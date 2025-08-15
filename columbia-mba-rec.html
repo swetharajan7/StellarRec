@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Columbia MBA Recommendation - StellarRec™ | BlueandCosmos</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;700&display=swap" rel="stylesheet" />
+  
+  <style>
+    :root {
+      --columbia-blue: #b9d9eb;
+      --columbia-navy: #003c71;
+      --stellar-gold: #ffd700;
+      --accent: #0033a0;
+      --text-white: #ffffff;
+      --text-dark: #333;
+      --light-bg: #f8f9fa;
+    }
+    
+    body {
+      margin: 0;
+      font-family: 'Work Sans', sans-serif;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      color: var(--text-dark);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2em;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 3em;
+      padding: 2em;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .columbia-logo {
+      font-size: 3em;
+      color: var(--columbia-navy);
+      margin-bottom: 0.5em;
+    }
+    
+    .title {
+      font-size: 2.5em;
+      color: var(--columbia-navy);
+      margin-bottom: 0.5em;
+    }
+    
+    .subtitle {
+      font-size: 1.2em;
+      color: var(--accent);
+      margin-bottom: 1em;
+    }
+    
+    .program-info {
+      background: var(--columbia-blue);
+      padding: 1em;
+      border-radius: 10px;
+      margin: 1em 0;
+    }
+    
+    .form-container {
+      background: white;
+      padding: 3em;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-bottom: 2em;
+    }
+    
+    .form-section {
+      margin-bottom: 2.5em;
+      padding-bottom: 2em;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .form-section:last-child {
+      border-bottom: none;
+    }
+    
+    .section-title {
+      color: var(--columbia-navy);
+      font-size: 1.4em;
+      font-weight: bold;
+      margin-bottom: 1em;
+    }
+    
+    .guidelines {
+      background: #f8f9fa;
+      padding: 1.5em;
+      border-left: 4px solid var(--stellar-gold);
+      margin-bottom: 1.5em;
+      border-radius: 5px;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5em;
+    }
+    
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5em;
+      color: var(--columbia-navy);
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 0.8em;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-family: inherit;
+      font-size: 1em;
+      transition: border-color 0.3s ease;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--columbia-navy);
+    }
+    
+    textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+    
+    .word-count {
+      font-size: 0.9em;
+      color: #666;
+      text-align: right;
+      margin-top: 0.5em;
+    }
+    
+    .rating-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+      gap: 1em;
+      align-items: center;
+      margin-bottom: 1em;
+      padding: 0.5em;
+      background: #f8f9fa;
+      border-radius: 5px;
+    }
+    
+    .rating-header {
+      font-weight: bold;
+      text-align: center;
+      color: var(--columbia-navy);
+    }
+    
+    .rating-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+      gap: 1em;
+      align-items: center;
+      margin-bottom: 0.5em;
+    }
+    
+    .rating-label {
+      font-weight: 500;
+    }
+    
+    input[type="radio"] {
+      width: auto;
+      margin: 0;
+    }
+    
+    .submit-section {
+      text-align: center;
+      margin-top: 3em;
+      padding: 2em;
+      background: var(--columbia-blue);
+      border-radius: 10px;
+    }
+    
+    .submit-btn {
+      background: var(--columbia-navy);
+      color: white;
+      padding: 1em 3em;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    
+    .submit-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    .back-link {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 0.8em 1.5em;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 2em;
+    }
+    
+    .required {
+      color: #dc3545;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="columbia-logo">🎓</div>
+      <h1 class="title">Columbia Business School</h1>
+      <p class="subtitle">MBA Program Recommendation Form</p>
+      <div class="program-info">
+        <strong>Program:</strong> Two-Year MBA Program | <strong>Start Date:</strong> Fall 2026
+      </div>
+    </div>
+    
+    <div class="form-container">
+      <form id="recommendationForm">
+        
+        <!-- Recommender Information -->
+        <div class="form-section">
+          <h2 class="section-title">Recommender Information</h2>
+          
+          <div class="form-group">
+            <label for="recommenderName">Full Name <span class="required">*</span></label>
+            <input type="text" id="recommenderName" name="recommenderName" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="title">Title/Position <span class="required">*</span></label>
+            <input type="text" id="title" name="title" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="organization">Organization/Company <span class="required">*</span></label>
+            <input type="text" id="organization" name="organization" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Email Address <span class="required">*</span></label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="relationship">Relationship to Candidate <span class="required">*</span></label>
+            <select id="relationship" name="relationship" required>
+              <option value="">Select relationship</option>
+              <option value="supervisor">Direct Supervisor</option>
+              <option value="manager">Manager</option>
+              <option value="colleague">Colleague</option>
+              <option value="client">Client</option>
+              <option value="professor">Professor</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="duration">How long have you known the candidate? <span class="required">*</span></label>
+            <input type="text" id="duration" name="duration" placeholder="e.g., 3 years" required>
+          </div>
+        </div>
+
+        <!-- Rating Section -->
+        <div class="form-section">
+          <h2 class="section-title">Candidate Evaluation</h2>
+          <p>Please rate the candidate on the following dimensions compared to other professionals at a similar level:</p>
+          
+          <div class="rating-grid">
+            <div class="rating-header">Attribute</div>
+            <div class="rating-header">Exceptional<br>(Top 5%)</div>
+            <div class="rating-header">Excellent<br>(Top 10%)</div>
+            <div class="rating-header">Very Good<br>(Top 25%)</div>
+            <div class="rating-header">Good<br>(Top 50%)</div>
+            <div class="rating-header">Average<br>(Bottom 50%)</div>
+          </div>
+          
+          <div class="rating-row">
+            <div class="rating-label">Leadership Potential</div>
+            <div><input type="radio" name="leadership" value="5" required></div>
+            <div><input type="radio" name="leadership" value="4" required></div>
+            <div><input type="radio" name="leadership" value="3" required></div>
+            <div><input type="radio" name="leadership" value="2" required></div>
+            <div><input type="radio" name="leadership" value="1" required></div>
+          </div>
+          
+          <div class="rating-row">
+            <div class="rating-label">Analytical Skills</div>
+            <div><input type="radio" name="analytical" value="5" required></div>
+            <div><input type="radio" name="analytical" value="4" required></div>
+            <div><input type="radio" name="analytical" value="3" required></div>
+            <div><input type="radio" name="analytical" value="2" required></div>
+            <div><input type="radio" name="analytical" value="1" required></div>
+          </div>
+          
+          <div class="rating-row">
+            <div class="rating-label">Communication Skills</div>
+            <div><input type="radio" name="communication" value="5" required></div>
+            <div><input type="radio" name="communication" value="4" required></div>
+            <div><input type="radio" name="communication" value="3" required></div>
+            <div><input type="radio" name="communication" value="2" required></div>
+            <div><input type="radio" name="communication" value="1" required></div>
+          </div>
+          
+          <div class="rating-row">
+            <div class="rating-label">Teamwork</div>
+            <div><input type="radio" name="teamwork" value="5" required></div>
+            <div><input type="radio" name="teamwork" value="4" required></div>
+            <div><input type="radio" name="teamwork" value="3" required></div>
+            <div><input type="radio" name="teamwork" value="2" required></div>
+            <div><input type="radio" name="teamwork" value="1" required></div>
+          </div>
+          
+          <div class="rating-row">
+            <div class="rating-label">Initiative</div>
+            <div><input type="radio" name="initiative" value="5" required></div>
+            <div><input type="radio" name="initiative" value="4" required></div>
+            <div><input type="radio" name="initiative" value="3" required></div>
+            <div><input type="radio" name="initiative" value="2" required></div>
+            <div><input type="radio" name="initiative" value="1" required></div>
+          </div>
+        </div>
+
+        <!-- Written Recommendation -->
+        <div class="form-section">
+          <h2 class="section-title">Written Recommendation</h2>
+          
+          <div class="guidelines">
+            <strong>Guidelines for your recommendation (1000 word limit):</strong>
+            <ul>
+              <li>How do the candidate's performance, potential, background, or personal qualities compare to those of other well-qualified individuals in similar roles? Please provide specific examples.</li>
+              <li>Please describe the most important piece of constructive feedback you have given the applicant. Please detail the circumstances and the applicant's response.</li>
+            </ul>
+          </div>
+          
+          <div class="form-group">
+            <label for="recommendation">Your Recommendation <span class="required">*</span></label>
+            <textarea id="recommendation" name="recommendation" placeholder="Please provide your detailed recommendation here..." required></textarea>
+            <div class="word-count" id="wordCount">0 / 1000 words</div>
+          </div>
+        </div>
+
+        <!-- Submit Section -->
+        <div class="submit-section">
+          <p><strong>By submitting this form, you confirm that:</strong></p>
+          <ul style="text-align: left; display: inline-block;">
+            <li>All information provided is accurate and complete</li>
+            <li>You consent to Columbia Business School using this recommendation</li>
+            <li>You understand this recommendation will be part of the candidate's application</li>
+          </ul>
+          <br><br>
+          <button type="submit" class="submit-btn">Submit Recommendation</button>
+        </div>
+        
+      </form>
+    </div>
+    
+    <a href="stellarrec.html" class="back-link">← Back to StellarRec</a>
+  </div>
+
+  <script>
+    // Word count functionality
+    const textarea = document.getElementById('recommendation');
+    const wordCount = document.getElementById('wordCount');
+    
+    textarea.addEventListener('input', function() {
+      const words = this.value.trim().split(/\s+/).filter(word => word.length > 0);
+      const count = this.value.trim() === '' ? 0 : words.length;
+      wordCount.textContent = `${count} / 1000 words`;
+      
+      if (count > 1000) {
+        wordCount.style.color = '#dc3545';
+      } else {
+        wordCount.style.color = '#666';
+      }
+    });
+    
+    // Form submission
+    document.getElementById('recommendationForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Basic validation
+      const words = textarea.value.trim().split(/\s+/).filter(word => word.length > 0);
+      const wordCount = textarea.value.trim() === '' ? 0 : words.length;
+      
+      if (wordCount > 1000) {
+        alert('Please reduce your recommendation to 1000 words or fewer.');
+        return;
+      }
+      
+      // Simulate form submission
+      alert('Thank you! Your recommendation has been submitted to Columbia Business School. The candidate will receive a confirmation email shortly.');
+      
+      // In a real implementation, this would send the data to your backend
+      console.log('Form data:', new FormData(this));
+    });
+  </script>
+</body>
+</html>

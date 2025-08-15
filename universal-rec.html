@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Universal College and Graduate Recommendation - StellarRec™ | BlueandCosmos</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;700&display=swap" rel="stylesheet" />
+  
+  <style>
+    :root {
+      --stellar-gold: #ffd700;
+      --stellar-blue: #4169e1;
+      --accent: #0033a0;
+      --text-white: #ffffff;
+      --text-dark: #333;
+      --light-bg: #f8f9fa;
+      --success-green: #28a745;
+    }
+    
+    body {
+      margin: 0;
+      font-family: 'Work Sans', sans-serif;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      color: var(--text-dark);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2em;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 3em;
+      padding: 2em;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .stellar-logo {
+      font-size: 3em;
+      margin-bottom: 0.5em;
+    }
+    
+    .title {
+      font-size: 2.5em;
+      color: var(--stellar-blue);
+      margin-bottom: 0.5em;
+    }
+    
+    .subtitle {
+      font-size: 1.2em;
+      color: var(--accent);
+      margin-bottom: 1em;
+    }
+    
+    .school-selector {
+      background: linear-gradient(135deg, var(--stellar-gold), #ffed4e);
+      padding: 2em;
+      border-radius: 15px;
+      margin-bottom: 2em;
+      box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+    }
+    
+    .selector-title {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 1em;
+      text-align: center;
+    }
+    
+    .school-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1em;
+    }
+    
+    .school-option {
+      background: white;
+      padding: 1em;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    
+    .school-option:hover {
+      border-color: var(--stellar-blue);
+      transform: translateY(-2px);
+    }
+    
+    .school-option.selected {
+      border-color: var(--success-green);
+      background: #f8fff8;
+    }
+    
+    .school-checkbox {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .school-info {
+      flex: 1;
+    }
+    
+    .school-name {
+      font-weight: bold;
+      color: var(--text-dark);
+    }
+    
+    .school-program {
+      font-size: 0.9em;
+      color: #666;
+    }
+    
+    .selected-count {
+      text-align: center;
+      margin-top: 1em;
+      font-weight: bold;
+      color: var(--success-green);
+    }
+    
+    .form-container {
+      background: white;
+      padding: 3em;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-bottom: 2em;
+    }
+    
+    .form-section {
+      margin-bottom: 2.5em;
+      padding-bottom: 2em;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .form-section:last-child {
+      border-bottom: none;
+    }
+    
+    .section-title {
+      color: var(--stellar-blue);
+      font-size: 1.4em;
+      font-weight: bold;
+      margin-bottom: 1em;
+    }
+    
+    .guidelines {
+      background: #f8f9fa;
+      padding: 1.5em;
+      border-left: 4px solid var(--stellar-gold);
+      margin-bottom: 1.5em;
+      border-radius: 5px;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5em;
+    }
+    
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5em;
+      color: var(--stellar-blue);
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 0.8em;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-family: inherit;
+      font-size: 1em;
+      transition: border-color 0.3s ease;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--stellar-blue);
+    }
+    
+    textarea {
+      min-height: 200px;
+      resize: vertical;
+    }
+    
+    .word-count {
+      font-size: 0.9em;
+      color: #666;
+      text-align: right;
+      margin-top: 0.5em;
+    }
+    
+    .rating-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+      gap: 1em;
+      align-items: center;
+      margin-bottom: 1em;
+      padding: 0.5em;
+      background: #f8f9fa;
+      border-radius: 5px;
+    }
+    
+    .rating-header {
+      font-weight: bold;
+      text-align: center;
+      color: var(--stellar-blue);
+      font-size: 0.9em;
+    }
+    
+    .rating-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+      gap: 1em;
+      align-items: center;
+      margin-bottom: 0.5em;
+    }
+    
+    .rating-label {
+      font-weight: 500;
+    }
+    
+    input[type="radio"] {
+      width: auto;
+      margin: 0;
+    }
+    
+    .submit-section {
+      text-align: center;
+      margin-top: 3em;
+      padding: 2em;
+      background: linear-gradient(135deg, var(--stellar-gold), #ffed4e);
+      border-radius: 15px;
+    }
+    
+    .submit-btn {
+      background: var(--stellar-blue);
+      color: white;
+      padding: 1.2em 3em;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.3em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    
+    .submit-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    .submit-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .back-link {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 0.8em 1.5em;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 2em;
+    }
+    
+    .required {
+      color: #dc3545;
+    }
+    
+    .warning {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+      padding: 1em;
+      border-radius: 5px;
+      margin-bottom: 1em;
+    }
+    
+    .ai-assistant {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 1em;
+      border-radius: 10px;
+      margin-bottom: 1em;
+    }
+    
+    .ai-button {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 0.5em 1em;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 0.5em 0.5em 0.5em 0;
+      transition: transform 0.2s ease;
+    }
+    
+    .ai-button:hover {
+      transform: scale(1.05);
+    }
+    
+    .ai-suggestions {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 5px;
+      padding: 1em;
+      margin-top: 1em;
+      display: none;
+    }
+    
+    .suggestion-item {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 0.8em;
+      margin-bottom: 0.5em;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    
+    .suggestion-item:hover {
+      background: #e9ecef;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="stellar-logo">⭐</div>
+      <h1 class="title">StellarRec™</h1>
+      <p class="subtitle">Universal College and Graduate Recommendation System</p>
+      <p><em>One Recommendation. Multiple Universities. Infinite Possibilities.</em></p>
+    </div>
+    
+    <!-- School Selector -->
+    <div class="school-selector">
+      <h2 class="selector-title">🎓 US Colleges - Select Target Universities</h2>
+      <div class="school-grid">
+        
+        <div class="school-option" onclick="toggleSchool('harvard')">
+          <input type="checkbox" id="harvard" class="school-checkbox">
+          <div class="school-info">
+            <div class="school-name">Harvard University</div>
+            <div class="school-program">Graduate & Undergraduate Programs</div>
+          </div>
+        </div>
+        
+        <div class="school-option" onclick="toggleSchool('stanford')">
+          <input type="checkbox" id="stanford" class="school-checkbox">
+          <div class="school-info">
+            <div class="school-name">Stanford University</div>
+            <div class="school-program">Graduate & Undergraduate Programs</div>
+          </div>
+        </div>
+        
+        <div class="school-option" onclick="toggleSchool('mit')">
+          <input type="checkbox" id="mit" class="school-checkbox">
+          <div class="school-info">
+            <div class="school-name">Massachusetts Institute of Technology</div>
+            <div class="school-program">Graduate & Undergraduate Programs</div>
+          </div>
+        </div>
+        
+        <div class="school-option" onclick="toggleSchool('princeton')">
+          <input type="checkbox" id="princeton" class="school-checkbox">
+          <div class="school-info">
+            <div class="school-name">Princeton University</div>
+            <div class="school-program">Graduate & Undergraduate Programs</div>
+          </div>
+        </div>
+        
+        <div class="school-option" onclick="toggleSchool('upenn')">
+          <input type="checkbox" id="upenn" class="school-checkbox">
+          <div class="school-info">
+            <div class="school-name">University of Pennsylvania</div>
+            <div class="school-program">Graduate & Undergraduate Programs</div>
+          </div>
+        </div>
+        
+        <div class="school-option" onclick="toggleSchool('berkeley')">
+          <input type="checkbox" id="berkeley" class="school-checkbox">
+          <div class="school-info">
+            <div class="school-name">University of California, Berkeley</div>
+            <div class="school-program">Graduate & Undergraduate Programs</div>
+          </div>
+        </div>
+        
+        <div class="school-option" onclick="toggleSchool('nyu')">
+          <input type="checkbox" id="nyu" class="school-checkbox">
+          <div class="school-info">
+            <div class="school-name">New York University</div>
+            <div class="school-program">Graduate & Undergraduate Programs</div>
+          </div>
+        </div>
+        
+        <div class="school-option" onclick="toggleSchool('michigan')">
+          <input type="checkbox" id="michigan" class="school-checkbox">
+          <div class="school-info">
+            <div class="school-name">University of Michigan - Ann Arbor</div>
+            <div class="school-program">Graduate & Undergraduate Programs</div>
+          </div>
+        </div>
+        
+        <div class="school-option" onclick="toggleSchool('utaustin')">
+          <input type="checkbox" id="utaustin" class="school-checkbox">
+          <div class="school-info">
+            <div class="school-name">University of Texas - Austin</div>
+            <div class="school-program">Graduate & Undergraduate Programs</div>
+          </div>
+        </div>
+        
+      </div>
+      <div class="selected-count" id="selectedCount">0 universities selected</div>
+    </div>
+    
+    <div class="form-container">
+      <div class="warning" id="schoolWarning" style="display: none;">
+        ⚠️ Please select at least one university before filling out the recommendation.
+      </div>
+      
+      <form id="universalRecForm">
+        
+        <!-- Recommender Information -->
+        <div class="form-section">
+          <h2 class="section-title">Recommender Information</h2>
+          
+          <div class="form-group">
+            <label for="recommenderName">Full Name <span class="required">*</span></label>
+            <input type="text" id="recommenderName" name="recommenderName" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="title">Title/Position <span class="required">*</span></label>
+            <input type="text" id="title" name="title" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="organization">Organization/Company <span class="required">*</span></label>
+            <input type="text" id="organization" name="organization" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Email Address <span class="required">*</span></label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="relationship">Relationship to Candidate <span class="required">*</span></label>
+            <select id="relationship" name="relationship" required>
+              <option value="">Select relationship</option>
+              <option value="supervisor">Direct Supervisor</option>
+              <option value="manager">Manager</option>
+              <option value="colleague">Colleague</option>
+              <option value="client">Client</option>
+              <option value="professor">Professor</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="duration">How long have you known the candidate? <span class="required">*</span></label>
+            <input type="text" id="duration" name="duration" placeholder="e.g., 3 years" required>
+          </div>
+        </div>
+
+        <!-- Rating Section -->
+        <div class="form-section">
+          <h2 class="section-title">Candidate Evaluation</h2>
+          <p>Please rate the candidate on the following dimensions compared to other professionals at a similar level:</p>
+          
+          <div class="rating-grid">
+            <div class="rating-header">Attribute</div>
+            <div class="rating-header">Exceptional<br>(Top 5%)</div>
+            <div class="rating-header">Excellent<br>(Top 10%)</div>
+            <div class="rating-header">Very Good<br>(Top 25%)</div>
+            <div class="rating-header">Good<br>(Top 50%)</div>
+            <div class="rating-header">Average<br>(Bottom 50%)</div>
+          </div>
+          
+          <div class="rating-row">
+            <div class="rating-label">Leadership Potential</div>
+            <div><input type="radio" name="leadership" value="5" required></div>
+            <div><input type="radio" name="leadership" value="4" required></div>
+            <div><input type="radio" name="leadership" value="3" required></div>
+            <div><input type="radio" name="leadership" value="2" required></div>
+            <div><input type="radio" name="leadership" value="1" required></div>
+          </div>
+          
+          <div class="rating-row">
+            <div class="rating-label">Analytical Skills</div>
+            <div><input type="radio" name="analytical" value="5" required></div>
+            <div><input type="radio" name="analytical" value="4" required></div>
+            <div><input type="radio" name="analytical" value="3" required></div>
+            <div><input type="radio" name="analytical" value="2" required></div>
+            <div><input type="radio" name="analytical" value="1" required></div>
+          </div>
+          
+          <div class="rating-row">
+            <div class="rating-label">Communication Skills</div>
+            <div><input type="radio" name="communication" value="5" required></div>
+            <div><input type="radio" name="communication" value="4" required></div>
+            <div><input type="radio" name="communication" value="3" required></div>
+            <div><input type="radio" name="communication" value="2" required></div>
+            <div><input type="radio" name="communication" value="1" required></div>
+          </div>
+          
+          <div class="rating-row">
+            <div class="rating-label">Teamwork</div>
+            <div><input type="radio" name="teamwork" value="5" required></div>
+            <div><input type="radio" name="teamwork" value="4" required></div>
+            <div><input type="radio" name="teamwork" value="3" required></div>
+            <div><input type="radio" name="teamwork" value="2" required></div>
+            <div><input type="radio" name="teamwork" value="1" required></div>
+          </div>
+          
+          <div class="rating-row">
+            <div class="rating-label">Initiative</div>
+            <div><input type="radio" name="initiative" value="5" required></div>
+            <div><input type="radio" name="initiative" value="4" required></div>
+            <div><input type="radio" name="initiative" value="3" required></div>
+            <div><input type="radio" name="initiative" value="2" required></div>
+            <div><input type="radio" name="initiative" value="1" required></div>
+          </div>
+        </div>
+
+        <!-- Written Recommendation -->
+        <div class="form-section">
+          <h2 class="section-title">Written Recommendation</h2>
+          
+          <div class="guidelines">
+            <strong>Guidelines for your recommendation (1000 word limit):</strong>
+            <ul>
+              <li>How do the candidate's performance, potential, background, or personal qualities compare to those of other well-qualified individuals in similar roles? Please provide specific examples.</li>
+              <li>Please describe the most important piece of constructive feedback you have given the applicant. Please detail the circumstances and the applicant's response.</li>
+            </ul>
+          </div>
+          
+          <div class="ai-assistant">
+            <h4>🤖 AI Writing Assistant</h4>
+            <p>Need help structuring your recommendation? Our AI can provide suggestions and help you get started.</p>
+            <button type="button" class="ai-button" onclick="generateOutline()">Generate Outline</button>
+            <button type="button" class="ai-button" onclick="suggestExamples()">Suggest Examples</button>
+            <button type="button" class="ai-button" onclick="improveWriting()">Improve Writing</button>
+          </div>
+          
+          <div class="ai-suggestions" id="aiSuggestions">
+            <h5>AI Suggestions:</h5>
+            <div id="suggestionContent"></div>
+          </div>
+          
+          <div class="form-group">
+            <label for="recommendation">Your Recommendation <span class="required">*</span></label>
+            <textarea id="recommendation" name="recommendation" placeholder="Please provide your detailed recommendation here..." required></textarea>
+            <div class="word-count" id="wordCount">0 / 1000 words</div>
+          </div>
+        </div>
+
+        <!-- Submit Section -->
+        <div class="submit-section">
+          <p><strong>By submitting this form, you confirm that:</strong></p>
+          <ul style="text-align: left; display: inline-block;">
+            <li>All information provided is accurate and complete</li>
+            <li>You consent to the selected universities using this recommendation</li>
+            <li>You understand this recommendation will be part of the candidate's applications</li>
+          </ul>
+          <br><br>
+          <button type="submit" class="submit-btn" id="submitBtn" disabled>Submit to Selected Universities</button>
+        </div>
+        
+      </form>
+    </div>
+    
+    <a href="stellarrec.html" class="back-link">← Back to StellarRec</a>
+  </div>
+
+  <script>
+    let selectedSchools = [];
+    
+    // School selection functionality
+    function toggleSchool(schoolId) {
+      const checkbox = document.getElementById(schoolId);
+      const option = checkbox.parentElement;
+      
+      checkbox.checked = !checkbox.checked;
+      
+      if (checkbox.checked) {
+        option.classList.add('selected');
+        selectedSchools.push(schoolId);
+      } else {
+        option.classList.remove('selected');
+        selectedSchools = selectedSchools.filter(id => id !== schoolId);
+      }
+      
+      updateSelectedCount();
+      updateSubmitButton();
+    }
+    
+    function updateSelectedCount() {
+      const count = selectedSchools.length;
+      const countElement = document.getElementById('selectedCount');
+      const warning = document.getElementById('schoolWarning');
+      
+      if (count === 0) {
+        countElement.textContent = '0 universities selected';
+        countElement.style.color = '#dc3545';
+        warning.style.display = 'block';
+      } else if (count === 1) {
+        countElement.textContent = '1 university selected';
+        countElement.style.color = '#28a745';
+        warning.style.display = 'none';
+      } else {
+        countElement.textContent = `${count} universities selected`;
+        countElement.style.color = '#28a745';
+        warning.style.display = 'none';
+      }
+    }
+    
+    function updateSubmitButton() {
+      const submitBtn = document.getElementById('submitBtn');
+      if (selectedSchools.length > 0) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = `Submit to ${selectedSchools.length} Selected ${selectedSchools.length === 1 ? 'University' : 'Universities'}`;
+      } else {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Select Universities First';
+      }
+    }
+    
+    // Word count functionality
+    const textarea = document.getElementById('recommendation');
+    const wordCount = document.getElementById('wordCount');
+    
+    textarea.addEventListener('input', function() {
+      const words = this.value.trim().split(/\s+/).filter(word => word.length > 0);
+      const count = this.value.trim() === '' ? 0 : words.length;
+      wordCount.textContent = `${count} / 1000 words`;
+      
+      if (count > 1000) {
+        wordCount.style.color = '#dc3545';
+      } else {
+        wordCount.style.color = '#666';
+      }
+    });
+    
+    // Form submission
+    document.getElementById('universalRecForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      if (selectedSchools.length === 0) {
+        alert('Please select at least one university.');
+        return;
+      }
+      
+      // Basic validation
+      const words = textarea.value.trim().split(/\s+/).filter(word => word.length > 0);
+      const wordCount = textarea.value.trim() === '' ? 0 : words.length;
+      
+      if (wordCount > 1000) {
+        alert('Please reduce your recommendation to 1000 words or fewer.');
+        return;
+      }
+      
+      // Get selected school names
+      const schoolNames = selectedSchools.map(id => {
+        const checkbox = document.getElementById(id);
+        return checkbox.parentElement.querySelector('.school-name').textContent;
+      });
+      
+      // Simulate form submission
+      alert(`🎉 Success! Your recommendation has been submitted to:\n\n${schoolNames.join('\n')}\n\nThe candidate will receive confirmation emails from all selected universities shortly.`);
+      
+      // In a real implementation, this would send the data to your backend
+      console.log('Form data:', new FormData(this));
+      console.log('Selected schools:', selectedSchools);
+    });
+    
+    // AI Assistant Functions
+    function generateOutline() {
+      const suggestions = document.getElementById('aiSuggestions');
+      const content = document.getElementById('suggestionContent');
+      
+      content.innerHTML = `
+        <div class="suggestion-item" onclick="insertText(this.textContent)">
+          <strong>Paragraph 1:</strong> Introduction - How you know the candidate and in what capacity
+        </div>
+        <div class="suggestion-item" onclick="insertText(this.textContent)">
+          <strong>Paragraph 2:</strong> Performance comparison - Specific examples of how they compare to peers
+        </div>
+        <div class="suggestion-item" onclick="insertText(this.textContent)">
+          <strong>Paragraph 3:</strong> Constructive feedback example - Specific situation and their response
+        </div>
+        <div class="suggestion-item" onclick="insertText(this.textContent)">
+          <strong>Paragraph 4:</strong> Key strengths - Leadership, analytical skills, teamwork examples
+        </div>
+        <div class="suggestion-item" onclick="insertText(this.textContent)">
+          <strong>Paragraph 5:</strong> Conclusion - Overall recommendation and future potential
+        </div>
+      `;
+      
+      suggestions.style.display = 'block';
+    }
+    
+    function suggestExamples() {
+      const suggestions = document.getElementById('aiSuggestions');
+      const content = document.getElementById('suggestionContent');
+      
+      content.innerHTML = `
+        <div class="suggestion-item" onclick="insertText(this.textContent)">
+          "In my X years of experience managing teams, [Candidate] ranks in the top 10% of professionals I have worked with..."
+        </div>
+        <div class="suggestion-item" onclick="insertText(this.textContent)">
+          "A specific example of their exceptional performance was when they [specific project/situation]..."
+        </div>
+        <div class="suggestion-item" onclick="insertText(this.textContent)">
+          "When I provided feedback about [specific area], they responded by [specific actions taken]..."
+        </div>
+        <div class="suggestion-item" onclick="insertText(this.textContent)">
+          "Their analytical approach to [specific challenge] demonstrated their ability to..."
+        </div>
+        <div class="suggestion-item" onclick="insertText(this.textContent)">
+          "I would not hesitate to hire [Candidate] again and believe they will excel in graduate school because..."
+        </div>
+      `;
+      
+      suggestions.style.display = 'block';
+    }
+    
+    function improveWriting() {
+      const textarea = document.getElementById('recommendation');
+      const currentText = textarea.value.trim();
+      
+      if (currentText.length < 50) {
+        alert('Please write at least a few sentences first, then I can help improve your writing!');
+        return;
+      }
+      
+      const suggestions = document.getElementById('aiSuggestions');
+      const content = document.getElementById('suggestionContent');
+      
+      content.innerHTML = `
+        <div class="suggestion-item">
+          <strong>💡 Writing Tips:</strong>
+          <ul>
+            <li>Use specific metrics and examples (e.g., "increased efficiency by 25%")</li>
+            <li>Compare to peers explicitly ("top 15% of analysts I've managed")</li>
+            <li>Include concrete situations, not just general praise</li>
+            <li>Show growth and learning from feedback</li>
+            <li>Use active voice and strong action verbs</li>
+          </ul>
+        </div>
+        <div class="suggestion-item">
+          <strong>🔍 Check your text for:</strong>
+          <ul>
+            <li>Specific examples with measurable outcomes</li>
+            <li>Clear comparison to other qualified individuals</li>
+            <li>Detailed constructive feedback scenario</li>
+            <li>Professional tone throughout</li>
+          </ul>
+        </div>
+      `;
+      
+      suggestions.style.display = 'block';
+    }
+    
+    function insertText(text) {
+      const textarea = document.getElementById('recommendation');
+      const cursorPos = textarea.selectionStart;
+      const textBefore = textarea.value.substring(0, cursorPos);
+      const textAfter = textarea.value.substring(cursorPos);
+      
+      textarea.value = textBefore + text + '\\n\\n' + textAfter;
+      textarea.focus();
+      
+      // Update word count
+      textarea.dispatchEvent(new Event('input'));
+    }
+    
+    // Initialize
+    updateSelectedCount();
+    updateSubmitButton();
+  </script>
+</body>
+</html>
