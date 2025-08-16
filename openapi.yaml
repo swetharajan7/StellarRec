@@ -1,0 +1,1260 @@
+openapi: 3.0.3
+info:
+  title: StellarRec University Integration API
+  description: |
+    Comprehensive API for submitting recommendations to 2000+ universities across North America.
+    
+    ## Features
+    - **2000+ Universities** - Complete coverage of US and Canadian institutions
+    - **Multiple Integration Types** - CommonApp, Coalition, UC System, OUAC, and direct APIs
+    - **Real-time Tracking** - Live status updates and submission monitoring
+    - **Enterprise Security** - JWT authentication, rate limiting, and audit trails
+    - **Comprehensive Analytics** - Performance metrics and integration health monitoring
+    
+    ## Integration Types
+    - **CommonApp** - 700+ universities including Ivy League and top privates
+    - **Coalition** - 150+ universities with holistic application approach
+    - **UC System** - All University of California campuses
+    - **OUAC** - Ontario universities (Canada)
+    - **Direct APIs** - Individual university integrations
+    - **Email Fallback** - Ensures 100% university coverage
+    
+    ## Base URL
+    Production: `https://api.stellarrec.com/api/university-integration`
+    Sandbox: `https://sandbox-api.stellarrec.com/api/university-integration`
+  version: 1.0.0
+  contact:
+    name: StellarRec API Support
+    email: api-support@stellarrec.com
+    url: https://docs.stellarrec.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.stellarrec.com/api/university-integration
+    description: Production server
+  - url: https://sandbox-api.stellarrec.com/api/university-integration
+    description: Sandbox server
+
+security:
+  - BearerAuth: []
+
+paths:
+  /universities/search:
+    get:
+      summary: Search Universities
+      description: Search and filter from 2000+ North American universities with advanced filtering options.
+      tags:
+        - Universities
+      parameters:
+        - name: search
+          in: query
+          description: Search term for university name or code
+          schema:
+            type: string
+            example: "Harvard"
+        - name: country
+          in: query
+          description: Filter by country
+          schema:
+            type: string
+            enum: [US, CA]
+            example: "US"
+        - name: state
+          in: query
+          description: Filter by US state
+          schema:
+            type: string
+            example: "California"
+        - name: province
+          in: query
+          description: Filter by Canadian province
+          schema:
+            type: string
+            example: "Ontario"
+        - name: integrationType
+          in: query
+          description: Filter by integration type
+          schema:
+            type: string
+            enum: [commonapp, coalition, uc_system, ouac, direct_api, email]
+            example: "commonapp"
+        - name: programType
+          in: query
+          description: Filter by supported program type
+          schema:
+            type: string
+            enum: [undergraduate, graduate, doctoral, certificate]
+            example: "graduate"
+        - name: isActive
+          in: query
+          description: Filter by active status
+          schema:
+            type: boolean
+            example: true
+        - name: limit
+          in: query
+          description: Number of results to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+            example: 10
+        - name: offset
+          in: query
+          description: Pagination offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UniversitySearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /universities/integration-type/{integrationType}:
+    get:
+      summary: Get Universities by Integration Type
+      description: Retrieve all universities that use a specific integration type.
+      tags:
+        - Universities
+      parameters:
+        - name: integrationType
+          in: path
+          required: true
+          description: Integration type
+          schema:
+            type: string
+            enum: [commonapp, coalition, uc_system, ouac, direct_api, email]
+            example: "commonapp"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UniversityListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /universities/location/{country}:
+    get:
+      summary: Get Universities by Location
+      description: Retrieve universities filtered by country and optionally by state/province.
+      tags:
+        - Universities
+      parameters:
+        - name: country
+          in: path
+          required: true
+          description: Country code
+          schema:
+            type: string
+            enum: [US, CA]
+            example: "US"
+        - name: state
+          in: query
+          description: US state name
+          schema:
+            type: string
+            example: "California"
+        - name: province
+          in: query
+          description: Canadian province name
+          schema:
+            type: string
+            example: "Ontario"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UniversityListResponse'
+
+  /submit:
+    post:
+      summary: Submit to Multiple Universities
+      description: Submit a recommendation to multiple universities in a single request with automatic routing to appropriate integration systems.
+      tags:
+        - Submissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmissionRequest'
+      responses:
+        '200':
+          description: Submission initiated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkSubmissionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /status/{recommendationId}:
+    get:
+      summary: Get Submission Status
+      description: Track the real-time status of submissions for a specific recommendation across all universities.
+      tags:
+        - Submissions
+      parameters:
+        - name: recommendationId
+          in: path
+          required: true
+          description: The recommendation ID
+          schema:
+            type: string
+            example: "rec_123"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionStatusResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /retry/{recommendationId}:
+    post:
+      summary: Retry Failed Submissions
+      description: Retry submissions that failed due to temporary issues with automatic exponential backoff.
+      tags:
+        - Submissions
+      parameters:
+        - name: recommendationId
+          in: path
+          required: true
+          description: The recommendation ID
+          schema:
+            type: string
+            example: "rec_123"
+      responses:
+        '200':
+          description: Retry initiated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkSubmissionResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /statistics/integrations:
+    get:
+      summary: Get Integration Statistics
+      description: Retrieve comprehensive statistics about university integrations and coverage.
+      tags:
+        - Analytics
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationStatisticsResponse'
+
+  /statistics/submissions:
+    get:
+      summary: Get Submission Statistics
+      description: Retrieve detailed statistics about submission performance and success rates.
+      tags:
+        - Analytics
+      parameters:
+        - name: dateFrom
+          in: query
+          description: Start date for statistics (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+            example: "2024-01-01T00:00:00Z"
+        - name: dateTo
+          in: query
+          description: End date for statistics (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+            example: "2024-01-31T23:59:59Z"
+        - name: integrationType
+          in: query
+          description: Filter by integration type
+          schema:
+            type: string
+            enum: [commonapp, coalition, uc_system, ouac, direct_api, email]
+        - name: universityId
+          in: query
+          description: Filter by specific university
+          schema:
+            type: string
+            example: "harv_001"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionStatisticsResponse'
+
+  /health:
+    get:
+      summary: Get Integration Health
+      description: Check the health status of all university integrations and system components.
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Health status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /admin/universities/{universityId}/test:
+    get:
+      summary: Test University Connection
+      description: Test the connection to a specific university's integration system.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: universityId
+          in: path
+          required: true
+          description: University ID
+          schema:
+            type: string
+            example: "harv_001"
+      responses:
+        '200':
+          description: Connection test completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionTestResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/rate-limits/{integrationType}:
+    get:
+      summary: Get Rate Limit Status
+      description: Check current rate limit usage for a specific integration type.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: integrationType
+          in: path
+          required: true
+          description: Integration type
+          schema:
+            type: string
+            enum: [commonapp, coalition, uc_system, ouac, direct_api, email]
+        - name: universityId
+          in: query
+          description: Specific university ID (optional)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Rate limit status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitStatusResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/universities/{universityId}/integration:
+    put:
+      summary: Update University Integration
+      description: Update integration configuration for a specific university.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: universityId
+          in: path
+          required: true
+          description: University ID
+          schema:
+            type: string
+            example: "harv_001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UniversityIntegrationUpdate'
+      responses:
+        '200':
+          description: Integration updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /webhooks/commonapp/confirmation:
+    post:
+      summary: CommonApp Confirmation Webhook
+      description: Webhook endpoint for receiving confirmation updates from CommonApp.
+      tags:
+        - Webhooks
+      security: []
+      parameters:
+        - name: X-CommonApp-Signature
+          in: header
+          required: true
+          description: Webhook signature for verification
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonAppWebhook'
+      responses:
+        '200':
+          description: Webhook processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: boolean
+                    example: true
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from the authentication endpoint
+
+  schemas:
+    University:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "harv_001"
+        name:
+          type: string
+          example: "Harvard University"
+        code:
+          type: string
+          example: "HARV"
+        country:
+          type: string
+          enum: [US, CA]
+          example: "US"
+        state:
+          type: string
+          example: "Massachusetts"
+        province:
+          type: string
+          example: "Ontario"
+        integrationType:
+          type: string
+          enum: [commonapp, coalition, uc_system, ouac, direct_api, email]
+          example: "commonapp"
+        features:
+          type: object
+          properties:
+            realTimeStatus:
+              type: boolean
+              example: true
+            bulkSubmission:
+              type: boolean
+              example: true
+            documentUpload:
+              type: boolean
+              example: true
+            statusWebhooks:
+              type: boolean
+              example: true
+            customFields:
+              type: boolean
+              example: true
+        requirements:
+          type: object
+          properties:
+            requiredFields:
+              type: array
+              items:
+                type: string
+              example: ["student_name", "student_email", "recommender_name"]
+            maxRecommendationLength:
+              type: integer
+              example: 8000
+            supportedPrograms:
+              type: array
+              items:
+                type: string
+              example: ["undergraduate", "graduate"]
+            deadlineBuffer:
+              type: integer
+              example: 48
+        institutionType:
+          type: string
+          example: "Private Research University"
+        isPublic:
+          type: boolean
+          example: false
+        websiteUrl:
+          type: string
+          format: uri
+          example: "https://www.harvard.edu"
+
+    UniversitySearchResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            universities:
+              type: array
+              items:
+                $ref: '#/components/schemas/University'
+            total:
+              type: integer
+              example: 1
+
+    UniversityListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/University'
+
+    SubmissionRequest:
+      type: object
+      required:
+        - recommendationId
+        - studentData
+        - recommenderData
+        - recommendationContent
+        - universities
+        - metadata
+      properties:
+        recommendationId:
+          type: string
+          example: "rec_123"
+        studentData:
+          $ref: '#/components/schemas/StudentData'
+        recommenderData:
+          $ref: '#/components/schemas/RecommenderData'
+        recommendationContent:
+          $ref: '#/components/schemas/RecommendationContent'
+        universities:
+          type: array
+          items:
+            $ref: '#/components/schemas/UniversityTarget'
+        metadata:
+          $ref: '#/components/schemas/SubmissionMetadata'
+
+    StudentData:
+      type: object
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - dateOfBirth
+        - address
+        - academicInfo
+      properties:
+        id:
+          type: string
+          example: "student_456"
+        firstName:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Doe"
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+        phone:
+          type: string
+          example: "+1-555-0123"
+        dateOfBirth:
+          type: string
+          format: date-time
+          example: "1995-06-15T00:00:00Z"
+        address:
+          $ref: '#/components/schemas/Address'
+        academicInfo:
+          $ref: '#/components/schemas/AcademicInfo'
+
+    RecommenderData:
+      type: object
+      required:
+        - id
+        - firstName
+        - lastName
+        - title
+        - institution
+        - email
+        - relationship
+        - yearsKnown
+      properties:
+        id:
+          type: string
+          example: "recommender_789"
+        firstName:
+          type: string
+          example: "Dr. Jane"
+        lastName:
+          type: string
+          example: "Smith"
+        title:
+          type: string
+          example: "Professor"
+        institution:
+          type: string
+          example: "Boston University"
+        email:
+          type: string
+          format: email
+          example: "jane.smith@bu.edu"
+        phone:
+          type: string
+          example: "+1-555-0456"
+        relationship:
+          type: string
+          example: "Academic Advisor"
+        yearsKnown:
+          type: integer
+          example: 3
+
+    RecommendationContent:
+      type: object
+      required:
+        - content
+        - wordCount
+        - programType
+      properties:
+        content:
+          type: string
+          example: "John is an exceptional student who has demonstrated outstanding academic performance..."
+        wordCount:
+          type: integer
+          example: 750
+        programType:
+          type: string
+          enum: [undergraduate, graduate, doctoral, certificate]
+          example: "graduate"
+        customizations:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            harvard_specific: "Additional content for Harvard application..."
+
+    UniversityTarget:
+      type: object
+      required:
+        - universityId
+        - universityCode
+        - programType
+        - applicationDeadline
+      properties:
+        universityId:
+          type: string
+          example: "harv_001"
+        universityCode:
+          type: string
+          example: "HARV"
+        programType:
+          type: string
+          enum: [undergraduate, graduate, doctoral, certificate]
+          example: "graduate"
+        applicationDeadline:
+          type: string
+          format: date-time
+          example: "2024-12-01T23:59:59Z"
+        specificRequirements:
+          type: object
+          additionalProperties: true
+          example:
+            program_focus: "Computer Science PhD"
+
+    Address:
+      type: object
+      required:
+        - street
+        - city
+        - state
+        - zipCode
+        - country
+      properties:
+        street:
+          type: string
+          example: "123 Main St"
+        city:
+          type: string
+          example: "Boston"
+        state:
+          type: string
+          example: "Massachusetts"
+        zipCode:
+          type: string
+          example: "02101"
+        country:
+          type: string
+          example: "US"
+
+    AcademicInfo:
+      type: object
+      required:
+        - currentInstitution
+        - gpa
+        - graduationDate
+        - major
+      properties:
+        currentInstitution:
+          type: string
+          example: "Boston University"
+        gpa:
+          type: number
+          format: float
+          example: 3.8
+        graduationDate:
+          type: string
+          format: date-time
+          example: "2024-05-15T00:00:00Z"
+        major:
+          type: string
+          example: "Computer Science"
+        testScores:
+          type: object
+          properties:
+            gre:
+              type: object
+              properties:
+                verbal:
+                  type: integer
+                  example: 165
+                quantitative:
+                  type: integer
+                  example: 170
+                analytical:
+                  type: number
+                  format: float
+                  example: 5.0
+
+    SubmissionMetadata:
+      type: object
+      required:
+        - submissionType
+        - priority
+        - deadline
+        - source
+        - version
+      properties:
+        submissionType:
+          type: string
+          example: "recommendation"
+        priority:
+          type: string
+          enum: [normal, high, urgent]
+          example: "normal"
+        deadline:
+          type: string
+          format: date-time
+          example: "2024-12-01T00:00:00Z"
+        source:
+          type: string
+          enum: [web, mobile, api]
+          example: "web"
+        version:
+          type: string
+          example: "1.0"
+
+    BulkSubmissionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            recommendationId:
+              type: string
+              example: "rec_123"
+            totalUniversities:
+              type: integer
+              example: 2
+            successful:
+              type: integer
+              example: 1
+            failed:
+              type: integer
+              example: 0
+            pending:
+              type: integer
+              example: 1
+            results:
+              type: array
+              items:
+                $ref: '#/components/schemas/SubmissionResult'
+            overallStatus:
+              type: string
+              enum: [completed, partial, failed]
+              example: "partial"
+
+    SubmissionResult:
+      type: object
+      properties:
+        universityId:
+          type: string
+          example: "harv_001"
+        status:
+          type: string
+          enum: [success, failed, pending, retry]
+          example: "success"
+        submissionId:
+          type: string
+          example: "sub_harv_789"
+        confirmationCode:
+          type: string
+          example: "HARV_REC_2024_001"
+        errorMessage:
+          type: string
+          example: "Rate limit exceeded"
+        retryAfter:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:35:00Z"
+        metadata:
+          type: object
+          additionalProperties: true
+
+    SubmissionStatusResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionStatus'
+
+    SubmissionStatus:
+      type: object
+      properties:
+        universityId:
+          type: string
+          example: "harv_001"
+        universityName:
+          type: string
+          example: "Harvard University"
+        universityCode:
+          type: string
+          example: "HARV"
+        integrationType:
+          type: string
+          example: "commonapp"
+        status:
+          type: string
+          enum: [pending, submitted, processing, delivered, confirmed, failed, retry]
+          example: "confirmed"
+        submittedAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        confirmedAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:32:00Z"
+        errorMessage:
+          type: string
+          example: "Network timeout"
+        retryCount:
+          type: integer
+          example: 1
+        nextRetryAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:35:00Z"
+        metadata:
+          type: object
+          additionalProperties: true
+
+    IntegrationStatisticsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            totalUniversities:
+              type: integer
+              example: 2147
+            byIntegrationType:
+              type: object
+              additionalProperties:
+                type: integer
+              example:
+                commonapp: 742
+                coalition: 156
+                uc_system: 9
+            byCountry:
+              type: object
+              additionalProperties:
+                type: integer
+              example:
+                US: 1876
+                CA: 271
+            byState:
+              type: object
+              additionalProperties:
+                type: integer
+              example:
+                California: 156
+                "New York": 134
+
+    SubmissionStatisticsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            totalSubmissions:
+              type: integer
+              example: 15420
+            successfulSubmissions:
+              type: integer
+              example: 15180
+            failedSubmissions:
+              type: integer
+              example: 240
+            pendingSubmissions:
+              type: integer
+              example: 0
+            successRate:
+              type: number
+              format: float
+              example: 98.4
+            byIntegrationType:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  successful:
+                    type: integer
+                  failed:
+                    type: integer
+                  successRate:
+                    type: number
+                    format: float
+            byStatus:
+              type: object
+              additionalProperties:
+                type: integer
+
+    HealthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            overall:
+              type: string
+              enum: [healthy, warning, critical]
+              example: "healthy"
+            integrations:
+              type: object
+              additionalProperties:
+                type: string
+                enum: [healthy, warning, critical]
+              example:
+                commonapp: "healthy"
+                coalition: "healthy"
+                uc_system: "warning"
+            timestamp:
+              type: string
+              format: date-time
+              example: "2024-01-15T10:30:00Z"
+
+    ConnectionTestResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            success:
+              type: boolean
+              example: true
+            responseTime:
+              type: integer
+              example: 1250
+            error:
+              type: string
+              example: "Connection timeout"
+
+    RateLimitStatusResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            minute:
+              $ref: '#/components/schemas/RateLimitWindow'
+            hour:
+              $ref: '#/components/schemas/RateLimitWindow'
+            day:
+              $ref: '#/components/schemas/RateLimitWindow'
+
+    RateLimitWindow:
+      type: object
+      properties:
+        current:
+          type: integer
+          example: 15
+        limit:
+          type: integer
+          example: 30
+        resetTime:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:31:00Z"
+
+    UniversityIntegrationUpdate:
+      type: object
+      properties:
+        integrationType:
+          type: string
+          enum: [commonapp, coalition, uc_system, ouac, direct_api, email]
+          example: "commonapp"
+        features:
+          type: object
+          properties:
+            realTimeStatus:
+              type: boolean
+            bulkSubmission:
+              type: boolean
+            documentUpload:
+              type: boolean
+        rateLimit:
+          type: object
+          properties:
+            requestsPerMinute:
+              type: integer
+            requestsPerHour:
+              type: integer
+            requestsPerDay:
+              type: integer
+            burstLimit:
+              type: integer
+        isActive:
+          type: boolean
+
+    CommonAppWebhook:
+      type: object
+      properties:
+        submission_id:
+          type: string
+          example: "sub_harv_789"
+        status:
+          type: string
+          enum: [confirmed, rejected, processing]
+          example: "confirmed"
+        confirmation_code:
+          type: string
+          example: "HARV_REC_2024_001"
+        university_code:
+          type: string
+          example: "HARV"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:32:00Z"
+        metadata:
+          type: object
+          additionalProperties: true
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Operation completed successfully"
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "VALIDATION_ERROR"
+            message:
+              type: string
+              example: "Invalid request parameters"
+            details:
+              type: object
+              additionalProperties: true
+            timestamp:
+              type: string
+              format: date-time
+              example: "2024-01-15T10:30:00Z"
+            requestId:
+              type: string
+              example: "req_123456"
+
+  responses:
+    BadRequest:
+      description: Bad request - Invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "VALIDATION_ERROR"
+              message: "Invalid request parameters"
+              details:
+                field: "email"
+                reason: "Invalid email format"
+
+    Unauthorized:
+      description: Unauthorized - Invalid or missing authentication token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "AUTHENTICATION_REQUIRED"
+              message: "Missing or invalid authentication token"
+
+    Forbidden:
+      description: Forbidden - Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "INSUFFICIENT_PERMISSIONS"
+              message: "User lacks required permissions"
+
+    NotFound:
+      description: Not found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "RESOURCE_NOT_FOUND"
+              message: "Requested resource does not exist"
+
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Request limit per time window
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Remaining requests in current window
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Time when rate limit resets (Unix timestamp)
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "RATE_LIMIT_EXCEEDED"
+              message: "Rate limit exceeded for CommonApp integration"
+              retryAfter: "2024-01-15T10:31:00Z"
+
+tags:
+  - name: Universities
+    description: University search and information endpoints
+  - name: Submissions
+    description: Recommendation submission and tracking endpoints
+  - name: Analytics
+    description: Statistics and performance analytics endpoints
+  - name: Health
+    description: System health and monitoring endpoints
+  - name: Admin
+    description: Administrative endpoints (requires admin role)
+  - name: Webhooks
+    description: Webhook endpoints for external integrations

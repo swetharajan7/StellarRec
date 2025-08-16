@@ -1,0 +1,611 @@
+{
+  "info": {
+    "name": "StellarRec University Integration API",
+    "description": "Comprehensive API collection for testing StellarRec's University Integration System. This collection covers all endpoints for submitting recommendations to 2000+ universities across North America.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.stellarrec.com/api/university-integration",
+      "type": "string"
+    },
+    {
+      "key": "sandbox_url",
+      "value": "https://sandbox-api.stellarrec.com/api/university-integration",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "your_jwt_token_here",
+      "type": "string"
+    },
+    {
+      "key": "recommendation_id",
+      "value": "rec_demo_123",
+      "type": "string"
+    },
+    {
+      "key": "university_id",
+      "value": "harv_001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@stellarrec.com\",\n  \"password\": \"demo_password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/../../auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["../../auth", "login"]
+            },
+            "description": "Authenticate and get JWT token for API access"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Universities",
+      "item": [
+        {
+          "name": "Search Universities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/universities/search?search=Harvard&country=US&integrationType=commonapp&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["universities", "search"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Harvard",
+                  "description": "Search term for university name or code"
+                },
+                {
+                  "key": "country",
+                  "value": "US",
+                  "description": "Filter by country (US or CA)"
+                },
+                {
+                  "key": "state",
+                  "value": "Massachusetts",
+                  "disabled": true,
+                  "description": "Filter by US state"
+                },
+                {
+                  "key": "integrationType",
+                  "value": "commonapp",
+                  "description": "Filter by integration type"
+                },
+                {
+                  "key": "programType",
+                  "value": "graduate",
+                  "disabled": true,
+                  "description": "Filter by program type"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of results (max 100)"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "disabled": true,
+                  "description": "Pagination offset"
+                }
+              ]
+            },
+            "description": "Search and filter from 2000+ North American universities"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Universities by Integration Type",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/universities/integration-type/commonapp",
+              "host": ["{{base_url}}"],
+              "path": ["universities", "integration-type", "commonapp"]
+            },
+            "description": "Get all universities using CommonApp integration"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Universities by Location",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/universities/location/US?state=California",
+              "host": ["{{base_url}}"],
+              "path": ["universities", "location", "US"],
+              "query": [
+                {
+                  "key": "state",
+                  "value": "California",
+                  "description": "Filter by state"
+                },
+                {
+                  "key": "province",
+                  "value": "Ontario",
+                  "disabled": true,
+                  "description": "Filter by Canadian province"
+                }
+              ]
+            },
+            "description": "Get universities in California, US"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Ivy League Universities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/universities/search?search=&country=US&integrationType=commonapp&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["universities", "search"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search for Ivy League schools"
+                },
+                {
+                  "key": "country",
+                  "value": "US"
+                },
+                {
+                  "key": "integrationType",
+                  "value": "commonapp"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Find Ivy League and top-tier universities"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Submissions",
+      "item": [
+        {
+          "name": "Submit to Multiple Universities",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recommendationId\": \"{{recommendation_id}}\",\n  \"studentData\": {\n    \"id\": \"student_demo_456\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phone\": \"+1-555-0123\",\n    \"dateOfBirth\": \"1995-06-15T00:00:00Z\",\n    \"address\": {\n      \"street\": \"123 Main St\",\n      \"city\": \"Boston\",\n      \"state\": \"Massachusetts\",\n      \"zipCode\": \"02101\",\n      \"country\": \"US\"\n    },\n    \"academicInfo\": {\n      \"currentInstitution\": \"Boston University\",\n      \"gpa\": 3.8,\n      \"graduationDate\": \"2024-05-15T00:00:00Z\",\n      \"major\": \"Computer Science\",\n      \"testScores\": {\n        \"gre\": {\n          \"verbal\": 165,\n          \"quantitative\": 170,\n          \"analytical\": 5.0\n        }\n      }\n    }\n  },\n  \"recommenderData\": {\n    \"id\": \"recommender_demo_789\",\n    \"firstName\": \"Dr. Jane\",\n    \"lastName\": \"Smith\",\n    \"title\": \"Professor\",\n    \"institution\": \"Boston University\",\n    \"email\": \"jane.smith@bu.edu\",\n    \"phone\": \"+1-555-0456\",\n    \"relationship\": \"Academic Advisor\",\n    \"yearsKnown\": 3\n  },\n  \"recommendationContent\": {\n    \"content\": \"John is an exceptional student who has demonstrated outstanding academic performance and research capabilities throughout his undergraduate studies. His dedication to computer science and innovative thinking make him an ideal candidate for graduate programs. I have had the pleasure of working with John for three years, during which he has consistently exceeded expectations in both coursework and research projects.\",\n    \"wordCount\": 750,\n    \"programType\": \"graduate\",\n    \"customizations\": {\n      \"harvard_specific\": \"John's research in machine learning aligns perfectly with Harvard's AI initiatives.\",\n      \"stanford_specific\": \"His entrepreneurial spirit would thrive in Stanford's innovation ecosystem.\"\n    }\n  },\n  \"universities\": [\n    {\n      \"universityId\": \"harv_001\",\n      \"universityCode\": \"HARV\",\n      \"programType\": \"graduate\",\n      \"applicationDeadline\": \"2024-12-01T23:59:59Z\",\n      \"specificRequirements\": {\n        \"program_focus\": \"Computer Science PhD\"\n      }\n    },\n    {\n      \"universityId\": \"stan_001\",\n      \"universityCode\": \"STAN\",\n      \"programType\": \"graduate\",\n      \"applicationDeadline\": \"2024-12-15T23:59:59Z\"\n    },\n    {\n      \"universityId\": \"mit_001\",\n      \"universityCode\": \"MIT\",\n      \"programType\": \"graduate\",\n      \"applicationDeadline\": \"2024-12-01T23:59:59Z\"\n    }\n  ],\n  \"metadata\": {\n    \"submissionType\": \"recommendation\",\n    \"priority\": \"normal\",\n    \"deadline\": \"2024-12-01T00:00:00Z\",\n    \"source\": \"api\",\n    \"version\": \"1.0\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/submit",
+              "host": ["{{base_url}}"],
+              "path": ["submit"]
+            },
+            "description": "Submit a recommendation to multiple universities (Harvard, Stanford, MIT)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Submission Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/status/{{recommendation_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["status", "{{recommendation_id}}"]
+            },
+            "description": "Track the status of all submissions for a recommendation"
+          },
+          "response": []
+        },
+        {
+          "name": "Retry Failed Submissions",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/retry/{{recommendation_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["retry", "{{recommendation_id}}"]
+            },
+            "description": "Retry any failed submissions for a recommendation"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit to Canadian Universities",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recommendationId\": \"rec_canada_456\",\n  \"studentData\": {\n    \"id\": \"student_ca_789\",\n    \"firstName\": \"Sarah\",\n    \"lastName\": \"Johnson\",\n    \"email\": \"sarah.johnson@example.ca\",\n    \"dateOfBirth\": \"1996-03-20T00:00:00Z\",\n    \"address\": {\n      \"street\": \"456 Queen St\",\n      \"city\": \"Toronto\",\n      \"state\": \"Ontario\",\n      \"zipCode\": \"M5V 2A8\",\n      \"country\": \"CA\"\n    },\n    \"academicInfo\": {\n      \"currentInstitution\": \"University of Toronto\",\n      \"gpa\": 3.9,\n      \"graduationDate\": \"2024-06-15T00:00:00Z\",\n      \"major\": \"Engineering\"\n    }\n  },\n  \"recommenderData\": {\n    \"id\": \"recommender_ca_101\",\n    \"firstName\": \"Prof. Michael\",\n    \"lastName\": \"Brown\",\n    \"title\": \"Associate Professor\",\n    \"institution\": \"University of Toronto\",\n    \"email\": \"m.brown@utoronto.ca\",\n    \"relationship\": \"Research Supervisor\",\n    \"yearsKnown\": 2\n  },\n  \"recommendationContent\": {\n    \"content\": \"Sarah is an outstanding engineering student with exceptional analytical skills and innovative problem-solving abilities. Her research contributions and academic excellence make her an ideal candidate for graduate studies.\",\n    \"wordCount\": 450,\n    \"programType\": \"graduate\"\n  },\n  \"universities\": [\n    {\n      \"universityId\": \"utor_001\",\n      \"universityCode\": \"UTOR\",\n      \"programType\": \"graduate\",\n      \"applicationDeadline\": \"2024-11-30T23:59:59Z\"\n    },\n    {\n      \"universityId\": \"mcgi_001\",\n      \"universityCode\": \"MCGI\",\n      \"programType\": \"graduate\",\n      \"applicationDeadline\": \"2024-12-15T23:59:59Z\"\n    }\n  ],\n  \"metadata\": {\n    \"submissionType\": \"recommendation\",\n    \"priority\": \"normal\",\n    \"deadline\": \"2024-11-30T00:00:00Z\",\n    \"source\": \"api\",\n    \"version\": \"1.0\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/submit",
+              "host": ["{{base_url}}"],
+              "path": ["submit"]
+            },
+            "description": "Submit recommendations to Canadian universities (Toronto, McGill)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Get Integration Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/statistics/integrations",
+              "host": ["{{base_url}}"],
+              "path": ["statistics", "integrations"]
+            },
+            "description": "Get comprehensive statistics about university integrations"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Submission Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/statistics/submissions?dateFrom=2024-01-01T00:00:00Z&dateTo=2024-01-31T23:59:59Z",
+              "host": ["{{base_url}}"],
+              "path": ["statistics", "submissions"],
+              "query": [
+                {
+                  "key": "dateFrom",
+                  "value": "2024-01-01T00:00:00Z",
+                  "description": "Start date for statistics"
+                },
+                {
+                  "key": "dateTo",
+                  "value": "2024-01-31T23:59:59Z",
+                  "description": "End date for statistics"
+                },
+                {
+                  "key": "integrationType",
+                  "value": "commonapp",
+                  "disabled": true,
+                  "description": "Filter by integration type"
+                },
+                {
+                  "key": "universityId",
+                  "value": "harv_001",
+                  "disabled": true,
+                  "description": "Filter by university"
+                }
+              ]
+            },
+            "description": "Get detailed submission statistics with filtering"
+          },
+          "response": []
+        },
+        {
+          "name": "Get CommonApp Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/statistics/submissions?integrationType=commonapp",
+              "host": ["{{base_url}}"],
+              "path": ["statistics", "submissions"],
+              "query": [
+                {
+                  "key": "integrationType",
+                  "value": "commonapp",
+                  "description": "Filter by CommonApp integration"
+                }
+              ]
+            },
+            "description": "Get statistics specifically for CommonApp submissions"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health & Monitoring",
+      "item": [
+        {
+          "name": "Get Integration Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Check the health status of all university integrations"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Performance Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/metrics/performance",
+              "host": ["{{base_url}}"],
+              "path": ["metrics", "performance"]
+            },
+            "description": "Get system performance metrics"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Usage Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/metrics/usage",
+              "host": ["{{base_url}}"],
+              "path": ["metrics", "usage"]
+            },
+            "description": "Get API usage metrics by integration type"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Test University Connection",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/universities/{{university_id}}/test",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "universities", "{{university_id}}", "test"]
+            },
+            "description": "Test connection to a specific university's integration"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Rate Limit Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/rate-limits/commonapp",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "rate-limits", "commonapp"],
+              "query": [
+                {
+                  "key": "universityId",
+                  "value": "harv_001",
+                  "disabled": true,
+                  "description": "Specific university ID"
+                }
+              ]
+            },
+            "description": "Check rate limit status for CommonApp integration"
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Rate Limits",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"universityId\": \"harv_001\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/rate-limits/commonapp/reset",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "rate-limits", "commonapp", "reset"]
+            },
+            "description": "Reset rate limits for CommonApp integration"
+          },
+          "response": []
+        },
+        {
+          "name": "Update University Integration",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"integrationType\": \"commonapp\",\n  \"features\": {\n    \"realTimeStatus\": true,\n    \"bulkSubmission\": true,\n    \"documentUpload\": true,\n    \"statusWebhooks\": true,\n    \"customFields\": true\n  },\n  \"rateLimit\": {\n    \"requestsPerMinute\": 30,\n    \"requestsPerHour\": 500,\n    \"requestsPerDay\": 2000,\n    \"burstLimit\": 10\n  },\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/universities/{{university_id}}/integration",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "universities", "{{university_id}}", "integration"]
+            },
+            "description": "Update integration configuration for a university"
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Credentials",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/credentials/commonapp/validate",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "credentials", "commonapp", "validate"]
+            },
+            "description": "Validate CommonApp API credentials"
+          },
+          "response": []
+        },
+        {
+          "name": "Store Credentials",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"apiKey\": \"your_commonapp_api_key\",\n  \"clientId\": \"your_client_id\",\n  \"clientSecret\": \"your_client_secret\",\n  \"expiresAt\": \"2024-12-31T23:59:59Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/credentials/commonapp",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "credentials", "commonapp"]
+            },
+            "description": "Store or update CommonApp API credentials"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Credentials Needing Rotation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/credentials/rotation-needed",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "credentials", "rotation-needed"]
+            },
+            "description": "Get list of credentials that need rotation"
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk Load Universities",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"universities\": [\n    {\n      \"name\": \"New University\",\n      \"code\": \"NEWU\",\n      \"country\": \"US\",\n      \"state\": \"California\",\n      \"integrationType\": \"email\",\n      \"institutionType\": \"Public University\",\n      \"isPublic\": true,\n      \"websiteUrl\": \"https://www.newuniversity.edu\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/universities/bulk-load",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "universities", "bulk-load"]
+            },
+            "description": "Bulk load new universities into the system"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Test Scenarios",
+      "item": [
+        {
+          "name": "Test Ivy League Submission",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recommendationId\": \"rec_ivy_test_001\",\n  \"studentData\": {\n    \"id\": \"student_ivy_001\",\n    \"firstName\": \"Emily\",\n    \"lastName\": \"Chen\",\n    \"email\": \"emily.chen@example.com\",\n    \"dateOfBirth\": \"1994-09-12T00:00:00Z\",\n    \"address\": {\n      \"street\": \"789 Academic Ave\",\n      \"city\": \"Cambridge\",\n      \"state\": \"Massachusetts\",\n      \"zipCode\": \"02138\",\n      \"country\": \"US\"\n    },\n    \"academicInfo\": {\n      \"currentInstitution\": \"Harvard University\",\n      \"gpa\": 3.95,\n      \"graduationDate\": \"2024-05-15T00:00:00Z\",\n      \"major\": \"Physics\",\n      \"testScores\": {\n        \"gre\": {\n          \"verbal\": 168,\n          \"quantitative\": 170,\n          \"analytical\": 5.5\n        }\n      }\n    }\n  },\n  \"recommenderData\": {\n    \"id\": \"recommender_ivy_001\",\n    \"firstName\": \"Dr. Robert\",\n    \"lastName\": \"Wilson\",\n    \"title\": \"Professor of Physics\",\n    \"institution\": \"Harvard University\",\n    \"email\": \"r.wilson@harvard.edu\",\n    \"relationship\": \"Research Advisor\",\n    \"yearsKnown\": 4\n  },\n  \"recommendationContent\": {\n    \"content\": \"Emily is one of the most brilliant physics students I have encountered in my 20-year career. Her research on quantum mechanics has already contributed to published papers, and her analytical abilities are truly exceptional. She would be an outstanding addition to any graduate program.\",\n    \"wordCount\": 850,\n    \"programType\": \"doctoral\"\n  },\n  \"universities\": [\n    {\n      \"universityId\": \"harv_001\",\n      \"universityCode\": \"HARV\",\n      \"programType\": \"doctoral\",\n      \"applicationDeadline\": \"2024-12-01T23:59:59Z\"\n    },\n    {\n      \"universityId\": \"yale_001\",\n      \"universityCode\": \"YALE\",\n      \"programType\": \"doctoral\",\n      \"applicationDeadline\": \"2024-12-01T23:59:59Z\"\n    },\n    {\n      \"universityId\": \"prin_001\",\n      \"universityCode\": \"PRIN\",\n      \"programType\": \"doctoral\",\n      \"applicationDeadline\": \"2024-12-01T23:59:59Z\"\n    }\n  ],\n  \"metadata\": {\n    \"submissionType\": \"recommendation\",\n    \"priority\": \"high\",\n    \"deadline\": \"2024-12-01T00:00:00Z\",\n    \"source\": \"api\",\n    \"version\": \"1.0\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/submit",
+              "host": ["{{base_url}}"],
+              "path": ["submit"]
+            },
+            "description": "Test submission to multiple Ivy League universities"
+          },
+          "response": []
+        },
+        {
+          "name": "Test UC System Submission",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recommendationId\": \"rec_uc_test_001\",\n  \"studentData\": {\n    \"id\": \"student_uc_001\",\n    \"firstName\": \"David\",\n    \"lastName\": \"Rodriguez\",\n    \"email\": \"david.rodriguez@example.com\",\n    \"dateOfBirth\": \"1995-11-08T00:00:00Z\",\n    \"address\": {\n      \"street\": \"321 College Blvd\",\n      \"city\": \"Los Angeles\",\n      \"state\": \"California\",\n      \"zipCode\": \"90024\",\n      \"country\": \"US\"\n    },\n    \"academicInfo\": {\n      \"currentInstitution\": \"UCLA\",\n      \"gpa\": 3.7,\n      \"graduationDate\": \"2024-06-15T00:00:00Z\",\n      \"major\": \"Computer Science\"\n    }\n  },\n  \"recommenderData\": {\n    \"id\": \"recommender_uc_001\",\n    \"firstName\": \"Prof. Lisa\",\n    \"lastName\": \"Martinez\",\n    \"title\": \"Associate Professor\",\n    \"institution\": \"UCLA\",\n    \"email\": \"l.martinez@ucla.edu\",\n    \"relationship\": \"Course Instructor\",\n    \"yearsKnown\": 2\n  },\n  \"recommendationContent\": {\n    \"content\": \"David has shown exceptional programming skills and innovative thinking in my advanced algorithms course. His project on machine learning optimization was among the best I've seen, and he would excel in graduate studies.\",\n    \"wordCount\": 650,\n    \"programType\": \"graduate\"\n  },\n  \"universities\": [\n    {\n      \"universityId\": \"ucb_001\",\n      \"universityCode\": \"UCB\",\n      \"programType\": \"graduate\",\n      \"applicationDeadline\": \"2024-12-15T23:59:59Z\"\n    },\n    {\n      \"universityId\": \"ucla_001\",\n      \"universityCode\": \"UCLA\",\n      \"programType\": \"graduate\",\n      \"applicationDeadline\": \"2024-12-15T23:59:59Z\"\n    },\n    {\n      \"universityId\": \"ucsd_001\",\n      \"universityCode\": \"UCSD\",\n      \"programType\": \"graduate\",\n      \"applicationDeadline\": \"2024-12-15T23:59:59Z\"\n    }\n  ],\n  \"metadata\": {\n    \"submissionType\": \"recommendation\",\n    \"priority\": \"normal\",\n    \"deadline\": \"2024-12-15T00:00:00Z\",\n    \"source\": \"api\",\n    \"version\": \"1.0\"\n  }\n}"
+            },\n            "url": {\n              "raw": "{{base_url}}/submit",\n              "host": ["{{base_url}}"],\n              "path": ["submit"]\n            },\n            "description": "Test submission to UC system universities"\n          },\n          "response": []\n        }\n      ]\n    }\n  ],\n  "event": [\n    {\n      "listen": "prerequest",\n      "script": {\n        "type": "text/javascript",\n        "exec": [\n          "// Set timestamp for requests",\n          "pm.globals.set('timestamp', new Date().toISOString());"\n        ]\n      }\n    },\n    {\n      "listen": "test",\n      "script": {\n        "type": "text/javascript",\n        "exec": [\n          "// Basic response validation",\n          "pm.test('Status code is 200', function () {",\n          "    pm.response.to.have.status(200);",\n          "});",\n          "",\n          "pm.test('Response has success field', function () {",\n          "    const jsonData = pm.response.json();",\n          "    pm.expect(jsonData).to.have.property('success');",\n          "});",\n          "",\n          "// Store auth token if login request",\n          "if (pm.info.requestName === 'Login') {",\n          "    const jsonData = pm.response.json();",\n          "    if (jsonData.success && jsonData.data.token) {",\n          "        pm.collectionVariables.set('auth_token', jsonData.data.token);",\n          "    }",\n          "}",\n          "",\n          "// Store recommendation ID from submission",\n          "if (pm.info.requestName.includes('Submit')) {",\n          "    const jsonData = pm.response.json();",\n          "    if (jsonData.success && jsonData.data.recommendationId) {",\n          "        pm.collectionVariables.set('recommendation_id', jsonData.data.recommendationId);",\n          "    }",\n          "}"\n        ]\n      }\n    }\n  ]\n}
