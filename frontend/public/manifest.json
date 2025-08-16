@@ -1,0 +1,83 @@
+{
+  "short_name": "StellarRec",
+  "name": "StellarRec - AI-Powered University Applications",
+  "description": "Transform your university application process with AI-powered recommendations, content optimization, and intelligent workflow management.",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1976d2",
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "categories": ["education", "productivity"],
+  "lang": "en-US",
+  "scope": "/",
+  "shortcuts": [
+    {
+      "name": "AI Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your AI-powered insights and recommendations",
+      "url": "/ai/dashboard",
+      "icons": [{ "src": "/icons/dashboard-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "University Finder",
+      "short_name": "Find Universities",
+      "description": "Discover universities with AI-powered matching",
+      "url": "/ai/university-finder",
+      "icons": [{ "src": "/icons/search-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Content Studio",
+      "short_name": "Optimize Content",
+      "description": "Optimize your application content with AI",
+      "url": "/ai/content-studio",
+      "icons": [{ "src": "/icons/edit-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Timeline Manager",
+      "short_name": "Timeline",
+      "description": "Manage your application timeline intelligently",
+      "url": "/ai/timeline",
+      "icons": [{ "src": "/icons/schedule-96x96.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard-desktop.png",
+      "type": "image/png",
+      "sizes": "1280x720",
+      "form_factor": "wide",
+      "label": "AI Dashboard - Desktop View"
+    },
+    {
+      "src": "/screenshots/dashboard-mobile.png",
+      "type": "image/png",
+      "sizes": "375x812",
+      "form_factor": "narrow",
+      "label": "AI Dashboard - Mobile View"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://stellarrec.com/manifest.json"
+    }
+  ],
+  "prefer_related_applications": false
+}

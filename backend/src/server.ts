@@ -8,6 +8,7 @@ import { Logger } from './services/logger';
 // Import route modules
 import universityIntegrationRoutes from './routes/universityIntegration';
 import aiIntelligenceRoutes from './routes/aiIntelligence';
+import authRoutes from './routes/auth';
 
 const app = express();
 const server = createServer(app);
@@ -39,6 +40,7 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     version: process.env.npm_package_version || '1.0.0',
     services: {
+      authentication: 'active',
       universityIntegration: 'active',
       aiIntelligence: 'active'
     }
@@ -46,6 +48,7 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/university-integration', universityIntegrationRoutes);
 app.use('/api/ai-intelligence', aiIntelligenceRoutes);
 
@@ -56,6 +59,7 @@ app.get('/api', (req, res) => {
     version: '1.0.0',
     description: 'Intelligent University Application Platform',
     endpoints: {
+      authentication: '/api/auth',
       universityIntegration: '/api/university-integration',
       aiIntelligence: '/api/ai-intelligence',
       health: '/health',
@@ -99,6 +103,7 @@ app.use('*', (req, res) => {
     error: 'Endpoint not found',
     message: `The requested endpoint ${req.originalUrl} does not exist`,
     availableEndpoints: [
+      '/api/auth',
       '/api/university-integration',
       '/api/ai-intelligence',
       '/health',
