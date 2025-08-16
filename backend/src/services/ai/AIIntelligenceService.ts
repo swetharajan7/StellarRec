@@ -709,4 +709,160 @@ export interface ProfileChangeImpact {
   significantChange: boolean;
   changes: string[];
   reasoning: string;
+}// Ad
+ditional interfaces for workflow management
+export interface SubmissionTiming {
+  earlyDecision: UniversityMatch[];
+  earlyAction: UniversityMatch[];
+  regularDecision: UniversityMatch[];
+  reasoning: string;
+}
+
+export interface UniversityPrioritization {
+  university: University;
+  priority: 'high' | 'medium' | 'low';
+  reasoning: string;
+  recommendedEffort: 'maximum' | 'standard' | 'minimal';
+}
+
+export interface BackupPlan {
+  planId: string;
+  name: string;
+  description: string;
+  triggerConditions: string[];
+  actions: string[];
+  timeline: string;
+}
+
+export interface TimelineOptimization {
+  criticalDeadlines: CriticalDeadline[];
+  workloadDistribution: WorkloadDistribution;
+  bufferTime: BufferTimeAnalysis;
+  recommendations: string[];
+}
+
+export interface ContentStrategy {
+  personalStatementThemes: string[];
+  universitySpecificApproaches: UniversityApproach[];
+  recommendationLetterStrategy: RecommendationStrategy;
+  supplementalEssayPlan: EssayPlan;
+  contentCalendar: ContentCalendar;
+}
+
+export interface CriticalDeadline {
+  universityId: string;
+  universityName: string;
+  date: Date;
+  type: 'early_decision' | 'early_action' | 'regular_decision' | 'scholarship';
+  priority: 'high' | 'medium' | 'low';
+}
+
+export interface WorkloadDistribution {
+  weeklyHours: Record<string, number>;
+  peakPeriods: string[];
+  recommendations: string[];
+}
+
+export interface BufferTimeAnalysis {
+  recommendedBuffer: number; // days
+  riskAssessment: string;
+  contingencyPlans: string[];
+}
+
+export interface UniversityApproach {
+  universityId: string;
+  approach: string;
+  keyMessages: string[];
+  tone: string;
+}
+
+export interface RecommendationStrategy {
+  recommenders: RecommenderProfile[];
+  timeline: RecommendationTimeline;
+  instructions: string[];
+}
+
+export interface RecommenderProfile {
+  name: string;
+  relationship: string;
+  strengths: string[];
+  universities: string[];
+}
+
+export interface RecommendationTimeline {
+  requestDate: Date;
+  followUpDates: Date[];
+  submissionDeadline: Date;
+}
+
+export interface EssayPlan {
+  essays: EssayRequirement[];
+  timeline: EssayTimeline;
+  themes: string[];
+}
+
+export interface EssayRequirement {
+  universityId: string;
+  prompt: string;
+  wordLimit: number;
+  priority: 'high' | 'medium' | 'low';
+  dueDate: Date;
+}
+
+export interface EssayTimeline {
+  draftDeadlines: Record<string, Date>;
+  reviewPeriods: Record<string, Date>;
+  finalDeadlines: Record<string, Date>;
+}
+
+export interface ContentCalendar {
+  milestones: ContentMilestone[];
+  deadlines: ContentDeadline[];
+  bufferPeriods: BufferPeriod[];
+}
+
+export interface ContentMilestone {
+  name: string;
+  date: Date;
+  deliverables: string[];
+  dependencies: string[];
+}
+
+export interface ContentDeadline {
+  name: string;
+  date: Date;
+  type: 'essay' | 'application' | 'document' | 'recommendation';
+  priority: 'high' | 'medium' | 'low';
+}
+
+export interface BufferPeriod {
+  startDate: Date;
+  endDate: Date;
+  purpose: string;
+  activities: string[];
+}
+
+export interface TimelineAdjustment {
+  type: 'acceleration' | 'deceleration' | 'resequencing';
+  description: string;
+  impact: string;
+  implementation: string;
+}
+
+export interface MitigationStrategy {
+  riskId: string;
+  strategy: string;
+  actions: string[];
+  timeline: Date;
+  responsible: string;
+  success_criteria: string[];
+}
+
+export interface MonitoringPoint {
+  pointId: string;
+  name: string;
+  description: string;
+  frequency: string;
+  triggers: string[];
+  actions: string[];
 }
