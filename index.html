@@ -454,14 +454,18 @@
             border-radius: 2px;
         }
 
-        .university-logos {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 2rem;
+        .carousel-container {
+            overflow: hidden;
             margin-bottom: 4rem;
-            max-width: 1000px;
-            margin-left: auto;
-            margin-right: auto;
+            position: relative;
+            width: 100%;
+        }
+
+        .university-carousel {
+            display: flex;
+            gap: 2rem;
+            animation: scroll 30s linear infinite;
+            width: fit-content;
         }
 
         .university-logo {
@@ -475,12 +479,28 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
             border: 1px solid rgba(25, 118, 210, 0.1);
+            min-width: 140px;
+            flex-shrink: 0;
         }
 
         .university-logo:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 30px rgba(25, 118, 210, 0.15);
             border-color: rgba(25, 118, 210, 0.3);
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Pause animation on hover */
+        .carousel-container:hover .university-carousel {
+            animation-play-state: paused;
         }
 
         .university-logo img {
@@ -1019,10 +1039,13 @@
                 margin-bottom: 2rem;
             }
 
-            .university-logos {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1rem;
+            .carousel-container {
                 margin-bottom: 3rem;
+            }
+
+            .university-carousel {
+                gap: 1rem;
+                animation: scroll 20s linear infinite;
             }
 
             .university-logo {
@@ -1201,38 +1224,91 @@
         <div class="container">
             <div class="trusted-content">
                 <h2 class="trusted-title">Trusted by students applying to top universities</h2>
-                <div class="university-logos">
-                    <div class="university-logo">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Harvard_University_logo.svg/200px-Harvard_University_logo.svg.png" alt="Harvard University" />
-                        <span>Harvard</span>
-                    </div>
-                    <div class="university-logo">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/MIT_logo.svg/200px-MIT_logo.svg.png" alt="MIT" />
-                        <span>MIT</span>
-                    </div>
-                    <div class="university-logo">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Stanford_University_seal_2003.svg/200px-Stanford_University_seal_2003.svg.png" alt="Stanford University" />
-                        <span>Stanford</span>
-                    </div>
-                    <div class="university-logo">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Yale_University_logo.svg/200px-Yale_University_logo.svg.png" alt="Yale University" />
-                        <span>Yale</span>
-                    </div>
-                    <div class="university-logo">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Princeton_shield.svg/200px-Princeton_shield.svg.png" alt="Princeton University" />
-                        <span>Princeton</span>
-                    </div>
-                    <div class="university-logo">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Columbia_University_logo.svg/200px-Columbia_University_logo.svg.png" alt="Columbia University" />
-                        <span>Columbia</span>
-                    </div>
-                    <div class="university-logo">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/University_of_Pennsylvania_logo.svg/200px-University_of_Pennsylvania_logo.svg.png" alt="University of Pennsylvania" />
-                        <span>UPenn</span>
-                    </div>
-                    <div class="university-logo">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Caltech_logo.svg/200px-Caltech_logo.svg.png" alt="Caltech" />
-                        <span>Caltech</span>
+                <div class="carousel-container">
+                    <div class="university-carousel">
+                        <!-- First set of logos -->
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Harvard_University_logo.svg/200px-Harvard_University_logo.svg.png" alt="Harvard University" />
+                            <span>Harvard</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/MIT_logo.svg/200px-MIT_logo.svg.png" alt="MIT" />
+                            <span>MIT</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Stanford_University_seal_2003.svg/200px-Stanford_University_seal_2003.svg.png" alt="Stanford University" />
+                            <span>Stanford</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Yale_University_logo.svg/200px-Yale_University_logo.svg.png" alt="Yale University" />
+                            <span>Yale</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Princeton_shield.svg/200px-Princeton_shield.svg.png" alt="Princeton University" />
+                            <span>Princeton</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Columbia_University_logo.svg/200px-Columbia_University_logo.svg.png" alt="Columbia University" />
+                            <span>Columbia</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/University_of_Pennsylvania_logo.svg/200px-University_of_Pennsylvania_logo.svg.png" alt="University of Pennsylvania" />
+                            <span>UPenn</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Caltech_logo.svg/200px-Caltech_logo.svg.png" alt="Caltech" />
+                            <span>Caltech</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/University_of_Chicago_logo.svg/200px-University_of_Chicago_logo.svg.png" alt="University of Chicago" />
+                            <span>UChicago</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Northwestern_University_seal.svg/200px-Northwestern_University_seal.svg.png" alt="Northwestern University" />
+                            <span>Northwestern</span>
+                        </div>
+                        
+                        <!-- Duplicate set for seamless loop -->
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Harvard_University_logo.svg/200px-Harvard_University_logo.svg.png" alt="Harvard University" />
+                            <span>Harvard</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/MIT_logo.svg/200px-MIT_logo.svg.png" alt="MIT" />
+                            <span>MIT</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Stanford_University_seal_2003.svg/200px-Stanford_University_seal_2003.svg.png" alt="Stanford University" />
+                            <span>Stanford</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Yale_University_logo.svg/200px-Yale_University_logo.svg.png" alt="Yale University" />
+                            <span>Yale</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Princeton_shield.svg/200px-Princeton_shield.svg.png" alt="Princeton University" />
+                            <span>Princeton</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Columbia_University_logo.svg/200px-Columbia_University_logo.svg.png" alt="Columbia University" />
+                            <span>Columbia</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/University_of_Pennsylvania_logo.svg/200px-University_of_Pennsylvania_logo.svg.png" alt="University of Pennsylvania" />
+                            <span>UPenn</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Caltech_logo.svg/200px-Caltech_logo.svg.png" alt="Caltech" />
+                            <span>Caltech</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/University_of_Chicago_logo.svg/200px-University_of_Chicago_logo.svg.png" alt="University of Chicago" />
+                            <span>UChicago</span>
+                        </div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Northwestern_University_seal.svg/200px-Northwestern_University_seal.svg.png" alt="Northwestern University" />
+                            <span>Northwestern</span>
+                        </div>
                     </div>
                 </div>
                 <div class="trusted-stats">
