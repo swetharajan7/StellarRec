@@ -561,6 +561,94 @@
             gap: 0.5rem;
         }
 
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            padding: 4rem 0 2rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .footer-copyright {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .contact-form h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .contact-form-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-contact {
+            background: #ffeb3b;
+            color: #1976d2;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+        }
+
+        .btn-contact:hover {
+            background: #fff59d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 235, 59, 0.4);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .hero-content {
@@ -608,6 +696,20 @@
             .features-list {
                 flex-direction: column;
                 align-items: center;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                text-align: center;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-contact {
+                align-self: center;
             }
         }
     </style>
@@ -671,8 +773,11 @@
                 </div>
 
                 <h1 class="hero-title">stellarrec</h1>
-                <p class="hero-subtitle">Transform Recommendations, Unlock Opportunities. With StellarRec, recommenders upload once and send to many universities—reducing redundancy, saving time, and helping students reach more schools.</p>
-                <p class="hero-subheading">Make it easier for professors to say yes. One upload, many applications—because student success should never be slowed down by paperwork.</p>
+                <p class="hero-subtitle">Transform Recommendations, Unlock Opportunities. With StellarRec, recommenders
+                    upload once and send to many universities—reducing redundancy, saving time, and helping students
+                    reach more schools.</p>
+                <p class="hero-subheading">Make it easier for professors to say yes. One upload, many
+                    applications—because student success should never be slowed down by paperwork.</p>
 
                 <div class="hero-buttons">
                     <a href="demo.html" class="btn btn-outline">Watch Demo</a>
@@ -690,120 +795,32 @@
         </div>
     </section>
 
-    <!-- Stats Section -->
-    <section class="stats">
+    <!-- Footer -->
+    <footer class="footer">
         <div class="container">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-icon">
-                        <span class="material-icons">school</span>
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <span class="material-icons">star</span>
+                        <span>stellarrec</span>
                     </div>
-                    <div class="stat-number">900+</div>
-                    <div>Universities Connected</div>
+                    <p class="footer-copyright">© 2025 StellarRec. All rights reserved.</p>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-icon">
-                        <span class="material-icons">trending_up</span>
-                    </div>
-                    <div class="stat-number">95%</div>
-                    <div>Success Rate Improvement</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-icon">
-                        <span class="material-icons">speed</span>
-                    </div>
-                    <div class="stat-number">60%</div>
-                    <div>Time Saved</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-icon">
-                        <span class="material-icons">psychology</span>
-                    </div>
-                    <div class="stat-number">24/7</div>
-                    <div>AI Assistance</div>
+                
+                <div class="contact-form">
+                    <h3>Contact Us</h3>
+                    <form class="contact-form-fields">
+                        <div class="form-row">
+                            <input type="text" placeholder="Your Name" required>
+                            <input type="email" placeholder="Your Email" required>
+                        </div>
+                        <textarea placeholder="Your Message" rows="4" required></textarea>
+                        <button type="submit" class="btn btn-contact">Send Message</button>
+                    </form>
                 </div>
             </div>
         </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features">
-        <div class="container">
-            <div class="section-header">
-                <h2>Powerful AI Features</h2>
-                <p>Everything you need to succeed in your university applications, powered by cutting-edge artificial
-                    intelligence.</p>
-            </div>
-
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon" style="background: rgba(25, 118, 210, 0.1); color: #1976d2;">
-                        <span class="material-icons">psychology</span>
-                    </div>
-                    <h3>AI University Matching</h3>
-                    <p>Get personalized university recommendations based on your profile, preferences, and success
-                        probability.</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon" style="background: rgba(124, 77, 255, 0.1); color: #7c4dff;">
-                        <span class="material-icons">auto_awesome</span>
-                    </div>
-                    <h3>Content Optimization</h3>
-                    <p>AI-powered essay and application optimization with real-time feedback and improvement
-                        suggestions.</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon" style="background: rgba(0, 172, 193, 0.1); color: #00acc1;">
-                        <span class="material-icons">timeline</span>
-                    </div>
-                    <h3>Smart Timeline Management</h3>
-                    <p>Intelligent workflow automation with deadline tracking and milestone management.</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon" style="background: rgba(255, 112, 67, 0.1); color: #ff7043;">
-                        <span class="material-icons">analytics</span>
-                    </div>
-                    <h3>Predictive Analytics</h3>
-                    <p>Advanced analytics to predict admission success and optimize your application strategy.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta">
-        <div class="container">
-            <span class="material-icons"
-                style="font-size: 60px; margin-bottom: 1rem; opacity: 0.9;">rocket_launch</span>
-            <h2>Ready to Transform Your Future?</h2>
-            <p>Join thousands of students who are already using StellarRec to achieve their university dreams. Start
-                your journey today with our free plan.</p>
-
-            <div class="cta-buttons">
-                <a href="#" class="btn btn-cta">Get Started Free</a>
-                <a href="#" class="btn btn-outline" style="color: white; border-color: rgba(255,255,255,0.5);">Schedule
-                    Demo</a>
-            </div>
-
-            <div class="features-list">
-                <div class="feature-item">
-                    <span class="material-icons">check_circle</span>
-                    <span>Free Forever Plan</span>
-                </div>
-                <div class="feature-item">
-                    <span class="material-icons">check_circle</span>
-                    <span>No Credit Card Required</span>
-                </div>
-                <div class="feature-item">
-                    <span class="material-icons">check_circle</span>
-                    <span>Setup in 2 Minutes</span>
-                </div>
-            </div>
-        </div>
-    </section>
+    </footer>
 
     <script>
         // Simple smooth scrolling for anchor links
