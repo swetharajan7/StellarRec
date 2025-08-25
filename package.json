@@ -1,0 +1,17 @@
+{
+  "name": "stellarrec",
+  "version": "1.0.0",
+  "description": "AI-Powered University Application Platform",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve -s .",
+    "build": "echo 'Static build complete'",
+    "dev": "serve -s ."
+  },
+  "keywords": ["university", "AI", "applications", "education"],
+  "author": "StellarRec Team",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.0.0"
+  }
+}

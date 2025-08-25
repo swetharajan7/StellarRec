@@ -122,13 +122,14 @@
         
         /* Hero Section */
         .hero {
-            background: linear-gradient(135deg, #1976d2 0%, #42a5f5 50%, #7c4dff 100%);
+            background: linear-gradient(135deg, #0a0a23 0%, #1a1a3a 30%, #2d1b69 60%, #7c4dff 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             color: white;
             padding-top: 80px;
             position: relative;
+            overflow: hidden;
         }
         
         .hero::before {
@@ -138,48 +139,92 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.3;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpolygon points='50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.4;
+            animation: twinkle 4s ease-in-out infinite alternate;
+        }
+        
+        @keyframes twinkle {
+            0% { opacity: 0.2; }
+            100% { opacity: 0.6; }
         }
         
         .hero-content {
             position: relative;
             z-index: 1;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
+            display: flex;
+            flex-direction: column;
             align-items: center;
+            text-align: center;
+            width: 100%;
         }
         
-        .hero-text h1 {
-            font-size: 4rem;
-            font-weight: 700;
-            line-height: 1.2;
-            margin-bottom: 1.5rem;
+        .stellar-star {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 2rem;
+            position: relative;
+            animation: float 6s ease-in-out infinite;
         }
         
-        .hero-text .highlight {
-            color: #ffeb3b;
-            display: block;
+        .star-svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 30px rgba(255, 235, 59, 0.8));
         }
         
-        .hero-text p {
-            font-size: 1.25rem;
+        .star-path {
+            fill: url(#starGradient);
+            stroke: #ffeb3b;
+            stroke-width: 2;
+            animation: pulse 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        
+        @keyframes pulse {
+            0% { stroke-width: 2; }
+            100% { stroke-width: 4; }
+        }
+        
+        .hero-title {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ffeb3b, #ffc107, #ff9800);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: lowercase;
+            letter-spacing: -2px;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
             margin-bottom: 2rem;
             opacity: 0.9;
             line-height: 1.4;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .hero-buttons {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            justify-content: center;
         }
         
         .hero-stats {
             display: flex;
             align-items: center;
             gap: 1rem;
+            justify-content: center;
         }
         
         .stars {
@@ -187,10 +232,54 @@
             color: #ffeb3b;
         }
         
-        .hero-visual {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .floating-star {
+            position: absolute;
+            color: #ffeb3b;
+            opacity: 0.6;
+            animation: floatStar 8s ease-in-out infinite;
+        }
+        
+        .floating-star:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+            font-size: 1.5rem;
+        }
+        
+        .floating-star:nth-child(2) {
+            top: 30%;
+            right: 15%;
+            animation-delay: 2s;
+            font-size: 1.2rem;
+        }
+        
+        .floating-star:nth-child(3) {
+            bottom: 30%;
+            left: 20%;
+            animation-delay: 4s;
+            font-size: 1.8rem;
+        }
+        
+        .floating-star:nth-child(4) {
+            bottom: 20%;
+            right: 10%;
+            animation-delay: 6s;
+            font-size: 1.3rem;
+        }
+        
+        @keyframes floatStar {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-30px) rotate(180deg); opacity: 0.8; }
         }
         
         .dashboard-preview {
@@ -394,12 +483,21 @@
         /* Responsive */
         @media (max-width: 768px) {
             .hero-content {
-                grid-template-columns: 1fr;
+                flex-direction: column;
                 text-align: center;
             }
             
-            .hero-text h1 {
-                font-size: 2.5rem;
+            .hero-title {
+                font-size: 3rem;
+            }
+            
+            .stellar-star {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
             }
             
             .stats-grid {
@@ -437,8 +535,8 @@
         <div class="container">
             <div class="nav-content">
                 <a href="#" class="logo">
-                    <span class="material-icons">school</span>
-                    StellarRec
+                    <span class="material-icons">star</span>
+                    stellarrec
                 </a>
                 <div class="nav-buttons">
                     <a href="#" class="btn btn-outline">Sign In</a>
@@ -450,71 +548,62 @@
 
     <!-- Hero Section -->
     <section class="hero">
+        <div class="floating-elements">
+            <div class="floating-star">
+                <span class="material-icons">star</span>
+            </div>
+            <div class="floating-star">
+                <span class="material-icons">star</span>
+            </div>
+            <div class="floating-star">
+                <span class="material-icons">star</span>
+            </div>
+            <div class="floating-star">
+                <span class="material-icons">star</span>
+            </div>
+        </div>
+        
         <div class="container">
             <div class="hero-content">
-                <div class="hero-text">
-                    <h1>
-                        Transform Your
-                        <span class="highlight">University Journey</span>
-                        with AI
-                    </h1>
-                    <p>Get personalized recommendations, optimize your applications, and maximize your admission success with our AI-powered platform.</p>
-                    
-                    <div class="hero-buttons">
-                        <a href="#" class="btn btn-cta">Start Free Today</a>
-                        <a href="#" class="btn btn-outline">Watch Demo</a>
-                    </div>
-                    
-                    <div class="hero-stats">
-                        <div class="stars">
-                            <span class="material-icons">star</span>
-                            <span class="material-icons">star</span>
-                            <span class="material-icons">star</span>
-                            <span class="material-icons">star</span>
-                            <span class="material-icons">star</span>
-                        </div>
-                        <span>Trusted by 10,000+ students worldwide</span>
-                    </div>
+                <div class="stellar-star">
+                    <svg class="star-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ffeb3b;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#ffc107;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#ff9800;stop-opacity:1" />
+                            </linearGradient>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                                <feMerge> 
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <polygon class="star-path" 
+                                 points="100,10 130,70 190,70 145,115 160,175 100,140 40,175 55,115 10,70 70,70"
+                                 filter="url(#glow)" />
+                    </svg>
                 </div>
                 
-                <div class="hero-visual">
-                    <div class="dashboard-preview">
-                        <div class="dashboard-header">
-                            <div class="avatar">
-                                <span class="material-icons">psychology</span>
-                            </div>
-                            <div>
-                                <h3>AI Dashboard</h3>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <p style="margin-bottom: 0.5rem; color: #666;">University Match Score</p>
-                            <div class="progress-bar">
-                                <div class="progress-fill"></div>
-                            </div>
-                            <p style="color: #4caf50; font-weight: 600;">92%</p>
-                        </div>
-                        
-                        <div class="university-grid">
-                            <div class="university-card">
-                                <strong>Stanford</strong>
-                                <div style="color: #1976d2; font-size: 0.9rem;">90% Match</div>
-                            </div>
-                            <div class="university-card">
-                                <strong>MIT</strong>
-                                <div style="color: #1976d2; font-size: 0.9rem;">85% Match</div>
-                            </div>
-                            <div class="university-card">
-                                <strong>Harvard</strong>
-                                <div style="color: #1976d2; font-size: 0.9rem;">80% Match</div>
-                            </div>
-                            <div class="university-card">
-                                <strong>Oxford</strong>
-                                <div style="color: #1976d2; font-size: 0.9rem;">75% Match</div>
-                            </div>
-                        </div>
+                <h1 class="hero-title">stellarrec</h1>
+                <p class="hero-subtitle">Transform your university application journey with AI-powered recommendations, content optimization, and intelligent workflow management.</p>
+                
+                <div class="hero-buttons">
+                    <a href="#" class="btn btn-cta">Start Free Today</a>
+                    <a href="#" class="btn btn-outline">Watch Demo</a>
+                </div>
+                
+                <div class="hero-stats">
+                    <div class="stars">
+                        <span class="material-icons">star</span>
+                        <span class="material-icons">star</span>
+                        <span class="material-icons">star</span>
+                        <span class="material-icons">star</span>
+                        <span class="material-icons">star</span>
                     </div>
+                    <span>Trusted by 10,000+ students worldwide</span>
                 </div>
             </div>
         </div>
