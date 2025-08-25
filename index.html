@@ -649,6 +649,236 @@
             box-shadow: 0 4px 15px rgba(255, 235, 59, 0.4);
         }
 
+        /* Max Chatbot Styles */
+        .max-chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+
+        .max-chat-button {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #1976d2 0%, #7c4dff 100%);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(25, 118, 210, 0.3);
+            transition: all 0.3s ease;
+            animation: maxPulse 2s infinite;
+        }
+
+        .max-chat-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(25, 118, 210, 0.4);
+        }
+
+        .max-chat-button .material-icons {
+            font-size: 24px;
+            margin-bottom: -2px;
+        }
+
+        .max-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes maxPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 4px 20px rgba(25, 118, 210, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 4px 20px rgba(25, 118, 210, 0.6);
+            }
+        }
+
+        .max-chat-interface {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 320px;
+            height: 450px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 10001;
+            overflow: hidden;
+        }
+
+        .max-chat-interface.open {
+            display: flex;
+            animation: maxSlideUp 0.3s ease-out;
+        }
+
+        @keyframes maxSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .max-chat-header {
+            background: linear-gradient(135deg, #1976d2 0%, #7c4dff 100%);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .max-header-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .max-header-info .material-icons {
+            font-size: 20px;
+        }
+
+        .max-header-text h4 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .max-header-text span {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .max-header-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .max-minimize,
+        .max-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+
+        .max-minimize:hover,
+        .max-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .max-minimize .material-icons,
+        .max-close .material-icons {
+            font-size: 18px;
+        }
+
+        .max-chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .max-chat-input {
+            padding: 1rem;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .max-chat-input input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .max-chat-input input:focus {
+            border-color: #1976d2;
+        }
+
+        .max-send-btn {
+            width: 40px;
+            height: 40px;
+            background: #1976d2;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .max-send-btn:hover {
+            background: #1565c0;
+            transform: scale(1.05);
+        }
+
+        .max-send-btn .material-icons {
+            font-size: 18px;
+        }
+
+        /* Message Bubbles */
+        .max-message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .max-message.user {
+            background: #1976d2;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 6px;
+        }
+
+        .max-message.bot {
+            background: #f5f5f5;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 6px;
+        }
+
+        .max-message-time {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+
+        .max-message.bot .max-message-time {
+            text-align: left;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .hero-content {
@@ -710,6 +940,28 @@
 
             .btn-contact {
                 align-self: center;
+            }
+
+            /* Max Chatbot Mobile */
+            .max-chat-interface {
+                width: calc(100vw - 40px);
+                height: 400px;
+                bottom: 80px;
+                right: 20px;
+                left: 20px;
+            }
+
+            .max-chat-button {
+                width: 50px;
+                height: 50px;
+            }
+
+            .max-chat-button .material-icons {
+                font-size: 20px;
+            }
+
+            .max-label {
+                font-size: 9px;
             }
         }
     </style>
@@ -806,7 +1058,7 @@
                     </div>
                     <p class="footer-copyright">© 2025 StellarRec. All rights reserved.</p>
                 </div>
-                
+
                 <div class="contact-form">
                     <h3>Contact Us</h3>
                     <form class="contact-form-fields">
@@ -849,41 +1101,801 @@
                 </button>
             </div>
         </div>
-        
+
         <div class="max-chat-messages" id="max-chat-messages">
             <!-- Messages will be dynamically added here -->
         </div>
-        
+
         <div class="max-chat-input">
-            <input type="text" id="max-message-input" placeholder="Ask Max anything about StellarRec..." />
-            <button id="max-send-button" class="max-send-btn">
+            <input type="text" id="max-message-input" placeholder="Ask me about StellarRec..." maxlength="500">
+            <button class="max-send-btn" id="max-send-btn">
                 <span class="material-icons">send</span>
             </button>
         </div>
     </div>
 
     <script>
-        // Simple smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
+        class MaxChatbot {
+            constructor() {
+                this.isOpen = false;
+                this.conversationHistory = [];
+                this.knowledgeBase = null;
+                this.sessionId = this.generateSessionId();
+                this.currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
-        // Add loading animation
-        window.addEventListener('load', function () {
-            document.body.style.opacity = '0';
-            document.body.style.transition = 'opacity 0.5s ease-in-out';
-            setTimeout(() => {
-                document.body.style.opacity = '1';
-            }, 100);
+                // DOM elements
+                this.chatButton = document.getElementById('max-chat-button');
+                this.chatInterface = document.getElementById('max-chatbot-interface');
+                this.messagesContainer = document.getElementById('max-chat-messages');
+                this.messageInput = document.getElementById('max-message-input');
+                this.sendButton = document.getElementById('max-send-btn');
+                this.minimizeButton = document.getElementById('max-minimize');
+                this.closeButton = document.getElementById('max-close');
+            }
+
+            async init() {
+                await this.loadKnowledgeBase();
+                this.bindEvents();
+                this.loadConversationHistory();
+
+                // Show welcome message if no conversation history
+                if (this.conversationHistory.length === 0) {
+                    this.showWelcomeMessage();
+                }
+            }
+
+            async loadKnowledgeBase() {
+                try {
+                    const response = await fetch('max-knowledge-base.json');
+                    this.knowledgeBase = await response.json();
+                } catch (error) {
+                    console.error('Failed to load knowledge base:', error);
+                    this.knowledgeBase = {
+                        fallback: {
+                            responses: ["I'm having trouble accessing my knowledge base right now. Please try again later or contact our support team!"]
+                        }
+                    };
+                }
+            }
+
+            bindEvents() {
+                // Chat button click
+                this.chatButton.addEventListener('click', () => this.toggleChat());
+
+                // Header controls
+                this.minimizeButton.addEventListener('click', () => this.closeChat());
+                this.closeButton.addEventListener('click', () => this.closeChat());
+
+                // Send message events
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.sendMessage();
+                    }
+                });
+
+                // Auto-resize input
+                this.messageInput.addEventListener('input', () => {
+                    if (this.messageInput.value.length > 0) {
+                        this.sendButton.style.background = '#1976d2';
+                    } else {
+                        this.sendButton.style.background = '#ccc';
+                    }
+                });
+            }
+
+            generateSessionId() {
+                return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            toggleChat() {
+                if (this.isOpen) {
+                    this.closeChat();
+                } else {
+                    this.openChat();
+                }
+            }
+
+            openChat() {
+                this.isOpen = true;
+                this.chatInterface.classList.add('open');
+                this.messageInput.focus();
+
+                // Update last opened timestamp
+                localStorage.setItem('max_last_opened', Date.now().toString());
+            }
+
+            closeChat() {
+                this.isOpen = false;
+                this.chatInterface.classList.remove('open');
+            }
+
+            showWelcomeMessage() {
+                const welcomeMessages = this.knowledgeBase?.greetings?.responses || [
+                    "Hi there! I'm Max, your StellarRec guide! ⭐ How can I help you navigate the world of university recommendations today?"
+                ];
+
+                const welcomeMessage = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+                this.addMessage('bot', welcomeMessage);
+
+                // Add quick action suggestions
+                const suggestions = this.knowledgeBase?.greetings?.followUpSuggestions || [];
+                if (suggestions.length > 0) {
+                    setTimeout(() => {
+                        this.addQuickActions(suggestions);
+                    }, 1000);
+                }
+            }
+
+            sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message) return;
+
+                // Add user message
+                this.addMessage('user', message);
+                this.messageInput.value = '';
+                this.sendButton.style.background = '#ccc';
+
+                // Process and respond
+                setTimeout(() => {
+                    this.processUserMessage(message);
+                }, 500);
+            }
+
+            addMessage(sender, content, timestamp = null) {
+                const messageTime = timestamp || new Date();
+                const messageId = 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+
+                const messageObj = {
+                    id: messageId,
+                    sender: sender,
+                    content: content,
+                    timestamp: messageTime.toISOString(),
+                    type: 'text'
+                };
+
+                // Add to conversation history
+                this.conversationHistory.push(messageObj);
+
+                // Create message element
+                const messageElement = this.createMessageElement(messageObj);
+                this.messagesContainer.appendChild(messageElement);
+
+                // Scroll to bottom
+                this.scrollToBottom();
+
+                // Save conversation
+                this.saveConversationHistory();
+
+                return messageElement;
+            }
+
+            createMessageElement(messageObj) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `max-message ${messageObj.sender}`;
+                messageDiv.id = messageObj.id;
+
+                const contentDiv = document.createElement('div');
+                contentDiv.textContent = messageObj.content;
+
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'max-message-time';
+                timeDiv.textContent = this.formatTimestamp(messageObj.timestamp);
+
+                messageDiv.appendChild(contentDiv);
+                messageDiv.appendChild(timeDiv);
+
+                return messageDiv;
+            }
+
+            addQuickActions(suggestions) {
+                const quickActionsDiv = document.createElement('div');
+                quickActionsDiv.className = 'max-quick-actions';
+                quickActionsDiv.style.cssText = `
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.5rem;
+                    margin: 0.5rem 0;
+                    align-self: flex-start;
+                `;
+
+                suggestions.forEach(suggestion => {
+                    const button = document.createElement('button');
+                    button.textContent = suggestion;
+                    button.style.cssText = `
+                        background: #f0f0f0;
+                        border: 1px solid #ddd;
+                        border-radius: 15px;
+                        padding: 0.5rem 0.75rem;
+                        font-size: 0.8rem;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                    `;
+
+                    button.addEventListener('click', () => {
+                        this.messageInput.value = suggestion;
+                        this.sendMessage();
+                        quickActionsDiv.remove();
+                    });
+
+                    button.addEventListener('mouseenter', () => {
+                        button.style.background = '#e0e0e0';
+                        button.style.borderColor = '#1976d2';
+                    });
+
+                    button.addEventListener('mouseleave', () => {
+                        button.style.background = '#f0f0f0';
+                        button.style.borderColor = '#ddd';
+                    });
+
+                    quickActionsDiv.appendChild(button);
+                });
+
+                this.messagesContainer.appendChild(quickActionsDiv);
+                this.scrollToBottom();
+            }
+
+            processUserMessage(message) {
+                // Show typing indicator
+                this.showTypingIndicator();
+                
+                // Enhanced response generation with context awareness
+                const response = this.generateIntelligentResponse(message);
+                
+                // Remove typing indicator and add response
+                setTimeout(() => {
+                    this.hideTypingIndicator();
+                    this.addMessage('bot', response.text);
+                    
+                    // Add follow-up suggestions if available
+                    if (response.suggestions && response.suggestions.length > 0) {
+                        setTimeout(() => {
+                            this.addQuickActions(response.suggestions);
+                        }, 800);
+                    }
+                }, Math.random() * 1000 + 500); // Variable response time for natural feel
+            }
+
+            generateIntelligentResponse(message) {
+                const processedMessage = this.preprocessMessage(message);
+                const contextualMatches = this.findContextualMatches(processedMessage);
+                const bestResponse = this.selectBestResponse(contextualMatches, processedMessage);
+                
+                // Track conversation patterns for learning
+                this.trackConversationPattern(message, bestResponse);
+                
+                return bestResponse;
+            }
+
+            preprocessMessage(message) {
+                // Enhanced message preprocessing
+                const cleaned = message.toLowerCase()
+                    .replace(/[^\w\s]/g, ' ') // Remove punctuation
+                    .replace(/\s+/g, ' ') // Normalize whitespace
+                    .trim();
+                
+                const words = cleaned.split(' ').filter(word => word.length > 2);
+                const stems = words.map(word => this.stemWord(word));
+                
+                return {
+                    original: message,
+                    cleaned: cleaned,
+                    words: words,
+                    stems: stems,
+                    intent: this.detectIntent(cleaned),
+                    sentiment: this.detectSentiment(cleaned)
+                };
+            }
+
+            findContextualMatches(processedMessage) {
+                const matches = [];
+                
+                // Search through knowledge base with multiple matching strategies
+                for (const [category, data] of Object.entries(this.knowledgeBase)) {
+                    if (category === 'fallback') continue;
+                    
+                    const patterns = data.patterns || [];
+                    let categoryScore = 0;
+                    let matchedPatterns = [];
+                    
+                    for (const pattern of patterns) {
+                        const scores = this.calculateMultipleMatchScores(processedMessage, pattern);
+                        const maxScore = Math.max(...Object.values(scores));
+                        
+                        if (maxScore > 0.2) {
+                            categoryScore = Math.max(categoryScore, maxScore);
+                            matchedPatterns.push({ pattern, scores, maxScore });
+                        }
+                    }
+                    
+                    if (categoryScore > 0) {
+                        matches.push({
+                            category: category,
+                            data: data,
+                            score: categoryScore,
+                            matchedPatterns: matchedPatterns,
+                            contextBonus: this.calculateContextBonus(category, processedMessage)
+                        });
+                    }
+                }
+                
+                // Sort by combined score (match score + context bonus)
+                return matches.sort((a, b) => 
+                    (b.score + b.contextBonus) - (a.score + a.contextBonus)
+                );
+            }
+
+            selectBestResponse(matches, processedMessage) {
+                if (matches.length === 0) {
+                    return this.generateFallbackResponse(processedMessage);
+                }
+                
+                const bestMatch = matches[0];
+                const responses = bestMatch.data.responses || [];
+                
+                if (responses.length === 0) {
+                    return this.generateFallbackResponse(processedMessage);
+                }
+                
+                // Intelligent response selection based on context and variety
+                const selectedResponse = this.selectResponseWithVariety(responses, bestMatch.category);
+                
+                return {
+                    text: selectedResponse,
+                    suggestions: bestMatch.data.followUpSuggestions || [],
+                    confidence: bestMatch.score + bestMatch.contextBonus,
+                    category: bestMatch.category
+                };
+            }
+
+            calculateMultipleMatchScores(processedMessage, pattern) {
+                const patternLower = pattern.toLowerCase();
+                const scores = {};
+                
+                // 1. Exact phrase matching
+                scores.exact = processedMessage.cleaned.includes(patternLower) ? 1.0 : 0;
+                
+                // 2. Word overlap scoring
+                const patternWords = patternLower.split(' ').filter(w => w.length > 2);
+                const commonWords = processedMessage.words.filter(word => 
+                    patternWords.some(pw => pw.includes(word) || word.includes(pw))
+                );
+                scores.wordOverlap = commonWords.length / Math.max(patternWords.length, processedMessage.words.length);
+                
+                // 3. Semantic similarity (basic)
+                scores.semantic = this.calculateSemanticSimilarity(processedMessage.words, patternWords);
+                
+                // 4. Intent matching
+                scores.intent = this.matchIntent(processedMessage.intent, patternLower);
+                
+                // 5. Fuzzy matching for typos
+                scores.fuzzy = this.calculateFuzzyMatch(processedMessage.cleaned, patternLower);
+                
+                return scores;
+            }
+
+            calculateSemanticSimilarity(words1, words2) {
+                // Simple semantic similarity based on word relationships
+                const synonyms = {
+                    'help': ['assist', 'support', 'aid', 'guide'],
+                    'university': ['college', 'school', 'institution'],
+                    'recommendation': ['letter', 'reference', 'endorsement'],
+                    'student': ['applicant', 'candidate'],
+                    'professor': ['teacher', 'instructor', 'faculty', 'recommender'],
+                    'application': ['apply', 'applying'],
+                    'work': ['function', 'operate', 'job'],
+                    'start': ['begin', 'commence', 'initiate']
+                };
+                
+                let matches = 0;
+                for (const word1 of words1) {
+                    for (const word2 of words2) {
+                        if (word1 === word2) {
+                            matches += 1;
+                        } else {
+                            // Check synonyms
+                            for (const [key, syns] of Object.entries(synonyms)) {
+                                if ((key === word1 && syns.includes(word2)) || 
+                                    (key === word2 && syns.includes(word1))) {
+                                    matches += 0.8;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                return matches / Math.max(words1.length, words2.length);
+            }
+
+            detectIntent(message) {
+                const intents = {
+                    'question': /^(what|how|when|where|why|who|which|can|could|would|will|is|are|do|does)/,
+                    'greeting': /^(hi|hello|hey|good morning|good afternoon|good evening)/,
+                    'help': /(help|assist|support|guide|explain)/,
+                    'navigation': /(where|find|go to|navigate|page|demo|dashboard)/,
+                    'information': /(tell me|show me|explain|about|information)/,
+                    'action': /(start|begin|try|use|sign up|register|create)/
+                };
+                
+                for (const [intent, pattern] of Object.entries(intents)) {
+                    if (pattern.test(message)) {
+                        return intent;
+                    }
+                }
+                
+                return 'general';
+            }
+
+            detectSentiment(message) {
+                const positive = /(good|great|excellent|amazing|love|like|thank|thanks|awesome|wonderful)/;
+                const negative = /(bad|terrible|hate|dislike|problem|issue|error|wrong|difficult)/;
+                
+                if (positive.test(message)) return 'positive';
+                if (negative.test(message)) return 'negative';
+                return 'neutral';
+            }
+
+            matchIntent(messageIntent, pattern) {
+                const intentKeywords = {
+                    'question': ['what', 'how', 'when', 'where', 'why'],
+                    'help': ['help', 'assist', 'support'],
+                    'navigation': ['navigate', 'find', 'go'],
+                    'information': ['about', 'explain', 'tell'],
+                    'action': ['start', 'begin', 'try']
+                };
+                
+                const keywords = intentKeywords[messageIntent] || [];
+                return keywords.some(keyword => pattern.includes(keyword)) ? 0.5 : 0;
+            }
+
+            calculateContextBonus(category, processedMessage) {
+                let bonus = 0;
+                
+                // Page context bonus
+                if (this.currentPage === 'demo.html' && category === 'getting_started') bonus += 0.2;
+                if (this.currentPage === 'dashboard.html' && category === 'navigation_help') bonus += 0.2;
+                
+                // Conversation history context
+                const recentMessages = this.conversationHistory.slice(-3);
+                const recentTopics = recentMessages.map(msg => this.detectTopicFromMessage(msg.content));
+                
+                if (recentTopics.includes('student') && category === 'student_benefits') bonus += 0.15;
+                if (recentTopics.includes('professor') && category === 'recommender_workflow') bonus += 0.15;
+                
+                return bonus;
+            }
+
+            selectResponseWithVariety(responses, category) {
+                // Track recently used responses to avoid repetition
+                const recentKey = `recent_${category}`;
+                let recentResponses = JSON.parse(localStorage.getItem(recentKey) || '[]');
+                
+                // Filter out recently used responses if we have alternatives
+                let availableResponses = responses;
+                if (responses.length > 1) {
+                    const unused = responses.filter(r => !recentResponses.includes(r));
+                    if (unused.length > 0) {
+                        availableResponses = unused;
+                    }
+                }
+                
+                // Select response with weighted randomization
+                const selectedResponse = availableResponses[Math.floor(Math.random() * availableResponses.length)];
+                
+                // Update recent responses tracking
+                recentResponses.unshift(selectedResponse);
+                recentResponses = recentResponses.slice(0, Math.min(3, responses.length - 1));
+                localStorage.setItem(recentKey, JSON.stringify(recentResponses));
+                
+                return selectedResponse;
+            }
+
+            generateFallbackResponse(processedMessage) {
+                const fallbackData = this.knowledgeBase.fallback || {};
+                const fallbackResponses = fallbackData.responses || [
+                    "I'm still learning about that topic! 🌟 Can you try asking in a different way?",
+                    "That's a great question! While I'm expanding my knowledge, you can check out our demo or contact our team! ⭐",
+                    "I want to give you the best answer! Could you rephrase that or ask about StellarRec features? 🚀"
+                ];
+                
+                // Contextual fallback enhancement
+                let enhancedFallback = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+                
+                // Add helpful suggestions based on message intent
+                const suggestions = this.generateContextualSuggestions(processedMessage);
+                
+                return {
+                    text: enhancedFallback,
+                    suggestions: suggestions,
+                    confidence: 0.1,
+                    category: 'fallback'
+                };
+            }
+
+            generateContextualSuggestions(processedMessage) {
+                const baseSuggestions = ['Try the demo', 'Contact support', 'Learn about features'];
+                
+                // Add contextual suggestions based on detected intent
+                if (processedMessage.intent === 'question') {
+                    baseSuggestions.unshift('How does StellarRec work?');
+                }
+                if (processedMessage.intent === 'help') {
+                    baseSuggestions.unshift('Getting started guide');
+                }
+                if (processedMessage.words.includes('student')) {
+                    baseSuggestions.unshift('Student benefits');
+                }
+                if (processedMessage.words.includes('professor') || processedMessage.words.includes('recommender')) {
+                    baseSuggestions.unshift('For professors');
+                }
+                
+                return baseSuggestions.slice(0, 3);
+            }
+
+            stemWord(word) {
+                // Simple stemming for better matching
+                const suffixes = ['ing', 'ed', 'er', 'est', 'ly', 'ion', 'tion', 'ness', 'ment'];
+                let stem = word;
+                
+                for (const suffix of suffixes) {
+                    if (word.endsWith(suffix) && word.length > suffix.length + 2) {
+                        stem = word.slice(0, -suffix.length);
+                        break;
+                    }
+                }
+                
+                return stem;
+            }
+
+            detectTopicFromMessage(message) {
+                const topics = {
+                    'student': /(student|applicant|apply|application)/i,
+                    'professor': /(professor|teacher|recommender|faculty)/i,
+                    'university': /(university|college|school)/i,
+                    'recommendation': /(recommendation|letter|reference)/i,
+                    'help': /(help|support|assist)/i
+                };
+                
+                for (const [topic, pattern] of Object.entries(topics)) {
+                    if (pattern.test(message)) {
+                        return topic;
+                    }
+                }
+                
+                return 'general';
+            }
+
+            trackConversationPattern(message, response) {
+                // Simple analytics for improving responses
+                const pattern = {
+                    timestamp: new Date().toISOString(),
+                    userMessage: message,
+                    responseCategory: response.category,
+                    confidence: response.confidence
+                };
+                
+                try {
+                    let patterns = JSON.parse(localStorage.getItem('max_conversation_patterns') || '[]');
+                    patterns.push(pattern);
+                    
+                    // Keep only recent patterns (last 50)
+                    patterns = patterns.slice(-50);
+                    localStorage.setItem('max_conversation_patterns', JSON.stringify(patterns));
+                } catch (error) {
+                    // Ignore storage errors
+                }
+            }
+
+            calculateFuzzyMatch(str1, str2) {
+                // Simple Levenshtein distance for fuzzy matching
+                const matrix = [];
+                const len1 = str1.length;
+                const len2 = str2.length;
+                
+                if (len1 === 0) return len2 === 0 ? 1 : 0;
+                if (len2 === 0) return 0;
+                
+                // Initialize matrix
+                for (let i = 0; i <= len1; i++) {
+                    matrix[i] = [i];
+                }
+                for (let j = 0; j <= len2; j++) {
+                    matrix[0][j] = j;
+                }
+                
+                // Fill matrix
+                for (let i = 1; i <= len1; i++) {
+                    for (let j = 1; j <= len2; j++) {
+                        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j - 1] + cost
+                        );
+                    }
+                }
+                
+                const distance = matrix[len1][len2];
+                const maxLen = Math.max(len1, len2);
+                return maxLen > 0 ? 1 - (distance / maxLen) : 1;
+            }
+
+            showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.id = 'max-typing-indicator';
+                typingDiv.className = 'max-message bot';
+                typingDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div class="typing-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <span style="font-style: italic; opacity: 0.7;">Max is typing...</span>
+                    </div>
+                `;
+                
+                // Add typing animation CSS if not already added
+                if (!document.getElementById('typing-animation-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'typing-animation-style';
+                    style.textContent = `
+                        .typing-dots span {
+                            display: inline-block;
+                            width: 6px;
+                            height: 6px;
+                            border-radius: 50%;
+                            background: #1976d2;
+                            margin: 0 1px;
+                            animation: typingDot 1.4s infinite ease-in-out;
+                        }
+                        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+                        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+                        @keyframes typingDot {
+                            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+                            40% { transform: scale(1); opacity: 1; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                this.messagesContainer.appendChild(typingDiv);
+                this.scrollToBottom();
+            }
+
+            hideTypingIndicator() {
+                const typingIndicator = document.getElementById('max-typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+
+            formatTimestamp(timestamp) {
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins}m ago`;
+                if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
+
+                return date.toLocaleDateString();
+            }
+
+            scrollToBottom() {
+                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            }
+
+            saveConversationHistory() {
+                const conversationData = {
+                    sessionId: this.sessionId,
+                    currentPage: this.currentPage,
+                    lastUpdated: new Date().toISOString(),
+                    messages: this.conversationHistory
+                };
+
+                try {
+                    localStorage.setItem('max_conversation', JSON.stringify(conversationData));
+                } catch (error) {
+                    console.warn('Failed to save conversation history:', error);
+                    // If storage is full, keep only recent messages
+                    if (this.conversationHistory.length > 20) {
+                        this.conversationHistory = this.conversationHistory.slice(-10);
+                        conversationData.messages = this.conversationHistory;
+                        try {
+                            localStorage.setItem('max_conversation', JSON.stringify(conversationData));
+                        } catch (e) {
+                            console.error('Failed to save even truncated conversation:', e);
+                        }
+                    }
+                }
+            }
+
+            loadConversationHistory() {
+                try {
+                    const savedData = localStorage.getItem('max_conversation');
+                    if (savedData) {
+                        const conversationData = JSON.parse(savedData);
+
+                        // Check if conversation is recent (within 24 hours)
+                        const lastUpdated = new Date(conversationData.lastUpdated);
+                        const now = new Date();
+                        const hoursDiff = (now - lastUpdated) / (1000 * 60 * 60);
+
+                        if (hoursDiff < 24) {
+                            this.conversationHistory = conversationData.messages || [];
+                            this.sessionId = conversationData.sessionId || this.sessionId;
+
+                            // Restore messages to UI
+                            this.conversationHistory.forEach(message => {
+                                const messageElement = this.createMessageElement(message);
+                                this.messagesContainer.appendChild(messageElement);
+                            });
+
+                            this.scrollToBottom();
+                        } else {
+                            // Clear old conversation
+                            localStorage.removeItem('max_conversation');
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Failed to load conversation history:', error);
+                    localStorage.removeItem('max_conversation');
+                }
+            }
+        }
+
+        // Initialize Max Chatbot when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const maxChatbot = new MaxChatbot();
+            maxChatbot.init();
         });
+    </script>ec Guide</span>
+    </div>
+    </div>
+    <div class="max-header-controls">
+        <button class="max-minimize" id="max-minimize">
+            <span class="material-icons">minimize</span>
+        </button>
+        <button class="max-close" id="max-close">
+            <span class="material-icons">close</span>
+        </button>
+    </div>
+    </div>
+
+    <div class="max-chat-messages" id="max-chat-messages">
+        <!-- Messages will be dynamically added here -->
+    </div>
+
+    <div class="max-chat-input">
+        <input type="text" id="max-message-input" placeholder="Ask Max anything about StellarRec..." />
+        <button id="max-send-button" class="max-send-btn">
+            <span class="material-icons">send</span>
+        </button>
+    </div>
+    </div>
+
+    <script></script>
+    // Simple smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+    target.scrollIntoView({
+    behavior: 'smooth'
+    });
+    }
+    });
+    });
+
+    // Add loading animation
+    window.addEventListener('load', function () {
+    document.body.style.opacity = '0';
+    document.body.style.transition = 'opacity 0.5s ease-in-out';
+    setTimeout(() => {
+    document.body.style.opacity = '1';
+    }, 100);
+    });
     </script>
 </body>
 
