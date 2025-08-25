@@ -851,10 +851,15 @@
         // Start demo
         function startDemo() {
             if (selectedUniversity && selectedProgram && selectedUserType) {
-                alert(`🎉 Welcome to StellarRec!\n\nYour Profile:\n• University: ${selectedUniversity.name}\n• Program: ${selectedProgram.toUpperCase()}\n• User Type: ${selectedUserType.charAt(0).toUpperCase() + selectedUserType.slice(1)}\n\nYour AI-powered application journey is about to begin!`);
+                // Store user selections in localStorage for dashboard
+                localStorage.setItem('stellarrec_demo_data', JSON.stringify({
+                    university: selectedUniversity,
+                    program: selectedProgram,
+                    userType: selectedUserType
+                }));
                 
-                // In a real app, this would redirect to the main dashboard
-                // window.location.href = 'dashboard.html';
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
             } else {
                 alert('Please complete all steps before starting your journey!');
             }
