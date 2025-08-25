@@ -1,4 +1,4 @@
-StellarRec™
+StellarRec
 To run the devserver:
 
 npm install
