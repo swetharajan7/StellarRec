@@ -1,46 +1,656 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta property="og:title" content="StellarRec™" />
-    <meta property="og:description" content="One upload, unlimited reach." />
-    <meta
-      property="og:image"
-      content="https://mocha-cdn.com/og.png"
-      type="image/png"
-    />
-    <meta
-      property="og:url"
-      content="https://getmocha.com"
-    />
-    <meta property="og:type" content="website" />
-    <meta property="og:author" content="StellarRec" />
-    <meta property="og:site_name" content="StellarRec" />
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:site" content="@stellarrec" />
-    <meta property="twitter:title" content="StellarRec™" />
-    <meta property="twitter:description" content="One upload, unlimited reach." />
-    <meta
-      property="twitter:image"
-      content="https://mocha-cdn.com/og.png"
-      type="image/png"
-    />
-    <link
-      rel="shortcut icon"
-      href="https://mocha-cdn.com/favicon.ico"
-      type="image/x-icon"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="https://mocha-cdn.com/apple-touch-icon.png"
-      type="image/png"
-    />
-    <title>StellarRec™</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/react-app/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StellarRec - AI-Powered University Applications</title>
+    <meta name="description" content="Transform your university application process with AI-powered recommendations, content optimization, and intelligent workflow management.">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://stellarrec.in/">
+    <meta property="og:title" content="StellarRec - AI-Powered University Applications">
+    <meta property="og:description" content="Transform your university application process with AI-powered recommendations, content optimization, and intelligent workflow management.">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://stellarrec.in/">
+    <meta property="twitter:title" content="StellarRec - AI-Powered University Applications">
+    <meta property="twitter:description" content="Transform your university application process with AI-powered recommendations, content optimization, and intelligent workflow management.">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+        
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1976d2;
+            text-decoration: none;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #1976d2;
+            color: #1976d2;
+        }
+        
+        .btn-outline:hover {
+            background: #1976d2;
+            color: white;
+        }
+        
+        .btn-primary {
+            background: #1976d2;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1565c0;
+            transform: translateY(-2px);
+        }
+        
+        .btn-cta {
+            background: #ffeb3b;
+            color: #1976d2;
+            font-size: 1.1rem;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-cta:hover {
+            background: #fff59d;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 235, 59, 0.3);
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #1976d2 0%, #42a5f5 50%, #7c4dff 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            color: white;
+            padding-top: 80px;
+            position: relative;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        
+        .hero-text h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero-text .highlight {
+            color: #ffeb3b;
+            display: block;
+        }
+        
+        .hero-text p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .hero-stats {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .stars {
+            display: flex;
+            color: #ffeb3b;
+        }
+        
+        .hero-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .dashboard-preview {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 2rem;
+            color: #333;
+            max-width: 400px;
+            transform: perspective(1000px) rotateY(-5deg) rotateX(5deg);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: #1976d2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 1rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .progress-fill {
+            width: 92%;
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            border-radius: 4px;
+        }
+        
+        .university-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .university-card {
+            background: #f5f5f5;
+            padding: 0.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        /* Stats Section */
+        .stats {
+            padding: 4rem 0;
+            background: #f8f9fa;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            text-align: center;
+        }
+        
+        .stat-item {
+            padding: 1rem;
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            background: #1976d2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 5rem 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .section-header p {
+            font-size: 1.25rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        /* CTA Section */
+        .cta {
+            background: linear-gradient(135deg, #1976d2 0%, #7c4dff 100%);
+            color: white;
+            padding: 5rem 0;
+            text-align: center;
+        }
+        
+        .cta h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .cta p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .features-list {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-buttons {
+                display: none;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .features-list {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <a href="#" class="logo">
+                    <span class="material-icons">school</span>
+                    StellarRec
+                </a>
+                <div class="nav-buttons">
+                    <a href="#" class="btn btn-outline">Sign In</a>
+                    <a href="#" class="btn btn-primary">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>
+                        Transform Your
+                        <span class="highlight">University Journey</span>
+                        with AI
+                    </h1>
+                    <p>Get personalized recommendations, optimize your applications, and maximize your admission success with our AI-powered platform.</p>
+                    
+                    <div class="hero-buttons">
+                        <a href="#" class="btn btn-cta">Start Free Today</a>
+                        <a href="#" class="btn btn-outline">Watch Demo</a>
+                    </div>
+                    
+                    <div class="hero-stats">
+                        <div class="stars">
+                            <span class="material-icons">star</span>
+                            <span class="material-icons">star</span>
+                            <span class="material-icons">star</span>
+                            <span class="material-icons">star</span>
+                            <span class="material-icons">star</span>
+                        </div>
+                        <span>Trusted by 10,000+ students worldwide</span>
+                    </div>
+                </div>
+                
+                <div class="hero-visual">
+                    <div class="dashboard-preview">
+                        <div class="dashboard-header">
+                            <div class="avatar">
+                                <span class="material-icons">psychology</span>
+                            </div>
+                            <div>
+                                <h3>AI Dashboard</h3>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <p style="margin-bottom: 0.5rem; color: #666;">University Match Score</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill"></div>
+                            </div>
+                            <p style="color: #4caf50; font-weight: 600;">92%</p>
+                        </div>
+                        
+                        <div class="university-grid">
+                            <div class="university-card">
+                                <strong>Stanford</strong>
+                                <div style="color: #1976d2; font-size: 0.9rem;">90% Match</div>
+                            </div>
+                            <div class="university-card">
+                                <strong>MIT</strong>
+                                <div style="color: #1976d2; font-size: 0.9rem;">85% Match</div>
+                            </div>
+                            <div class="university-card">
+                                <strong>Harvard</strong>
+                                <div style="color: #1976d2; font-size: 0.9rem;">80% Match</div>
+                            </div>
+                            <div class="university-card">
+                                <strong>Oxford</strong>
+                                <div style="color: #1976d2; font-size: 0.9rem;">75% Match</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <span class="material-icons">school</span>
+                    </div>
+                    <div class="stat-number">900+</div>
+                    <div>Universities Connected</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <span class="material-icons">trending_up</span>
+                    </div>
+                    <div class="stat-number">95%</div>
+                    <div>Success Rate Improvement</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <span class="material-icons">speed</span>
+                    </div>
+                    <div class="stat-number">60%</div>
+                    <div>Time Saved</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <span class="material-icons">psychology</span>
+                    </div>
+                    <div class="stat-number">24/7</div>
+                    <div>AI Assistance</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Powerful AI Features</h2>
+                <p>Everything you need to succeed in your university applications, powered by cutting-edge artificial intelligence.</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: rgba(25, 118, 210, 0.1); color: #1976d2;">
+                        <span class="material-icons">psychology</span>
+                    </div>
+                    <h3>AI University Matching</h3>
+                    <p>Get personalized university recommendations based on your profile, preferences, and success probability.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: rgba(124, 77, 255, 0.1); color: #7c4dff;">
+                        <span class="material-icons">auto_awesome</span>
+                    </div>
+                    <h3>Content Optimization</h3>
+                    <p>AI-powered essay and application optimization with real-time feedback and improvement suggestions.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: rgba(0, 172, 193, 0.1); color: #00acc1;">
+                        <span class="material-icons">timeline</span>
+                    </div>
+                    <h3>Smart Timeline Management</h3>
+                    <p>Intelligent workflow automation with deadline tracking and milestone management.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: rgba(255, 112, 67, 0.1); color: #ff7043;">
+                        <span class="material-icons">analytics</span>
+                    </div>
+                    <h3>Predictive Analytics</h3>
+                    <p>Advanced analytics to predict admission success and optimize your application strategy.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <span class="material-icons" style="font-size: 60px; margin-bottom: 1rem; opacity: 0.9;">rocket_launch</span>
+            <h2>Ready to Transform Your Future?</h2>
+            <p>Join thousands of students who are already using StellarRec to achieve their university dreams. Start your journey today with our free plan.</p>
+            
+            <div class="cta-buttons">
+                <a href="#" class="btn btn-cta">Get Started Free</a>
+                <a href="#" class="btn btn-outline" style="color: white; border-color: rgba(255,255,255,0.5);">Schedule Demo</a>
+            </div>
+            
+            <div class="features-list">
+                <div class="feature-item">
+                    <span class="material-icons">check_circle</span>
+                    <span>Free Forever Plan</span>
+                </div>
+                <div class="feature-item">
+                    <span class="material-icons">check_circle</span>
+                    <span>No Credit Card Required</span>
+                </div>
+                <div class="feature-item">
+                    <span class="material-icons">check_circle</span>
+                    <span>Setup in 2 Minutes</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Simple smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Add loading animation
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease-in-out';
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+    </script>
+</body>
 </html>
