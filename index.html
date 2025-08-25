@@ -822,6 +822,46 @@
         </div>
     </footer>
 
+    <!-- Max Chatbot Widget -->
+    <div id="max-chatbot-widget" class="max-chat-widget">
+        <div class="max-chat-button" id="max-chat-button">
+            <span class="material-icons">star</span>
+            <span class="max-label">Max</span>
+        </div>
+    </div>
+
+    <!-- Max Chatbot Interface -->
+    <div id="max-chatbot-interface" class="max-chat-interface">
+        <div class="max-chat-header">
+            <div class="max-header-info">
+                <span class="material-icons">star</span>
+                <div class="max-header-text">
+                    <h4>Max</h4>
+                    <span>Your StellarRec Guide</span>
+                </div>
+            </div>
+            <div class="max-header-controls">
+                <button class="max-minimize" id="max-minimize">
+                    <span class="material-icons">minimize</span>
+                </button>
+                <button class="max-close" id="max-close">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="max-chat-messages" id="max-chat-messages">
+            <!-- Messages will be dynamically added here -->
+        </div>
+        
+        <div class="max-chat-input">
+            <input type="text" id="max-message-input" placeholder="Ask Max anything about StellarRec..." />
+            <button id="max-send-button" class="max-send-btn">
+                <span class="material-icons">send</span>
+            </button>
+        </div>
+    </div>
+
     <script>
         // Simple smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
