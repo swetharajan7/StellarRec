@@ -118,6 +118,36 @@
             padding: 1rem 2rem;
         }
 
+        .dashboard-link {
+            position: relative;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: #1976d2;
+            transition: color 0.3s ease;
+            overflow: hidden;
+        }
+
+        .dashboard-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #ff1493; /* Hot pink */
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-link:hover {
+            color: #b22234; /* Old glory red */
+        }
+
+        .dashboard-link:hover::after {
+            transform: translateX(0);
+        }
+
         .btn-cta:hover {
             background: #fff59d;
             transform: translateY(-2px);
@@ -572,9 +602,7 @@
                     stellarrec
                 </a>
                 <div class="nav-buttons">
-                    <a href="dashboard.html" class="btn btn-outline">Dashboard</a>
-                    <a href="#" class="btn btn-outline">Sign In</a>
-                    <a href="#" class="btn btn-primary">Get Started</a>
+                    <a href="dashboard.html" class="dashboard-link">Dashboard</a>
                 </div>
             </div>
         </div>
