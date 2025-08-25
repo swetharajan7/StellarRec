@@ -164,7 +164,6 @@
 
         /* Hero Section */
         .hero {
-            background: linear-gradient(135deg, #0a0a23 0%, #1a1a3a 30%, #2d1b69 60%, #7c4dff 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -172,6 +171,38 @@
             padding-top: 80px;
             position: relative;
             overflow: hidden;
+            /* Fallback background image */
+            background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .hero-video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+            filter: brightness(0.7) contrast(1.1);
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .hero-video-background.loaded {
+            opacity: 1;
+        }
+
+        .hero-video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(10, 10, 35, 0.75) 0%, rgba(26, 26, 58, 0.7) 30%, rgba(45, 27, 105, 0.65) 60%, rgba(124, 77, 255, 0.6) 100%);
+            z-index: -1;
         }
 
         .hero::before {
@@ -1017,6 +1048,16 @@
 
         /* Responsive */
         @media (max-width: 768px) {
+            .hero {
+                /* On mobile, use static background to save bandwidth */
+                background-attachment: scroll;
+            }
+
+            .hero-video-background {
+                /* Hide video on mobile to improve performance */
+                display: none;
+            }
+
             .hero-content {
                 flex-direction: column;
                 text-align: center;
@@ -1171,19 +1212,36 @@
 
     <!-- Hero Section -->
     <section class="hero">
-        <div class="floating-elements">
-            <div class="floating-star">
-                <span class="material-icons">star</span>
-            </div>
-            <div class="floating-star">
-                <span class="material-icons">star</span>
-            </div>
-            <div class="floating-star">
-                <span class="material-icons">star</span>
-            </div>
-            <div class="floating-star">
-                <span class="material-icons">star</span>
-            </div>
+        <!-- Background Video -->
+        <video class="hero-video-background" autoplay muted loop playsinline
+            poster="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80">
+            <source
+                src="https://assets.mixkit.co/videos/preview/mixkit-students-working-together-in-a-library-4623-large.mp4"
+                type="video/mp4">
+            <source
+                src="https://assets.mixkit.co/videos/preview/mixkit-young-people-studying-together-in-a-library-4624-large.mp4"
+                type="video/mp4">
+            <source
+                src="https://assets.mixkit.co/videos/preview/mixkit-students-concentrating-on-their-studies-4625-large.mp4"
+                type="video/mp4">
+            <!-- Fallback for browsers that don't support video -->
+            Your browser does not support the video tag.
+        </video>
+        <div class="hero-video-overlay"></div>
+
+        <div class="floating-elements"></div>
+        <div class="floating-star">
+            <span class="material-icons">star</span>
+        </div>
+        <div class="floating-star">
+            <span class="material-icons">star</span>
+        </div>
+        <div class="floating-star">
+            <span class="material-icons">star</span>
+        </div>
+        <div class="floating-star">
+            <span class="material-icons">star</span>
+        </div>
         </div>
 
         <div class="container">
@@ -1211,7 +1269,7 @@
                 </div>
 
                 <h1 class="hero-title">stellarrec</h1>
-                <p class="hero-subtitle">Transform Recommendations, Unlock Opportunities. With StellarRec, recommenders
+                <p class="hero-subtitle">With StellarRec, recommenders
                     upload once and send to many universities—reducing redundancy, saving time, and helping students
                     reach more schools.</p>
                 <p class="hero-subheading">Make it easier for professors to say yes. One upload, many
@@ -2158,6 +2216,33 @@
         document.addEventListener('DOMContentLoaded', () => {
             const maxChatbot = new MaxChatbot();
             maxChatbot.init();
+        });
+
+        // Hero Video Loading
+        document.addEventListener('DOMContentLoaded', function () {
+            const heroVideo = document.querySelector('.hero-video-background');
+
+            if (heroVideo) {
+                // Add loaded class when video can play
+                heroVideo.addEventListener('canplay', function () {
+                    heroVideo.classList.add('loaded');
+                });
+
+                // Fallback: add loaded class after 2 seconds if video hasn't loaded
+                setTimeout(function () {
+                    if (!heroVideo.classList.contains('loaded')) {
+                        heroVideo.classList.add('loaded');
+                    }
+                }, 2000);
+
+                // Ensure video plays on mobile devices
+                heroVideo.addEventListener('loadeddata', function () {
+                    heroVideo.play().catch(function (error) {
+                        console.log('Video autoplay failed:', error);
+                        // Video will still show as a static image
+                    });
+                });
+            }
         });
     </script>
 </body>
