@@ -422,6 +422,116 @@
             text-align: center;
         }
 
+        /* Trusted Universities Banner */
+        .trusted-banner {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 50%, #f8f9fa 100%);
+            border-top: 1px solid rgba(25, 118, 210, 0.1);
+            border-bottom: 1px solid rgba(25, 118, 210, 0.1);
+        }
+
+        .trusted-content {
+            text-align: center;
+        }
+
+        .trusted-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1976d2;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .trusted-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #ffeb3b, #ffc107);
+            border-radius: 2px;
+        }
+
+        .university-logos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .university-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.5rem 1rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(25, 118, 210, 0.1);
+        }
+
+        .university-logo:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(25, 118, 210, 0.15);
+            border-color: rgba(25, 118, 210, 0.3);
+        }
+
+        .university-logo img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            filter: grayscale(0.3);
+            transition: filter 0.3s ease;
+        }
+
+        .university-logo:hover img {
+            filter: grayscale(0);
+        }
+
+        .university-logo span {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+        }
+
+        .trusted-stats {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            flex-wrap: wrap;
+        }
+
+        .trusted-stats .stat-item {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .trusted-stats .stat-number {
+            display: block;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #1976d2, #7c4dff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .trusted-stats .stat-label {
+            font-size: 1rem;
+            color: #666;
+            font-weight: 500;
+        }
+
         /* Stats Section */
         .stats {
             padding: 4rem 0;
@@ -899,6 +1009,45 @@
                 font-size: 1.2rem;
             }
 
+            /* Trusted Banner Mobile */
+            .trusted-banner {
+                padding: 3rem 0;
+            }
+
+            .trusted-title {
+                font-size: 1.8rem;
+                margin-bottom: 2rem;
+            }
+
+            .university-logos {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+                margin-bottom: 3rem;
+            }
+
+            .university-logo {
+                padding: 1rem 0.5rem;
+            }
+
+            .university-logo img {
+                width: 45px;
+                height: 45px;
+            }
+
+            .university-logo span {
+                font-size: 0.8rem;
+            }
+
+            .trusted-stats {
+                gap: 2rem;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .trusted-stats .stat-number {
+                font-size: 2rem;
+            }
+
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -1042,6 +1191,63 @@
                         10 reviews</span>
                     <img src="https://cdn.trustpilot.net/brand-assets/4.1.0/logo-white.svg" alt="Trustpilot"
                         style="height: 20px; margin-left: 10px; opacity: 0.8;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trusted Universities Banner -->
+    <section class="trusted-banner">
+        <div class="container">
+            <div class="trusted-content">
+                <h2 class="trusted-title">Trusted by students applying to top universities</h2>
+                <div class="university-logos">
+                    <div class="university-logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Harvard_University_logo.svg/200px-Harvard_University_logo.svg.png" alt="Harvard University" />
+                        <span>Harvard</span>
+                    </div>
+                    <div class="university-logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/MIT_logo.svg/200px-MIT_logo.svg.png" alt="MIT" />
+                        <span>MIT</span>
+                    </div>
+                    <div class="university-logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Stanford_University_seal_2003.svg/200px-Stanford_University_seal_2003.svg.png" alt="Stanford University" />
+                        <span>Stanford</span>
+                    </div>
+                    <div class="university-logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Yale_University_logo.svg/200px-Yale_University_logo.svg.png" alt="Yale University" />
+                        <span>Yale</span>
+                    </div>
+                    <div class="university-logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Princeton_shield.svg/200px-Princeton_shield.svg.png" alt="Princeton University" />
+                        <span>Princeton</span>
+                    </div>
+                    <div class="university-logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Columbia_University_logo.svg/200px-Columbia_University_logo.svg.png" alt="Columbia University" />
+                        <span>Columbia</span>
+                    </div>
+                    <div class="university-logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/University_of_Pennsylvania_logo.svg/200px-University_of_Pennsylvania_logo.svg.png" alt="University of Pennsylvania" />
+                        <span>UPenn</span>
+                    </div>
+                    <div class="university-logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Caltech_logo.svg/200px-Caltech_logo.svg.png" alt="Caltech" />
+                        <span>Caltech</span>
+                    </div>
+                </div>
+                <div class="trusted-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">10,000+</span>
+                        <span class="stat-label">Students Helped</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">500+</span>
+                        <span class="stat-label">Universities</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">95%</span>
+                        <span class="stat-label">Success Rate</span>
+                    </div>
                 </div>
             </div>
         </div>
