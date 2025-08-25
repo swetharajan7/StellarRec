@@ -422,6 +422,39 @@
             text-align: center;
         }
 
+        /* Bold Tagline Section */
+        .tagline-section {
+            padding: 4rem 0;
+            background: #ffffff;
+            text-align: center;
+        }
+
+        .bold-tagline {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #1976d2;
+            margin: 0;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            background: linear-gradient(45deg, #1976d2, #7c4dff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .bold-tagline::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #ffeb3b, #ffc107);
+            border-radius: 2px;
+        }
+
         /* Trusted Universities Banner */
         .trusted-banner {
             padding: 5rem 0;
@@ -1002,6 +1035,22 @@
                 font-size: 1.2rem;
             }
 
+            /* Tagline Mobile */
+            .tagline-section {
+                padding: 3rem 0;
+            }
+
+            .bold-tagline {
+                font-size: 2rem;
+                letter-spacing: -0.5px;
+            }
+
+            .bold-tagline::after {
+                width: 80px;
+                height: 3px;
+                bottom: -12px;
+            }
+
             /* Trusted Banner Mobile */
             .trusted-banner {
                 padding: 3rem 0;
@@ -1181,6 +1230,13 @@
                         style="height: 20px; margin-left: 10px; opacity: 0.8;">
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- Bold Tagline -->
+    <section class="tagline-section">
+        <div class="container">
+            <h2 class="bold-tagline">One upload. Unlimited reach.</h2>
         </div>
     </section>
 
