@@ -1338,15 +1338,15 @@
             processUserMessage(message) {
                 // Show typing indicator
                 this.showTypingIndicator();
-                
+
                 // Enhanced response generation with context awareness
                 const response = this.generateIntelligentResponse(message);
-                
+
                 // Remove typing indicator and add response
                 setTimeout(() => {
                     this.hideTypingIndicator();
                     this.addMessage('bot', response.text);
-                    
+
                     // Add follow-up suggestions if available
                     if (response.suggestions && response.suggestions.length > 0) {
                         setTimeout(() => {
@@ -1360,10 +1360,10 @@
                 const processedMessage = this.preprocessMessage(message);
                 const contextualMatches = this.findContextualMatches(processedMessage);
                 const bestResponse = this.selectBestResponse(contextualMatches, processedMessage);
-                
+
                 // Track conversation patterns for learning
                 this.trackConversationPattern(message, bestResponse);
-                
+
                 return bestResponse;
             }
 
@@ -1373,10 +1373,10 @@
                     .replace(/[^\w\s]/g, ' ') // Remove punctuation
                     .replace(/\s+/g, ' ') // Normalize whitespace
                     .trim();
-                
+
                 const words = cleaned.split(' ').filter(word => word.length > 2);
                 const stems = words.map(word => this.stemWord(word));
-                
+
                 return {
                     original: message,
                     cleaned: cleaned,
@@ -1389,25 +1389,25 @@
 
             findContextualMatches(processedMessage) {
                 const matches = [];
-                
+
                 // Search through knowledge base with multiple matching strategies
                 for (const [category, data] of Object.entries(this.knowledgeBase)) {
                     if (category === 'fallback') continue;
-                    
+
                     const patterns = data.patterns || [];
                     let categoryScore = 0;
                     let matchedPatterns = [];
-                    
+
                     for (const pattern of patterns) {
                         const scores = this.calculateMultipleMatchScores(processedMessage, pattern);
                         const maxScore = Math.max(...Object.values(scores));
-                        
+
                         if (maxScore > 0.2) {
                             categoryScore = Math.max(categoryScore, maxScore);
                             matchedPatterns.push({ pattern, scores, maxScore });
                         }
                     }
-                    
+
                     if (categoryScore > 0) {
                         matches.push({
                             category: category,
@@ -1418,9 +1418,9 @@
                         });
                     }
                 }
-                
+
                 // Sort by combined score (match score + context bonus)
-                return matches.sort((a, b) => 
+                return matches.sort((a, b) =>
                     (b.score + b.contextBonus) - (a.score + a.contextBonus)
                 );
             }
@@ -1429,17 +1429,17 @@
                 if (matches.length === 0) {
                     return this.generateFallbackResponse(processedMessage);
                 }
-                
+
                 const bestMatch = matches[0];
                 const responses = bestMatch.data.responses || [];
-                
+
                 if (responses.length === 0) {
                     return this.generateFallbackResponse(processedMessage);
                 }
-                
+
                 // Intelligent response selection based on context and variety
                 const selectedResponse = this.selectResponseWithVariety(responses, bestMatch.category);
-                
+
                 return {
                     text: selectedResponse,
                     suggestions: bestMatch.data.followUpSuggestions || [],
@@ -1451,26 +1451,26 @@
             calculateMultipleMatchScores(processedMessage, pattern) {
                 const patternLower = pattern.toLowerCase();
                 const scores = {};
-                
+
                 // 1. Exact phrase matching
                 scores.exact = processedMessage.cleaned.includes(patternLower) ? 1.0 : 0;
-                
+
                 // 2. Word overlap scoring
                 const patternWords = patternLower.split(' ').filter(w => w.length > 2);
-                const commonWords = processedMessage.words.filter(word => 
+                const commonWords = processedMessage.words.filter(word =>
                     patternWords.some(pw => pw.includes(word) || word.includes(pw))
                 );
                 scores.wordOverlap = commonWords.length / Math.max(patternWords.length, processedMessage.words.length);
-                
+
                 // 3. Semantic similarity (basic)
                 scores.semantic = this.calculateSemanticSimilarity(processedMessage.words, patternWords);
-                
+
                 // 4. Intent matching
                 scores.intent = this.matchIntent(processedMessage.intent, patternLower);
-                
+
                 // 5. Fuzzy matching for typos
                 scores.fuzzy = this.calculateFuzzyMatch(processedMessage.cleaned, patternLower);
-                
+
                 return scores;
             }
 
@@ -1486,7 +1486,7 @@
                     'work': ['function', 'operate', 'job'],
                     'start': ['begin', 'commence', 'initiate']
                 };
-                
+
                 let matches = 0;
                 for (const word1 of words1) {
                     for (const word2 of words2) {
@@ -1495,7 +1495,7 @@
                         } else {
                             // Check synonyms
                             for (const [key, syns] of Object.entries(synonyms)) {
-                                if ((key === word1 && syns.includes(word2)) || 
+                                if ((key === word1 && syns.includes(word2)) ||
                                     (key === word2 && syns.includes(word1))) {
                                     matches += 0.8;
                                 }
@@ -1503,7 +1503,7 @@
                         }
                     }
                 }
-                
+
                 return matches / Math.max(words1.length, words2.length);
             }
 
@@ -1516,20 +1516,20 @@
                     'information': /(tell me|show me|explain|about|information)/,
                     'action': /(start|begin|try|use|sign up|register|create)/
                 };
-                
+
                 for (const [intent, pattern] of Object.entries(intents)) {
                     if (pattern.test(message)) {
                         return intent;
                     }
                 }
-                
+
                 return 'general';
             }
 
             detectSentiment(message) {
                 const positive = /(good|great|excellent|amazing|love|like|thank|thanks|awesome|wonderful)/;
                 const negative = /(bad|terrible|hate|dislike|problem|issue|error|wrong|difficult)/;
-                
+
                 if (positive.test(message)) return 'positive';
                 if (negative.test(message)) return 'negative';
                 return 'neutral';
@@ -1543,25 +1543,25 @@
                     'information': ['about', 'explain', 'tell'],
                     'action': ['start', 'begin', 'try']
                 };
-                
+
                 const keywords = intentKeywords[messageIntent] || [];
                 return keywords.some(keyword => pattern.includes(keyword)) ? 0.5 : 0;
             }
 
             calculateContextBonus(category, processedMessage) {
                 let bonus = 0;
-                
+
                 // Page context bonus
                 if (this.currentPage === 'demo.html' && category === 'getting_started') bonus += 0.2;
                 if (this.currentPage === 'dashboard.html' && category === 'navigation_help') bonus += 0.2;
-                
+
                 // Conversation history context
                 const recentMessages = this.conversationHistory.slice(-3);
                 const recentTopics = recentMessages.map(msg => this.detectTopicFromMessage(msg.content));
-                
+
                 if (recentTopics.includes('student') && category === 'student_benefits') bonus += 0.15;
                 if (recentTopics.includes('professor') && category === 'recommender_workflow') bonus += 0.15;
-                
+
                 return bonus;
             }
 
@@ -1569,7 +1569,7 @@
                 // Track recently used responses to avoid repetition
                 const recentKey = `recent_${category}`;
                 let recentResponses = JSON.parse(localStorage.getItem(recentKey) || '[]');
-                
+
                 // Filter out recently used responses if we have alternatives
                 let availableResponses = responses;
                 if (responses.length > 1) {
@@ -1578,15 +1578,15 @@
                         availableResponses = unused;
                     }
                 }
-                
+
                 // Select response with weighted randomization
                 const selectedResponse = availableResponses[Math.floor(Math.random() * availableResponses.length)];
-                
+
                 // Update recent responses tracking
                 recentResponses.unshift(selectedResponse);
                 recentResponses = recentResponses.slice(0, Math.min(3, responses.length - 1));
                 localStorage.setItem(recentKey, JSON.stringify(recentResponses));
-                
+
                 return selectedResponse;
             }
 
@@ -1597,13 +1597,13 @@
                     "That's a great question! While I'm expanding my knowledge, you can check out our demo or contact our team! ⭐",
                     "I want to give you the best answer! Could you rephrase that or ask about StellarRec features? 🚀"
                 ];
-                
+
                 // Contextual fallback enhancement
                 let enhancedFallback = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-                
+
                 // Add helpful suggestions based on message intent
                 const suggestions = this.generateContextualSuggestions(processedMessage);
-                
+
                 return {
                     text: enhancedFallback,
                     suggestions: suggestions,
@@ -1614,7 +1614,7 @@
 
             generateContextualSuggestions(processedMessage) {
                 const baseSuggestions = ['Try the demo', 'Contact support', 'Learn about features'];
-                
+
                 // Add contextual suggestions based on detected intent
                 if (processedMessage.intent === 'question') {
                     baseSuggestions.unshift('How does StellarRec work?');
@@ -1628,7 +1628,7 @@
                 if (processedMessage.words.includes('professor') || processedMessage.words.includes('recommender')) {
                     baseSuggestions.unshift('For professors');
                 }
-                
+
                 return baseSuggestions.slice(0, 3);
             }
 
@@ -1636,14 +1636,14 @@
                 // Simple stemming for better matching
                 const suffixes = ['ing', 'ed', 'er', 'est', 'ly', 'ion', 'tion', 'ness', 'ment'];
                 let stem = word;
-                
+
                 for (const suffix of suffixes) {
                     if (word.endsWith(suffix) && word.length > suffix.length + 2) {
                         stem = word.slice(0, -suffix.length);
                         break;
                     }
                 }
-                
+
                 return stem;
             }
 
@@ -1655,13 +1655,13 @@
                     'recommendation': /(recommendation|letter|reference)/i,
                     'help': /(help|support|assist)/i
                 };
-                
+
                 for (const [topic, pattern] of Object.entries(topics)) {
                     if (pattern.test(message)) {
                         return topic;
                     }
                 }
-                
+
                 return 'general';
             }
 
@@ -1673,11 +1673,11 @@
                     responseCategory: response.category,
                     confidence: response.confidence
                 };
-                
+
                 try {
                     let patterns = JSON.parse(localStorage.getItem('max_conversation_patterns') || '[]');
                     patterns.push(pattern);
-                    
+
                     // Keep only recent patterns (last 50)
                     patterns = patterns.slice(-50);
                     localStorage.setItem('max_conversation_patterns', JSON.stringify(patterns));
@@ -1691,10 +1691,10 @@
                 const matrix = [];
                 const len1 = str1.length;
                 const len2 = str2.length;
-                
+
                 if (len1 === 0) return len2 === 0 ? 1 : 0;
                 if (len2 === 0) return 0;
-                
+
                 // Initialize matrix
                 for (let i = 0; i <= len1; i++) {
                     matrix[i] = [i];
@@ -1702,7 +1702,7 @@
                 for (let j = 0; j <= len2; j++) {
                     matrix[0][j] = j;
                 }
-                
+
                 // Fill matrix
                 for (let i = 1; i <= len1; i++) {
                     for (let j = 1; j <= len2; j++) {
@@ -1714,7 +1714,7 @@
                         );
                     }
                 }
-                
+
                 const distance = matrix[len1][len2];
                 const maxLen = Math.max(len1, len2);
                 return maxLen > 0 ? 1 - (distance / maxLen) : 1;
@@ -1732,7 +1732,7 @@
                         <span style="font-style: italic; opacity: 0.7;">Max is typing...</span>
                     </div>
                 `;
-                
+
                 // Add typing animation CSS if not already added
                 if (!document.getElementById('typing-animation-style')) {
                     const style = document.createElement('style');
@@ -1756,7 +1756,7 @@
                     `;
                     document.head.appendChild(style);
                 }
-                
+
                 this.messagesContainer.appendChild(typingDiv);
                 this.scrollToBottom();
             }
@@ -1849,54 +1849,6 @@
             const maxChatbot = new MaxChatbot();
             maxChatbot.init();
         });
-    </script>ec Guide</span>
-    </div>
-    </div>
-    <div class="max-header-controls">
-        <button class="max-minimize" id="max-minimize">
-            <span class="material-icons">minimize</span>
-        </button>
-        <button class="max-close" id="max-close">
-            <span class="material-icons">close</span>
-        </button>
-    </div>
-    </div>
-
-    <div class="max-chat-messages" id="max-chat-messages">
-        <!-- Messages will be dynamically added here -->
-    </div>
-
-    <div class="max-chat-input">
-        <input type="text" id="max-message-input" placeholder="Ask Max anything about StellarRec..." />
-        <button id="max-send-button" class="max-send-btn">
-            <span class="material-icons">send</span>
-        </button>
-    </div>
-    </div>
-
-    <script></script>
-    // Simple smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-    e.preventDefault();
-    const target = document.querySelector(this.getAttribute('href'));
-    if (target) {
-    target.scrollIntoView({
-    behavior: 'smooth'
-    });
-    }
-    });
-    });
-
-    // Add loading animation
-    window.addEventListener('load', function () {
-    document.body.style.opacity = '0';
-    document.body.style.transition = 'opacity 0.5s ease-in-out';
-    setTimeout(() => {
-    document.body.style.opacity = '1';
-    }, 100);
-    });
     </script>
 </body>
-
 </html>
