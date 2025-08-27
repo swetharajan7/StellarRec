@@ -258,48 +258,7 @@
             background: rgba(0, 0, 0, 0.1);
         }
 
-        .stellar-star {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto 2rem;
-            position: relative;
-            animation: float 6s ease-in-out infinite;
-        }
 
-        .star-svg {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 0 40px rgba(255, 235, 59, 1)) drop-shadow(0 0 20px rgba(255, 235, 59, 0.8));
-        }
-
-        .star-path {
-            fill: url(#starGradient);
-            stroke: #ffeb3b;
-            stroke-width: 2;
-            animation: pulse 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0px) rotate(0deg);
-            }
-
-            50% {
-                transform: translateY(-20px) rotate(5deg);
-            }
-        }
-
-        @keyframes pulse {
-            0% {
-                stroke-width: 2;
-            }
-
-            100% {
-                stroke-width: 4;
-            }
-        }
 
         .hero-title {
             font-size: 5rem;
@@ -331,50 +290,16 @@
             z-index: -1;
         }
 
-        .hero-subtitle {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            opacity: 0.95;
-            line-height: 1.4;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
-            font-weight: 500;
-        }
-
-        .hero-subheading {
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-            line-height: 1.5;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-            font-style: italic;
+        .hero-tagline {
+            font-size: 2rem;
+            font-weight: 600;
             color: rgba(255, 255, 255, 0.95);
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+            margin-top: 1rem;
+            letter-spacing: 0.5px;
         }
 
-        .hero-buttons {
-            display: flex;
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-            justify-content: center;
-        }
 
-        .hero-stats {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .stars {
-            display: flex;
-            color: #ffeb3b;
-        }
 
         .floating-elements {
             position: absolute;
@@ -494,38 +419,7 @@
             text-align: center;
         }
 
-        /* Bold Tagline Section */
-        .tagline-section {
-            padding: 4rem 0;
-            background: #ffffff;
-            text-align: center;
-        }
 
-        .bold-tagline {
-            font-size: 3rem;
-            font-weight: 800;
-            color: #1976d2;
-            margin: 0;
-            letter-spacing: -1px;
-            line-height: 1.2;
-            background: linear-gradient(45deg, #1976d2, #7c4dff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            position: relative;
-        }
-
-        .bold-tagline::after {
-            content: '';
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 4px;
-            background: linear-gradient(90deg, #ffeb3b, #ffc107);
-            border-radius: 2px;
-        }
 
         /* Trusted Universities Banner */
         .trusted-banner {
@@ -1108,30 +1002,11 @@
                 font-size: 3rem;
             }
 
-            .stellar-star {
-                width: 150px;
-                height: 150px;
+            .hero-tagline {
+                font-size: 1.5rem;
             }
 
-            .hero-subtitle {
-                font-size: 1.2rem;
-            }
 
-            /* Tagline Mobile */
-            .tagline-section {
-                padding: 3rem 0;
-            }
-
-            .bold-tagline {
-                font-size: 2rem;
-                letter-spacing: -0.5px;
-            }
-
-            .bold-tagline::after {
-                width: 80px;
-                height: 3px;
-                bottom: -12px;
-            }
 
             /* Trusted Banner Mobile */
             .trusted-banner {
@@ -1274,55 +1149,9 @@
 
         <div class="container">
             <div class="hero-content">
-                <div class="stellar-star">
-                    <svg class="star-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#ffeb3b;stop-opacity:1" />
-                                <stop offset="50%" style="stop-color:#ffc107;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#ff9800;stop-opacity:1" />
-                            </linearGradient>
-                            <filter id="glow">
-                                <feGaussianBlur stdDeviation="4" result="coloredBlur" />
-                                <feMerge>
-                                    <feMergeNode in="coloredBlur" />
-                                    <feMergeNode in="SourceGraphic" />
-                                </feMerge>
-                            </filter>
-                        </defs>
-                        <polygon class="star-path"
-                            points="100,10 130,70 190,70 145,115 160,175 100,140 40,175 55,115 10,70 70,70"
-                            filter="url(#glow)" />
-                    </svg>
-                </div>
-
                 <h1 class="hero-title" data-text="stellarrec">stellarrec</h1>
-                <p class="hero-subtitle">With StellarRec, recommenders
-                    upload once and send to many universities—reducing redundancy, saving time, and helping students
-                    reach more schools.</p>
-                <p class="hero-subheading">Make it easier for professors to say yes. One upload, many
-                    applications—because student success should never be slowed down by paperwork.</p>
-
-                <div class="hero-buttons">
-                    <a href="demo.html" class="btn btn-outline">Watch Demo</a>
-                </div>
-
-                <div class="hero-stats">
-                    <img src="https://cdn.trustpilot.net/brand-assets/4.1.0/stars/stars-5.svg" alt="5 out of 5 stars"
-                        style="height: 24px; margin-right: 10px;">
-                    <span style="color: rgba(255,255,255,0.9); font-size: 0.9rem;">Excellent 5 out of 5 • Based on
-                        10 reviews</span>
-                    <img src="https://cdn.trustpilot.net/brand-assets/4.1.0/logo-white.svg" alt="Trustpilot"
-                        style="height: 20px; margin-left: 10px; opacity: 0.8;">
-                </div>
+                <p class="hero-tagline">One upload. Unlimited reach.</p>
             </div>
-        </div>
-    </section>
-
-    <!-- Bold Tagline -->
-    <section class="tagline-section">
-        <div class="container">
-            <h2 class="bold-tagline">One upload. Unlimited reach.</h2>
         </div>
     </section>
 
