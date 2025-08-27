@@ -52,22 +52,22 @@
         }
 
         /* Navigation */
-        .navbar {
+        nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
             z-index: 1000;
-            padding: 1rem 0;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
         }
 
-        .nav-content {
+        .nav-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 1rem 0;
         }
 
         .logo {
@@ -117,65 +117,17 @@
             transform: translateY(-2px);
         }
 
-        .btn-cta {
-            background: #ffeb3b;
-            color: #1976d2;
-            font-size: 1.1rem;
-            padding: 1rem 2rem;
-        }
-
-        .dashboard-link {
-            position: relative;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            text-decoration: none;
-            color: #1976d2;
-            transition: color 0.3s ease;
-            overflow: hidden;
-        }
-
-        .dashboard-link::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: #ff1493;
-            /* Hot pink */
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-        }
-
-        .dashboard-link:hover {
-            color: #b22234;
-            /* Old glory red */
-        }
-
-        .dashboard-link:hover::after {
-            transform: translateX(0);
-        }
-
-        .btn-cta:hover {
-            background: #fff59d;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 235, 59, 0.3);
-        }
-
         /* Hero Section */
         .hero {
             min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
+            justify-content: center;
+            text-align: center;
             color: white;
-            padding-top: 80px;
             position: relative;
             overflow: hidden;
-            /* Fallback background image */
-            background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
         }
 
         .hero-background-image {
@@ -184,19 +136,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            /* 
-            TO USE YOUR EXACT IMAGE:
-            1. Save your image to your website's assets folder (e.g., /images/hero-background.jpg)
-            2. Replace the URL below with your image path
-            3. Or upload to an image hosting service and use that URL
-            */
-            background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background: url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover;
             z-index: -2;
-            filter: brightness(0.5) contrast(1.3) saturate(0.9);
-            opacity: 1;
         }
 
         .hero-image-overlay {
@@ -205,89 +146,64 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background:
-                radial-gradient(ellipse at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.7) 70%),
-                linear-gradient(135deg, rgba(10, 10, 35, 0.5) 0%, rgba(26, 26, 58, 0.6) 30%, rgba(45, 27, 105, 0.5) 60%, rgba(124, 77, 255, 0.4) 100%);
+            background: linear-gradient(135deg, rgba(25, 118, 210, 0.8) 0%, rgba(124, 77, 255, 0.8) 100%);
             z-index: -1;
-            animation: overlayPulse 8s ease-in-out infinite alternate;
-        }
-
-        @keyframes overlayPulse {
-            0% {
-                opacity: 0.8;
-            }
-
-            100% {
-                opacity: 1;
-            }
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpolygon points='50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.4;
-            animation: twinkle 4s ease-in-out infinite alternate;
-        }
-
-        @keyframes twinkle {
-            0% {
-                opacity: 0.2;
-            }
-
-            100% {
-                opacity: 0.6;
-            }
         }
 
         .hero-content {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            width: 100%;
-            backdrop-filter: blur(1px);
+            max-width: 800px;
+            margin: 0 auto;
             padding: 2rem;
-            border-radius: 20px;
-            background: rgba(0, 0, 0, 0.1);
         }
 
+        .stellar-star {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 2rem;
+            position: relative;
+            animation: float 6s ease-in-out infinite;
+        }
 
+        .star-svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 40px rgba(255, 235, 59, 1)) drop-shadow(0 0 20px rgba(255, 235, 59, 0.8));
+        }
+
+        .star-path {
+            fill: url(#starGradient);
+            stroke: #ffeb3b;
+            stroke-width: 2;
+            animation: pulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                stroke-width: 2;
+            }
+            100% {
+                stroke-width: 4;
+            }
+        }
 
         .hero-title {
-            font-size: 5rem;
-            font-weight: 800;
-            line-height: 1.1;
+            font-size: 4rem;
+            font-weight: 700;
             margin-bottom: 1rem;
             background: linear-gradient(45deg, #ffeb3b, #ffc107, #ff9800);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-transform: lowercase;
-            letter-spacing: -2px;
-            text-shadow: 0 0 30px rgba(255, 235, 59, 0.5);
-            position: relative;
-        }
-
-        .hero-title::before {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, #ffeb3b, #ffc107, #ff9800);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: blur(1px);
-            z-index: -1;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         .hero-tagline {
@@ -298,8 +214,6 @@
             margin-top: 1rem;
             letter-spacing: 0.5px;
         }
-
-
 
         .floating-elements {
             position: absolute;
@@ -313,683 +227,104 @@
 
         .floating-star {
             position: absolute;
-            color: #ffeb3b;
-            opacity: 0.6;
-            animation: floatStar 8s ease-in-out infinite;
-        }
-
-        .floating-star:nth-child(1) {
-            top: 20%;
-            left: 10%;
-            animation-delay: 0s;
             font-size: 1.5rem;
-        }
-
-        .floating-star:nth-child(2) {
-            top: 30%;
-            right: 15%;
-            animation-delay: 2s;
-            font-size: 1.2rem;
-        }
-
-        .floating-star:nth-child(3) {
-            bottom: 30%;
-            left: 20%;
-            animation-delay: 4s;
-            font-size: 1.8rem;
-        }
-
-        .floating-star:nth-child(4) {
-            bottom: 20%;
-            right: 10%;
-            animation-delay: 6s;
-            font-size: 1.3rem;
+            opacity: 0.8;
+            animation: floatStar 8s ease-in-out infinite;
+            pointer-events: none;
         }
 
         @keyframes floatStar {
-
-            0%,
-            100% {
+            0%, 100% {
                 transform: translateY(0px) rotate(0deg);
-                opacity: 0.3;
-            }
-
-            50% {
-                transform: translateY(-30px) rotate(180deg);
                 opacity: 0.8;
             }
+            50% {
+                transform: translateY(-30px) rotate(180deg);
+                opacity: 1;
+            }
         }
 
-        .dashboard-preview {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 2rem;
-            color: #333;
-            max-width: 400px;
-            transform: perspective(1000px) rotateY(-5deg) rotateX(5deg);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .dashboard-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            background: #1976d2;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            margin-right: 1rem;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 0.5rem 0;
-        }
-
-        .progress-fill {
-            width: 92%;
-            height: 100%;
-            background: linear-gradient(90deg, #4caf50, #8bc34a);
-            border-radius: 4px;
-        }
-
-        .university-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .university-card {
-            background: #f5f5f5;
-            padding: 0.5rem;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-
-
-        /* Trusted Universities Banner */
+        /* University Carousel */
         .trusted-banner {
-            padding: 5rem 0;
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 50%, #f8f9fa 100%);
-            border-top: 1px solid rgba(25, 118, 210, 0.1);
-            border-bottom: 1px solid rgba(25, 118, 210, 0.1);
-        }
-
-        .trusted-content {
+            background: #f8f9fa;
+            padding: 3rem 0;
             text-align: center;
         }
 
         .trusted-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #1976d2;
-            margin-bottom: 3rem;
-            position: relative;
-        }
-
-        .trusted-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 3px;
-            background: linear-gradient(90deg, #ffeb3b, #ffc107);
-            border-radius: 2px;
-        }
-
-        .carousel-container {
-            overflow: hidden;
-            margin-bottom: 4rem;
-            position: relative;
-            width: 100%;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2rem;
         }
 
         .university-carousel {
-            display: flex;
-            gap: 2rem;
-            animation: scroll 30s linear infinite;
-            width: fit-content;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
         }
 
-        .university-logo {
+        .university-track {
+            display: inline-flex;
+            animation: scroll 30s linear infinite;
+            gap: 3rem;
+        }
+
+        .university-item {
+            flex-shrink: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.75rem;
-            padding: 1.5rem 1rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(25, 118, 210, 0.1);
-            min-width: 140px;
-            flex-shrink: 0;
+            gap: 0.5rem;
+            padding: 1rem;
         }
 
-        .university-logo:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(25, 118, 210, 0.15);
-            border-color: rgba(25, 118, 210, 0.3);
+        .university-logo {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-size: 2rem;
+            color: #1976d2;
+        }
+
+        .university-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+            white-space: normal;
+            max-width: 120px;
         }
 
         @keyframes scroll {
             0% {
                 transform: translateX(0);
             }
-
             100% {
                 transform: translateX(-50%);
             }
         }
 
-        /* Pause animation on hover */
-        .carousel-container:hover .university-carousel {
-            animation-play-state: paused;
-        }
-
-        .university-logo img {
-            width: 60px;
-            height: 60px;
-            object-fit: contain;
-            filter: grayscale(0.3);
-            transition: filter 0.3s ease;
-        }
-
-        .university-logo:hover img {
-            filter: grayscale(0);
-        }
-
-        .university-logo span {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #333;
-            text-align: center;
-        }
-
-
-
-        /* Stats Section */
-        .stats {
-            padding: 4rem 0;
-            background: #f8f9fa;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 2rem;
-            text-align: center;
-        }
-
-        .stat-item {
-            padding: 1rem;
-        }
-
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            background: #1976d2;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            margin: 0 auto 1rem;
-            font-size: 1.5rem;
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #1976d2;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Features Section */
-        .features {
-            padding: 5rem 0;
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        .section-header h2 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-
-        .section-header p {
-            font-size: 1.25rem;
-            color: #666;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
-            transition: all 0.3s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
-        }
-
-        .feature-card h3 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        /* CTA Section */
-        .cta {
-            background: linear-gradient(135deg, #1976d2 0%, #7c4dff 100%);
-            color: white;
-            padding: 5rem 0;
-            text-align: center;
-        }
-
-        .cta h2 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-
-        .cta p {
-            font-size: 1.25rem;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-bottom: 2rem;
-        }
-
-        .features-list {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
         /* Footer */
-        .footer {
-            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+        footer {
+            background: #333;
             color: white;
-            padding: 4rem 0 2rem;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 4rem;
-            align-items: start;
-        }
-
-        .footer-brand {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-
-        .footer-copyright {
-            opacity: 0.8;
-            font-size: 0.9rem;
-        }
-
-        .contact-form h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            font-weight: 600;
-        }
-
-        .contact-form-fields {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .contact-form input,
-        .contact-form textarea {
-            padding: 0.75rem 1rem;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Roboto', sans-serif;
-            font-size: 1rem;
-            background: rgba(255, 255, 255, 0.9);
-            transition: all 0.3s ease;
-        }
-
-        .contact-form input:focus,
-        .contact-form textarea:focus {
-            outline: none;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-contact {
-            background: #ffeb3b;
-            color: #1976d2;
-            font-weight: 600;
-            padding: 0.75rem 2rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            align-self: flex-start;
-        }
-
-        .btn-contact:hover {
-            background: #fff59d;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(255, 235, 59, 0.4);
-        }
-
-        /* Max Chatbot Styles */
-        .max-chat-widget {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 10000;
-        }
-
-        .max-chat-button {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #1976d2 0%, #7c4dff 100%);
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(25, 118, 210, 0.3);
-            transition: all 0.3s ease;
-            animation: maxPulse 2s infinite;
-        }
-
-        .max-chat-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(25, 118, 210, 0.4);
-        }
-
-        .max-chat-button .material-icons {
-            font-size: 24px;
-            margin-bottom: -2px;
-        }
-
-        .max-label {
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        @keyframes maxPulse {
-
-            0%,
-            100% {
-                box-shadow: 0 4px 20px rgba(25, 118, 210, 0.3);
-            }
-
-            50% {
-                box-shadow: 0 4px 20px rgba(25, 118, 210, 0.6);
-            }
-        }
-
-        .max-chat-interface {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 320px;
-            height: 450px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
-            display: none;
-            flex-direction: column;
-            z-index: 10001;
-            overflow: hidden;
-        }
-
-        .max-chat-interface.open {
-            display: flex;
-            animation: maxSlideUp 0.3s ease-out;
-        }
-
-        @keyframes maxSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .max-chat-header {
-            background: linear-gradient(135deg, #1976d2 0%, #7c4dff 100%);
-            color: white;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .max-header-info {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .max-header-info .material-icons {
-            font-size: 20px;
-        }
-
-        .max-header-text h4 {
-            margin: 0;
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .max-header-text span {
-            font-size: 0.8rem;
-            opacity: 0.9;
-        }
-
-        .max-header-controls {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .max-minimize,
-        .max-close {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-            transition: background 0.2s ease;
-        }
-
-        .max-minimize:hover,
-        .max-close:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .max-minimize .material-icons,
-        .max-close .material-icons {
-            font-size: 18px;
-        }
-
-        .max-chat-messages {
-            flex: 1;
-            padding: 1rem;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .max-chat-input {
-            padding: 1rem;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .max-chat-input input {
-            flex: 1;
-            padding: 0.75rem;
-            border: 1px solid #e0e0e0;
-            border-radius: 20px;
-            font-family: 'Roboto', sans-serif;
-            font-size: 0.9rem;
-            outline: none;
-            transition: border-color 0.2s ease;
-        }
-
-        .max-chat-input input:focus {
-            border-color: #1976d2;
-        }
-
-        .max-send-btn {
-            width: 40px;
-            height: 40px;
-            background: #1976d2;
-            border: none;
-            border-radius: 50%;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-
-        .max-send-btn:hover {
-            background: #1565c0;
-            transform: scale(1.05);
-        }
-
-        .max-send-btn .material-icons {
-            font-size: 18px;
-        }
-
-        /* Message Bubbles */
-        .max-message {
-            max-width: 80%;
-            padding: 0.75rem 1rem;
-            border-radius: 18px;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .max-message.user {
-            background: #1976d2;
-            color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 6px;
-        }
-
-        .max-message.bot {
-            background: #f5f5f5;
-            color: #333;
-            align-self: flex-start;
-            border-bottom-left-radius: 6px;
-        }
-
-        .max-message-time {
-            font-size: 0.7rem;
-            opacity: 0.6;
-            margin-top: 0.25rem;
-            text-align: right;
-        }
-
-        .max-message.bot .max-message-time {
-            text-align: left;
+            text-align: center;
+            padding: 2rem 0;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
             .hero {
-                /* On mobile, use static background to save bandwidth */
                 background-attachment: scroll;
             }
 
             .hero-background-image {
-                /* Optimize image on mobile */
                 filter: brightness(0.7) contrast(1.1);
             }
 
@@ -1006,105 +341,19 @@
                 font-size: 1.5rem;
             }
 
-
-
-            /* Trusted Banner Mobile */
-            .trusted-banner {
-                padding: 3rem 0;
-            }
-
-            .trusted-title {
-                font-size: 1.8rem;
-                margin-bottom: 2rem;
-            }
-
-            .carousel-container {
-                margin-bottom: 3rem;
-            }
-
-            .university-carousel {
-                gap: 1rem;
-                animation: scroll 20s linear infinite;
-            }
-
-            .university-logo {
-                padding: 1rem 0.5rem;
-            }
-
-            .university-logo img {
-                width: 45px;
-                height: 45px;
-            }
-
-            .university-logo span {
-                font-size: 0.8rem;
-            }
-
-
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
+            .stellar-star {
+                width: 150px;
+                height: 150px;
             }
 
             .nav-buttons {
-                display: flex;
                 flex-direction: column;
                 gap: 0.5rem;
             }
 
-            .hero-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .cta-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .features-list {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-                text-align: center;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .btn-contact {
-                align-self: center;
-            }
-
-            /* Max Chatbot Mobile */
-            .max-chat-interface {
-                width: calc(100vw - 40px);
-                height: 400px;
-                bottom: 80px;
-                right: 20px;
-                left: 20px;
-            }
-
-            .max-chat-button {
-                width: 50px;
-                height: 50px;
-            }
-
-            .max-chat-button .material-icons {
-                font-size: 20px;
-            }
-
-            .max-label {
-                font-size: 9px;
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -1112,15 +361,15 @@
 
 <body>
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav>
         <div class="container">
-            <div class="nav-content">
+            <div class="nav-container">
                 <a href="#" class="logo">
                     <span class="material-icons">star</span>
                     stellarrec
                 </a>
                 <div class="nav-buttons">
-                    <a href="dashboard.html" class="dashboard-link">Dashboard</a>
+                    <a href="dashboard.html" class="btn btn-primary">Dashboard</a>
                 </div>
             </div>
         </div>
@@ -1132,23 +381,51 @@
         <div class="hero-background-image"></div>
         <div class="hero-image-overlay"></div>
 
-        <div class="floating-elements"></div>
-        <div class="floating-star">
-            <span class="material-icons">star</span>
-        </div>
-        <div class="floating-star">
-            <span class="material-icons">star</span>
-        </div>
-        <div class="floating-star">
-            <span class="material-icons">star</span>
-        </div>
-        <div class="floating-star">
-            <span class="material-icons">star</span>
-        </div>
+        <div class="floating-elements">
+            <div class="floating-star" style="top: 20%; left: 10%; animation-delay: 0s;">⭐</div>
+            <div class="floating-star" style="top: 30%; right: 15%; animation-delay: 1s;">✨</div>
+            <div class="floating-star" style="top: 60%; left: 20%; animation-delay: 2s;">⭐</div>
+            <div class="floating-star" style="top: 80%; right: 25%; animation-delay: 3s;">✨</div>
+            <div class="floating-star" style="top: 15%; right: 30%; animation-delay: 4s;">⭐</div>
+            <div class="floating-star" style="top: 70%; left: 5%; animation-delay: 5s;">✨</div>
+            <div class="floating-star" style="top: 25%; left: 80%; animation-delay: 1.5s;">⭐</div>
+            <div class="floating-star" style="top: 45%; right: 5%; animation-delay: 2.5s;">✨</div>
+            <div class="floating-star" style="top: 85%; left: 15%; animation-delay: 3.5s;">⭐</div>
+            <div class="floating-star" style="top: 10%; left: 60%; animation-delay: 4.5s;">✨</div>
+            <div class="floating-star" style="top: 55%; right: 40%; animation-delay: 0.5s;">⭐</div>
+            <div class="floating-star" style="top: 75%; left: 70%; animation-delay: 1.8s;">✨</div>
+            <div class="floating-star" style="top: 35%; left: 3%; animation-delay: 2.8s;">⭐</div>
+            <div class="floating-star" style="top: 90%; right: 10%; animation-delay: 3.8s;">✨</div>
+            <div class="floating-star" style="top: 5%; right: 50%; animation-delay: 4.8s;">⭐</div>
+            <div class="floating-star" style="top: 65%; left: 85%; animation-delay: 0.8s;">✨</div>
+            <div class="floating-star" style="top: 40%; right: 70%; animation-delay: 2.2s;">⭐</div>
+            <div class="floating-star" style="top: 95%; left: 40%; animation-delay: 3.2s;">✨</div>
         </div>
 
         <div class="container">
             <div class="hero-content">
+                <div class="stellar-star">
+                    <svg class="star-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ffeb3b;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#ffc107;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#ff9800;stop-opacity:1" />
+                            </linearGradient>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur" />
+                                    <feMergeNode in="SourceGraphic" />
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <polygon class="star-path"
+                            points="100,10 130,70 190,70 145,115 160,175 100,140 40,175 55,115 10,70 70,70"
+                            filter="url(#glow)" />
+                    </svg>
+                </div>
+
                 <h1 class="hero-title" data-text="stellarrec">stellarrec</h1>
                 <p class="hero-tagline">One upload. Unlimited reach.</p>
             </div>
@@ -1158,939 +435,84 @@
     <!-- Trusted Universities Banner -->
     <section class="trusted-banner">
         <div class="container">
-            <div class="trusted-content">
-                <h2 class="trusted-title">Trusted by students applying to top universities</h2>
-                <div class="carousel-container">
-                    <div class="university-carousel">
-                        <!-- First set of logos -->
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Harvard_University_logo.svg/200px-Harvard_University_logo.svg.png"
-                                alt="Harvard University" />
-                            <span>Harvard</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/MIT_logo.svg/200px-MIT_logo.svg.png"
-                                alt="MIT" />
-                            <span>MIT</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Stanford_University_seal_2003.svg/200px-Stanford_University_seal_2003.svg.png"
-                                alt="Stanford University" />
-                            <span>Stanford</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Yale_University_logo.svg/200px-Yale_University_logo.svg.png"
-                                alt="Yale University" />
-                            <span>Yale</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Princeton_shield.svg/200px-Princeton_shield.svg.png"
-                                alt="Princeton University" />
-                            <span>Princeton</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Columbia_University_logo.svg/200px-Columbia_University_logo.svg.png"
-                                alt="Columbia University" />
-                            <span>Columbia</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/University_of_Pennsylvania_logo.svg/200px-University_of_Pennsylvania_logo.svg.png"
-                                alt="University of Pennsylvania" />
-                            <span>UPenn</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Caltech_logo.svg/200px-Caltech_logo.svg.png"
-                                alt="Caltech" />
-                            <span>Caltech</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/University_of_Chicago_logo.svg/200px-University_of_Chicago_logo.svg.png"
-                                alt="University of Chicago" />
-                            <span>UChicago</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Northwestern_University_seal.svg/200px-Northwestern_University_seal.svg.png"
-                                alt="Northwestern University" />
-                            <span>Northwestern</span>
-                        </div>
-
-                        <!-- Duplicate set for seamless loop -->
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Harvard_University_logo.svg/200px-Harvard_University_logo.svg.png"
-                                alt="Harvard University" />
-                            <span>Harvard</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/MIT_logo.svg/200px-MIT_logo.svg.png"
-                                alt="MIT" />
-                            <span>MIT</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Stanford_University_seal_2003.svg/200px-Stanford_University_seal_2003.svg.png"
-                                alt="Stanford University" />
-                            <span>Stanford</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Yale_University_logo.svg/200px-Yale_University_logo.svg.png"
-                                alt="Yale University" />
-                            <span>Yale</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Princeton_shield.svg/200px-Princeton_shield.svg.png"
-                                alt="Princeton University" />
-                            <span>Princeton</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Columbia_University_logo.svg/200px-Columbia_University_logo.svg.png"
-                                alt="Columbia University" />
-                            <span>Columbia</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/University_of_Pennsylvania_logo.svg/200px-University_of_Pennsylvania_logo.svg.png"
-                                alt="University of Pennsylvania" />
-                            <span>UPenn</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Caltech_logo.svg/200px-Caltech_logo.svg.png"
-                                alt="Caltech" />
-                            <span>Caltech</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/University_of_Chicago_logo.svg/200px-University_of_Chicago_logo.svg.png"
-                                alt="University of Chicago" />
-                            <span>UChicago</span>
-                        </div>
-                        <div class="university-logo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Northwestern_University_seal.svg/200px-Northwestern_University_seal.svg.png"
-                                alt="Northwestern University" />
-                            <span>Northwestern</span>
-                        </div>
+            <h2 class="trusted-title">Trusted by students applying to top universities</h2>
+            <div class="university-carousel">
+                <div class="university-track">
+                    <div class="university-item">
+                        <div class="university-logo">🎓</div>
+                        <div class="university-name">Harvard University</div>
+                    </div>
+                    <div class="university-item">
+                        <div class="university-logo">🏛️</div>
+                        <div class="university-name">Stanford University</div>
+                    </div>
+                    <div class="university-item">
+                        <div class="university-logo">🔬</div>
+                        <div class="university-name">MIT</div>
+                    </div>
+                    <div class="university-item">
+                        <div class="university-logo">🦅</div>
+                        <div class="university-name">Yale University</div>
+                    </div>
+                    <div class="university-item">
+                        <div class="university-logo">🐅</div>
+                        <div class="university-name">Princeton University</div>
+                    </div>
+                    <div class="university-item">
+                        <div class="university-logo">🏫</div>
+                        <div class="university-name">Columbia University</div>
+                    </div>
+                    <div class="university-item">
+                        <div class="university-logo">🌲</div>
+                        <div class="university-name">UC Berkeley</div>
+                    </div>
+                    <div class="university-item">
+                        <div class="university-logo">🌟</div>
+                        <div class="university-name">UCLA</div>
+                    </div>
+                    <!-- Duplicate for seamless loop -->
+                    <div class="university-item">
+                        <div class="university-logo">🎓</div>
+                        <div class="university-name">Harvard University</div>
+                    </div>
+                    <div class="university-item">
+                        <div class="university-logo">🏛️</div>
+                        <div class="university-name">Stanford University</div>
+                    </div>
+                    <div class="university-item">
+                        <div class="university-logo">🔬</div>
+                        <div class="university-name">MIT</div>
+                    </div>
+                    <div class="university-item">
+                        <div class="university-logo">🦅</div>
+                        <div class="university-name">Yale University</div>
+                    </div>
+                    <div class="university-item">
+                        <div class="university-logo">🐅</div>
+                        <div class="university-name">Princeton University</div>
+                    </div>
+                    <div class="university-item">
+                        <div class="university-logo">🏫</div>
+                        <div class="university-name">Columbia University</div>
+                    </div>
+                    <div class="university-item">
+                        <div class="university-logo">🌲</div>
+                        <div class="university-name">UC Berkeley</div>
+                    </div>
+                    <div class="university-item">
+                        <div class="university-logo">🌟</div>
+                        <div class="university-name">UCLA</div>
                     </div>
                 </div>
-
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer>
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <div class="footer-logo">
-                        <span class="material-icons">star</span>
-                        <span>stellarrec</span>
-                    </div>
-                    <p class="footer-copyright">© 2025 StellarRec. All rights reserved.</p>
-                </div>
-
-                <div class="contact-form">
-                    <h3>Contact Us</h3>
-                    <form class="contact-form-fields">
-                        <div class="form-row">
-                            <input type="text" placeholder="Your Name" required>
-                            <input type="email" placeholder="Your Email" required>
-                        </div>
-                        <textarea placeholder="Your Message" rows="4" required></textarea>
-                        <button type="submit" class="btn btn-contact">Send Message</button>
-                    </form>
-                </div>
-            </div>
+            <p>&copy; 2024 StellarRec. All rights reserved.</p>
         </div>
     </footer>
-
-    <!-- Max Chatbot Widget -->
-    <div id="max-chatbot-widget" class="max-chat-widget">
-        <div class="max-chat-button" id="max-chat-button">
-            <span class="material-icons">star</span>
-            <span class="max-label">Max</span>
-        </div>
-    </div>
-
-    <!-- Max Chatbot Interface -->
-    <div id="max-chatbot-interface" class="max-chat-interface">
-        <div class="max-chat-header">
-            <div class="max-header-info">
-                <span class="material-icons">star</span>
-                <div class="max-header-text">
-                    <h4>Max</h4>
-                    <span>Your StellarRec Guide</span>
-                </div>
-            </div>
-            <div class="max-header-controls">
-                <button class="max-minimize" id="max-minimize">
-                    <span class="material-icons">minimize</span>
-                </button>
-                <button class="max-close" id="max-close">
-                    <span class="material-icons">close</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="max-chat-messages" id="max-chat-messages">
-            <!-- Messages will be dynamically added here -->
-        </div>
-
-        <div class="max-chat-input">
-            <input type="text" id="max-message-input" placeholder="Ask me about StellarRec..." maxlength="500">
-            <button class="max-send-btn" id="max-send-btn">
-                <span class="material-icons">send</span>
-            </button>
-        </div>
-    </div>
-
-    <script>
-        class MaxChatbot {
-            constructor() {
-                this.isOpen = false;
-                this.conversationHistory = [];
-                this.knowledgeBase = null;
-                this.sessionId = this.generateSessionId();
-                this.currentPage = window.location.pathname.split('/').pop() || 'index.html';
-
-                // DOM elements
-                this.chatButton = document.getElementById('max-chat-button');
-                this.chatInterface = document.getElementById('max-chatbot-interface');
-                this.messagesContainer = document.getElementById('max-chat-messages');
-                this.messageInput = document.getElementById('max-message-input');
-                this.sendButton = document.getElementById('max-send-btn');
-                this.minimizeButton = document.getElementById('max-minimize');
-                this.closeButton = document.getElementById('max-close');
-            }
-
-            async init() {
-                await this.loadKnowledgeBase();
-                this.bindEvents();
-                this.loadConversationHistory();
-
-                // Show welcome message if no conversation history
-                if (this.conversationHistory.length === 0) {
-                    this.showWelcomeMessage();
-                }
-            }
-
-            async loadKnowledgeBase() {
-                try {
-                    const response = await fetch('max-knowledge-base.json');
-                    this.knowledgeBase = await response.json();
-                } catch (error) {
-                    console.error('Failed to load knowledge base:', error);
-                    this.knowledgeBase = {
-                        fallback: {
-                            responses: ["I'm having trouble accessing my knowledge base right now. Please try again later or contact our support team!"]
-                        }
-                    };
-                }
-            }
-
-            bindEvents() {
-                // Chat button click
-                this.chatButton.addEventListener('click', () => this.toggleChat());
-
-                // Header controls
-                this.minimizeButton.addEventListener('click', () => this.closeChat());
-                this.closeButton.addEventListener('click', () => this.closeChat());
-
-                // Send message events
-                this.sendButton.addEventListener('click', () => this.sendMessage());
-                this.messageInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        this.sendMessage();
-                    }
-                });
-
-                // Auto-resize input
-                this.messageInput.addEventListener('input', () => {
-                    if (this.messageInput.value.length > 0) {
-                        this.sendButton.style.background = '#1976d2';
-                    } else {
-                        this.sendButton.style.background = '#ccc';
-                    }
-                });
-            }
-
-            generateSessionId() {
-                return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            }
-
-            toggleChat() {
-                if (this.isOpen) {
-                    this.closeChat();
-                } else {
-                    this.openChat();
-                }
-            }
-
-            openChat() {
-                this.isOpen = true;
-                this.chatInterface.classList.add('open');
-                this.messageInput.focus();
-
-                // Update last opened timestamp
-                localStorage.setItem('max_last_opened', Date.now().toString());
-            }
-
-            closeChat() {
-                this.isOpen = false;
-                this.chatInterface.classList.remove('open');
-            }
-
-            showWelcomeMessage() {
-                const welcomeMessages = this.knowledgeBase?.greetings?.responses || [
-                    "Hi there! I'm Max, your StellarRec guide! ⭐ How can I help you navigate the world of university recommendations today?"
-                ];
-
-                const welcomeMessage = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
-                this.addMessage('bot', welcomeMessage);
-
-                // Add quick action suggestions
-                const suggestions = this.knowledgeBase?.greetings?.followUpSuggestions || [];
-                if (suggestions.length > 0) {
-                    setTimeout(() => {
-                        this.addQuickActions(suggestions);
-                    }, 1000);
-                }
-            }
-
-            sendMessage() {
-                const message = this.messageInput.value.trim();
-                if (!message) return;
-
-                // Add user message
-                this.addMessage('user', message);
-                this.messageInput.value = '';
-                this.sendButton.style.background = '#ccc';
-
-                // Process and respond
-                setTimeout(() => {
-                    this.processUserMessage(message);
-                }, 500);
-            }
-
-            addMessage(sender, content, timestamp = null) {
-                const messageTime = timestamp || new Date();
-                const messageId = 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-
-                const messageObj = {
-                    id: messageId,
-                    sender: sender,
-                    content: content,
-                    timestamp: messageTime.toISOString(),
-                    type: 'text'
-                };
-
-                // Add to conversation history
-                this.conversationHistory.push(messageObj);
-
-                // Create message element
-                const messageElement = this.createMessageElement(messageObj);
-                this.messagesContainer.appendChild(messageElement);
-
-                // Scroll to bottom
-                this.scrollToBottom();
-
-                // Save conversation
-                this.saveConversationHistory();
-
-                return messageElement;
-            }
-
-            createMessageElement(messageObj) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `max-message ${messageObj.sender}`;
-                messageDiv.id = messageObj.id;
-
-                const contentDiv = document.createElement('div');
-                contentDiv.textContent = messageObj.content;
-
-                const timeDiv = document.createElement('div');
-                timeDiv.className = 'max-message-time';
-                timeDiv.textContent = this.formatTimestamp(messageObj.timestamp);
-
-                messageDiv.appendChild(contentDiv);
-                messageDiv.appendChild(timeDiv);
-
-                return messageDiv;
-            }
-
-            addQuickActions(suggestions) {
-                const quickActionsDiv = document.createElement('div');
-                quickActionsDiv.className = 'max-quick-actions';
-                quickActionsDiv.style.cssText = `
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 0.5rem;
-                    margin: 0.5rem 0;
-                    align-self: flex-start;
-                `;
-
-                suggestions.forEach(suggestion => {
-                    const button = document.createElement('button');
-                    button.textContent = suggestion;
-                    button.style.cssText = `
-                        background: #f0f0f0;
-                        border: 1px solid #ddd;
-                        border-radius: 15px;
-                        padding: 0.5rem 0.75rem;
-                        font-size: 0.8rem;
-                        cursor: pointer;
-                        transition: all 0.2s ease;
-                    `;
-
-                    button.addEventListener('click', () => {
-                        this.messageInput.value = suggestion;
-                        this.sendMessage();
-                        quickActionsDiv.remove();
-                    });
-
-                    button.addEventListener('mouseenter', () => {
-                        button.style.background = '#e0e0e0';
-                        button.style.borderColor = '#1976d2';
-                    });
-
-                    button.addEventListener('mouseleave', () => {
-                        button.style.background = '#f0f0f0';
-                        button.style.borderColor = '#ddd';
-                    });
-
-                    quickActionsDiv.appendChild(button);
-                });
-
-                this.messagesContainer.appendChild(quickActionsDiv);
-                this.scrollToBottom();
-            }
-
-            processUserMessage(message) {
-                // Show typing indicator
-                this.showTypingIndicator();
-
-                // Enhanced response generation with context awareness
-                const response = this.generateIntelligentResponse(message);
-
-                // Remove typing indicator and add response
-                setTimeout(() => {
-                    this.hideTypingIndicator();
-                    this.addMessage('bot', response.text);
-
-                    // Add follow-up suggestions if available
-                    if (response.suggestions && response.suggestions.length > 0) {
-                        setTimeout(() => {
-                            this.addQuickActions(response.suggestions);
-                        }, 800);
-                    }
-                }, Math.random() * 1000 + 500); // Variable response time for natural feel
-            }
-
-            generateIntelligentResponse(message) {
-                const processedMessage = this.preprocessMessage(message);
-                const contextualMatches = this.findContextualMatches(processedMessage);
-                const bestResponse = this.selectBestResponse(contextualMatches, processedMessage);
-
-                // Track conversation patterns for learning
-                this.trackConversationPattern(message, bestResponse);
-
-                return bestResponse;
-            }
-
-            preprocessMessage(message) {
-                // Enhanced message preprocessing
-                const cleaned = message.toLowerCase()
-                    .replace(/[^\w\s]/g, ' ') // Remove punctuation
-                    .replace(/\s+/g, ' ') // Normalize whitespace
-                    .trim();
-
-                const words = cleaned.split(' ').filter(word => word.length > 2);
-                const stems = words.map(word => this.stemWord(word));
-
-                return {
-                    original: message,
-                    cleaned: cleaned,
-                    words: words,
-                    stems: stems,
-                    intent: this.detectIntent(cleaned),
-                    sentiment: this.detectSentiment(cleaned)
-                };
-            }
-
-            findContextualMatches(processedMessage) {
-                const matches = [];
-
-                // Search through knowledge base with multiple matching strategies
-                for (const [category, data] of Object.entries(this.knowledgeBase)) {
-                    if (category === 'fallback') continue;
-
-                    const patterns = data.patterns || [];
-                    let categoryScore = 0;
-                    let matchedPatterns = [];
-
-                    for (const pattern of patterns) {
-                        const scores = this.calculateMultipleMatchScores(processedMessage, pattern);
-                        const maxScore = Math.max(...Object.values(scores));
-
-                        if (maxScore > 0.2) {
-                            categoryScore = Math.max(categoryScore, maxScore);
-                            matchedPatterns.push({ pattern, scores, maxScore });
-                        }
-                    }
-
-                    if (categoryScore > 0) {
-                        matches.push({
-                            category: category,
-                            data: data,
-                            score: categoryScore,
-                            matchedPatterns: matchedPatterns,
-                            contextBonus: this.calculateContextBonus(category, processedMessage)
-                        });
-                    }
-                }
-
-                // Sort by combined score (match score + context bonus)
-                return matches.sort((a, b) =>
-                    (b.score + b.contextBonus) - (a.score + a.contextBonus)
-                );
-            }
-
-            selectBestResponse(matches, processedMessage) {
-                if (matches.length === 0) {
-                    return this.generateFallbackResponse(processedMessage);
-                }
-
-                const bestMatch = matches[0];
-                const responses = bestMatch.data.responses || [];
-
-                if (responses.length === 0) {
-                    return this.generateFallbackResponse(processedMessage);
-                }
-
-                // Intelligent response selection based on context and variety
-                const selectedResponse = this.selectResponseWithVariety(responses, bestMatch.category);
-
-                return {
-                    text: selectedResponse,
-                    suggestions: bestMatch.data.followUpSuggestions || [],
-                    confidence: bestMatch.score + bestMatch.contextBonus,
-                    category: bestMatch.category
-                };
-            }
-
-            calculateMultipleMatchScores(processedMessage, pattern) {
-                const patternLower = pattern.toLowerCase();
-                const scores = {};
-
-                // 1. Exact phrase matching
-                scores.exact = processedMessage.cleaned.includes(patternLower) ? 1.0 : 0;
-
-                // 2. Word overlap scoring
-                const patternWords = patternLower.split(' ').filter(w => w.length > 2);
-                const commonWords = processedMessage.words.filter(word =>
-                    patternWords.some(pw => pw.includes(word) || word.includes(pw))
-                );
-                scores.wordOverlap = commonWords.length / Math.max(patternWords.length, processedMessage.words.length);
-
-                // 3. Semantic similarity (basic)
-                scores.semantic = this.calculateSemanticSimilarity(processedMessage.words, patternWords);
-
-                // 4. Intent matching
-                scores.intent = this.matchIntent(processedMessage.intent, patternLower);
-
-                // 5. Fuzzy matching for typos
-                scores.fuzzy = this.calculateFuzzyMatch(processedMessage.cleaned, patternLower);
-
-                return scores;
-            }
-
-            calculateSemanticSimilarity(words1, words2) {
-                // Simple semantic similarity based on word relationships
-                const synonyms = {
-                    'help': ['assist', 'support', 'aid', 'guide'],
-                    'university': ['college', 'school', 'institution'],
-                    'recommendation': ['letter', 'reference', 'endorsement'],
-                    'student': ['applicant', 'candidate'],
-                    'professor': ['teacher', 'instructor', 'faculty', 'recommender'],
-                    'application': ['apply', 'applying'],
-                    'work': ['function', 'operate', 'job'],
-                    'start': ['begin', 'commence', 'initiate']
-                };
-
-                let matches = 0;
-                for (const word1 of words1) {
-                    for (const word2 of words2) {
-                        if (word1 === word2) {
-                            matches += 1;
-                        } else {
-                            // Check synonyms
-                            for (const [key, syns] of Object.entries(synonyms)) {
-                                if ((key === word1 && syns.includes(word2)) ||
-                                    (key === word2 && syns.includes(word1))) {
-                                    matches += 0.8;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                return matches / Math.max(words1.length, words2.length);
-            }
-
-            detectIntent(message) {
-                const intents = {
-                    'question': /^(what|how|when|where|why|who|which|can|could|would|will|is|are|do|does)/,
-                    'greeting': /^(hi|hello|hey|good morning|good afternoon|good evening)/,
-                    'help': /(help|assist|support|guide|explain)/,
-                    'navigation': /(where|find|go to|navigate|page|demo|dashboard)/,
-                    'information': /(tell me|show me|explain|about|information)/,
-                    'action': /(start|begin|try|use|sign up|register|create)/
-                };
-
-                for (const [intent, pattern] of Object.entries(intents)) {
-                    if (pattern.test(message)) {
-                        return intent;
-                    }
-                }
-
-                return 'general';
-            }
-
-            detectSentiment(message) {
-                const positive = /(good|great|excellent|amazing|love|like|thank|thanks|awesome|wonderful)/;
-                const negative = /(bad|terrible|hate|dislike|problem|issue|error|wrong|difficult)/;
-
-                if (positive.test(message)) return 'positive';
-                if (negative.test(message)) return 'negative';
-                return 'neutral';
-            }
-
-            matchIntent(messageIntent, pattern) {
-                const intentKeywords = {
-                    'question': ['what', 'how', 'when', 'where', 'why'],
-                    'help': ['help', 'assist', 'support'],
-                    'navigation': ['navigate', 'find', 'go'],
-                    'information': ['about', 'explain', 'tell'],
-                    'action': ['start', 'begin', 'try']
-                };
-
-                const keywords = intentKeywords[messageIntent] || [];
-                return keywords.some(keyword => pattern.includes(keyword)) ? 0.5 : 0;
-            }
-
-            calculateContextBonus(category, processedMessage) {
-                let bonus = 0;
-
-                // Page context bonus
-                if (this.currentPage === 'demo.html' && category === 'getting_started') bonus += 0.2;
-                if (this.currentPage === 'dashboard.html' && category === 'navigation_help') bonus += 0.2;
-
-                // Conversation history context
-                const recentMessages = this.conversationHistory.slice(-3);
-                const recentTopics = recentMessages.map(msg => this.detectTopicFromMessage(msg.content));
-
-                if (recentTopics.includes('student') && category === 'student_benefits') bonus += 0.15;
-                if (recentTopics.includes('professor') && category === 'recommender_workflow') bonus += 0.15;
-
-                return bonus;
-            }
-
-            selectResponseWithVariety(responses, category) {
-                // Track recently used responses to avoid repetition
-                const recentKey = `recent_${category}`;
-                let recentResponses = JSON.parse(localStorage.getItem(recentKey) || '[]');
-
-                // Filter out recently used responses if we have alternatives
-                let availableResponses = responses;
-                if (responses.length > 1) {
-                    const unused = responses.filter(r => !recentResponses.includes(r));
-                    if (unused.length > 0) {
-                        availableResponses = unused;
-                    }
-                }
-
-                // Select response with weighted randomization
-                const selectedResponse = availableResponses[Math.floor(Math.random() * availableResponses.length)];
-
-                // Update recent responses tracking
-                recentResponses.unshift(selectedResponse);
-                recentResponses = recentResponses.slice(0, Math.min(3, responses.length - 1));
-                localStorage.setItem(recentKey, JSON.stringify(recentResponses));
-
-                return selectedResponse;
-            }
-
-            generateFallbackResponse(processedMessage) {
-                const fallbackData = this.knowledgeBase.fallback || {};
-                const fallbackResponses = fallbackData.responses || [
-                    "I'm still learning about that topic! 🌟 Can you try asking in a different way?",
-                    "That's a great question! While I'm expanding my knowledge, you can check out our demo or contact our team! ⭐",
-                    "I want to give you the best answer! Could you rephrase that or ask about StellarRec features? 🚀"
-                ];
-
-                // Contextual fallback enhancement
-                let enhancedFallback = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-
-                // Add helpful suggestions based on message intent
-                const suggestions = this.generateContextualSuggestions(processedMessage);
-
-                return {
-                    text: enhancedFallback,
-                    suggestions: suggestions,
-                    confidence: 0.1,
-                    category: 'fallback'
-                };
-            }
-
-            generateContextualSuggestions(processedMessage) {
-                const baseSuggestions = ['Try the demo', 'Contact support', 'Learn about features'];
-
-                // Add contextual suggestions based on detected intent
-                if (processedMessage.intent === 'question') {
-                    baseSuggestions.unshift('How does StellarRec work?');
-                }
-                if (processedMessage.intent === 'help') {
-                    baseSuggestions.unshift('Getting started guide');
-                }
-                if (processedMessage.words.includes('student')) {
-                    baseSuggestions.unshift('Student benefits');
-                }
-                if (processedMessage.words.includes('professor') || processedMessage.words.includes('recommender')) {
-                    baseSuggestions.unshift('For professors');
-                }
-
-                return baseSuggestions.slice(0, 3);
-            }
-
-            stemWord(word) {
-                // Simple stemming for better matching
-                const suffixes = ['ing', 'ed', 'er', 'est', 'ly', 'ion', 'tion', 'ness', 'ment'];
-                let stem = word;
-
-                for (const suffix of suffixes) {
-                    if (word.endsWith(suffix) && word.length > suffix.length + 2) {
-                        stem = word.slice(0, -suffix.length);
-                        break;
-                    }
-                }
-
-                return stem;
-            }
-
-            detectTopicFromMessage(message) {
-                const topics = {
-                    'student': /(student|applicant|apply|application)/i,
-                    'professor': /(professor|teacher|recommender|faculty)/i,
-                    'university': /(university|college|school)/i,
-                    'recommendation': /(recommendation|letter|reference)/i,
-                    'help': /(help|support|assist)/i
-                };
-
-                for (const [topic, pattern] of Object.entries(topics)) {
-                    if (pattern.test(message)) {
-                        return topic;
-                    }
-                }
-
-                return 'general';
-            }
-
-            trackConversationPattern(message, response) {
-                // Simple analytics for improving responses
-                const pattern = {
-                    timestamp: new Date().toISOString(),
-                    userMessage: message,
-                    responseCategory: response.category,
-                    confidence: response.confidence
-                };
-
-                try {
-                    let patterns = JSON.parse(localStorage.getItem('max_conversation_patterns') || '[]');
-                    patterns.push(pattern);
-
-                    // Keep only recent patterns (last 50)
-                    patterns = patterns.slice(-50);
-                    localStorage.setItem('max_conversation_patterns', JSON.stringify(patterns));
-                } catch (error) {
-                    // Ignore storage errors
-                }
-            }
-
-            calculateFuzzyMatch(str1, str2) {
-                // Simple Levenshtein distance for fuzzy matching
-                const matrix = [];
-                const len1 = str1.length;
-                const len2 = str2.length;
-
-                if (len1 === 0) return len2 === 0 ? 1 : 0;
-                if (len2 === 0) return 0;
-
-                // Initialize matrix
-                for (let i = 0; i <= len1; i++) {
-                    matrix[i] = [i];
-                }
-                for (let j = 0; j <= len2; j++) {
-                    matrix[0][j] = j;
-                }
-
-                // Fill matrix
-                for (let i = 1; i <= len1; i++) {
-                    for (let j = 1; j <= len2; j++) {
-                        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
-                        matrix[i][j] = Math.min(
-                            matrix[i - 1][j] + 1,
-                            matrix[i][j - 1] + 1,
-                            matrix[i - 1][j - 1] + cost
-                        );
-                    }
-                }
-
-                const distance = matrix[len1][len2];
-                const maxLen = Math.max(len1, len2);
-                return maxLen > 0 ? 1 - (distance / maxLen) : 1;
-            }
-
-            showTypingIndicator() {
-                const typingDiv = document.createElement('div');
-                typingDiv.id = 'max-typing-indicator';
-                typingDiv.className = 'max-message bot';
-                typingDiv.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <div class="typing-dots">
-                            <span></span><span></span><span></span>
-                        </div>
-                        <span style="font-style: italic; opacity: 0.7;">Max is typing...</span>
-                    </div>
-                `;
-
-                // Add typing animation CSS if not already added
-                if (!document.getElementById('typing-animation-style')) {
-                    const style = document.createElement('style');
-                    style.id = 'typing-animation-style';
-                    style.textContent = `
-                        .typing-dots span {
-                            display: inline-block;
-                            width: 6px;
-                            height: 6px;
-                            border-radius: 50%;
-                            background: #1976d2;
-                            margin: 0 1px;
-                            animation: typingDot 1.4s infinite ease-in-out;
-                        }
-                        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
-                        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
-                        @keyframes typingDot {
-                            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
-                            40% { transform: scale(1); opacity: 1; }
-                        }
-                    `;
-                    document.head.appendChild(style);
-                }
-
-                this.messagesContainer.appendChild(typingDiv);
-                this.scrollToBottom();
-            }
-
-            hideTypingIndicator() {
-                const typingIndicator = document.getElementById('max-typing-indicator');
-                if (typingIndicator) {
-                    typingIndicator.remove();
-                }
-            }
-
-            formatTimestamp(timestamp) {
-                const date = new Date(timestamp);
-                const now = new Date();
-                const diffMs = now - date;
-                const diffMins = Math.floor(diffMs / 60000);
-
-                if (diffMins < 1) return 'Just now';
-                if (diffMins < 60) return `${diffMins}m ago`;
-                if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
-
-                return date.toLocaleDateString();
-            }
-
-            scrollToBottom() {
-                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-            }
-
-            saveConversationHistory() {
-                const conversationData = {
-                    sessionId: this.sessionId,
-                    currentPage: this.currentPage,
-                    lastUpdated: new Date().toISOString(),
-                    messages: this.conversationHistory
-                };
-
-                try {
-                    localStorage.setItem('max_conversation', JSON.stringify(conversationData));
-                } catch (error) {
-                    console.warn('Failed to save conversation history:', error);
-                    // If storage is full, keep only recent messages
-                    if (this.conversationHistory.length > 20) {
-                        this.conversationHistory = this.conversationHistory.slice(-10);
-                        conversationData.messages = this.conversationHistory;
-                        try {
-                            localStorage.setItem('max_conversation', JSON.stringify(conversationData));
-                        } catch (e) {
-                            console.error('Failed to save even truncated conversation:', e);
-                        }
-                    }
-                }
-            }
-
-            loadConversationHistory() {
-                try {
-                    const savedData = localStorage.getItem('max_conversation');
-                    if (savedData) {
-                        const conversationData = JSON.parse(savedData);
-
-                        // Check if conversation is recent (within 24 hours)
-                        const lastUpdated = new Date(conversationData.lastUpdated);
-                        const now = new Date();
-                        const hoursDiff = (now - lastUpdated) / (1000 * 60 * 60);
-
-                        if (hoursDiff < 24) {
-                            this.conversationHistory = conversationData.messages || [];
-                            this.sessionId = conversationData.sessionId || this.sessionId;
-
-                            // Restore messages to UI
-                            this.conversationHistory.forEach(message => {
-                                const messageElement = this.createMessageElement(message);
-                                this.messagesContainer.appendChild(messageElement);
-                            });
-
-                            this.scrollToBottom();
-                        } else {
-                            // Clear old conversation
-                            localStorage.removeItem('max_conversation');
-                        }
-                    }
-                } catch (error) {
-                    console.warn('Failed to load conversation history:', error);
-                    localStorage.removeItem('max_conversation');
-                }
-            }
-        }
-
-        // Initialize Max Chatbot when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            const maxChatbot = new MaxChatbot();
-            maxChatbot.init();
-        });
-
-        // Hero Background Image Loading
-        document.addEventListener('DOMContentLoaded', function () {
-            const heroBackground = document.querySelector('.hero-background-image');
-
-            if (heroBackground) {
-                // Add a subtle fade-in animation for the background
-                heroBackground.style.opacity = '0';
-                heroBackground.style.transition = 'opacity 1s ease-in-out';
-
-                // Fade in the background
-                setTimeout(function () {
-                    heroBackground.style.opacity = '1';
-                }, 100);
-            }
-        });
-    </script>
 </body>
-
 </html>
