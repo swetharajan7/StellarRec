@@ -1136,10 +1136,14 @@
 
         // Initialize dashboard
         function initializeDashboard() {
-            updateUserInterface();
-            updateNavigation();
-            updateStats();
-            showSection(currentSection);
+            try {
+                updateUserInterface();
+                updateNavigation();
+                updateStats();
+                showSection(currentSection);
+            } catch (error) {
+                console.error('Dashboard initialization error:', error);
+            }
         }
 
         // Switch user type
@@ -1306,9 +1310,13 @@
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            initializeDashboard();
-            simulateRealTimeUpdates();
-            initializeStella();
+            try {
+                initializeDashboard();
+                simulateRealTimeUpdates();
+                initializeStella();
+            } catch (error) {
+                console.error('Dashboard initialization error:', error);
+            }
         });
 
         // Stella Chatbot Implementation
@@ -1624,8 +1632,12 @@
         // Initialize Stella
         let stellaBot;
         function initializeStella() {
-            stellaBot = new StellaChatbot();
-            stellaBot.init();
+            try {
+                stellaBot = new StellaChatbot();
+                stellaBot.init();
+            } catch (error) {
+                console.error('Stella initialization error:', error);
+            }
         }
     </script>
 </body>
