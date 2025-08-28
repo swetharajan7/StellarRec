@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - StellarRec AI Platform</title>
+    <title>StellarRec™ - Letter of Recommendation Platform</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -98,11 +98,142 @@
         .remove-tag { cursor: pointer; background: rgba(255, 255, 255, 0.2); border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
         .remove-tag:hover { background: rgba(255, 255, 255, 0.3); }
         
+        /* Additional StellarRec Styles */
+        .notification-bell { position: relative; cursor: pointer; padding: 0.5rem; }
+        .notification-badge { 
+            position: absolute; top: 0; right: 0; background: #f44336; color: white; 
+            border-radius: 50%; width: 20px; height: 20px; font-size: 0.8rem; 
+            display: flex; align-items: center; justify-content: center; 
+        }
+        
+        .top-bar-actions { display: flex; align-items: center; gap: 1rem; }
+        
+        .section-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 2rem; 
+        }
+        .section-description { color: #666; font-size: 0.9rem; margin: 0; }
+        
+        /* Letter Management Styles */
+        .letter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; }
+        .letter-card { 
+            background: white; border-radius: 12px; padding: 1.5rem; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); 
+        }
+        .letter-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .letter-info h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+        .letter-student { color: #1976d2; font-weight: 500; margin-bottom: 0.25rem; }
+        .letter-meta { color: #666; font-size: 0.9rem; }
+        
+        .status-badge { 
+            padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem; font-weight: 500; 
+        }
+        .status-badge.active { background: #e8f5e8; color: #4caf50; }
+        .status-badge.pending { background: #fff3e0; color: #ff9800; }
+        .status-badge.delivered { background: #e3f2fd; color: #1976d2; }
+        .status-badge.approved { background: #e8f5e8; color: #4caf50; }
+        .status-badge.in-transit { background: #fff3e0; color: #ff9800; }
+        
+        .letter-stats { 
+            display: flex; gap: 2rem; margin: 1rem 0; padding: 1rem 0; 
+            border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; 
+        }
+        .stat-item { text-align: center; }
+        .stat-value { display: block; font-size: 1.5rem; font-weight: 600; color: #1976d2; }
+        .stat-label { font-size: 0.8rem; color: #666; }
+        
+        .letter-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        
+        /* Delivery Tracking Styles */
+        .tracking-filters { display: flex; gap: 1rem; }
+        .delivery-table { background: white; border-radius: 12px; overflow: hidden; }
+        .table-header, .table-row { 
+            display: grid; 
+            grid-template-columns: 1fr 1.5fr 1fr 1fr 1.2fr 0.8fr; 
+            gap: 1rem; padding: 1rem; align-items: center; 
+        }
+        .table-header { 
+            background: #f5f5f5; font-weight: 600; color: #333; 
+            border-bottom: 1px solid #e0e0e0; 
+        }
+        .table-row { border-bottom: 1px solid #f0f0f0; }
+        .table-row:hover { background: #f9f9f9; }
+        
+        .method-badge { 
+            padding: 0.25rem 0.5rem; border-radius: 10px; font-size: 0.8rem; font-weight: 500; 
+        }
+        .method-badge.api { background: #e8f5e8; color: #4caf50; }
+        .method-badge.secure-inbox { background: #e3f2fd; color: #1976d2; }
+        .method-badge.email { background: #fff3e0; color: #ff9800; }
+        
+        .btn-icon { 
+            background: none; border: none; cursor: pointer; padding: 0.5rem; 
+            border-radius: 50%; transition: background 0.3s ease; 
+        }
+        .btn-icon:hover { background: #f0f0f0; }
+        
+        /* Consent Management Styles */
+        .consent-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.5rem; }
+        .consent-card { 
+            background: white; border-radius: 12px; padding: 1.5rem; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); 
+        }
+        .consent-card.pending { border-left: 4px solid #ff9800; }
+        .consent-card.approved { border-left: 4px solid #4caf50; }
+        
+        .consent-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .student-info h3 { margin-bottom: 0.25rem; }
+        .student-info p { color: #666; font-size: 0.9rem; }
+        
+        .consent-request, .consent-details { 
+            background: #f9f9f9; padding: 1rem; border-radius: 8px; margin: 1rem 0; 
+        }
+        .consent-request p, .consent-details p { margin-bottom: 0.5rem; }
+        .consent-request p:last-child, .consent-details p:last-child { margin-bottom: 0; }
+        
+        .consent-actions { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+        .btn-approve { 
+            background: #4caf50; color: white; border: none; padding: 0.5rem 1rem; 
+            border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; 
+        }
+        .btn-decline { 
+            background: #f44336; color: white; border: none; padding: 0.5rem 1rem; 
+            border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; 
+        }
+        
+        /* Delivery List Styles */
+        .delivery-list { margin: 1rem 0; }
+        .delivery-item { 
+            display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0; 
+            border-bottom: 1px solid #f0f0f0; 
+        }
+        .delivery-item:last-child { border-bottom: none; }
+        .delivery-status.delivered { color: #4caf50; font-weight: bold; }
+        .delivery-time { margin-left: auto; color: #666; font-size: 0.9rem; }
+        
+        /* Approval List Styles */
+        .approval-list { margin: 1rem 0; }
+        .approval-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 1rem; background: #f9f9f9; border-radius: 8px; margin-bottom: 0.5rem; 
+        }
+        .approval-details { color: #666; font-size: 0.9rem; margin-top: 0.25rem; }
+        .approval-actions { display: flex; gap: 0.5rem; }
+        .approval-actions .btn-approve, .approval-actions .btn-decline { 
+            width: 35px; height: 35px; border-radius: 50%; display: flex; 
+            align-items: center; justify-content: center; font-size: 1.2rem; 
+        }
+        
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
             .main-content { margin-left: 0; }
             .content-area { padding: 1rem; }
             .dashboard-grid { grid-template-columns: 1fr; }
+            .letter-grid { grid-template-columns: 1fr; }
+            .consent-grid { grid-template-columns: 1fr; }
+            .table-header, .table-row { grid-template-columns: 1fr; }
+            .tracking-filters { flex-direction: column; }
+            .top-bar-actions { flex-direction: column; gap: 0.5rem; }
         }
     </style>
 </head>
@@ -115,63 +246,365 @@
             </a>
             <div class="user-info">
                 <div class="user-avatar">
-                    <span class="material-icons">person</span>
+                    <span class="material-icons" id="userIcon">person</span>
                 </div>
                 <div class="user-details">
-                    <h3 id="userName">Alex Johnson</h3>
-                    <p id="userType">Student</p>
+                    <h3 id="userName">Dr. Sarah Chen</h3>
+                    <p id="userRole">Recommender</p>
+                    <p id="userAffiliation" style="font-size: 0.8rem; opacity: 0.8;">MIT Computer Science</p>
                 </div>
             </div>
         </div>
         
-        <nav class="nav-menu">
-            <a href="#" class="nav-item active" onclick="showSection('overview')">
-                <span class="material-icons">dashboard</span>
-                Overview
-            </a>
-            <a href="#" class="nav-item" onclick="showSection('universities')">
-                <span class="material-icons">school</span>
-                University Matches
-            </a>
-            <a href="#" class="nav-item" onclick="showSection('applications')">
-                <span class="material-icons">assignment</span>
-                Applications
-            </a>
-            <a href="#" class="nav-item" onclick="showSection('essays')">
-                <span class="material-icons">edit</span>
-                Essay Editor
-            </a>
-
+        <nav class="nav-menu" id="navMenu">
+            <!-- Navigation will be populated based on user role -->
         </nav>
     </div>
 
     <div class="main-content">
         <div class="top-bar">
-            <h1 class="page-title" id="pageTitle">Dashboard Overview</h1>
-            <div class="user-type-toggle">
-                <button class="toggle-btn active" onclick="switchUserType('student')">Student</button>
-                <button class="toggle-btn" onclick="switchUserType('recommender')">Recommender</button>
+            <h1 class="page-title" id="pageTitle">Letter Management Dashboard</h1>
+            <div class="top-bar-actions">
+                <div class="user-type-toggle">
+                    <button class="toggle-btn" onclick="switchUserType('student')">Student View</button>
+                    <button class="toggle-btn active" onclick="switchUserType('recommender')">Recommender View</button>
+                    <button class="toggle-btn" onclick="switchUserType('institution')">Institution View</button>
+                    <button class="toggle-btn" onclick="switchUserType('admin')">Admin View</button>
+                </div>
+                <div class="notification-bell">
+                    <span class="material-icons">notifications</span>
+                    <span class="notification-badge" id="notificationCount">3</span>
+                </div>
             </div>
         </div>
 
         <div class="content-area">
-            <div class="dashboard-section active" id="overview">
+            <!-- RECOMMENDER DASHBOARD -->
+            <div class="dashboard-section active" id="recommender-overview">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-number" id="matchedUniversities">12</div>
-                        <div class="stat-label">University Matches</div>
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">Active Letters</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" id="applicationsStarted">5</div>
-                        <div class="stat-label">Applications Started</div>
+                        <div class="stat-number">24</div>
+                        <div class="stat-label">Total Deliveries</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" id="essaysCompleted">3</div>
-                        <div class="stat-label">Essays Completed</div>
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Pending Approvals</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" id="recommendationsReceived">2</div>
-                        <div class="stat-label">Recommendations</div>
+                        <div class="stat-number">96%</div>
+                        <div class="stat-label">Delivery Success Rate</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #4caf50, #66bb6a);">
+                                <span class="material-icons">assignment_turned_in</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Recent Deliveries</div>
+                                <div class="card-subtitle">5 letters delivered today</div>
+                            </div>
+                        </div>
+                        <div class="delivery-list">
+                            <div class="delivery-item">
+                                <span class="delivery-status delivered">✓</span>
+                                <span>MIT - Alex Chen - STEM Grad 2025</span>
+                                <span class="delivery-time">2 hours ago</span>
+                            </div>
+                            <div class="delivery-item">
+                                <span class="delivery-status delivered">✓</span>
+                                <span>Stanford - Maria Rodriguez - CS PhD</span>
+                                <span class="delivery-time">4 hours ago</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="showSection('delivery-tracking')">View All Deliveries</button>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #ff9800, #ffb74d);">
+                                <span class="material-icons">pending_actions</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Pending Approvals</div>
+                                <div class="card-subtitle">3 new destination requests</div>
+                            </div>
+                        </div>
+                        <div class="approval-list">
+                            <div class="approval-item">
+                                <div class="approval-info">
+                                    <strong>David Kim</strong> wants to add <strong>CMU</strong>
+                                    <div class="approval-details">STEM Grad 2025 • Expires in 2 days</div>
+                                </div>
+                                <div class="approval-actions">
+                                    <button class="btn-approve">✓</button>
+                                    <button class="btn-decline">✗</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="showSection('consent-management')">Manage All Approvals</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LETTER MANAGEMENT SECTION -->
+            <div class="dashboard-section" id="letter-management">
+                <div class="section-header">
+                    <h2>Letter Management</h2>
+                    <button class="btn btn-primary" onclick="showLetterUpload()">
+                        <span class="material-icons">add</span>
+                        Create New Letter
+                    </button>
+                </div>
+
+                <div class="letter-grid">
+                    <div class="letter-card">
+                        <div class="letter-header">
+                            <div class="letter-info">
+                                <h3>STEM Graduate Programs 2025</h3>
+                                <p class="letter-student">For: Alex Chen, Maria Rodriguez, David Kim</p>
+                                <p class="letter-meta">Created: Jan 15, 2025 • Last updated: Jan 20, 2025</p>
+                            </div>
+                            <div class="letter-status">
+                                <span class="status-badge active">Active</span>
+                            </div>
+                        </div>
+                        
+                        <div class="letter-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">12</span>
+                                <span class="stat-label">Deliveries</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">3</span>
+                                <span class="stat-label">Students</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">8</span>
+                                <span class="stat-label">Universities</span>
+                            </div>
+                        </div>
+
+                        <div class="letter-actions">
+                            <button class="btn btn-outline" onclick="viewLetter('stem-2025')">View Letter</button>
+                            <button class="btn btn-outline" onclick="editLetter('stem-2025')">Edit</button>
+                            <button class="btn btn-outline" onclick="viewDeliveries('stem-2025')">Track Deliveries</button>
+                        </div>
+                    </div>
+
+                    <div class="letter-card">
+                        <div class="letter-header">
+                            <div class="letter-info">
+                                <h3>Business School Applications 2025</h3>
+                                <p class="letter-student">For: Sarah Johnson</p>
+                                <p class="letter-meta">Created: Dec 10, 2024 • Last updated: Jan 18, 2025</p>
+                            </div>
+                            <div class="letter-status">
+                                <span class="status-badge active">Active</span>
+                            </div>
+                        </div>
+                        
+                        <div class="letter-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">6</span>
+                                <span class="stat-label">Deliveries</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">1</span>
+                                <span class="stat-label">Students</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">6</span>
+                                <span class="stat-label">Universities</span>
+                            </div>
+                        </div>
+
+                        <div class="letter-actions">
+                            <button class="btn btn-outline" onclick="viewLetter('business-2025')">View Letter</button>
+                            <button class="btn btn-outline" onclick="editLetter('business-2025')">Edit</button>
+                            <button class="btn btn-outline" onclick="viewDeliveries('business-2025')">Track Deliveries</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DELIVERY TRACKING SECTION -->
+            <div class="dashboard-section" id="delivery-tracking">
+                <div class="section-header">
+                    <h2>Delivery Tracking</h2>
+                    <div class="tracking-filters">
+                        <select class="filter-select">
+                            <option>All Letters</option>
+                            <option>STEM Graduate 2025</option>
+                            <option>Business School 2025</option>
+                        </select>
+                        <select class="filter-select">
+                            <option>All Statuses</option>
+                            <option>Delivered</option>
+                            <option>In Transit</option>
+                            <option>Failed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="delivery-table">
+                    <div class="table-header">
+                        <div class="col-student">Student</div>
+                        <div class="col-university">University</div>
+                        <div class="col-method">Delivery Method</div>
+                        <div class="col-status">Status</div>
+                        <div class="col-timestamp">Timestamp</div>
+                        <div class="col-actions">Actions</div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div class="col-student">Alex Chen</div>
+                        <div class="col-university">MIT EECS</div>
+                        <div class="col-method">
+                            <span class="method-badge api">Native API</span>
+                        </div>
+                        <div class="col-status">
+                            <span class="status-badge delivered">Delivered</span>
+                        </div>
+                        <div class="col-timestamp">Jan 22, 2025 2:30 PM</div>
+                        <div class="col-actions">
+                            <button class="btn-icon" onclick="viewDeliveryDetails('del-001')">
+                                <span class="material-icons">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="col-student">Maria Rodriguez</div>
+                        <div class="col-university">Stanford CS</div>
+                        <div class="col-method">
+                            <span class="method-badge secure-inbox">Secure Inbox</span>
+                        </div>
+                        <div class="col-status">
+                            <span class="status-badge delivered">Delivered</span>
+                        </div>
+                        <div class="col-timestamp">Jan 22, 2025 1:15 PM</div>
+                        <div class="col-actions">
+                            <button class="btn-icon" onclick="viewDeliveryDetails('del-002')">
+                                <span class="material-icons">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="col-student">David Kim</div>
+                        <div class="col-university">CMU SCS</div>
+                        <div class="col-method">
+                            <span class="method-badge email">Secure Email</span>
+                        </div>
+                        <div class="col-status">
+                            <span class="status-badge in-transit">In Transit</span>
+                        </div>
+                        <div class="col-timestamp">Jan 22, 2025 3:45 PM</div>
+                        <div class="col-actions">
+                            <button class="btn-icon" onclick="retryDelivery('del-003')">
+                                <span class="material-icons">refresh</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONSENT MANAGEMENT SECTION -->
+            <div class="dashboard-section" id="consent-management">
+                <div class="section-header">
+                    <h2>Consent & Approval Management</h2>
+                    <p class="section-description">Manage student requests and destination approvals</p>
+                </div>
+
+                <div class="consent-grid">
+                    <div class="consent-card pending">
+                        <div class="consent-header">
+                            <div class="student-info">
+                                <h3>David Kim</h3>
+                                <p>STEM Graduate Programs 2025</p>
+                            </div>
+                            <div class="consent-status">
+                                <span class="status-badge pending">Pending Approval</span>
+                            </div>
+                        </div>
+                        
+                        <div class="consent-request">
+                            <p><strong>New Destination Request:</strong> Carnegie Mellon University - School of Computer Science</p>
+                            <p><strong>Program Type:</strong> PhD Computer Science</p>
+                            <p><strong>Delivery Method:</strong> Secure Email (FERPA Compliant)</p>
+                            <p><strong>Student Visibility:</strong> Status only (sealed letter)</p>
+                        </div>
+
+                        <div class="consent-actions">
+                            <button class="btn btn-approve" onclick="approveDestination('req-001')">
+                                <span class="material-icons">check</span>
+                                Approve
+                            </button>
+                            <button class="btn btn-decline" onclick="declineDestination('req-001')">
+                                <span class="material-icons">close</span>
+                                Decline
+                            </button>
+                            <button class="btn btn-outline" onclick="viewConsentDetails('req-001')">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="consent-card approved">
+                        <div class="consent-header">
+                            <div class="student-info">
+                                <h3>Alex Chen</h3>
+                                <p>STEM Graduate Programs 2025</p>
+                            </div>
+                            <div class="consent-status">
+                                <span class="status-badge approved">Approved</span>
+                            </div>
+                        </div>
+                        
+                        <div class="consent-details">
+                            <p><strong>Approved Destinations:</strong> MIT, Stanford, Berkeley, Caltech</p>
+                            <p><strong>Reuse Policy:</strong> Allowed for STEM programs until Dec 2025</p>
+                            <p><strong>Student Visibility:</strong> Full access granted</p>
+                            <p><strong>Last Updated:</strong> Jan 15, 2025</p>
+                        </div>
+
+                        <div class="consent-actions">
+                            <button class="btn btn-outline" onclick="editConsent('consent-001')">
+                                Edit Permissions
+                            </button>
+                            <button class="btn btn-outline" onclick="viewConsentLog('consent-001')">
+                                View Audit Log
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STUDENT DASHBOARD -->
+            <div class="dashboard-section" id="student-overview">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Active Requests</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Letters Sent</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">Universities Applied</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Pending Approvals</div>
                     </div>
                 </div>
 
@@ -179,159 +612,127 @@
                     <div class="dashboard-card">
                         <div class="card-header">
                             <div class="card-icon" style="background: linear-gradient(135deg, #1976d2, #42a5f5);">
-                                <span class="material-icons">psychology</span>
+                                <span class="material-icons">mail</span>
                             </div>
                             <div>
-                                <div class="card-title">AI University Matching</div>
-                                <div class="card-subtitle">92% compatibility found</div>
+                                <div class="card-title">Recommendation Requests</div>
+                                <div class="card-subtitle">5 active requests</div>
                             </div>
                         </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 92%; background: linear-gradient(90deg, #1976d2, #42a5f5);"></div>
+                        <button class="btn btn-primary" onclick="showSection('student-requests')">Manage Requests</button>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #4caf50, #66bb6a);">
+                                <span class="material-icons">track_changes</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Application Tracking</div>
+                                <div class="card-subtitle">Real-time delivery status</div>
+                            </div>
                         </div>
-                        <button class="btn btn-primary">View Matches</button>
+                        <button class="btn btn-primary" onclick="showSection('student-tracking')">Track Applications</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INSTITUTION DASHBOARD -->
+            <div class="dashboard-section" id="institution-overview">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">156</div>
+                        <div class="stat-label">Letters Received Today</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">2,847</div>
+                        <div class="stat-label">Total This Cycle</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">98.5%</div>
+                        <div class="stat-label">API Uptime</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">45</div>
+                        <div class="stat-label">Active Programs</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #ff9800, #ffb74d);">
+                                <span class="material-icons">inbox</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Letter Inbox</div>
+                                <div class="card-subtitle">156 new letters today</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="showSection('institution-inbox')">View Inbox</button>
                     </div>
 
                     <div class="dashboard-card">
                         <div class="card-header">
                             <div class="card-icon" style="background: linear-gradient(135deg, #7c4dff, #9c27b0);">
-                                <span class="material-icons">auto_awesome</span>
+                                <span class="material-icons">settings</span>
                             </div>
                             <div>
-                                <div class="card-title">Essay Optimization</div>
-                                <div class="card-subtitle">3 essays need review</div>
+                                <div class="card-title">Integration Settings</div>
+                                <div class="card-subtitle">API & delivery configuration</div>
                             </div>
                         </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 60%; background: linear-gradient(90deg, #7c4dff, #9c27b0);"></div>
-                        </div>
-                        <button class="btn btn-primary">Continue Writing</button>
+                        <button class="btn btn-primary" onclick="showSection('institution-settings')">Configure</button>
                     </div>
                 </div>
             </div>
 
-            <div class="dashboard-section" id="universities">
-                <h2 style="margin-bottom: 1.5rem;">University Directory</h2>
-                <p style="color: #666; margin-bottom: 2rem;">Browse and select from over 4,000 accredited universities across the United States</p>
-                
-                <div class="university-search">
-                    <div class="search-filters">
-                        <div class="filter-group">
-                            <label>Search Universities</label>
-                            <input type="text" class="search-input" id="universitySearch" placeholder="Search by name or location...">
-                        </div>
-                        <div class="filter-group">
-                            <label>State</label>
-                            <select class="filter-select" id="stateFilter">
-                                <option value="">All States</option>
-                                <option value="AL">Alabama</option>
-                                <option value="AK">Alaska</option>
-                                <option value="AZ">Arizona</option>
-                                <option value="AR">Arkansas</option>
-                                <option value="CA">California</option>
-                                <option value="CO">Colorado</option>
-                                <option value="CT">Connecticut</option>
-                                <option value="DE">Delaware</option>
-                                <option value="FL">Florida</option>
-                                <option value="GA">Georgia</option>
-                                <option value="HI">Hawaii</option>
-                                <option value="ID">Idaho</option>
-                                <option value="IL">Illinois</option>
-                                <option value="IN">Indiana</option>
-                                <option value="IA">Iowa</option>
-                                <option value="KS">Kansas</option>
-                                <option value="KY">Kentucky</option>
-                                <option value="LA">Louisiana</option>
-                                <option value="ME">Maine</option>
-                                <option value="MD">Maryland</option>
-                                <option value="MA">Massachusetts</option>
-                                <option value="MI">Michigan</option>
-                                <option value="MN">Minnesota</option>
-                                <option value="MS">Mississippi</option>
-                                <option value="MO">Missouri</option>
-                                <option value="MT">Montana</option>
-                                <option value="NE">Nebraska</option>
-                                <option value="NV">Nevada</option>
-                                <option value="NH">New Hampshire</option>
-                                <option value="NJ">New Jersey</option>
-                                <option value="NM">New Mexico</option>
-                                <option value="NY">New York</option>
-                                <option value="NC">North Carolina</option>
-                                <option value="ND">North Dakota</option>
-                                <option value="OH">Ohio</option>
-                                <option value="OK">Oklahoma</option>
-                                <option value="OR">Oregon</option>
-                                <option value="PA">Pennsylvania</option>
-                                <option value="RI">Rhode Island</option>
-                                <option value="SC">South Carolina</option>
-                                <option value="SD">South Dakota</option>
-                                <option value="TN">Tennessee</option>
-                                <option value="TX">Texas</option>
-                                <option value="UT">Utah</option>
-                                <option value="VT">Vermont</option>
-                                <option value="VA">Virginia</option>
-                                <option value="WA">Washington</option>
-                                <option value="WV">West Virginia</option>
-                                <option value="WI">Wisconsin</option>
-                                <option value="WY">Wyoming</option>
-                                <option value="DC">Washington D.C.</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Type</label>
-                            <select class="filter-select" id="typeFilter">
-                                <option value="">All Types</option>
-                                <option value="Public">Public</option>
-                                <option value="Private">Private</option>
-                                <option value="Community College">Community College</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Size</label>
-                            <select class="filter-select" id="sizeFilter">
-                                <option value="">All Sizes</option>
-                                <option value="Small">Small (< 5,000)</option>
-                                <option value="Medium">Medium (5,000-15,000)</option>
-                                <option value="Large">Large (> 15,000)</option>
-                            </select>
-                        </div>
+            <!-- ADMIN DASHBOARD -->
+            <div class="dashboard-section" id="admin-overview">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">12,456</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3,892</div>
+                        <div class="stat-label">Active Letters</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">847</div>
+                        <div class="stat-label">Partner Institutions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">99.2%</div>
+                        <div class="stat-label">System Uptime</div>
                     </div>
                 </div>
-                
-                <div class="university-grid" id="universityGrid">
-                    <!-- Universities will be populated by JavaScript -->
-                </div>
-                
-                <div class="selected-universities" id="selectedUniversities" style="display: none;">
-                    <div class="selected-count" id="selectedCount">0 universities selected</div>
-                    <div class="selected-list" id="selectedList"></div>
-                    <div style="margin-top: 1rem;">
-                        <button class="btn btn-primary" onclick="proceedWithSelection()">
-                            <span class="material-icons">arrow_forward</span>
-                            Proceed with Selected Universities
-                        </button>
-                    </div>
-                </div>
-            </div>
 
-            <div class="dashboard-section" id="applications">
-                <h2 style="margin-bottom: 1.5rem;">Application Progress</h2>
-                <div id="applicationsList"></div>
-            </div>
-
-            <div class="dashboard-section" id="essays">
-                <h2 style="margin-bottom: 1.5rem;">AI Essay Editor</h2>
-                <div class="dashboard-card">
-                    <div class="card-title" style="margin-bottom: 1rem;">Personal Statement - Stanford University</div>
-                    <textarea style="width: 100%; height: 300px; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; resize: vertical;" placeholder="Start writing your essay here...">Growing up in a small town, I never imagined that my curiosity about how things work would lead me to pursue computer science...</textarea>
-                    <div style="margin-top: 1rem; display: flex; gap: 1rem; align-items: center;">
-                        <button class="btn btn-primary">
-                            <span class="material-icons">auto_awesome</span>
-                            AI Optimize
-                        </button>
-                        <div style="margin-left: auto; color: #666;">
-                            <span style="color: #4caf50;">✓ 487 words</span>
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #f44336, #ef5350);">
+                                <span class="material-icons">security</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Trust & Safety</div>
+                                <div class="card-subtitle">5 flagged accounts</div>
+                            </div>
                         </div>
+                        <button class="btn btn-primary" onclick="showSection('admin-security')">Review Flags</button>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #607d8b, #78909c);">
+                                <span class="material-icons">analytics</span>
+                            </div>
+                            <div>
+                                <div class="card-title">System Analytics</div>
+                                <div class="card-subtitle">Performance & usage metrics</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="showSection('admin-analytics')">View Analytics</button>
                     </div>
                 </div>
             </div>
@@ -339,83 +740,250 @@
     </div>
 
     <script>
-        let currentUserType = 'student';
-        let selectedUniversities = [];
-        let allUniversities = [];
+        // StellarRec™ Dashboard System
+        let currentUserType = 'recommender';
+        let currentSection = 'recommender-overview';
+        
+        // User data simulation
+        const userData = {
+            recommender: {
+                name: "Dr. Sarah Chen",
+                role: "Recommender",
+                affiliation: "MIT Computer Science",
+                icon: "school",
+                stats: { activeLetters: 8, totalDeliveries: 24, pendingApprovals: 3, successRate: "96%" }
+            },
+            student: {
+                name: "Alex Johnson",
+                role: "Student",
+                affiliation: "Senior, Computer Science",
+                icon: "person",
+                stats: { activeRequests: 5, lettersSent: 12, universitiesApplied: 8, pendingApprovals: 3 }
+            },
+            institution: {
+                name: "MIT Admissions",
+                role: "Institution",
+                affiliation: "Graduate Admissions Office",
+                icon: "business",
+                stats: { lettersToday: 156, totalCycle: 2847, apiUptime: "98.5%", activePrograms: 45 }
+            },
+            admin: {
+                name: "System Admin",
+                role: "Administrator",
+                affiliation: "StellarRec Platform",
+                icon: "admin_panel_settings",
+                stats: { totalUsers: 12456, activeLetters: 3892, partnerInstitutions: 847, systemUptime: "99.2%" }
+            }
+        };
 
-        // Comprehensive list of US universities
-        const universities = [
-            // Ivy League & Top Private Universities
-            { name: "Harvard University", location: "Cambridge, MA", state: "MA", type: "Private", size: "Medium", acceptance: "3%", ranking: 1 },
-            { name: "Stanford University", location: "Stanford, CA", state: "CA", type: "Private", size: "Large", acceptance: "4%", ranking: 2 },
-            { name: "Massachusetts Institute of Technology", location: "Cambridge, MA", state: "MA", type: "Private", size: "Medium", acceptance: "4%", ranking: 3 },
-            { name: "Yale University", location: "New Haven, CT", state: "CT", type: "Private", size: "Medium", acceptance: "5%", ranking: 4 },
-            { name: "Princeton University", location: "Princeton, NJ", state: "NJ", type: "Private", size: "Small", acceptance: "4%", ranking: 5 },
-            { name: "University of Pennsylvania", location: "Philadelphia, PA", state: "PA", type: "Private", size: "Large", acceptance: "6%", ranking: 6 },
-            { name: "Columbia University", location: "New York, NY", state: "NY", type: "Private", size: "Large", acceptance: "4%", ranking: 7 },
-            { name: "Dartmouth College", location: "Hanover, NH", state: "NH", type: "Private", size: "Medium", acceptance: "6%", ranking: 8 },
-            { name: "Brown University", location: "Providence, RI", state: "RI", type: "Private", size: "Medium", acceptance: "5%", ranking: 9 },
-            { name: "Cornell University", location: "Ithaca, NY", state: "NY", type: "Private", size: "Large", acceptance: "9%", ranking: 10 },
+        // Navigation menus for different user types
+        const navigationMenus = {
+            recommender: [
+                { id: 'recommender-overview', icon: 'dashboard', label: 'Overview' },
+                { id: 'letter-management', icon: 'mail', label: 'Letter Management' },
+                { id: 'delivery-tracking', icon: 'track_changes', label: 'Delivery Tracking' },
+                { id: 'consent-management', icon: 'verified_user', label: 'Consent Management' },
+                { id: 'notifications', icon: 'notifications', label: 'Notifications' }
+            ],
+            student: [
+                { id: 'student-overview', icon: 'dashboard', label: 'Overview' },
+                { id: 'student-requests', icon: 'mail_outline', label: 'My Requests' },
+                { id: 'student-tracking', icon: 'track_changes', label: 'Application Tracking' },
+                { id: 'university-search', icon: 'school', label: 'Find Universities' }
+            ],
+            institution: [
+                { id: 'institution-overview', icon: 'dashboard', label: 'Overview' },
+                { id: 'institution-inbox', icon: 'inbox', label: 'Letter Inbox' },
+                { id: 'institution-settings', icon: 'settings', label: 'Integration Settings' },
+                { id: 'institution-analytics', icon: 'analytics', label: 'Analytics' }
+            ],
+            admin: [
+                { id: 'admin-overview', icon: 'dashboard', label: 'Overview' },
+                { id: 'admin-security', icon: 'security', label: 'Trust & Safety' },
+                { id: 'admin-analytics', icon: 'analytics', label: 'System Analytics' },
+                { id: 'admin-users', icon: 'people', label: 'User Management' },
+                { id: 'admin-institutions', icon: 'business', label: 'Institution Partners' }
+            ]
+        };
+
+        // Initialize dashboard
+        function initializeDashboard() {
+            updateUserInterface();
+            updateNavigation();
+            updateStats();
+            showSection(currentSection);
+        }
+
+        // Switch user type
+        function switchUserType(userType) {
+            currentUserType = userType;
             
-            // Top Public Universities
-            { name: "University of California, Berkeley", location: "Berkeley, CA", state: "CA", type: "Public", size: "Large", acceptance: "11%", ranking: 11 },
-            { name: "University of California, Los Angeles", location: "Los Angeles, CA", state: "CA", type: "Public", size: "Large", acceptance: "9%", ranking: 12 },
-            { name: "University of Michigan", location: "Ann Arbor, MI", state: "MI", type: "Public", size: "Large", acceptance: "18%", ranking: 13 },
-            { name: "University of Virginia", location: "Charlottesville, VA", state: "VA", type: "Public", size: "Large", acceptance: "21%", ranking: 14 },
-            { name: "University of North Carolina at Chapel Hill", location: "Chapel Hill, NC", state: "NC", type: "Public", size: "Large", acceptance: "20%", ranking: 15 },
-            { name: "Georgia Institute of Technology", location: "Atlanta, GA", state: "GA", type: "Public", size: "Large", acceptance: "16%", ranking: 16 },
-            { name: "University of California, San Diego", location: "San Diego, CA", state: "CA", type: "Public", size: "Large", acceptance: "24%", ranking: 17 },
-            { name: "University of Florida", location: "Gainesville, FL", state: "FL", type: "Public", size: "Large", acceptance: "23%", ranking: 18 },
-            { name: "University of Texas at Austin", location: "Austin, TX", state: "TX", type: "Public", size: "Large", acceptance: "29%", ranking: 19 },
-            { name: "University of Wisconsin-Madison", location: "Madison, WI", state: "WI", type: "Public", size: "Large", acceptance: "39%", ranking: 20 },
+            // Update active toggle button
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
             
-            // More Top Universities
-            { name: "California Institute of Technology", location: "Pasadena, CA", state: "CA", type: "Private", size: "Small", acceptance: "3%", ranking: 21 },
-            { name: "Duke University", location: "Durham, NC", state: "NC", type: "Private", size: "Large", acceptance: "6%", ranking: 22 },
-            { name: "Northwestern University", location: "Evanston, IL", state: "IL", type: "Private", size: "Large", acceptance: "7%", ranking: 23 },
-            { name: "Johns Hopkins University", location: "Baltimore, MD", state: "MD", type: "Private", size: "Large", acceptance: "7%", ranking: 24 },
-            { name: "University of Chicago", location: "Chicago, IL", state: "IL", type: "Private", size: "Medium", acceptance: "6%", ranking: 25 },
-            { name: "Vanderbilt University", location: "Nashville, TN", state: "TN", type: "Private", size: "Medium", acceptance: "7%", ranking: 26 },
-            { name: "Rice University", location: "Houston, TX", state: "TX", type: "Private", size: "Medium", acceptance: "9%", ranking: 27 },
-            { name: "Washington University in St. Louis", location: "St. Louis, MO", state: "MO", type: "Private", size: "Large", acceptance: "11%", ranking: 28 },
-            { name: "Emory University", location: "Atlanta, GA", state: "GA", type: "Private", size: "Large", acceptance: "13%", ranking: 29 },
-            { name: "Carnegie Mellon University", location: "Pittsburgh, PA", state: "PA", type: "Private", size: "Large", acceptance: "11%", ranking: 30 },
+            // Update section based on user type
+            currentSection = userType + '-overview';
             
-            // State Universities & Large Public Schools
-            { name: "Ohio State University", location: "Columbus, OH", state: "OH", type: "Public", size: "Large", acceptance: "54%", ranking: 49 },
-            { name: "Pennsylvania State University", location: "University Park, PA", state: "PA", type: "Public", size: "Large", acceptance: "56%", ranking: 50 },
-            { name: "University of Washington", location: "Seattle, WA", state: "WA", type: "Public", size: "Large", acceptance: "48%", ranking: 51 },
-            { name: "University of Illinois at Urbana-Champaign", location: "Urbana, IL", state: "IL", type: "Public", size: "Large", acceptance: "45%", ranking: 52 },
-            { name: "Purdue University", location: "West Lafayette, IN", state: "IN", type: "Public", size: "Large", acceptance: "43%", ranking: 53 },
-            { name: "University of Minnesota", location: "Minneapolis, MN", state: "MN", type: "Public", size: "Large", acceptance: "57%", ranking: 54 },
-            { name: "University of Maryland", location: "College Park, MD", state: "MD", type: "Public", size: "Large", acceptance: "44%", ranking: 55 },
-            { name: "University of Pittsburgh", location: "Pittsburgh, PA", state: "PA", type: "Public", size: "Large", acceptance: "67%", ranking: 56 },
-            { name: "Rutgers University", location: "New Brunswick, NJ", state: "NJ", type: "Public", size: "Large", acceptance: "66%", ranking: 57 },
-            { name: "University of Connecticut", location: "Storrs, CT", state: "CT", type: "Public", size: "Large", acceptance: "56%", ranking: 58 },
+            updateUserInterface();
+            updateNavigation();
+            updateStats();
+            showSection(currentSection);
+        }
+
+        // Update user interface elements
+        function updateUserInterface() {
+            const user = userData[currentUserType];
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userRole').textContent = user.role;
+            document.getElementById('userAffiliation').textContent = user.affiliation;
+            document.getElementById('userIcon').textContent = user.icon;
             
-            // Liberal Arts Colleges
-            { name: "Williams College", location: "Williamstown, MA", state: "MA", type: "Private", size: "Small", acceptance: "8%", ranking: 31 },
-            { name: "Amherst College", location: "Amherst, MA", state: "MA", type: "Private", size: "Small", acceptance: "9%", ranking: 32 },
-            { name: "Swarthmore College", location: "Swarthmore, PA", state: "PA", type: "Private", size: "Small", acceptance: "7%", ranking: 33 },
-            { name: "Wellesley College", location: "Wellesley, MA", state: "MA", type: "Private", size: "Small", acceptance: "16%", ranking: 34 },
-            { name: "Bowdoin College", location: "Brunswick, ME", state: "ME", type: "Private", size: "Small", acceptance: "9%", ranking: 35 },
-            { name: "Carleton College", location: "Northfield, MN", state: "MN", type: "Private", size: "Small", acceptance: "18%", ranking: 36 },
-            { name: "Middlebury College", location: "Middlebury, VT", state: "VT", type: "Private", size: "Small", acceptance: "13%", ranking: 37 },
-            { name: "Pomona College", location: "Claremont, CA", state: "CA", type: "Private", size: "Small", acceptance: "7%", ranking: 38 },
-            { name: "Claremont McKenna College", location: "Claremont, CA", state: "CA", type: "Private", size: "Small", acceptance: "10%", ranking: 39 },
-            { name: "Davidson College", location: "Davidson, NC", state: "NC", type: "Private", size: "Small", acceptance: "17%", ranking: 40 },
+            // Update page title
+            const titles = {
+                recommender: 'Letter Management Dashboard',
+                student: 'Application Tracking Dashboard',
+                institution: 'Letter Intake Dashboard',
+                admin: 'System Administration Dashboard'
+            };
+            document.getElementById('pageTitle').textContent = titles[currentUserType];
+        }
+
+        // Update navigation menu
+        function updateNavigation() {
+            const navMenu = document.getElementById('navMenu');
+            const menu = navigationMenus[currentUserType];
             
-            // More Universities by State
-            // California
-            { name: "University of California, Davis", location: "Davis, CA", state: "CA", type: "Public", size: "Large", acceptance: "39%", ranking: 60 },
-            { name: "University of California, Irvine", location: "Irvine, CA", state: "CA", type: "Public", size: "Large", acceptance: "21%", ranking: 61 },
-            { name: "University of California, Santa Barbara", location: "Santa Barbara, CA", state: "CA", type: "Public", size: "Large", acceptance: "26%", ranking: 62 },
-            { name: "University of Southern California", location: "Los Angeles, CA", state: "CA", type: "Private", size: "Large", acceptance: "11%", ranking: 63 },
-            { name: "Pepperdine University", location: "Malibu, CA", state: "CA", type: "Private", size: "Medium", acceptance: "31%", ranking: 64 },
-            { name: "Santa Clara University", location: "Santa Clara, CA", state: "CA", type: "Private", size: "Medium", acceptance: "44%", ranking: 65 },
+            navMenu.innerHTML = menu.map(item => `
+                <a href="#" class="nav-item ${item.id === currentSection ? 'active' : ''}" 
+                   onclick="showSection('${item.id}')">
+                    <span class="material-icons">${item.icon}</span>
+                    ${item.label}
+                </a>
+            `).join('');
+        }
+
+        // Update statistics
+        function updateStats() {
+            const stats = userData[currentUserType].stats;
+            const statCards = document.querySelectorAll('.stat-number');
+            const statValues = Object.values(stats);
             
-            // New York
-            { name: "New York University", location: "New York, NY", state: "NY", type: "Private", size: "Large", acceptance: "12%", ranking: 66 },
+            statCards.forEach((card, index) => {
+                if (statValues[index]) {
+                    card.textContent = statValues[index];
+                }
+            });
+        }
+
+        // Show specific section
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+                currentSection = sectionId;
+            }
+            
+            // Update navigation active state
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const activeNavItem = document.querySelector(`[onclick="showSection('${sectionId}')"]`);
+            if (activeNavItem) {
+                activeNavItem.classList.add('active');
+            }
+        }
+
+        // Letter management functions
+        function showLetterUpload() {
+            alert('Letter upload modal would open here. Features:\n\n• Paste text, upload DOC/PDF, or connect Google Docs\n• Set reuse policy and visibility rules\n• Define expiry date\n• Add e-signature integration');
+        }
+
+        function viewLetter(letterId) {
+            alert(`Viewing letter: ${letterId}\n\nThis would show:\n• Full letter content\n• Metadata and version history\n• Current consent settings\n• Delivery history`);
+        }
+
+        function editLetter(letterId) {
+            alert(`Editing letter: ${letterId}\n\nFeatures:\n• Version control with audit trail\n• Student notification of changes\n• Re-delivery options\n• Lock letter for cycle option`);
+        }
+
+        function viewDeliveries(letterId) {
+            showSection('delivery-tracking');
+        }
+
+        // Delivery tracking functions
+        function viewDeliveryDetails(deliveryId) {
+            alert(`Delivery Details: ${deliveryId}\n\n• Delivery method: Native API\n• Status: Successfully delivered\n• Receipt ID: MIT-2025-001847\n• Timestamp: Jan 22, 2025 2:30 PM\n• Checksum verified: ✓`);
+        }
+
+        function retryDelivery(deliveryId) {
+            alert(`Retrying delivery: ${deliveryId}\n\nSystem will:\n• Check consent scope\n• Apply fallback delivery method\n• Generate new secure link\n• Send notification to student`);
+        }
+
+        // Consent management functions
+        function approveDestination(requestId) {
+            alert(`Approving destination request: ${requestId}\n\n✓ CMU added to approved destinations\n✓ Student notified\n✓ Letter queued for delivery\n✓ Audit log updated`);
+        }
+
+        function declineDestination(requestId) {
+            alert(`Declining destination request: ${requestId}\n\n✗ Request declined\n✗ Student notified with reason\n✓ Audit log updated`);
+        }
+
+        function viewConsentDetails(requestId) {
+            alert(`Consent Details: ${requestId}\n\n• Student: David Kim\n• Program: PhD Computer Science\n• Institution: Carnegie Mellon University\n• Delivery: Secure Email (FERPA)\n• Visibility: Status only (sealed)\n• Expiry: Dec 31, 2025`);
+        }
+
+        function editConsent(consentId) {
+            alert(`Editing consent: ${consentId}\n\nModifiable settings:\n• Destination list\n• Reuse policy\n• Student visibility\n• Expiry date\n• Delivery preferences`);
+        }
+
+        function viewConsentLog(consentId) {
+            alert(`Consent Audit Log: ${consentId}\n\n• Jan 15, 2025 - Initial consent granted\n• Jan 18, 2025 - MIT added to destinations\n• Jan 20, 2025 - Stanford added\n• Jan 22, 2025 - Berkeley added\n\nAll changes logged with timestamps and actor IDs`);
+        }
+
+        // Notification system
+        function updateNotificationCount() {
+            const counts = {
+                recommender: 3,
+                student: 2,
+                institution: 8,
+                admin: 12
+            };
+            document.getElementById('notificationCount').textContent = counts[currentUserType];
+        }
+
+        // Simulated real-time updates
+        function simulateRealTimeUpdates() {
+            setInterval(() => {
+                // Simulate delivery status updates
+                const deliveryItems = document.querySelectorAll('.delivery-item');
+                if (deliveryItems.length > 0 && Math.random() > 0.8) {
+                    // Randomly update a delivery status
+                    console.log('Real-time delivery update received');
+                }
+                
+                // Update notification count occasionally
+                if (Math.random() > 0.9) {
+                    updateNotificationCount();
+                }
+            }, 5000);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+            simulateRealTimeUpdates();
+        });
+    </script>
+</body>
+</html>ame: "New York University", location: "New York, NY", state: "NY", type: "Private", size: "Large", acceptance: "12%", ranking: 66 },
             { name: "University of Rochester", location: "Rochester, NY", state: "NY", type: "Private", size: "Large", acceptance: "30%", ranking: 67 },
             { name: "Syracuse University", location: "Syracuse, NY", state: "NY", type: "Private", size: "Large", acceptance: "44%", ranking: 68 },
             { name: "Fordham University", location: "Bronx, NY", state: "NY", type: "Private", size: "Large", acceptance: "46%", ranking: 69 },
