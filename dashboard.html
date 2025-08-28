@@ -224,7 +224,301 @@
             align-items: center; justify-content: center; font-size: 1.2rem; 
         }
         
+        /* Stella Chatbot Styles */
+        .stella-chatbot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .stella-widget {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #1976d2, #7c4dff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(25, 118, 210, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .stella-widget:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(25, 118, 210, 0.4);
+        }
+
+        .stella-widget .material-icons {
+            color: white;
+            font-size: 28px;
+        }
+
+        .stella-pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1976d2, #7c4dff);
+            opacity: 0.6;
+            animation: stellaPulse 2s infinite;
+        }
+
+        @keyframes stellaPulse {
+            0% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 0.3; }
+            100% { transform: scale(1); opacity: 0.6; }
+        }
+
+        .stella-chat-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .stella-chat-window.open {
+            display: flex;
+            animation: stellaSlideUp 0.3s ease-out;
+        }
+
+        @keyframes stellaSlideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .stella-header {
+            background: linear-gradient(135deg, #1976d2, #7c4dff);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stella-header-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .stella-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stella-avatar .material-icons {
+            color: #ffeb3b;
+            font-size: 24px;
+        }
+
+        .stella-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stella-info p {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .stella-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .stella-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .stella-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .stella-message {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .stella-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .stella-message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stella-message.stella .stella-message-avatar {
+            background: linear-gradient(135deg, #1976d2, #7c4dff);
+            color: white;
+        }
+
+        .stella-message.user .stella-message-avatar {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .stella-message-content {
+            background: #f5f5f5;
+            padding: 0.75rem 1rem;
+            border-radius: 16px;
+            max-width: 80%;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .stella-message.stella .stella-message-content {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border-bottom-left-radius: 4px;
+        }
+
+        .stella-message.user .stella-message-content {
+            background: #1976d2;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .stella-quick-actions {
+            padding: 0 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stella-quick-btn {
+            background: #f0f0f0;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .stella-quick-btn:hover {
+            background: #1976d2;
+            color: white;
+            border-color: #1976d2;
+        }
+
+        .stella-input-area {
+            padding: 1rem;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .stella-input {
+            flex: 1;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .stella-input:focus {
+            border-color: #1976d2;
+        }
+
+        .stella-send-btn {
+            width: 40px;
+            height: 40px;
+            background: #1976d2;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .stella-send-btn:hover {
+            background: #1565c0;
+            transform: scale(1.05);
+        }
+
+        .stella-send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .stella-typing {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        .stella-typing-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .stella-typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #1976d2;
+            border-radius: 50%;
+            animation: stellaTyping 1.4s infinite;
+        }
+
+        .stella-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .stella-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes stellaTyping {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
         @media (max-width: 768px) {
+            .stella-chat-window {
+                width: 320px;
+                height: 450px;
+                bottom: 70px;
+                right: -10px;
+            }
+            
             .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
             .main-content { margin-left: 0; }
             .content-area { padding: 1rem; }
@@ -980,7 +1274,325 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeDashboard();
             simulateRealTimeUpdates();
+            initializeStella();
         });
+
+        // Stella Chatbot Implementation
+        class StellaChatbot {
+            constructor() {
+                this.isOpen = false;
+                this.conversationHistory = [];
+                this.knowledgeBase = this.initializeKnowledgeBase();
+                this.currentUserType = currentUserType;
+            }
+
+            initializeKnowledgeBase() {
+                return {
+                    greetings: {
+                        patterns: ['hello', 'hi', 'hey', 'start', 'help'],
+                        responses: [
+                            "Hi there! I'm Stella, your StellarRec guide! ⭐ How can I help you navigate the recommendation universe today?",
+                            "Hello! Welcome to StellarRec! I'm Stella, and I'm here to help make your recommendation process stellar! What would you like to know?",
+                            "Hey! I'm Stella, your AI assistant for all things StellarRec! Ready to explore the galaxy of recommendations? 🚀"
+                        ]
+                    },
+                    platform_overview: {
+                        patterns: ['what is stellarrec', 'how does it work', 'platform', 'overview', 'explain'],
+                        responses: [
+                            "StellarRec revolutionizes letter of recommendation management! 🌟 Recommenders write once and send to multiple universities through our smart routing system. It's like having a recommendation rocket ship that delivers to the entire academic universe!",
+                            "Think of StellarRec as your recommendation mission control! Professors upload one canonical letter per student per program type, then we handle secure delivery to all target universities via API, secure inbox, or compliant email. One upload, unlimited reach! 🚀"
+                        ]
+                    },
+                    recommender_workflow: {
+                        patterns: ['recommender', 'professor', 'upload', 'letter management', 'how to write'],
+                        responses: [
+                            "For recommenders, StellarRec is a game-changer! 📝 Upload your letter once, set reuse policies and visibility rules, then approve destinations as students add them. We handle all the delivery logistics - API integration, secure email, SFTP - whatever each university prefers!",
+                            "As a recommender, you maintain one canonical letter per student per program type (like 'STEM Grad 2025'). Set who can receive it, whether students can view it, and expiry dates. When students add new universities, you get a simple one-tap approval prompt! ⭐"
+                        ]
+                    },
+                    student_workflow: {
+                        patterns: ['student', 'application', 'request', 'how to apply', 'get recommendations'],
+                        responses: [
+                            "Students love StellarRec because it makes getting recommendations easier! 🎓 Create requests, list your target universities, and track real-time delivery status. Your recommenders write once, but you can reach unlimited schools!",
+                            "Here's your student journey: 1) Request recommendations from professors, 2) List target universities, 3) Get approvals, 4) Track deliveries in real-time with status updates like 'sent,' 'received,' 'viewed.' It's that stellar! ✨"
+                        ]
+                    },
+                    delivery_tracking: {
+                        patterns: ['tracking', 'delivery', 'status', 'sent', 'received'],
+                        responses: [
+                            "Our delivery tracking is out of this world! 🛸 We use smart routing - Native API for partner schools, secure inbox via SFTP, compliant email with signed URLs, or manual portal as fallback. You see real-time status: sent → received → viewed → acknowledged!",
+                            "Every delivery gets a receipt! API response IDs, SFTP acknowledgments, email confirmations - we capture it all. Plus, our system automatically retries with fallback methods if the first attempt fails. Your letters always reach their destination! 🎯"
+                        ]
+                    },
+                    security_privacy: {
+                        patterns: ['security', 'privacy', 'safe', 'encryption', 'ferpa', 'gdpr'],
+                        responses: [
+                            "Security is our North Star! 🔒 We use field-level encryption for PII, KMS-managed envelope encryption for documents, and TLS 1.2+ for all transit. FERPA-aligned controls for educational records, GDPR compliance with consent management, and zero-trust architecture throughout!",
+                            "Your data is stellar-safe! Letters are hashed, encrypted, and versioned. We support FERPA-style waivers where students see only status, not content. All consent decisions are captured in immutable audit logs with timestamps and actor IDs. Privacy by design! 🛡️"
+                        ]
+                    },
+                    institutions: {
+                        patterns: ['institution', 'university', 'school', 'partner', 'integration'],
+                        responses: [
+                            "We work with 800+ partner institutions! 🏛️ Universities can receive letters via our Native API (preferred), secure HTTPS/SFTP inbox, or compliant email. Non-partners get secure download links with time-boxed access. Everyone gets what they need!",
+                            "Institution integration is seamless! Partner schools get OAuth-secured API delivery with instant receipts. Others use our secure inbox or receive DKIM/DMARC-aligned emails with signed URLs. We adapt to each university's preferred intake method! 🌐"
+                        ]
+                    },
+                    getting_started: {
+                        patterns: ['get started', 'begin', 'start', 'demo', 'sign up', 'how to'],
+                        responses: [
+                            "Ready to launch your stellar journey? 🚀 Click 'Get Started' to create your account, or try our interactive demo first! Students can invite recommenders, and professors can start uploading letters immediately. The universe of recommendations awaits!",
+                            "Getting started is easy as starlight! ✨ Choose your role (Student, Recommender, or Institution), complete verification, and you're ready to revolutionize recommendations! Want to see it in action first? Check out our demo!"
+                        ]
+                    }
+                };
+            }
+
+            init() {
+                this.createWidget();
+                this.bindEvents();
+                this.loadConversationHistory();
+            }
+
+            createWidget() {
+                const chatbotHTML = `
+                    <div class="stella-chatbot">
+                        <div class="stella-widget" id="stellaWidget">
+                            <div class="stella-pulse"></div>
+                            <span class="material-icons">auto_awesome</span>
+                        </div>
+                        <div class="stella-chat-window" id="stellaChatWindow">
+                            <div class="stella-header">
+                                <div class="stella-header-info">
+                                    <div class="stella-avatar">
+                                        <span class="material-icons">star</span>
+                                    </div>
+                                    <div class="stella-info">
+                                        <h3>Stella</h3>
+                                        <p>Your StellarRec AI Guide</p>
+                                    </div>
+                                </div>
+                                <button class="stella-close" id="stellaClose">
+                                    <span class="material-icons">close</span>
+                                </button>
+                            </div>
+                            <div class="stella-messages" id="stellaMessages">
+                                <!-- Messages will be populated here -->
+                            </div>
+                            <div class="stella-quick-actions" id="stellaQuickActions">
+                                <button class="stella-quick-btn" onclick="stellaBot.sendQuickMessage('How does StellarRec work?')">How it works</button>
+                                <button class="stella-quick-btn" onclick="stellaBot.sendQuickMessage('Help with letter management')">Letter Management</button>
+                                <button class="stella-quick-btn" onclick="stellaBot.sendQuickMessage('Track my deliveries')">Track Deliveries</button>
+                                <button class="stella-quick-btn" onclick="stellaBot.sendQuickMessage('Security and privacy')">Security</button>
+                            </div>
+                            <div class="stella-input-area">
+                                <input type="text" class="stella-input" id="stellaInput" placeholder="Ask Stella anything about StellarRec..." maxlength="500">
+                                <button class="stella-send-btn" id="stellaSendBtn">
+                                    <span class="material-icons">send</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', chatbotHTML);
+            }
+
+            bindEvents() {
+                const widget = document.getElementById('stellaWidget');
+                const closeBtn = document.getElementById('stellaClose');
+                const sendBtn = document.getElementById('stellaSendBtn');
+                const input = document.getElementById('stellaInput');
+
+                widget.addEventListener('click', () => this.toggleChat());
+                closeBtn.addEventListener('click', () => this.closeChat());
+                sendBtn.addEventListener('click', () => this.sendMessage());
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.sendMessage();
+                });
+                input.addEventListener('input', () => {
+                    sendBtn.disabled = input.value.trim() === '';
+                });
+            }
+
+            toggleChat() {
+                const chatWindow = document.getElementById('stellaChatWindow');
+                this.isOpen = !this.isOpen;
+                
+                if (this.isOpen) {
+                    chatWindow.classList.add('open');
+                    if (this.conversationHistory.length === 0) {
+                        this.addWelcomeMessage();
+                    }
+                    document.getElementById('stellaInput').focus();
+                } else {
+                    chatWindow.classList.remove('open');
+                }
+            }
+
+            closeChat() {
+                document.getElementById('stellaChatWindow').classList.remove('open');
+                this.isOpen = false;
+            }
+
+            addWelcomeMessage() {
+                const welcomeMessages = [
+                    "Welcome to StellarRec! I'm Stella, your AI guide to the recommendation universe! ⭐",
+                    `I see you're in ${currentUserType} mode. I can help you with ${this.getUserTypeHelp()} and answer any questions about our platform!`,
+                    "What would you like to explore today? 🚀"
+                ];
+                
+                welcomeMessages.forEach((message, index) => {
+                    setTimeout(() => {
+                        this.addMessage('stella', message);
+                    }, index * 1000);
+                });
+            }
+
+            getUserTypeHelp() {
+                const helpText = {
+                    recommender: "letter management, delivery tracking, and consent approvals",
+                    student: "creating requests, tracking applications, and finding universities",
+                    institution: "letter intake, API integration, and analytics",
+                    admin: "system monitoring, user management, and security oversight"
+                };
+                return helpText[currentUserType] || "navigating the platform";
+            }
+
+            sendMessage() {
+                const input = document.getElementById('stellaInput');
+                const message = input.value.trim();
+                
+                if (message) {
+                    this.addMessage('user', message);
+                    input.value = '';
+                    document.getElementById('stellaSendBtn').disabled = true;
+                    
+                    this.showTyping();
+                    setTimeout(() => {
+                        this.hideTyping();
+                        this.generateResponse(message);
+                    }, 1500);
+                }
+            }
+
+            sendQuickMessage(message) {
+                this.addMessage('user', message);
+                this.showTyping();
+                setTimeout(() => {
+                    this.hideTyping();
+                    this.generateResponse(message);
+                }, 1000);
+            }
+
+            generateResponse(userMessage) {
+                const response = this.findBestResponse(userMessage.toLowerCase());
+                this.addMessage('stella', response);
+            }
+
+            findBestResponse(message) {
+                let bestMatch = null;
+                let bestScore = 0;
+
+                for (const [category, data] of Object.entries(this.knowledgeBase)) {
+                    for (const pattern of data.patterns) {
+                        if (message.includes(pattern)) {
+                            const score = pattern.length / message.length;
+                            if (score > bestScore) {
+                                bestScore = score;
+                                bestMatch = data;
+                            }
+                        }
+                    }
+                }
+
+                if (bestMatch) {
+                    const responses = bestMatch.responses;
+                    return responses[Math.floor(Math.random() * responses.length)];
+                } else {
+                    return this.getFallbackResponse();
+                }
+            }
+
+            getFallbackResponse() {
+                const fallbacks = [
+                    "That's a great question! I'm still learning about that specific topic. Let me connect you with our team for detailed help! 🌟",
+                    "I want to make sure I give you the best answer! Could you try rephrasing that, or would you like me to show you our main features? ⭐",
+                    "Hmm, I'm not quite sure about that one yet! Try asking about letter management, delivery tracking, or how StellarRec works in general! 🚀",
+                    "I'm constantly expanding my knowledge! For now, you might want to check out our demo or contact our support team for that specific question! ✨"
+                ];
+                return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+            }
+
+            addMessage(sender, content) {
+                const messagesContainer = document.getElementById('stellaMessages');
+                const messageHTML = `
+                    <div class="stella-message ${sender}">
+                        <div class="stella-message-avatar">
+                            <span class="material-icons">${sender === 'stella' ? 'star' : 'person'}</span>
+                        </div>
+                        <div class="stella-message-content">
+                            ${content}
+                        </div>
+                    </div>
+                `;
+                messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                this.conversationHistory.push({ sender, content, timestamp: new Date() });
+                this.saveConversationHistory();
+            }
+
+            showTyping() {
+                const messagesContainer = document.getElementById('stellaMessages');
+                const typingHTML = `
+                    <div class="stella-message stella" id="stellaTyping">
+                        <div class="stella-message-avatar">
+                            <span class="material-icons">star</span>
+                        </div>
+                        <div class="stella-message-content">
+                            <div class="stella-typing">
+                                <span>Stella is typing</span>
+                                <div class="stella-typing-dots">
+                                    <div class="stella-typing-dot"></div>
+                                    <div class="stella-typing-dot"></div>
+                                    <div class="stella-typing-dot"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                messagesContainer.insertAdjacentHTML('beforeend', typingHTML);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            hideTyping() {
+                const typingElement = document.getElementById('stellaTyping');
+                if (typingElement) {
+                    typingElement.remove();
+                }
+            }
+
+            loadConversationHistory() {
+                const saved = localStorage.getItem('stellaConversation');
+                if (saved) {
+                    this.conversationHistory = JSON.parse(saved);
+                    this.conversationHistory.forEach(msg => {
+                        this.addMessage(msg.sender, msg.content);
+                    });
+                }
+            }
+
+            saveConversationHistory() {
+                localStorage.setItem('stellaConversation', JSON.stringify(this.conversationHistory));
+            }
+        }
+
+        // Initialize Stella
+        let stellaBot;
+        function initializeStella() {
+            stellaBot = new StellaChatbot();
+            stellaBot.init();
+        }
     </script>
 </body>
 </html>ame: "New York University", location: "New York, NY", state: "NY", type: "Private", size: "Large", acceptance: "12%", ranking: 66 },
