@@ -515,22 +515,9 @@
         .dashboard-footer {
             background: #333;
             color: white;
+            text-align: center;
             padding: 2rem 0;
             margin-top: 3rem;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .footer-bottom {
-            text-align: center;
-            color: rgba(255, 255, 255, 0.8);
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        .footer-bottom .stellar-brand {
-            color: #ffeb3b;
-            font-weight: 600;
         }
 
         @media (max-width: 768px) {
@@ -678,10 +665,54 @@
             <div class="dashboard-section" id="letter-management">
                 <div class="section-header">
                     <h2>Letter Management</h2>
-                    <button class="btn btn-primary" onclick="showLetterUpload()">
-                        <span class="material-icons">add</span>
-                        Create New Letter
-                    </button>
+                    <div class="section-actions">
+                        <button class="btn btn-outline" onclick="showAIAssistant()">
+                            <span class="material-icons">auto_awesome</span>
+                            AI Writing Assistant
+                        </button>
+                        <button class="btn btn-outline" onclick="showTemplateLibrary()">
+                            <span class="material-icons">library_books</span>
+                            Templates
+                        </button>
+                        <button class="btn btn-primary" onclick="showLetterUpload()">
+                            <span class="material-icons">add</span>
+                            Create New Letter
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Writing Assistant Panel -->
+                <div class="ai-assistant-panel" id="aiAssistantPanel" style="display: none;">
+                    <div class="ai-panel-header">
+                        <div class="ai-avatar">
+                            <span class="material-icons">auto_awesome</span>
+                        </div>
+                        <div class="ai-info">
+                            <h3>Stella AI Writing Assistant</h3>
+                            <p>Get real-time suggestions to improve your letter</p>
+                        </div>
+                        <button class="close-panel" onclick="hideAIAssistant()">
+                            <span class="material-icons">close</span>
+                        </button>
+                    </div>
+                    <div class="ai-suggestions">
+                        <div class="suggestion-card">
+                            <div class="suggestion-icon">💡</div>
+                            <div class="suggestion-content">
+                                <h4>Strengthen Opening</h4>
+                                <p>Consider starting with a specific example of the student's achievements</p>
+                                <button class="btn-apply">Apply Suggestion</button>
+                            </div>
+                        </div>
+                        <div class="suggestion-card">
+                            <div class="suggestion-icon">📊</div>
+                            <div class="suggestion-content">
+                                <h4>Add Quantifiable Results</h4>
+                                <p>Include specific metrics or rankings to strengthen your recommendation</p>
+                                <button class="btn-apply">Apply Suggestion</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="letter-grid">
@@ -1057,13 +1088,217 @@
                     </div>
                 </div>
             </div>
+            <!-- MISSING SECTIONS -->
+            
+            <!-- NOTIFICATIONS SECTION -->
+            <div class="dashboard-section" id="notifications">
+                <div class="section-header">
+                    <h2>Notifications</h2>
+                    <p class="section-description">Manage your notification preferences and view recent alerts</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Notification Center</h3>
+                    <p>All notifications and alerts will be displayed here.</p>
+                </div>
+            </div>
+
+            <!-- STUDENT REQUESTS SECTION -->
+            <div class="dashboard-section" id="student-requests">
+                <div class="section-header">
+                    <h2>My Requests</h2>
+                    <p class="section-description">Manage your letter of recommendation requests</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Request Management</h3>
+                    <p>Your letter requests and their status will be displayed here.</p>
+                </div>
+            </div>
+
+            <!-- STUDENT TRACKING SECTION -->
+            <div class="dashboard-section" id="student-tracking">
+                <div class="section-header">
+                    <h2>Application Tracking</h2>
+                    <p class="section-description">Track your university applications and letter deliveries</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Application Status</h3>
+                    <p>Track the status of your applications and letter deliveries here.</p>
+                </div>
+            </div>
+
+            <!-- UNIVERSITY SEARCH SECTION -->
+            <div class="dashboard-section" id="university-search">
+                <div class="section-header">
+                    <h2>AI University Matching</h2>
+                    <p class="section-description">Get personalized university recommendations based on your profile</p>
+                </div>
+
+                <!-- AI Matching Engine -->
+                <div class="matching-engine">
+                    <div class="match-input-panel">
+                        <h3>Tell us about yourself</h3>
+                        <div class="input-grid">
+                            <div class="input-group">
+                                <label>Academic Focus</label>
+                                <select class="form-select">
+                                    <option>Computer Science</option>
+                                    <option>Engineering</option>
+                                    <option>Business</option>
+                                    <option>Medicine</option>
+                                    <option>Liberal Arts</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>GPA Range</label>
+                                <select class="form-select">
+                                    <option>3.8 - 4.0</option>
+                                    <option>3.5 - 3.7</option>
+                                    <option>3.0 - 3.4</option>
+                                    <option>Below 3.0</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Location Preference</label>
+                                <select class="form-select">
+                                    <option>No Preference</option>
+                                    <option>East Coast</option>
+                                    <option>West Coast</option>
+                                    <option>Midwest</option>
+                                    <option>International</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="generateMatches()">
+                            <span class="material-icons">psychology</span>
+                            Generate AI Matches
+                        </button>
+                    </div>
+
+                    <div class="match-results" id="matchResults" style="display: none;">
+                        <h3>Your AI-Powered Matches</h3>
+                        <div class="match-grid">
+                            <div class="match-card high-match">
+                                <div class="match-score">95%</div>
+                                <div class="university-info">
+                                    <h4>Stanford University</h4>
+                                    <p>Computer Science Program</p>
+                                    <div class="match-reasons">
+                                        <span class="reason-tag">Strong CS Program</span>
+                                        <span class="reason-tag">Research Focus</span>
+                                        <span class="reason-tag">Location Match</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline">Learn More</button>
+                            </div>
+                            <div class="match-card medium-match">
+                                <div class="match-score">87%</div>
+                                <div class="university-info">
+                                    <h4>MIT</h4>
+                                    <p>Computer Science & Engineering</p>
+                                    <div class="match-reasons">
+                                        <span class="reason-tag">Top Tier</span>
+                                        <span class="reason-tag">Innovation Hub</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline">Learn More</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INSTITUTION INBOX SECTION -->
+            <div class="dashboard-section" id="institution-inbox">
+                <div class="section-header">
+                    <h2>Letter Inbox</h2>
+                    <p class="section-description">Manage incoming letters of recommendation</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Incoming Letters</h3>
+                    <p>Letters of recommendation received through StellarRec will appear here.</p>
+                </div>
+            </div>
+
+            <!-- INSTITUTION SETTINGS SECTION -->
+            <div class="dashboard-section" id="institution-settings">
+                <div class="section-header">
+                    <h2>Integration Settings</h2>
+                    <p class="section-description">Configure your institution's StellarRec integration</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>API Configuration</h3>
+                    <p>Configure API endpoints, authentication, and delivery preferences.</p>
+                </div>
+            </div>
+
+            <!-- INSTITUTION ANALYTICS SECTION -->
+            <div class="dashboard-section" id="institution-analytics">
+                <div class="section-header">
+                    <h2>Analytics</h2>
+                    <p class="section-description">View analytics and insights for your institution</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Institution Analytics</h3>
+                    <p>Analytics and reporting for letter processing and student applications.</p>
+                </div>
+            </div>
+
+            <!-- ADMIN SECURITY SECTION -->
+            <div class="dashboard-section" id="admin-security">
+                <div class="section-header">
+                    <h2>Trust & Safety</h2>
+                    <p class="section-description">Monitor security and safety across the platform</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Security Dashboard</h3>
+                    <p>Security monitoring, fraud detection, and safety controls.</p>
+                </div>
+            </div>
+
+            <!-- ADMIN ANALYTICS SECTION -->
+            <div class="dashboard-section" id="admin-analytics">
+                <div class="section-header">
+                    <h2>System Analytics</h2>
+                    <p class="section-description">Platform-wide analytics and performance metrics</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Platform Analytics</h3>
+                    <p>System-wide analytics, performance metrics, and usage statistics.</p>
+                </div>
+            </div>
+
+            <!-- ADMIN USERS SECTION -->
+            <div class="dashboard-section" id="admin-users">
+                <div class="section-header">
+                    <h2>User Management</h2>
+                    <p class="section-description">Manage users and their permissions</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>User Administration</h3>
+                    <p>User management, permissions, and account administration.</p>
+                </div>
+            </div>
+
+            <!-- ADMIN INSTITUTIONS SECTION -->
+            <div class="dashboard-section" id="admin-institutions">
+                <div class="section-header">
+                    <h2>Institution Partners</h2>
+                    <p class="section-description">Manage institutional partnerships and integrations</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Partner Management</h3>
+                    <p>Manage institutional partnerships, integrations, and onboarding.</p>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <!-- Footer -->
     <footer class="dashboard-footer">
-        <div class="footer-bottom">
-            <p>&copy; 2025 <span class="stellar-brand">StellarRec™</span>. All rights reserved. | Making recommendations stellar since 2025 🚀</p>
+        <div class="container">
+            <p>&copy; 2025 <span style="color: #ffeb3b; font-weight: 600;">StellarRec™</span>. All rights reserved. |
+                Making recommendations stellar since 2025 🚀</p>
         </div>
     </footer>
 
