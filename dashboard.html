@@ -520,6 +520,428 @@
             margin-top: 3rem;
         }
 
+        /* Enhanced Dashboard Features */
+        .section-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #1976d2;
+            color: #1976d2;
+        }
+
+        .btn-outline:hover {
+            background: #1976d2;
+            color: white;
+        }
+
+        /* AI Assistant Panel */
+        .ai-assistant-panel {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 2px solid #1976d2;
+        }
+
+        .ai-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ai-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #1976d2, #7c4dff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .ai-info h3 {
+            margin-bottom: 0.25rem;
+            color: #1976d2;
+        }
+
+        .ai-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .close-panel {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .close-panel:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .ai-suggestions {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .suggestion-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .suggestion-icon {
+            font-size: 2rem;
+        }
+
+        .suggestion-content h4 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .suggestion-content p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .btn-apply {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.3s ease;
+        }
+
+        .btn-apply:hover {
+            background: #45a049;
+        }
+
+        /* Analytics Dashboard */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-placeholder {
+            height: 200px;
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* University Matching */
+        .matching-engine {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .match-input-panel h3 {
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        .match-results {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .match-grid {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .match-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .match-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .high-match {
+            border-color: #4caf50;
+            background: linear-gradient(135deg, #e8f5e8, #f1f8e9);
+        }
+
+        .medium-match {
+            border-color: #ff9800;
+            background: linear-gradient(135deg, #fff3e0, #fef7e0);
+        }
+
+        .match-score {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1976d2;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .university-info {
+            flex: 1;
+        }
+
+        .university-info h4 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .university-info p {
+            color: #666;
+            margin-bottom: 0.75rem;
+        }
+
+        .match-reasons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .reason-tag {
+            background: #1976d2;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Template Library */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .template-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .template-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .template-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .template-type {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .template-preview {
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 8px;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 1rem;
+            border-left: 4px solid #1976d2;
+        }
+
+        .template-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        /* Performance Insights */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .insight-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .insight-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .insight-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-trend {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .trend-up {
+            color: #4caf50;
+        }
+
+        .trend-down {
+            color: #f44336;
+        }
+
+        /* Collaboration Tools */
+        .collaboration-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        .collaborator-list {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .collaborator-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #1976d2;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .collaborator-status {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .status-online {
+            background: #4caf50;
+        }
+
+        .status-away {
+            background: #ff9800;
+        }
+
+        .collaboration-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
         @media (max-width: 768px) {
             .stella-chat-window {
                 width: 320px;
@@ -1291,6 +1713,250 @@
                 </div>
             </div>
 
+            <!-- SMART ANALYTICS DASHBOARD -->
+            <div class="dashboard-section" id="analytics-dashboard">
+                <div class="section-header">
+                    <h2>Smart Analytics Dashboard</h2>
+                    <p class="section-description">AI-powered insights and data visualization</p>
+                </div>
+
+                <div class="analytics-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Letter Performance</h3>
+                            <span class="material-icons">trending_up</span>
+                        </div>
+                        <div class="chart-placeholder">
+                            📊 Interactive Chart: Letter Success Rates Over Time
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>University Preferences</h3>
+                            <span class="material-icons">pie_chart</span>
+                        </div>
+                        <div class="chart-placeholder">
+                            🥧 Pie Chart: Top Universities by Application Volume
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Delivery Methods</h3>
+                            <span class="material-icons">bar_chart</span>
+                        </div>
+                        <div class="chart-placeholder">
+                            📈 Bar Chart: API vs Email vs Portal Deliveries
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>AI Suggestions Impact</h3>
+                            <span class="material-icons">psychology</span>
+                        </div>
+                        <div class="chart-placeholder">
+                            🧠 Line Chart: Letters with AI Help vs Traditional
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TEMPLATE LIBRARY -->
+            <div class="dashboard-section" id="template-library">
+                <div class="section-header">
+                    <h2>Letter Templates Library</h2>
+                    <p class="section-description">Pre-built templates optimized for different programs and institutions</p>
+                </div>
+
+                <div class="template-grid">
+                    <div class="template-card" onclick="useTemplate('stem-grad')">
+                        <div class="template-header">
+                            <h3>STEM Graduate Programs</h3>
+                            <span class="template-type">Academic</span>
+                        </div>
+                        <div class="template-preview">
+                            "I am writing to provide my strongest recommendation for [Student Name], who has demonstrated exceptional analytical thinking and research capabilities in my [Course/Lab]..."
+                        </div>
+                        <div class="template-stats">
+                            <span>Used 847 times</span>
+                            <span>⭐ 4.9/5 rating</span>
+                        </div>
+                        <button class="btn btn-primary">Use Template</button>
+                    </div>
+
+                    <div class="template-card" onclick="useTemplate('business-school')">
+                        <div class="template-header">
+                            <h3>Business School MBA</h3>
+                            <span class="template-type">Professional</span>
+                        </div>
+                        <div class="template-preview">
+                            "Having worked closely with [Student Name] for [Duration], I can confidently attest to their leadership abilities and strategic thinking that make them an ideal MBA candidate..."
+                        </div>
+                        <div class="template-stats">
+                            <span>Used 623 times</span>
+                            <span>⭐ 4.8/5 rating</span>
+                        </div>
+                        <button class="btn btn-primary">Use Template</button>
+                    </div>
+
+                    <div class="template-card" onclick="useTemplate('medical-school')">
+                        <div class="template-header">
+                            <h3>Medical School</h3>
+                            <span class="template-type">Healthcare</span>
+                        </div>
+                        <div class="template-preview">
+                            "I recommend [Student Name] for medical school admission based on their compassionate patient care, clinical acumen, and dedication to healthcare excellence..."
+                        </div>
+                        <div class="template-stats">
+                            <span>Used 412 times</span>
+                            <span>⭐ 4.9/5 rating</span>
+                        </div>
+                        <button class="btn btn-primary">Use Template</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PERFORMANCE INSIGHTS -->
+            <div class="dashboard-section" id="performance-insights">
+                <div class="section-header">
+                    <h2>Performance Insights</h2>
+                    <p class="section-description">Track your recommendation success metrics and impact</p>
+                </div>
+
+                <div class="insights-grid">
+                    <div class="insight-card">
+                        <div class="insight-icon" style="background: linear-gradient(135deg, #4caf50, #66bb6a);">
+                            <span class="material-icons">school</span>
+                        </div>
+                        <div class="insight-value">94%</div>
+                        <div class="insight-label">Acceptance Rate</div>
+                        <div class="insight-trend trend-up">↗ +5% vs last year</div>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-icon" style="background: linear-gradient(135deg, #1976d2, #42a5f5);">
+                            <span class="material-icons">speed</span>
+                        </div>
+                        <div class="insight-value">2.3</div>
+                        <div class="insight-label">Avg Days to Deliver</div>
+                        <div class="insight-trend trend-up">↗ 15% faster</div>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-icon" style="background: linear-gradient(135deg, #ff9800, #ffb74d);">
+                            <span class="material-icons">star</span>
+                        </div>
+                        <div class="insight-value">4.9</div>
+                        <div class="insight-label">Student Rating</div>
+                        <div class="insight-trend trend-up">↗ Excellent feedback</div>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-icon" style="background: linear-gradient(135deg, #7c4dff, #9575cd);">
+                            <span class="material-icons">psychology</span>
+                        </div>
+                        <div class="insight-value">87%</div>
+                        <div class="insight-label">AI Enhancement Usage</div>
+                        <div class="insight-trend trend-up">↗ +23% adoption</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>Recent Achievements</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span style="color: #4caf50; font-size: 1.5rem;">🏆</span>
+                            <div>
+                                <strong>Top Performer Badge</strong>
+                                <p style="color: #666; font-size: 0.9rem; margin: 0;">Achieved 95%+ acceptance rate for Q4 2024</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span style="color: #1976d2; font-size: 1.5rem;">⚡</span>
+                            <div>
+                                <strong>Speed Champion</strong>
+                                <p style="color: #666; font-size: 0.9rem; margin: 0;">Fastest letter delivery times in your department</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLLABORATION TOOLS -->
+            <div class="dashboard-section" id="collaboration-tools">
+                <div class="section-header">
+                    <h2>Collaboration Tools</h2>
+                    <p class="section-description">Work together with colleagues and students on recommendations</p>
+                </div>
+
+                <div class="collaboration-panel">
+                    <h3>Active Collaborations</h3>
+                    <div class="collaborator-list">
+                        <div class="collaborator-avatar">
+                            SC
+                            <div class="collaborator-status status-online"></div>
+                        </div>
+                        <div class="collaborator-avatar">
+                            MJ
+                            <div class="collaborator-status status-away"></div>
+                        </div>
+                        <div class="collaborator-avatar">
+                            DK
+                            <div class="collaborator-status status-online"></div>
+                        </div>
+                        <button class="btn btn-outline" onclick="inviteCollaborator()">
+                            <span class="material-icons">person_add</span>
+                            Invite
+                        </button>
+                    </div>
+                    
+                    <div class="collaboration-actions">
+                        <button class="btn btn-primary" onclick="startCollabSession()">
+                            <span class="material-icons">edit</span>
+                            Start Co-Writing Session
+                        </button>
+                        <button class="btn btn-outline" onclick="shareForReview()">
+                            <span class="material-icons">rate_review</span>
+                            Share for Review
+                        </button>
+                        <button class="btn btn-outline" onclick="scheduleDiscussion()">
+                            <span class="material-icons">schedule</span>
+                            Schedule Discussion
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #4caf50, #66bb6a);">
+                                <span class="material-icons">group_work</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Shared Letters</div>
+                                <div class="card-subtitle">3 letters in collaborative editing</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary">View Shared Work</button>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #ff9800, #ffb74d);">
+                                <span class="material-icons">feedback</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Peer Reviews</div>
+                                <div class="card-subtitle">2 reviews pending your input</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary">Review Letters</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -1863,6 +2529,91 @@
                 localStorage.setItem('stellaConversation', JSON.stringify(this.conversationHistory));
             }
         }
+
+        // Enhanced Dashboard Functions
+
+        // AI Assistant Functions
+        function showAIAssistant() {
+            document.getElementById('aiAssistantPanel').style.display = 'block';
+        }
+
+        function hideAIAssistant() {
+            document.getElementById('aiAssistantPanel').style.display = 'none';
+        }
+
+        function showTemplateLibrary() {
+            showSection('template-library');
+        }
+
+        // University Matching Functions
+        function generateMatches() {
+            const results = document.getElementById('matchResults');
+            results.style.display = 'block';
+            
+            // Simulate AI processing
+            setTimeout(() => {
+                alert('🎯 AI Analysis Complete!\n\nBased on your profile, we found 12 excellent matches.\nTop recommendations:\n\n• Stanford (95% match) - Strong CS program alignment\n• MIT (87% match) - Research opportunities\n• UC Berkeley (82% match) - Location preference\n\nWould you like to add these to your application list?');
+            }, 1500);
+        }
+
+        // Template Functions
+        function useTemplate(templateId) {
+            const templates = {
+                'stem-grad': 'STEM Graduate Programs Template',
+                'business-school': 'Business School MBA Template', 
+                'medical-school': 'Medical School Template'
+            };
+            
+            alert(`📝 Loading ${templates[templateId]}...\n\nThis template includes:\n• Optimized structure for ${templateId.replace('-', ' ')}\n• AI-suggested key phrases\n• Success-proven language patterns\n• Customizable sections\n\nTemplate loaded into letter editor!`);
+        }
+
+        // Collaboration Functions
+        function inviteCollaborator() {
+            alert('👥 Invite Collaborator\n\nEnter email address to invite:\n• Co-authors can edit letters\n• Real-time collaboration\n• Comment and suggestion system\n• Version control included\n\nInvitation sent!');
+        }
+
+        function startCollabSession() {
+            alert('✏️ Starting Collaborative Writing Session\n\n• Real-time editing enabled\n• All collaborators notified\n• Auto-save every 30 seconds\n• Chat sidebar activated\n\nSession started! Others can join now.');
+        }
+
+        function shareForReview() {
+            alert('📋 Share for Review\n\nSharing options:\n• Send review link to colleagues\n• Set review deadline\n• Enable comment permissions\n• Track review status\n\nReview link generated and shared!');
+        }
+
+        function scheduleDiscussion() {
+            alert('📅 Schedule Discussion\n\nMeeting options:\n• Video call integration\n• Calendar invites sent\n• Agenda auto-generated\n• Letter context shared\n\nMeeting scheduled for tomorrow 2 PM!');
+        }
+
+        // Performance Insights Functions
+        function viewDetailedAnalytics() {
+            showSection('analytics-dashboard');
+        }
+
+        // Enhanced Navigation
+        function addNavigationItem(userType, item) {
+            if (!navigationMenus[userType]) return;
+            navigationMenus[userType].push(item);
+        }
+
+        // Add new sections to navigation menus
+        navigationMenus.recommender.push(
+            { id: 'analytics-dashboard', icon: 'analytics', label: 'Smart Analytics' },
+            { id: 'template-library', icon: 'library_books', label: 'Templates' },
+            { id: 'performance-insights', icon: 'insights', label: 'Performance' },
+            { id: 'collaboration-tools', icon: 'group_work', label: 'Collaboration' }
+        );
+
+        navigationMenus.student.push(
+            { id: 'performance-insights', icon: 'insights', label: 'My Progress' }
+        );
+
+        navigationMenus.institution.push(
+            { id: 'analytics-dashboard', icon: 'analytics', label: 'Analytics' }
+        );
+
+        navigationMenus.admin.push(
+            { id: 'analytics-dashboard', icon: 'analytics', label: 'Platform Analytics' }
+        );
 
         // Initialize Stella
         let stellaBot;

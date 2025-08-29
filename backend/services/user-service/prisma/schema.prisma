@@ -1,0 +1,456 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  student
+  recommender
+  institution
+  admin
+}
+
+model users {
+  id                        String    @id @default(uuid())
+  email                     String    @unique
+  password_hash             String
+  role                      UserRole
+  email_verified            Boolean   @default(false)
+  email_verification_token  String?
+  password_reset_token      String?
+  password_reset_expires    DateTime?
+  last_login               DateTime?
+  is_active                Boolean   @default(true)
+  deleted_at               DateTime?
+  created_at               DateTime  @default(now())
+  updated_at               DateTime  @updatedAt
+
+  // Relationships
+  student_profiles         student_profiles?
+  recommender_profiles     recommender_profiles?
+  institution_profiles     institution_profiles?
+  user_preferences         user_preferences?
+  applications             applications[]
+  recommendation_letters_as_student    recommendation_letters[] @relation("StudentLetters")
+  recommendation_letters_as_recommender recommendation_letters[] @relation("RecommenderLetters")
+  letter_collaborators     letter_collaborators[]
+  letter_versions          letter_versions[]
+  university_matches       university_matches[]
+  essay_analyses           essay_analyses[]
+  notifications            notifications[]
+  audit_logs               audit_logs[]
+
+  @@map("users")
+}
+
+model student_profiles {
+  user_id            String    @id
+  first_name         String
+  last_name          String
+  date_of_birth      DateTime?
+  phone              String?
+  address            Json?
+  gpa                Decimal?  @db.Decimal(3, 2)
+  graduation_year    Int?
+  academic_interests String[]
+  target_programs    String[]
+  test_scores        Json?
+  profile_data       Json      @default("{}")
+  avatar_url         String?
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  // Relationships
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("student_profiles")
+}
+
+model recommender_profiles {
+  user_id          String    @id
+  first_name       String
+  last_name        String
+  title            String?
+  institution      String?
+  department       String?
+  phone            String?
+  office_address   String?
+  expertise_areas  String[]
+  years_experience Int?
+  profile_data     Json      @default("{}")
+  avatar_url       String?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+
+  // Relationships
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("recommender_profiles")
+}
+
+model institution_profiles {
+  user_id            String   @id
+  institution_name   String
+  contact_email      String
+  contact_phone      String?
+  address            Json?
+  website            String?
+  integration_config Json     @default("{}")
+  profile_data       Json     @default("{}")
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  // Relationships
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("institution_profiles")
+}
+
+model user_preferences {
+  user_id       String   @id
+  notifications Json     @default("{\"email\": true, \"sms\": false, \"push\": true}")
+  privacy       Json     @default("{\"profileVisibility\": \"private\", \"dataSharing\": false}")
+  language      String   @default("en")
+  timezone      String   @default("UTC")
+  theme         String   @default("light")
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relationships
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+model universities {
+  id                    String   @id @default(uuid())
+  name                  String
+  short_name            String?
+  location              Json
+  ranking               Json     @default("{}")
+  admission_requirements Json     @default("{}")
+  deadlines             Json     @default("{}")
+  integration_config    Json     @default("{}")
+  metadata              Json     @default("{}")
+  is_active             Boolean  @default(true)
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  // Relationships
+  programs              programs[]
+  applications          applications[]
+  letter_deliveries     letter_deliveries[]
+  university_matches    university_matches[]
+
+  @@map("universities")
+}
+
+model programs {
+  id            String   @id @default(uuid())
+  university_id String
+  name          String
+  degree        String
+  department    String
+  description   String?
+  requirements  Json     @default("{}")
+  duration      String?
+  tuition       Json     @default("{}")
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relationships
+  university    universities @relation(fields: [university_id], references: [id], onDelete: Cascade)
+  applications  applications[]
+
+  @@map("programs")
+}
+
+enum ApplicationStatus {
+  draft
+  in_progress
+  submitted
+  under_review
+  accepted
+  rejected
+  waitlisted
+}
+
+model applications {
+  id                  String            @id @default(uuid())
+  student_id          String
+  university_id       String
+  program_id          String
+  status              ApplicationStatus @default(draft)
+  progress_percentage Int               @default(0)
+  deadline            DateTime
+  submitted_at        DateTime?
+  decision_date       DateTime?
+  decision_result     String?
+  notes               String?
+  deleted_at          DateTime?
+  created_at          DateTime          @default(now())
+  updated_at          DateTime          @updatedAt
+
+  // Relationships
+  student             users @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  university          universities @relation(fields: [university_id], references: [id])
+  program             programs @relation(fields: [program_id], references: [id])
+  application_components application_components[]
+  timeline_events     timeline_events[]
+
+  @@map("applications")
+}
+
+enum ComponentType {
+  personal_info
+  academic_history
+  test_scores
+  essays
+  recommendations
+  portfolio
+  financial_aid
+}
+
+enum ComponentStatus {
+  pending
+  in_progress
+  completed
+  approved
+  rejected
+}
+
+model application_components {
+  id             String          @id @default(uuid())
+  application_id String
+  component_type ComponentType
+  status         ComponentStatus @default(pending)
+  data           Json            @default("{}")
+  completed_at   DateTime?
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+
+  // Relationships
+  application applications @relation(fields: [application_id], references: [id], onDelete: Cascade)
+
+  @@map("application_components")
+}
+
+enum PriorityLevel {
+  low
+  medium
+  high
+  critical
+}
+
+enum EventStatus {
+  pending
+  completed
+  overdue
+}
+
+model timeline_events {
+  id             String        @id @default(uuid())
+  application_id String
+  event_type     String
+  title          String
+  description    String?
+  due_date       DateTime?
+  completed_at   DateTime?
+  priority       PriorityLevel @default(medium)
+  status         EventStatus   @default(pending)
+  created_at     DateTime      @default(now())
+  updated_at     DateTime      @updatedAt
+
+  // Relationships
+  application applications @relation(fields: [application_id], references: [id], onDelete: Cascade)
+
+  @@map("timeline_events")
+}
+
+enum LetterStatus {
+  draft
+  in_review
+  approved
+  delivered
+  expired
+}
+
+model recommendation_letters {
+  id               String        @id @default(uuid())
+  student_id       String
+  recommender_id   String
+  title            String
+  content          String?
+  status           LetterStatus  @default(draft)
+  template_id      String?
+  ai_suggestions   Json          @default("[]")
+  deleted_at       DateTime?
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+
+  // Relationships
+  student          users @relation("StudentLetters", fields: [student_id], references: [id], onDelete: Cascade)
+  recommender      users @relation("RecommenderLetters", fields: [recommender_id], references: [id], onDelete: Cascade)
+  letter_deliveries letter_deliveries[]
+  letter_collaborators letter_collaborators[]
+  letter_versions  letter_versions[]
+
+  @@map("recommendation_letters")
+}
+
+enum DeliveryStatus {
+  pending
+  in_transit
+  delivered
+  failed
+  expired
+}
+
+enum DeliveryMethodType {
+  api
+  email
+  portal
+  ftp
+  webhook
+}
+
+model letter_deliveries {
+  id               String              @id @default(uuid())
+  letter_id        String
+  university_id    String
+  delivery_method  DeliveryMethodType
+  status           DeliveryStatus      @default(pending)
+  delivered_at     DateTime?
+  confirmation_id  String?
+  error_message    String?
+  retry_count      Int                 @default(0)
+  created_at       DateTime            @default(now())
+  updated_at       DateTime            @updatedAt
+
+  // Relationships
+  letter           recommendation_letters @relation(fields: [letter_id], references: [id], onDelete: Cascade)
+  university       universities @relation(fields: [university_id], references: [id])
+
+  @@map("letter_deliveries")
+}
+
+model letter_collaborators {
+  id          String   @id @default(uuid())
+  letter_id   String
+  user_id     String
+  role        String   @default("viewer")
+  permissions String[] @default([])
+  invited_at  DateTime @default(now())
+  accepted_at DateTime?
+
+  // Relationships
+  letter recommendation_letters @relation(fields: [letter_id], references: [id], onDelete: Cascade)
+  user   users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([letter_id, user_id])
+  @@map("letter_collaborators")
+}
+
+model letter_versions {
+  id         String   @id @default(uuid())
+  letter_id  String
+  version    Int
+  content    String
+  changes    String?
+  created_by String
+  created_at DateTime @default(now())
+
+  // Relationships
+  letter     recommendation_letters @relation(fields: [letter_id], references: [id], onDelete: Cascade)
+  creator    users @relation(fields: [created_by], references: [id])
+
+  @@map("letter_versions")
+}
+
+enum MatchCategory {
+  safety
+  target
+  reach
+}
+
+model university_matches {
+  id               String        @id @default(uuid())
+  student_id       String
+  university_id    String
+  match_percentage Decimal       @db.Decimal(5, 2)
+  confidence       Decimal       @db.Decimal(5, 2)
+  reasoning        Json          @default("{}")
+  category         MatchCategory
+  factors          Json          @default("[]")
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+
+  // Relationships
+  student    users @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  university universities @relation(fields: [university_id], references: [id])
+
+  @@unique([student_id, university_id])
+  @@map("university_matches")
+}
+
+model essay_analyses {
+  id                String   @id @default(uuid())
+  user_id           String
+  content           String
+  scores            Json     @default("{}")
+  suggestions       Json     @default("[]")
+  word_count        Int?
+  readability_score Decimal? @db.Decimal(5, 2)
+  sentiment         String?
+  key_topics        String[]
+  created_at        DateTime @default(now())
+
+  // Relationships
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("essay_analyses")
+}
+
+model notifications {
+  id              String    @id @default(uuid())
+  user_id         String
+  type            String
+  title           String
+  message         String
+  data            Json      @default("{}")
+  read            Boolean   @default(false)
+  sent_at         DateTime?
+  delivery_method String?
+  created_at      DateTime  @default(now())
+
+  // Relationships
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model audit_logs {
+  id            String    @id @default(uuid())
+  user_id       String?
+  action        String
+  resource_type String
+  resource_id   String?
+  old_values    Json?
+  new_values    Json?
+  ip_address    String?
+  user_agent    String?
+  created_at    DateTime  @default(now())
+
+  // Relationships
+  user users? @relation(fields: [user_id], references: [id])
+
+  @@map("audit_logs")
+}

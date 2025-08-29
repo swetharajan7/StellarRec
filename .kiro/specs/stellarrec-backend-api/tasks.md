@@ -10,7 +10,7 @@
   - Configure environment variables and secrets management
   - _Requirements: 1.1, 14.1, 15.1_
 
-- [-] 2. Set up CI/CD pipeline and deployment infrastructure
+- [x] 2. Set up CI/CD pipeline and deployment infrastructure
   - Configure GitHub Actions for automated testing and deployment
   - Set up staging and production environments on AWS/GCP
   - Implement infrastructure as code (Terraform/CloudFormation)
@@ -20,7 +20,7 @@
 
 ## Core Authentication and User Management
 
-- [ ] 3. Implement API Gateway with authentication
+- [x] 3. Implement API Gateway with authentication
   - Set up Kong/AWS API Gateway with rate limiting
   - Implement JWT token generation and validation
   - Configure OAuth 2.0 authentication flow
@@ -28,7 +28,7 @@
   - Implement API versioning and documentation endpoints
   - _Requirements: 1.1, 1.3, 1.4, 15.3_
 
-- [ ] 4. Build User Management Service
+- [x] 4. Build User Management Service
   - Create user registration endpoints for students and recommenders
   - Implement secure password hashing with bcrypt
   - Build user profile CRUD operations with validation
@@ -36,7 +36,7 @@
   - Implement user preferences and settings management
   - _Requirements: 2.1, 2.2, 2.3, 1.5_
 
-- [ ] 5. Create database schema and models
+- [x] 5. Create database schema and models
   - Design and implement PostgreSQL database schema
   - Create user, student_profiles, and recommender_profiles tables
   - Set up database indexes for performance optimization
