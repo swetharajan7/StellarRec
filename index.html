@@ -297,6 +297,14 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             font-size: 2rem;
             color: #1976d2;
+            overflow: hidden;
+        }
+
+        .university-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 8px;
         }
 
         .university-name {
@@ -447,68 +455,126 @@
             <div class="university-carousel">
                 <div class="university-track">
                     <div class="university-item">
-                        <div class="university-logo">🎓</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Harvard_University_coat_of_arms.svg"
+                                alt="Harvard University"
+                                onerror="this.style.display='none'; this.parentNode.innerHTML='🎓';">
+                        </div>
                         <div class="university-name">Harvard University</div>
                     </div>
                     <div class="university-item">
-                        <div class="university-logo">🏛️</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Seal_of_Leland_Stanford_Junior_University.svg"
+                                alt="Stanford University"
+                                onerror="this.style.display='none'; this.parentNode.innerHTML='🏛️';">
+                        </div>
                         <div class="university-name">Stanford University</div>
                     </div>
                     <div class="university-item">
-                        <div class="university-logo">🔬</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/MIT_Seal.svg" alt="MIT"
+                                onerror="this.style.display='none'; this.parentNode.innerHTML='🔬';">
+                        </div>
                         <div class="university-name">MIT</div>
                     </div>
                     <div class="university-item">
-                        <div class="university-logo">🦅</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/0/07/Yale_University_Shield_1.svg"
+                                alt="Yale University"
+                                onerror="this.style.display='none'; this.parentNode.innerHTML='🦅';">
+                        </div>
                         <div class="university-name">Yale University</div>
                     </div>
                     <div class="university-item">
-                        <div class="university-logo">🐅</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/Princeton_seal.svg"
+                                alt="Princeton University"
+                                onerror="this.style.display='none'; this.parentNode.innerHTML='🐅';">
+                        </div>
                         <div class="university-name">Princeton University</div>
                     </div>
                     <div class="university-item">
-                        <div class="university-logo">🏫</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Columbia_University_Shield.svg"
+                                alt="Columbia University"
+                                onerror="this.style.display='none'; this.parentNode.innerHTML='🏫';">
+                        </div>
                         <div class="university-name">Columbia University</div>
                     </div>
                     <div class="university-item">
-                        <div class="university-logo">🌲</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/University_of_California%2C_Berkeley_seal.svg"
+                                alt="UC Berkeley" onerror="this.style.display='none'; this.parentNode.innerHTML='🌲';">
+                        </div>
                         <div class="university-name">UC Berkeley</div>
                     </div>
                     <div class="university-item">
-                        <div class="university-logo">🌟</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/0/0d/The_University_of_California_UCLA.svg"
+                                alt="UCLA" onerror="this.style.display='none'; this.parentNode.innerHTML='🌟';">
+                        </div>
                         <div class="university-name">UCLA</div>
                     </div>
                     <!-- Duplicate for seamless loop -->
                     <div class="university-item">
-                        <div class="university-logo">🎓</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Harvard_University_coat_of_arms.svg"
+                                alt="Harvard University"
+                                onerror="this.style.display='none'; this.parentNode.innerHTML='🎓';">
+                        </div>
                         <div class="university-name">Harvard University</div>
                     </div>
                     <div class="university-item">
-                        <div class="university-logo">🏛️</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Seal_of_Leland_Stanford_Junior_University.svg"
+                                alt="Stanford University"
+                                onerror="this.style.display='none'; this.parentNode.innerHTML='🏛️';">
+                        </div>
                         <div class="university-name">Stanford University</div>
                     </div>
                     <div class="university-item">
-                        <div class="university-logo">🔬</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/MIT_Seal.svg" alt="MIT"
+                                onerror="this.style.display='none'; this.parentNode.innerHTML='🔬';">
+                        </div>
                         <div class="university-name">MIT</div>
                     </div>
                     <div class="university-item">
-                        <div class="university-logo">🦅</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/0/07/Yale_University_Shield_1.svg"
+                                alt="Yale University"
+                                onerror="this.style.display='none'; this.parentNode.innerHTML='🦅';">
+                        </div>
                         <div class="university-name">Yale University</div>
                     </div>
                     <div class="university-item">
-                        <div class="university-logo">🐅</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/Princeton_seal.svg"
+                                alt="Princeton University"
+                                onerror="this.style.display='none'; this.parentNode.innerHTML='🐅';">
+                        </div>
                         <div class="university-name">Princeton University</div>
                     </div>
                     <div class="university-item">
-                        <div class="university-logo">🏫</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Columbia_University_Shield.svg"
+                                alt="Columbia University"
+                                onerror="this.style.display='none'; this.parentNode.innerHTML='🏫';">
+                        </div>
                         <div class="university-name">Columbia University</div>
                     </div>
                     <div class="university-item">
-                        <div class="university-logo">🌲</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/University_of_California%2C_Berkeley_seal.svg"
+                                alt="UC Berkeley" onerror="this.style.display='none'; this.parentNode.innerHTML='🌲';">
+                        </div>
                         <div class="university-name">UC Berkeley</div>
                     </div>
                     <div class="university-item">
-                        <div class="university-logo">🌟</div>
+                        <div class="university-logo">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/0/0d/The_University_of_California_UCLA.svg"
+                                alt="UCLA" onerror="this.style.display='none'; this.parentNode.innerHTML='🌟';">
+                        </div>
                         <div class="university-name">UCLA</div>
                     </div>
                 </div>
