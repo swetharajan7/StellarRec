@@ -92,19 +92,27 @@ services:
       dockerfile: Dockerfile
     container_name: stellarrec-ai-service
     ports:
-      - "3002:3002"
+      - "8002:8002"
     environment:
       - ENVIRONMENT=development
-      - PORT=3002
+      - PORT=8002
       - DATABASE_URL=postgresql://stellarrec:stellarrec_dev_password@postgres:5432/stellarrec_dev
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
       - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - SECRET_KEY=stellarrec_ai_secret_dev
+      - DEBUG=true
+    volumes:
+      - ./services/ai-service:/app
+      - ai_models:/app/models
     depends_on:
       - postgres
       - redis
       - elasticsearch
     networks:
       - stellarrec-network
+    restart: unless-stopped
 
   # Application Management Service
   application-service:
@@ -129,6 +137,7 @@ volumes:
   postgres_data:
   redis_data:
   elasticsearch_data:
+  ai_models:
 
 networks:
   stellarrec-network:

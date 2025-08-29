@@ -46,7 +46,7 @@
 
 ## AI/ML Service Development
 
-- [ ] 6. Set up AI/ML service infrastructure
+- [x] 6. Set up AI/ML service infrastructure
   - Initialize Python FastAPI service for ML operations
   - Set up TensorFlow/PyTorch environment with GPU support
   - Configure model serving infrastructure (TensorFlow Serving/MLflow)
@@ -54,7 +54,7 @@
   - Set up data preprocessing pipelines
   - _Requirements: 3.1, 3.4, 14.3_
 
-- [ ] 7. Implement university matching algorithm
+- [x] 7. Implement university matching algorithm
   - Build collaborative filtering model for university recommendations
   - Implement content-based filtering using university features
   - Create hybrid recommendation system combining both approaches
@@ -62,7 +62,7 @@
   - Implement match reasoning and explanation generation
   - _Requirements: 3.1, 3.2, 3.3, 8.1_
 
-- [ ] 8. Develop essay analysis and optimization engine
+- [x] 8. Develop essay analysis and optimization engine
   - Integrate BERT-based NLP model for essay analysis
   - Implement grammar checking and style suggestions
   - Build essay scoring system for clarity, impact, and relevance
