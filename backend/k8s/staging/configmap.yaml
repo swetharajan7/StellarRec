@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: stellarrec-config
+  namespace: stellarrec-staging
+data:
+  NODE_ENV: "staging"
+  API_VERSION: "v1"
+  LOG_LEVEL: "info"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  RATE_LIMIT_MAX_REQUESTS: "100"
+  BCRYPT_ROUNDS: "12"
+  CORS_ORIGIN: "https://staging.stellarrec.com"
+  MAX_FILE_SIZE: "10485760"
+  ALLOWED_FILE_TYPES: "pdf,doc,docx,txt,jpg,jpeg,png"
+  FROM_EMAIL: "noreply@stellarrec.com"
+  FROM_NAME: "StellarRec Platform"

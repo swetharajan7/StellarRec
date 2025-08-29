@@ -1,0 +1,50 @@
+{
+  "name": "stellarrec-backend",
+  "version": "1.0.0",
+  "description": "StellarRec AI-powered university application platform backend API",
+  "main": "index.js",
+  "scripts": {
+    "dev": "docker-compose up -d && npm run dev:services",
+    "dev:services": "concurrently \"npm run dev:gateway\" \"npm run dev:user\" \"npm run dev:ai\" \"npm run dev:application\"",
+    "dev:gateway": "cd services/api-gateway && npm run dev",
+    "dev:user": "cd services/user-service && npm run dev",
+    "dev:ai": "cd services/ai-service && npm run dev",
+    "dev:application": "cd services/application-service && npm run dev",
+    "test": "npm run test:services",
+    "test:services": "concurrently \"npm run test:gateway\" \"npm run test:user\" \"npm run test:ai\" \"npm run test:application\"",
+    "test:gateway": "cd services/api-gateway && npm test",
+    "test:user": "cd services/user-service && npm test",
+    "test:ai": "cd services/ai-service && npm test",
+    "test:application": "cd services/application-service && npm test",
+    "build": "npm run build:services",
+    "build:services": "concurrently \"npm run build:gateway\" \"npm run build:user\" \"npm run build:ai\" \"npm run build:application\"",
+    "build:gateway": "cd services/api-gateway && npm run build",
+    "build:user": "cd services/user-service && npm run build",
+    "build:ai": "cd services/ai-service && npm run build",
+    "build:application": "cd services/application-service && npm run build",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "migrate": "cd services/user-service && npm run migrate",
+    "seed": "cd services/user-service && npm run seed"
+  },
+  "keywords": [
+    "stellarrec",
+    "university",
+    "application",
+    "ai",
+    "recommendation",
+    "letters",
+    "microservices"
+  ],
+  "author": "StellarRec Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "docker-compose": "^0.24.6"
+  },
+  "workspaces": [
+    "services/*",
+    "shared/*"
+  ]
+}

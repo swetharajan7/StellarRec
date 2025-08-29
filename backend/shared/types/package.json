@@ -1,0 +1,26 @@
+{
+  "name": "@stellarrec/types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for StellarRec backend services",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "stellarrec",
+    "types",
+    "typescript",
+    "shared"
+  ],
+  "author": "StellarRec Team",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "files": [
+    "dist/**/*"
+  ]
+}

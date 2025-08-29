@@ -1,0 +1,135 @@
+version: '3.8'
+
+services:
+  # Database Services
+  postgres:
+    image: postgres:15-alpine
+    container_name: stellarrec-postgres
+    environment:
+      POSTGRES_DB: stellarrec_dev
+      POSTGRES_USER: stellarrec
+      POSTGRES_PASSWORD: stellarrec_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - stellarrec-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: stellarrec-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - stellarrec-network
+
+  # Elasticsearch for Search
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    container_name: stellarrec-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - stellarrec-network
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    container_name: stellarrec-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - JWT_SECRET=stellarrec_jwt_secret_dev
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+      - user-service
+      - ai-service
+      - application-service
+    networks:
+      - stellarrec-network
+
+  # User Management Service
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    container_name: stellarrec-user-service
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DATABASE_URL=postgresql://stellarrec:stellarrec_dev_password@postgres:5432/stellarrec_dev
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=stellarrec_jwt_secret_dev
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - stellarrec-network
+
+  # AI/ML Service
+  ai-service:
+    build:
+      context: ./services/ai-service
+      dockerfile: Dockerfile
+    container_name: stellarrec-ai-service
+    ports:
+      - "3002:3002"
+    environment:
+      - ENVIRONMENT=development
+      - PORT=3002
+      - DATABASE_URL=postgresql://stellarrec:stellarrec_dev_password@postgres:5432/stellarrec_dev
+      - REDIS_URL=redis://redis:6379
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    depends_on:
+      - postgres
+      - redis
+      - elasticsearch
+    networks:
+      - stellarrec-network
+
+  # Application Management Service
+  application-service:
+    build:
+      context: ./services/application-service
+      dockerfile: Dockerfile
+    container_name: stellarrec-application-service
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - PORT=3003
+      - DATABASE_URL=postgresql://stellarrec:stellarrec_dev_password@postgres:5432/stellarrec_dev
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - stellarrec-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  elasticsearch_data:
+
+networks:
+  stellarrec-network:
+    driver: bridge
