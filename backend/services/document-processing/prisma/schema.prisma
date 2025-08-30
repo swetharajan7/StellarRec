@@ -1,0 +1,130 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model processing_jobs {
+  id              String   @id @default(uuid())
+  file_id         String
+  user_id         String
+  job_type        String   // conversion, ocr, preview, metadata, indexing, full
+  status          String   @default("pending") // pending, processing, completed, failed
+  progress        Int      @default(0)
+  input_format    String
+  output_format   String?
+  parameters      Json     @default("{}")
+  result          Json?
+  error_message   String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  completed_at    DateTime?
+
+  @@index([user_id])
+  @@index([status])
+  @@index([job_type])
+  @@index([created_at])
+  @@map("processing_jobs")
+}
+
+model document_versions {
+  id                String   @id @default(uuid())
+  document_id       String
+  version_number    Int
+  processing_job_id String?
+  file_path         String
+  file_size         BigInt
+  checksum          String
+  format            String
+  metadata          Json?
+  created_by        String
+  created_at        DateTime @default(now())
+
+  @@unique([document_id, version_number])
+  @@index([document_id])
+  @@index([created_at])
+  @@map("document_versions")
+}
+
+model processing_cache {
+  id            String   @id @default(uuid())
+  cache_key     String   @unique
+  input_hash    String
+  output_data   Json
+  expires_at    DateTime
+  created_at    DateTime @default(now())
+  accessed_at   DateTime @default(now())
+  access_count  Int      @default(1)
+
+  @@index([cache_key])
+  @@index([expires_at])
+  @@index([input_hash])
+  @@map("processing_cache")
+}
+
+model ocr_results {
+  id              String   @id @default(uuid())
+  file_id         String
+  language        String
+  confidence      Float
+  extracted_text  String
+  word_data       Json?
+  line_data       Json?
+  paragraph_data  Json?
+  processing_time Int
+  created_at      DateTime @default(now())
+
+  @@index([file_id])
+  @@index([language])
+  @@index([confidence])
+  @@index([created_at])
+  @@map("ocr_results")
+}
+
+model conversion_history {
+  id              String   @id @default(uuid())
+  file_id         String
+  source_format   String
+  target_format   String
+  conversion_type String   // image_to_image, document_to_image, etc.
+  success         Boolean
+  file_size_before BigInt
+  file_size_after  BigInt?
+  compression_ratio Float?
+  processing_time Int
+  error_message   String?
+  created_at      DateTime @default(now())
+
+  @@index([file_id])
+  @@index([source_format])
+  @@index([target_format])
+  @@index([success])
+  @@index([created_at])
+  @@map("conversion_history")
+}
+
+model preview_cache {
+  id            String   @id @default(uuid())
+  file_id       String
+  preview_type  String   // thumbnail, page, text
+  format        String
+  width         Int?
+  height        Int?
+  quality       Int?
+  preview_data  String   // Base64 encoded or file path
+  file_size     Int
+  created_at    DateTime @default(now())
+  expires_at    DateTime
+
+  @@unique([file_id, preview_type, format, width, height, quality])
+  @@index([file_id])
+  @@index([preview_type])
+  @@index([expires_at])
+  @@map("preview_cache")
+}

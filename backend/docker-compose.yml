@@ -158,6 +158,31 @@ services:
     networks:
       - stellarrec-network
 
+  # Document Processing Service
+  document-processing:
+    build:
+      context: ./services/document-processing
+      dockerfile: Dockerfile
+    container_name: stellarrec-document-processing
+    ports:
+      - "3010:3010"
+    environment:
+      - NODE_ENV=development
+      - PORT=3010
+      - DATABASE_URL=postgresql://stellarrec:stellarrec_dev_password@postgres:5432/stellarrec_dev
+      - JWT_SECRET=stellarrec_jwt_secret_dev
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ELASTICSEARCH_INDEX=stellarrec-documents
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+      - MAX_FILE_SIZE=104857600
+      - TEMP_DIR=/tmp
+      - DEFAULT_OCR_LANGUAGE=eng
+    depends_on:
+      - postgres
+      - elasticsearch
+    networks:
+      - stellarrec-network
+
   # MinIO for S3-compatible storage
   minio:
     image: minio/minio:latest
