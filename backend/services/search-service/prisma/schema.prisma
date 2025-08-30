@@ -1,0 +1,151 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model search_analytics {
+  id              String    @id @default(uuid())
+  search_id       String    @unique
+  user_id         String?
+  session_id      String?
+  query           String
+  filters         Json      @default("{}")
+  results_count   Int
+  processing_time Int
+  clicked_results String[]  @default([])
+  timestamp       DateTime  @default(now())
+  user_agent      String?
+  ip_address      String?
+  location        String?
+
+  @@index([user_id])
+  @@index([query])
+  @@index([timestamp])
+  @@index([results_count])
+  @@map("search_analytics")
+}
+
+model search_clicks {
+  id          String   @id @default(uuid())
+  search_id   String
+  document_id String
+  position    Int
+  user_id     String?
+  timestamp   DateTime @default(now())
+
+  @@index([search_id])
+  @@index([document_id])
+  @@index([user_id])
+  @@index([timestamp])
+  @@map("search_clicks")
+}
+
+model popular_queries {
+  id            String   @id @default(uuid())
+  query         String   @unique
+  search_count  Int      @default(1)
+  click_count   Int      @default(0)
+  last_searched DateTime @default(now())
+  trending_score Float   @default(0)
+  category      String?
+  
+  @@index([search_count])
+  @@index([trending_score])
+  @@index([last_searched])
+  @@index([category])
+  @@map("popular_queries")
+}
+
+model query_suggestions {
+  id          String   @id @default(uuid())
+  query       String
+  suggestion  String
+  score       Float
+  type        String   // completion, correction, related
+  metadata    Json?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@unique([query, suggestion])
+  @@index([query])
+  @@index([score])
+  @@index([type])
+  @@map("query_suggestions")
+}
+
+model search_performance {
+  id                String   @id @default(uuid())
+  query             String   @unique
+  avg_processing_time Float
+  avg_results_count Float
+  total_searches    Int
+  successful_searches Int
+  click_through_rate Float
+  last_optimized    DateTime?
+  optimization_notes String?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  @@index([query])
+  @@index([avg_processing_time])
+  @@index([click_through_rate])
+  @@index([total_searches])
+  @@map("search_performance")
+}
+
+model facet_usage {
+  id         String   @id @default(uuid())
+  facet_name String
+  facet_value String
+  usage_count Int     @default(1)
+  last_used  DateTime @default(now())
+  user_id    String?
+
+  @@unique([facet_name, facet_value, user_id])
+  @@index([facet_name])
+  @@index([usage_count])
+  @@index([last_used])
+  @@index([user_id])
+  @@map("facet_usage")
+}
+
+model search_sessions {
+  id              String   @id @default(uuid())
+  session_id      String   @unique
+  user_id         String?
+  start_time      DateTime @default(now())
+  end_time        DateTime?
+  total_searches  Int      @default(0)
+  total_clicks    Int      @default(0)
+  queries         String[] @default([])
+  user_agent      String?
+  ip_address      String?
+
+  @@index([session_id])
+  @@index([user_id])
+  @@index([start_time])
+  @@map("search_sessions")
+}
+
+model index_metadata {
+  id            String   @id @default(uuid())
+  index_name    String   @unique
+  index_type    String
+  document_count Int     @default(0)
+  last_updated  DateTime @default(now())
+  schema_version String  @default("1.0")
+  settings      Json?
+  mappings      Json?
+
+  @@index([index_name])
+  @@index([index_type])
+  @@index([last_updated])
+  @@map("index_metadata")
+}

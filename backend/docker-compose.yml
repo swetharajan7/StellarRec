@@ -183,6 +183,35 @@ services:
     networks:
       - stellarrec-network
 
+  # Search Service
+  search-service:
+    build:
+      context: ./services/search-service
+      dockerfile: Dockerfile
+    container_name: stellarrec-search-service
+    ports:
+      - "3011:3011"
+    environment:
+      - NODE_ENV=development
+      - PORT=3011
+      - DATABASE_URL=postgresql://stellarrec:stellarrec_dev_password@postgres:5432/stellarrec_dev
+      - JWT_SECRET=stellarrec_jwt_secret_dev
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=changeme
+      - DOCUMENTS_INDEX=stellarrec-documents
+      - UNIVERSITIES_INDEX=stellarrec-universities
+      - PROGRAMS_INDEX=stellarrec-programs
+      - SCHOLARSHIPS_INDEX=stellarrec-scholarships
+      - USERS_INDEX=stellarrec-users
+      - APPLICATIONS_INDEX=stellarrec-applications
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+    depends_on:
+      - postgres
+      - elasticsearch
+    networks:
+      - stellarrec-network
+
   # MinIO for S3-compatible storage
   minio:
     image: minio/minio:latest
