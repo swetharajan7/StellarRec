@@ -1,0 +1,195 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model user_behavior {
+  id          String   @id @default(uuid())
+  userId      String
+  sessionId   String?
+  action      String   // view, click, search, save, share, apply, like, dislike, bookmark
+  contentType String   // university, program, scholarship, opportunity, article, guide
+  contentId   String
+  metadata    Json     @default("{}")
+  context     Json     @default("{}")
+  timestamp   DateTime @default(now())
+
+  @@index([userId])
+  @@index([contentType])
+  @@index([contentId])
+  @@index([action])
+  @@index([timestamp])
+  @@map("user_behavior")
+}
+
+model user_behavior_profile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  preferences    Json     @default("{}")
+  patterns       Json     @default("{}")
+  interests      String[] @default([])
+  recentActivity Json     @default("[]")
+  lastUpdated    DateTime @default(now())
+
+  @@index([userId])
+  @@index([lastUpdated])
+  @@map("user_behavior_profile")
+}
+
+model trending_content {
+  id             String   @id @default(uuid())
+  contentId      String
+  contentType    String
+  category       String
+  trendingScore  Float
+  changeRate     Float
+  timeframe      String   // 1h, 6h, 24h, 7d
+  stats          Json     @default("{}")
+  metadata       Json     @default("{}")
+  lastCalculated DateTime @default(now())
+
+  @@unique([contentId, timeframe])
+  @@index([contentType])
+  @@index([trendingScore])
+  @@index([timeframe])
+  @@index([lastCalculated])
+  @@map("trending_content")
+}
+
+model opportunity {
+  id             String   @id @default(uuid())
+  type           String   // scholarship, grant, fellowship, internship, program, competition
+  title          String
+  description    String
+  provider       String
+  amount         Int?
+  currency       String   @default("USD")
+  deadline       DateTime
+  eligibility    String[] @default([])
+  requirements   String[] @default([])
+  benefits       String[] @default([])
+  applicationUrl String
+  category       String
+  location       String
+  academicLevel  String[] @default([])
+  fieldOfStudy   String[] @default([])
+  tags           String[] @default([])
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([type])
+  @@index([category])
+  @@index([location])
+  @@index([deadline])
+  @@index([amount])
+  @@index([createdAt])
+  @@map("opportunity")
+}
+
+model recommendation_log {
+  id                String   @id @default(uuid())
+  userId            String
+  algorithm         String
+  recommendationIds String[] @default([])
+  timestamp         DateTime @default(now())
+
+  @@index([userId])
+  @@index([algorithm])
+  @@index([timestamp])
+  @@map("recommendation_log")
+}
+
+model user_personalization {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  preferences Json     @default("{}")
+  lastUpdated DateTime @default(now())
+
+  @@index([userId])
+  @@index([lastUpdated])
+  @@map("user_personalization")
+}
+
+model content_similarity {
+  id            String  @id @default(uuid())
+  contentId1    String
+  contentId2    String
+  contentType   String
+  similarity    Float
+  sharedFeatures String[] @default([])
+  calculatedAt  DateTime @default(now())
+
+  @@unique([contentId1, contentId2])
+  @@index([contentId1])
+  @@index([contentId2])
+  @@index([similarity])
+  @@map("content_similarity")
+}
+
+model user_interaction_summary {
+  id                String   @id @default(uuid())
+  userId            String
+  contentType       String
+  totalInteractions Int      @default(0)
+  uniqueContent     Int      @default(0)
+  avgEngagement     Float    @default(0)
+  topCategories     String[] @default([])
+  lastInteraction   DateTime?
+  periodStart       DateTime
+  periodEnd         DateTime
+
+  @@unique([userId, contentType, periodStart])
+  @@index([userId])
+  @@index([contentType])
+  @@index([periodStart])
+  @@map("user_interaction_summary")
+}
+
+model content_performance {
+  id              String   @id @default(uuid())
+  contentId       String
+  contentType     String
+  viewCount       Int      @default(0)
+  clickCount      Int      @default(0)
+  saveCount       Int      @default(0)
+  shareCount      Int      @default(0)
+  applyCount      Int      @default(0)
+  likeCount       Int      @default(0)
+  dislikeCount    Int      @default(0)
+  engagementRate  Float    @default(0)
+  conversionRate  Float    @default(0)
+  lastUpdated     DateTime @default(now())
+
+  @@unique([contentId])
+  @@index([contentType])
+  @@index([engagementRate])
+  @@index([conversionRate])
+  @@index([lastUpdated])
+  @@map("content_performance")
+}
+
+model discovery_session {
+  id              String   @id @default(uuid())
+  userId          String?
+  sessionId       String
+  filters         Json     @default("{}")
+  resultsCount    Int
+  clickedResults  String[] @default([])
+  savedResults    String[] @default([])
+  appliedResults  String[] @default([])
+  sessionDuration Int?     // in seconds
+  timestamp       DateTime @default(now())
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([timestamp])
+  @@map("discovery_session")
+}
