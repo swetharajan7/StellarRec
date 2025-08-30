@@ -133,11 +133,53 @@ services:
     networks:
       - stellarrec-network
 
+  # File Management Service
+  file-management:
+    build:
+      context: ./services/file-management
+      dockerfile: Dockerfile
+    container_name: stellarrec-file-management
+    ports:
+      - "3009:3009"
+    environment:
+      - NODE_ENV=development
+      - PORT=3009
+      - DATABASE_URL=postgresql://stellarrec:stellarrec_dev_password@postgres:5432/stellarrec_dev
+      - JWT_SECRET=stellarrec_jwt_secret_dev
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-minioadmin}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-minioadmin}
+      - AWS_REGION=us-east-1
+      - S3_BUCKET=stellarrec-files
+      - S3_ENDPOINT=http://minio:9000
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+    depends_on:
+      - postgres
+      - minio
+    networks:
+      - stellarrec-network
+
+  # MinIO for S3-compatible storage
+  minio:
+    image: minio/minio:latest
+    container_name: stellarrec-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - stellarrec-network
+
 volumes:
   postgres_data:
   redis_data:
   elasticsearch_data:
   ai_models:
+  minio_data:
 
 networks:
   stellarrec-network:

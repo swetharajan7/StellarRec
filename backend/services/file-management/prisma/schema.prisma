@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model files {
+  id                     String    @id @default(uuid())
+  user_id               String
+  original_name         String
+  sanitized_name        String
+  mime_type             String
+  file_size             BigInt
+  storage_key           String    @unique
+  checksum              String
+  status                String    @default("uploading") // uploading, processing, ready, error, deleted
+  tags                  String[]  @default([])
+  description           String?
+  category              String?
+  is_public             Boolean   @default(false)
+  access_permissions    Json      @default("{}")
+  processing_results    Json?
+  security_scan_results Json?
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+  accessed_at           DateTime?
+  expires_at            DateTime?
+
+  // Relations
+  versions              file_versions[]
+  access_logs           file_access_logs[]
+
+  @@index([user_id])
+  @@index([status])
+  @@index([category])
+  @@index([created_at])
+  @@index([mime_type])
+  @@map("files")
+}
+
+model file_versions {
+  id                  String   @id @default(uuid())
+  file_id             String
+  version_number      Int
+  storage_key         String
+  checksum            String
+  changes_description String?
+  created_by          String
+  created_at          DateTime @default(now())
+
+  // Relations
+  file                files    @relation(fields: [file_id], references: [id], onDelete: Cascade)
+
+  @@unique([file_id, version_number])
+  @@index([file_id])
+  @@index([created_at])
+  @@map("file_versions")
+}
+
+model file_access_logs {
+  id         String   @id @default(uuid())
+  file_id    String
+  user_id    String
+  action     String   // view, download, edit, delete, share
+  ip_address String?
+  user_agent String?
+  created_at DateTime @default(now())
+
+  // Relations
+  file       files    @relation(fields: [file_id], references: [id], onDelete: Cascade)
+
+  @@index([file_id])
+  @@index([user_id])
+  @@index([created_at])
+  @@index([action])
+  @@map("file_access_logs")
+}
+
+model file_shares {
+  id          String    @id @default(uuid())
+  file_id     String
+  shared_by   String
+  shared_with String?   // null for public shares
+  share_token String    @unique
+  permissions String[]  @default(["view"]) // view, download, edit
+  expires_at  DateTime?
+  created_at  DateTime  @default(now())
+  accessed_at DateTime?
+
+  @@index([file_id])
+  @@index([shared_by])
+  @@index([share_token])
+  @@index([expires_at])
+  @@map("file_shares")
+}

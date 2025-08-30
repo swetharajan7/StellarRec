@@ -103,7 +103,7 @@ const services = {
     pathRewrite: { '^/api/v1/analytics': '' },
   },
   file: {
-    target: process.env.FILE_SERVICE_URL || 'http://file-service:3007',
+    target: process.env.FILE_SERVICE_URL || 'http://file-management:3009',
     pathRewrite: { '^/api/v1/files': '' },
   },
 };
