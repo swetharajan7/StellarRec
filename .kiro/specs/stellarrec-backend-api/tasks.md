@@ -98,7 +98,7 @@
 
 ## Letter Management and Collaboration
 
-- [ ] 12. Implement recommendation letter service
+- [-] 12. Implement recommendation letter service
   - Create letter CRUD operations with version control
   - Build invitation workflow for recommenders with secure tokens
   - Implement letter template system with customization options
