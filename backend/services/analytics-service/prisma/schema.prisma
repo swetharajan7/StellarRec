@@ -1,0 +1,225 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model metric {
+  id          String   @id @default(uuid())
+  metricName  String
+  metricType  String   // counter, gauge, histogram, summary
+  value       Float
+  dimensions  Json     @default("{}")
+  timestamp   DateTime @default(now())
+  source      String
+  userId      String?
+  sessionId   String?
+
+  @@index([metricName])
+  @@index([timestamp])
+  @@index([source])
+  @@index([userId])
+  @@map("metric")
+}
+
+model aggregated_metric {
+  id         String   @id @default(uuid())
+  metricName String
+  period     String   // hour, day, week, month
+  timestamp  DateTime
+  value      Float
+  count      Int
+  min        Float
+  max        Float
+  avg        Float
+  sum        Float
+  dimensions Json     @default("{}")
+  metadata   Json     @default("{}")
+
+  @@unique([metricName, period, timestamp])
+  @@index([metricName])
+  @@index([period])
+  @@index([timestamp])
+  @@map("aggregated_metric")
+}
+
+model report {
+  id            String   @id @default(uuid())
+  name          String
+  type          String
+  generatedAt   DateTime @default(now())
+  period        Json
+  data          Json
+  summary       Json
+  visualizations Json
+  insights      String[]
+
+  @@index([type])
+  @@index([generatedAt])
+  @@map("report")
+}
+
+model scheduled_report {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  type        String
+  schedule    String   // daily, weekly, monthly
+  recipients  String[]
+  parameters  Json     @default("{}")
+  isActive    Boolean  @default(true)
+  nextRun     DateTime
+  lastRun     DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([schedule])
+  @@index([nextRun])
+  @@index([isActive])
+  @@map("scheduled_report")
+}
+
+model dashboard {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  userId      String?
+  isPublic    Boolean  @default(false)
+  widgets     Json     @default("[]")
+  layout      Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isPublic])
+  @@index([createdAt])
+  @@map("dashboard")
+}
+
+model insight {
+  id            String    @id @default(uuid())
+  type          String    // trend, anomaly, correlation, prediction, recommendation
+  category      String    // user_behavior, performance, business, technical, engagement
+  title         String
+  description   String
+  severity      String    // low, medium, high, critical
+  confidence    Float
+  impact        String    // positive, negative, neutral
+  metrics       String[]
+  data          Json
+  recommendations String[]
+  createdAt     DateTime  @default(now())
+  expiresAt     DateTime?
+
+  @@index([type])
+  @@index([category])
+  @@index([severity])
+  @@index([createdAt])
+  @@map("insight")
+}
+
+model prediction_model {
+  id           String   @id @default(uuid())
+  name         String
+  type         String   // linear_regression, polynomial, exponential, seasonal
+  targetMetric String
+  features     String[]
+  accuracy     Float
+  lastTrained  DateTime
+  parameters   Json
+
+  @@index([targetMetric])
+  @@index([type])
+  @@index([lastTrained])
+  @@map("prediction_model")
+}
+
+model aggregation_rule {
+  id              String   @id @default(uuid())
+  name            String
+  sourceMetrics   String[]
+  aggregationType String   // sum, avg, min, max, count, percentile
+  groupBy         String[]
+  timeWindow      String   // hour, day, week, month
+  filters         Json     @default("{}")
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  @@index([timeWindow])
+  @@index([isActive])
+  @@map("aggregation_rule")
+}
+
+model user_success_prediction {
+  id                  String   @id @default(uuid())
+  userId              String
+  applicationId       String?
+  successProbability  Float
+  confidence          Float
+  factors             Json
+  recommendations     String[]
+  riskLevel           String   // low, medium, high
+  createdAt           DateTime @default(now())
+  expiresAt           DateTime
+
+  @@index([userId])
+  @@index([applicationId])
+  @@index([riskLevel])
+  @@index([createdAt])
+  @@map("user_success_prediction")
+}
+
+model benchmark_data {
+  id                String   @id @default(uuid())
+  userSegment       String   // academic_level, field_of_study, etc.
+  segmentValue      String
+  metric            String
+  averageValue      Float
+  percentiles       Json     // P25, P50, P75, P90, P95
+  sampleSize        Int
+  lastUpdated       DateTime @default(now())
+
+  @@unique([userSegment, segmentValue, metric])
+  @@index([userSegment])
+  @@index([metric])
+  @@index([lastUpdated])
+  @@map("benchmark_data")
+}
+
+model timeline_optimization {
+  id              String   @id @default(uuid())
+  userId          String
+  applicationId   String
+  originalTimeline Json
+  optimizedTimeline Json
+  recommendations String[]
+  riskAssessment  String   // low, medium, high
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([applicationId])
+  @@index([createdAt])
+  @@map("timeline_optimization")
+}
+
+model analytics_job {
+  id          String    @id @default(uuid())
+  jobType     String    // aggregation, insight_generation, model_training
+  status      String    // pending, running, completed, failed
+  parameters  Json      @default("{}")
+  result      Json?
+  error       String?
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([jobType])
+  @@index([status])
+  @@index([createdAt])
+  @@map("analytics_job")
+}
