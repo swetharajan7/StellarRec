@@ -999,7 +999,7 @@
                     <button class="toggle-btn" onclick="switchUserType('student')">Student View</button>
                     <button class="toggle-btn active" onclick="switchUserType('recommender')">Recommender View</button>
                     <button class="toggle-btn" onclick="switchUserType('institution')">Institution View</button>
-                    <button class="toggle-btn" onclick="switchUserType('admin')">Admin View</button>
+
                 </div>
                 <div class="notification-bell">
                     <span class="material-icons">notifications</span>
@@ -1461,55 +1461,7 @@
                 </div>
             </div>
 
-            <!-- ADMIN DASHBOARD -->
-            <div class="dashboard-section" id="admin-overview">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number">12,456</div>
-                        <div class="stat-label">Total Users</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">3,892</div>
-                        <div class="stat-label">Active Letters</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">847</div>
-                        <div class="stat-label">Partner Institutions</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">99.2%</div>
-                        <div class="stat-label">System Uptime</div>
-                    </div>
-                </div>
 
-                <div class="dashboard-grid">
-                    <div class="dashboard-card">
-                        <div class="card-header">
-                            <div class="card-icon" style="background: linear-gradient(135deg, #f44336, #ef5350);">
-                                <span class="material-icons">security</span>
-                            </div>
-                            <div>
-                                <div class="card-title">Trust & Safety</div>
-                                <div class="card-subtitle">5 flagged accounts</div>
-                            </div>
-                        </div>
-                        <button class="btn btn-primary" onclick="showSection('admin-security')">Review Flags</button>
-                    </div>
-
-                    <div class="dashboard-card">
-                        <div class="card-header">
-                            <div class="card-icon" style="background: linear-gradient(135deg, #607d8b, #78909c);">
-                                <span class="material-icons">analytics</span>
-                            </div>
-                            <div>
-                                <div class="card-title">System Analytics</div>
-                                <div class="card-subtitle">Performance & usage metrics</div>
-                            </div>
-                        </div>
-                        <button class="btn btn-primary" onclick="showSection('admin-analytics')">View Analytics</button>
-                    </div>
-                </div>
-            </div>
             <!-- MISSING SECTIONS -->
             
             <!-- NOTIFICATIONS SECTION -->
@@ -1665,53 +1617,7 @@
                 </div>
             </div>
 
-            <!-- ADMIN SECURITY SECTION -->
-            <div class="dashboard-section" id="admin-security">
-                <div class="section-header">
-                    <h2>Trust & Safety</h2>
-                    <p class="section-description">Monitor security and safety across the platform</p>
-                </div>
-                <div class="dashboard-card">
-                    <h3>Security Dashboard</h3>
-                    <p>Security monitoring, fraud detection, and safety controls.</p>
-                </div>
-            </div>
 
-            <!-- ADMIN ANALYTICS SECTION -->
-            <div class="dashboard-section" id="admin-analytics">
-                <div class="section-header">
-                    <h2>System Analytics</h2>
-                    <p class="section-description">Platform-wide analytics and performance metrics</p>
-                </div>
-                <div class="dashboard-card">
-                    <h3>Platform Analytics</h3>
-                    <p>System-wide analytics, performance metrics, and usage statistics.</p>
-                </div>
-            </div>
-
-            <!-- ADMIN USERS SECTION -->
-            <div class="dashboard-section" id="admin-users">
-                <div class="section-header">
-                    <h2>User Management</h2>
-                    <p class="section-description">Manage users and their permissions</p>
-                </div>
-                <div class="dashboard-card">
-                    <h3>User Administration</h3>
-                    <p>User management, permissions, and account administration.</p>
-                </div>
-            </div>
-
-            <!-- ADMIN INSTITUTIONS SECTION -->
-            <div class="dashboard-section" id="admin-institutions">
-                <div class="section-header">
-                    <h2>Institution Partners</h2>
-                    <p class="section-description">Manage institutional partnerships and integrations</p>
-                </div>
-                <div class="dashboard-card">
-                    <h3>Partner Management</h3>
-                    <p>Manage institutional partnerships, integrations, and onboarding.</p>
-                </div>
-            </div>
 
             <!-- SMART ANALYTICS DASHBOARD -->
             <div class="dashboard-section" id="analytics-dashboard">
@@ -1996,13 +1902,7 @@
                 icon: "business",
                 stats: { lettersToday: 156, totalCycle: 2847, apiUptime: "98.5%", activePrograms: 45 }
             },
-            admin: {
-                name: "System Admin",
-                role: "Administrator",
-                affiliation: "StellarRec Platform",
-                icon: "admin_panel_settings",
-                stats: { totalUsers: 12456, activeLetters: 3892, partnerInstitutions: 847, systemUptime: "99.2%" }
-            }
+
         };
 
         // Navigation menus for different user types
@@ -2026,13 +1926,7 @@
                 { id: 'institution-settings', icon: 'settings', label: 'Integration Settings' },
                 { id: 'institution-analytics', icon: 'analytics', label: 'Analytics' }
             ],
-            admin: [
-                { id: 'admin-overview', icon: 'dashboard', label: 'Overview' },
-                { id: 'admin-security', icon: 'security', label: 'Trust & Safety' },
-                { id: 'admin-analytics', icon: 'analytics', label: 'System Analytics' },
-                { id: 'admin-users', icon: 'people', label: 'User Management' },
-                { id: 'admin-institutions', icon: 'business', label: 'Institution Partners' }
-            ]
+
         };
 
         // Initialize dashboard
@@ -2076,8 +1970,7 @@
             const titles = {
                 recommender: 'Letter Management Dashboard',
                 student: 'Application Tracking Dashboard',
-                institution: 'Letter Intake Dashboard',
-                admin: 'System Administration Dashboard'
+                institution: 'Letter Intake Dashboard'
             };
             document.getElementById('pageTitle').textContent = titles[currentUserType];
         }
@@ -2186,8 +2079,7 @@
             const counts = {
                 recommender: 3,
                 student: 2,
-                institution: 8,
-                admin: 12
+                institution: 8
             };
             document.getElementById('notificationCount').textContent = counts[currentUserType];
         }
@@ -2395,8 +2287,7 @@
                 const helpText = {
                     recommender: "letter management, delivery tracking, and consent approvals",
                     student: "creating requests, tracking applications, and finding universities",
-                    institution: "letter intake, API integration, and analytics",
-                    admin: "system monitoring, user management, and security oversight"
+                    institution: "letter intake, API integration, and analytics"
                 };
                 return helpText[currentUserType] || "navigating the platform";
             }
@@ -2611,9 +2502,7 @@
             { id: 'analytics-dashboard', icon: 'analytics', label: 'Analytics' }
         );
 
-        navigationMenus.admin.push(
-            { id: 'analytics-dashboard', icon: 'analytics', label: 'Platform Analytics' }
-        );
+
 
         // Initialize Stella
         let stellaBot;
