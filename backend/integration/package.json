@@ -1,0 +1,56 @@
+{
+  "name": "@stellarrec/integration",
+  "version": "1.0.0",
+  "description": "System integration and testing framework for StellarRec",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "test": "jest",
+    "test:integration": "jest --config jest.integration.config.js",
+    "test:e2e": "jest --config jest.e2e.config.js",
+    "test:load": "node dist/testing/loadTesting.js",
+    "test:security": "node dist/testing/securityTesting.js",
+    "start:all": "node dist/orchestrator/serviceOrchestrator.js",
+    "health:report": "node dist/monitoring/healthReport.js",
+    "validate:data": "node dist/validation/dataConsistency.js"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "axios": "^1.6.0",
+    "redis": "^4.6.0",
+    "pg": "^8.11.0",
+    "ws": "^8.14.0",
+    "node-cron": "^3.0.0",
+    "prom-client": "^15.1.0",
+    "winston": "^3.11.0",
+    "joi": "^17.11.0",
+    "lodash": "^4.17.0",
+    "uuid": "^9.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "bcryptjs": "^2.4.0",
+    "supertest": "^6.3.0",
+    "artillery": "^2.0.0",
+    "owasp-zap": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/express": "^4.17.0",
+    "@types/jest": "^29.5.0",
+    "@types/lodash": "^4.14.0",
+    "@types/uuid": "^9.0.0",
+    "typescript": "^5.3.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.0"
+  },
+  "keywords": [
+    "integration",
+    "testing",
+    "microservices",
+    "orchestration",
+    "monitoring"
+  ],
+  "author": "StellarRec Team",
+  "license": "MIT"
+}
