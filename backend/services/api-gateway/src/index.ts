@@ -1,7 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
@@ -12,7 +10,7 @@ import { logger } from './utils/logger';
 import { authMiddleware } from './middleware/auth';
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
-import { validateRequest } from './middleware/validation';
+import { createSecurityStack, createSecurityConfig, authRateLimit } from '@stellarrec/security';
 import authRoutes from './routes/auth';
 import healthRoutes from './routes/health';
 
@@ -22,41 +20,23 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Security middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-    },
-  },
-}));
+// Security configuration
+const securityConfig = createSecurityConfig({
+  corsOrigins: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
+  rateLimitMax: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
+  rateLimitWindow: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000')
+});
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
+  origin: securityConfig.corsOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000'), // 1 minute
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'), // limit each IP to 100 requests per windowMs
-  message: {
-    error: {
-      code: 'RATE_LIMIT_EXCEEDED',
-      message: 'Too many requests from this IP, please try again later.',
-    },
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-app.use(limiter);
+// Apply comprehensive security middleware stack
+app.use(createSecurityStack(securityConfig));
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -73,8 +53,8 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/health', healthRoutes);
 app.use('/ready', healthRoutes);
 
-// Authentication routes
-app.use('/api/v1/auth', authRoutes);
+// Authentication routes with stricter rate limiting
+app.use('/api/v1/auth', authRateLimit, authRoutes);
 
 // Service proxy configurations
 const services = {
