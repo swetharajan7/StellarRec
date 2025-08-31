@@ -1,399 +1,800 @@
 import { PrismaClient } from '@prisma/client';
-import OpenAI from 'openai';
-import natural from 'natural';
-import compromise from 'compromise';
-import sentiment from 'sentiment';
-import { logger } from '../utils/logger';
+import axios from 'axios';
 
-export interface WritingAnalysis {
-  readability: {
-    score: number;
-    level: string;
+const prisma = new PrismaClient();
+
+export interface AnalysisRequest {
+  content: string;
+  type: 'personal_statement' | 'supplemental_essay' | 'scholarship_essay' | 'cover_letter';
+  requirements?: {
+    wordLimit?: number;
+    tone?: string;
+    audience?: string;
+    prompts?: string[];
+  };
+  userId: string;
+}
+
+export interface AnalysisResult {
+  id: string;
+  scores: {
+    grammar: number;
+    style: number;
+    clarity: number;
+    impact: number;
+    originality: number;
+    overall: number;
+  };
+  suggestions: {
+    type: 'grammar' | 'style' | 'structure' | 'vocabulary' | 'tone';
+    severity: 'low' | 'medium' | 'high';
+    message: string;
+    suggestion: string;
+    position?: {
+      start: number;
+      end: number;
+    };
+  }[];
+  metrics: {
+    wordCount: number;
+    sentenceCount: number;
+    paragraphCount: number;
+    readabilityScore: number;
+    averageSentenceLength: number;
+    vocabularyComplexity: number;
+  };
+  readinessLevel: 'draft' | 'needs_work' | 'good' | 'excellent';
+}
+
+export interface GrammarCheck {
+  errors: {
+    type: 'grammar' | 'spelling' | 'punctuation' | 'style';
+    message: string;
+    suggestion: string;
+    position: {
+      start: number;
+      end: number;
+    };
+    severity: 'low' | 'medium' | 'high';
+  }[];
+  score: number;
+}
+
+export interface StyleAnalysis {
+  tone: {
+    detected: string;
+    confidence: number;
     suggestions: string[];
   };
-  sentiment: {
+  formality: {
+    level: 'very_informal' | 'informal' | 'neutral' | 'formal' | 'very_formal';
     score: number;
-    comparative: number;
-    positive: string[];
-    negative: string[];
+    appropriate: boolean;
   };
-  structure: {
-    paragraphs: number;
-    sentences: number;
-    words: number;
-    characters: number;
-    avg_sentence_length: number;
-    avg_paragraph_length: number;
+  voice: {
+    active: number;
+    passive: number;
+    recommendation: string;
   };
-  vocabulary: {
-    unique_words: number;
-    complexity_score: number;
-    repeated_words: string[];
-    advanced_words: string[];
-  };
-  grammar: {
-    issues: GrammarIssue[];
+  sentenceVariety: {
     score: number;
+    suggestions: string[];
   };
-  style: {
-    tone: string;
-    formality: number;
-    clarity_score: number;
-    engagement_score: number;
-  };
-  suggestions: WritingSuggestion[];
 }
 
-export interface GrammarIssue {
-  type: 'spelling' | 'grammar' | 'punctuation' | 'style';
-  message: string;
-  position: { start: number; end: number };
-  suggestions: string[];
-  severity: 'low' | 'medium' | 'high';
-}
-
-export interface WritingSuggestion {
-  type: 'improvement' | 'enhancement' | 'correction';
-  category: 'clarity' | 'conciseness' | 'engagement' | 'structure' | 'vocabulary';
-  message: string;
-  original_text?: string;
-  suggested_text?: string;
-  position?: { start: number; end: number };
-  confidence: number;
+export interface ReadabilityAssessment {
+  fleschKincaid: {
+    gradeLevel: number;
+    readingEase: number;
+  };
+  gunningFog: number;
+  smog: number;
+  automatedReadability: number;
+  colemanLiau: number;
+  recommendation: string;
+  targetAudience: string;
 }
 
 export class WritingAnalysisService {
-  private openai: OpenAI;
-  private sentimentAnalyzer: any;
-
-  constructor(private prisma: PrismaClient) {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
-    this.sentimentAnalyzer = new sentiment();
-  }
-
-  async analyzeText(text: string, context?: any): Promise<WritingAnalysis> {
+  async analyzeContent(request: AnalysisRequest): Promise<AnalysisResult> {
     try {
-      logger.info('Starting comprehensive text analysis');
-
+      const analysisId = this.generateId();
+      
+      // Perform parallel analysis
       const [
-        readabilityAnalysis,
-        sentimentAnalysis,
+        grammarCheck,
+        styleAnalysis,
+        readabilityAssessment,
         structureAnalysis,
-        vocabularyAnalysis,
-        grammarAnalysis,
-        styleAnalysis
+        originalityCheck
       ] = await Promise.all([
-        this.analyzeReadability(text),
-        this.analyzeSentiment(text),
-        this.analyzeStructure(text),
-        this.analyzeVocabulary(text),
-        this.analyzeGrammar(text),
-        this.analyzeStyle(text, context)
+        this.checkGrammar(request.content),
+        this.analyzeStyle(request.content, request.type),
+        this.assessReadability(request.content),
+        this.analyzeStructure(request.content, request.type),
+        this.checkOriginality(request.content)
       ]);
 
-      const suggestions = await this.generateWritingSuggestions(text, {
-        readability: readabilityAnalysis,
-        sentiment: sentimentAnalysis,
-        structure: structureAnalysis,
-        vocabulary: vocabularyAnalysis,
-        grammar: grammarAnalysis,
-        style: styleAnalysis
+      // Calculate metrics
+      const metrics = this.calculateMetrics(request.content);
+      
+      // Generate suggestions
+      const suggestions = this.generateSuggestions(
+        grammarCheck,
+        styleAnalysis,
+        structureAnalysis,
+        request.requirements
+      );
+
+      // Calculate scores
+      const scores = this.calculateScores(
+        grammarCheck,
+        styleAnalysis,
+        readabilityAssessment,
+        structureAnalysis,
+        originalityCheck
+      );
+
+      // Determine readiness level
+      const readinessLevel = this.determineReadinessLevel(scores);
+
+      const result: AnalysisResult = {
+        id: analysisId,
+        scores,
+        suggestions,
+        metrics,
+        readinessLevel
+      };
+
+      // Store analysis result
+      await this.storeAnalysisResult(request.userId, result);
+
+      return result;
+
+    } catch (error) {
+      console.error('Error analyzing content:', error);
+      throw new Error(`Failed to analyze content: ${error.message}`);
+    }
+  }
+
+  async checkGrammar(content: string): Promise<GrammarCheck> {
+    try {
+      // Use multiple grammar checking services
+      const [grammarlyResult, languageToolResult] = await Promise.allSettled([
+        this.checkWithGrammarly(content),
+        this.checkWithLanguageTool(content)
+      ]);
+
+      const errors: GrammarCheck['errors'] = [];
+      let totalScore = 100;
+
+      // Process Grammarly results
+      if (grammarlyResult.status === 'fulfilled') {
+        errors.push(...grammarlyResult.value.errors);
+        totalScore = Math.min(totalScore, grammarlyResult.value.score);
+      }
+
+      // Process LanguageTool results
+      if (languageToolResult.status === 'fulfilled') {
+        errors.push(...languageToolResult.value.errors);
+        totalScore = Math.min(totalScore, languageToolResult.value.score);
+      }
+
+      // Remove duplicates and sort by severity
+      const uniqueErrors = this.deduplicateErrors(errors);
+      const sortedErrors = uniqueErrors.sort((a, b) => {
+        const severityOrder = { high: 3, medium: 2, low: 1 };
+        return severityOrder[b.severity] - severityOrder[a.severity];
       });
 
-      const analysis: WritingAnalysis = {
-        readability: readabilityAnalysis,
-        sentiment: sentimentAnalysis,
-        structure: structureAnalysis,
-        vocabulary: vocabularyAnalysis,
-        grammar: grammarAnalysis,
-        style: styleAnalysis,
+      return {
+        errors: sortedErrors,
+        score: Math.max(0, totalScore - (sortedErrors.length * 2))
+      };
+
+    } catch (error) {
+      console.error('Error checking grammar:', error);
+      return {
+        errors: [],
+        score: 85 // Default score if grammar check fails
+      };
+    }
+  }
+
+  async analyzeStyle(content: string, essayType: string): Promise<StyleAnalysis> {
+    try {
+      // Analyze tone using sentiment analysis
+      const toneAnalysis = await this.analyzeTone(content);
+      
+      // Assess formality level
+      const formalityAnalysis = await this.assessFormality(content, essayType);
+      
+      // Analyze voice (active vs passive)
+      const voiceAnalysis = this.analyzeVoice(content);
+      
+      // Assess sentence variety
+      const sentenceVariety = this.assessSentenceVariety(content);
+
+      return {
+        tone: toneAnalysis,
+        formality: formalityAnalysis,
+        voice: voiceAnalysis,
+        sentenceVariety
+      };
+
+    } catch (error) {
+      console.error('Error analyzing style:', error);
+      throw new Error(`Failed to analyze style: ${error.message}`);
+    }
+  }
+
+  async assessReadability(content: string): Promise<ReadabilityAssessment> {
+    try {
+      const sentences = this.splitIntoSentences(content);
+      const words = this.splitIntoWords(content);
+      const syllables = this.countSyllables(content);
+
+      // Calculate Flesch-Kincaid metrics
+      const avgSentenceLength = words.length / sentences.length;
+      const avgSyllablesPerWord = syllables / words.length;
+      
+      const fleschReadingEase = 206.835 - (1.015 * avgSentenceLength) - (84.6 * avgSyllablesPerWord);
+      const fleschKincaidGrade = (0.39 * avgSentenceLength) + (11.8 * avgSyllablesPerWord) - 15.59;
+
+      // Calculate other readability metrics
+      const gunningFog = this.calculateGunningFog(content);
+      const smog = this.calculateSMOG(content);
+      const automatedReadability = this.calculateARI(content);
+      const colemanLiau = this.calculateColemanLiau(content);
+
+      // Generate recommendation
+      const recommendation = this.generateReadabilityRecommendation(fleschKincaidGrade);
+      const targetAudience = this.determineTargetAudience(fleschKincaidGrade);
+
+      return {
+        fleschKincaid: {
+          gradeLevel: Math.round(fleschKincaidGrade * 10) / 10,
+          readingEase: Math.round(fleschReadingEase * 10) / 10
+        },
+        gunningFog: Math.round(gunningFog * 10) / 10,
+        smog: Math.round(smog * 10) / 10,
+        automatedReadability: Math.round(automatedReadability * 10) / 10,
+        colemanLiau: Math.round(colemanLiau * 10) / 10,
+        recommendation,
+        targetAudience
+      };
+
+    } catch (error) {
+      console.error('Error assessing readability:', error);
+      throw new Error(`Failed to assess readability: ${error.message}`);
+    }
+  }
+
+  private async checkWithGrammarly(content: string): Promise<GrammarCheck> {
+    // Placeholder for Grammarly API integration
+    // In a real implementation, you would integrate with Grammarly's API
+    return {
+      errors: [],
+      score: 95
+    };
+  }
+
+  private async checkWithLanguageTool(content: string): Promise<GrammarCheck> {
+    try {
+      // Use LanguageTool API for grammar checking
+      const response = await axios.post('https://api.languagetool.org/v2/check', {
+        text: content,
+        language: 'en-US'
+      }, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      });
+
+      const errors = response.data.matches.map((match: any) => ({
+        type: this.mapLanguageToolCategory(match.rule.category.id),
+        message: match.message,
+        suggestion: match.replacements[0]?.value || '',
+        position: {
+          start: match.offset,
+          end: match.offset + match.length
+        },
+        severity: this.mapLanguageToolSeverity(match.rule.category.id)
+      }));
+
+      const score = Math.max(0, 100 - (errors.length * 3));
+
+      return { errors, score };
+
+    } catch (error) {
+      console.error('LanguageTool API error:', error);
+      return { errors: [], score: 90 };
+    }
+  }
+
+  private async analyzeTone(content: string): Promise<StyleAnalysis['tone']> {
+    try {
+      // Use sentiment analysis to detect tone
+      // This is a simplified implementation
+      const words = content.toLowerCase().split(/\s+/);
+      
+      const positiveWords = ['excellent', 'outstanding', 'passionate', 'dedicated', 'innovative'];
+      const negativeWords = ['difficult', 'challenging', 'struggle', 'problem', 'issue'];
+      const formalWords = ['furthermore', 'consequently', 'therefore', 'moreover', 'nevertheless'];
+      
+      const positiveCount = words.filter(word => positiveWords.includes(word)).length;
+      const negativeCount = words.filter(word => negativeWords.includes(word)).length;
+      const formalCount = words.filter(word => formalWords.includes(word)).length;
+      
+      let detectedTone = 'neutral';
+      let confidence = 0.5;
+      
+      if (positiveCount > negativeCount && positiveCount > 2) {
+        detectedTone = 'positive';
+        confidence = Math.min(0.9, 0.5 + (positiveCount * 0.1));
+      } else if (negativeCount > positiveCount && negativeCount > 2) {
+        detectedTone = 'negative';
+        confidence = Math.min(0.9, 0.5 + (negativeCount * 0.1));
+      }
+      
+      if (formalCount > 3) {
+        detectedTone = 'formal';
+        confidence = Math.min(0.9, 0.6 + (formalCount * 0.05));
+      }
+
+      const suggestions = this.generateToneSuggestions(detectedTone, confidence);
+
+      return {
+        detected: detectedTone,
+        confidence,
         suggestions
       };
 
-      // Save analysis to database
-      await this.saveAnalysis(text, analysis, context);
-
-      return analysis;
     } catch (error) {
-      logger.error('Error in text analysis:', error);
-      throw error;
+      console.error('Error analyzing tone:', error);
+      return {
+        detected: 'neutral',
+        confidence: 0.5,
+        suggestions: []
+      };
     }
   }
 
-  private async analyzeReadability(text: string) {
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-    const words = text.split(/\s+/).filter(w => w.length > 0);
-    const syllables = this.countSyllables(text);
-
-    // Flesch Reading Ease Score
-    const avgSentenceLength = words.length / sentences.length;
-    const avgSyllablesPerWord = syllables / words.length;
+  private async assessFormality(content: string, essayType: string): Promise<StyleAnalysis['formality']> {
+    const formalIndicators = [
+      'furthermore', 'consequently', 'therefore', 'moreover', 'nevertheless',
+      'subsequently', 'accordingly', 'thus', 'hence', 'whereas'
+    ];
     
-    const fleschScore = 206.835 - (1.015 * avgSentenceLength) - (84.6 * avgSyllablesPerWord);
-    const clampedScore = Math.max(0, Math.min(100, fleschScore));
-
-    let level = 'Graduate';
-    let suggestions = [];
-
-    if (clampedScore >= 90) {
-      level = 'Very Easy';
-    } else if (clampedScore >= 80) {
-      level = 'Easy';
-    } else if (clampedScore >= 70) {
-      level = 'Fairly Easy';
-    } else if (clampedScore >= 60) {
-      level = 'Standard';
-    } else if (clampedScore >= 50) {
-      level = 'Fairly Difficult';
-    } else if (clampedScore >= 30) {
-      level = 'Difficult';
-    }
-
-    if (avgSentenceLength > 20) {
-      suggestions.push('Consider breaking up long sentences for better readability');
-    }
-    if (avgSyllablesPerWord > 1.7) {
-      suggestions.push('Consider using simpler words where appropriate');
-    }
-
+    const informalIndicators = [
+      'gonna', 'wanna', 'kinda', 'sorta', 'yeah', 'ok', 'cool', 'awesome'
+    ];
+    
+    const contractions = ["don't", "won't", "can't", "shouldn't", "wouldn't"];
+    
+    const words = content.toLowerCase().split(/\s+/);
+    const formalCount = words.filter(word => formalIndicators.includes(word)).length;
+    const informalCount = words.filter(word => informalIndicators.includes(word)).length;
+    const contractionCount = words.filter(word => contractions.some(c => word.includes(c))).length;
+    
+    const formalityScore = Math.max(0, Math.min(100, 
+      50 + (formalCount * 10) - (informalCount * 15) - (contractionCount * 5)
+    ));
+    
+    let level: StyleAnalysis['formality']['level'];
+    if (formalityScore >= 80) level = 'very_formal';
+    else if (formalityScore >= 60) level = 'formal';
+    else if (formalityScore >= 40) level = 'neutral';
+    else if (formalityScore >= 20) level = 'informal';
+    else level = 'very_informal';
+    
+    const appropriate = this.isFormalityAppropriate(level, essayType);
+    
     return {
-      score: Math.round(clampedScore),
       level,
+      score: formalityScore,
+      appropriate
+    };
+  }
+
+  private analyzeVoice(content: string): StyleAnalysis['voice'] {
+    const sentences = this.splitIntoSentences(content);
+    let activeCount = 0;
+    let passiveCount = 0;
+    
+    sentences.forEach(sentence => {
+      if (this.isPassiveVoice(sentence)) {
+        passiveCount++;
+      } else {
+        activeCount++;
+      }
+    });
+    
+    const total = activeCount + passiveCount;
+    const activePercentage = total > 0 ? (activeCount / total) * 100 : 0;
+    const passivePercentage = total > 0 ? (passiveCount / total) * 100 : 0;
+    
+    let recommendation = '';
+    if (passivePercentage > 30) {
+      recommendation = 'Consider using more active voice to make your writing more engaging and direct.';
+    } else if (passivePercentage < 5) {
+      recommendation = 'Good use of active voice! Your writing is direct and engaging.';
+    } else {
+      recommendation = 'Good balance of active and passive voice.';
+    }
+    
+    return {
+      active: Math.round(activePercentage),
+      passive: Math.round(passivePercentage),
+      recommendation
+    };
+  }
+
+  private assessSentenceVariety(content: string): StyleAnalysis['sentenceVariety'] {
+    const sentences = this.splitIntoSentences(content);
+    const lengths = sentences.map(s => s.split(/\s+/).length);
+    
+    const avgLength = lengths.reduce((sum, len) => sum + len, 0) / lengths.length;
+    const variance = lengths.reduce((sum, len) => sum + Math.pow(len - avgLength, 2), 0) / lengths.length;
+    const standardDeviation = Math.sqrt(variance);
+    
+    // Score based on variety (higher standard deviation = more variety)
+    const varietyScore = Math.min(100, (standardDeviation / avgLength) * 100);
+    
+    const suggestions = [];
+    if (varietyScore < 30) {
+      suggestions.push('Try varying your sentence lengths for better flow and readability.');
+    }
+    if (avgLength > 25) {
+      suggestions.push('Consider breaking up some longer sentences for clarity.');
+    }
+    if (avgLength < 10) {
+      suggestions.push('Consider combining some shorter sentences for better flow.');
+    }
+    
+    return {
+      score: Math.round(varietyScore),
       suggestions
     };
   }
 
-  private async analyzeSentiment(text: string) {
-    const result = this.sentimentAnalyzer.analyze(text);
+  private calculateMetrics(content: string) {
+    const words = this.splitIntoWords(content);
+    const sentences = this.splitIntoSentences(content);
+    const paragraphs = content.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+    
+    const syllables = this.countSyllables(content);
+    const avgSentenceLength = words.length / sentences.length;
+    const avgSyllablesPerWord = syllables / words.length;
+    
+    // Calculate vocabulary complexity (unique words / total words)
+    const uniqueWords = new Set(words.map(w => w.toLowerCase()));
+    const vocabularyComplexity = (uniqueWords.size / words.length) * 100;
+    
+    // Calculate readability score (Flesch Reading Ease)
+    const readabilityScore = 206.835 - (1.015 * avgSentenceLength) - (84.6 * avgSyllablesPerWord);
     
     return {
-      score: result.score,
-      comparative: result.comparative,
-      positive: result.positive,
-      negative: result.negative
+      wordCount: words.length,
+      sentenceCount: sentences.length,
+      paragraphCount: paragraphs.length,
+      readabilityScore: Math.round(readabilityScore * 10) / 10,
+      averageSentenceLength: Math.round(avgSentenceLength * 10) / 10,
+      vocabularyComplexity: Math.round(vocabularyComplexity * 10) / 10
     };
   }
 
-  private async analyzeStructure(text: string) {
-    const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-    const words = text.split(/\s+/).filter(w => w.length > 0);
-    const characters = text.length;
-
-    return {
-      paragraphs: paragraphs.length,
-      sentences: sentences.length,
-      words: words.length,
-      characters,
-      avg_sentence_length: Math.round(words.length / sentences.length),
-      avg_paragraph_length: Math.round(sentences.length / paragraphs.length)
-    };
-  }
-
-  private async analyzeVocabulary(text: string) {
-    const words = text.toLowerCase().match(/\b[a-z]+\b/g) || [];
-    const uniqueWords = new Set(words);
-    const wordFreq = new Map<string, number>();
-
-    words.forEach(word => {
-      wordFreq.set(word, (wordFreq.get(word) || 0) + 1);
+  private generateSuggestions(
+    grammarCheck: GrammarCheck,
+    styleAnalysis: StyleAnalysis,
+    structureAnalysis: any,
+    requirements?: AnalysisRequest['requirements']
+  ) {
+    const suggestions: AnalysisResult['suggestions'] = [];
+    
+    // Add grammar suggestions
+    grammarCheck.errors.forEach(error => {
+      suggestions.push({
+        type: 'grammar',
+        severity: error.severity,
+        message: error.message,
+        suggestion: error.suggestion,
+        position: error.position
+      });
     });
-
-    const repeatedWords = Array.from(wordFreq.entries())
-      .filter(([word, count]) => count > 3 && word.length > 3)
-      .map(([word]) => word)
-      .slice(0, 10);
-
-    // Simple complexity score based on average word length and unique word ratio
-    const avgWordLength = words.reduce((sum, word) => sum + word.length, 0) / words.length;
-    const uniqueRatio = uniqueWords.size / words.length;
-    const complexityScore = Math.round((avgWordLength * 10) + (uniqueRatio * 50));
-
-    const advancedWords = words.filter(word => word.length > 8).slice(0, 10);
-
-    return {
-      unique_words: uniqueWords.size,
-      complexity_score: Math.min(100, complexityScore),
-      repeated_words: repeatedWords,
-      advanced_words: [...new Set(advancedWords)]
-    };
-  }
-
-  private async analyzeGrammar(text: string): Promise<{ issues: GrammarIssue[]; score: number }> {
-    const issues: GrammarIssue[] = [];
     
-    // Basic grammar checks using natural language processing
-    const doc = compromise(text);
-    
-    // Check for common issues
-    const sentences = text.split(/[.!?]+/);
-    
-    sentences.forEach((sentence, index) => {
-      const trimmed = sentence.trim();
-      if (trimmed.length === 0) return;
-
-      // Check for sentence fragments
-      if (trimmed.length < 10 && !trimmed.match(/^(yes|no|okay|ok)$/i)) {
-        issues.push({
-          type: 'grammar',
-          message: 'This might be a sentence fragment',
-          position: { start: 0, end: trimmed.length },
-          suggestions: ['Consider expanding this sentence'],
-          severity: 'medium'
-        });
-      }
-
-      // Check for run-on sentences
-      if (trimmed.length > 150) {
-        issues.push({
-          type: 'style',
-          message: 'This sentence might be too long',
-          position: { start: 0, end: trimmed.length },
-          suggestions: ['Consider breaking this into shorter sentences'],
-          severity: 'low'
-        });
-      }
-    });
-
-    // Check for passive voice overuse
-    const passiveCount = doc.match('#Passive').length;
-    const totalSentences = sentences.length;
-    
-    if (passiveCount / totalSentences > 0.3) {
-      issues.push({
+    // Add style suggestions
+    if (!styleAnalysis.formality.appropriate) {
+      suggestions.push({
         type: 'style',
-        message: 'Consider reducing passive voice usage',
-        position: { start: 0, end: text.length },
-        suggestions: ['Use more active voice constructions'],
-        severity: 'medium'
+        severity: 'medium',
+        message: `The formality level (${styleAnalysis.formality.level}) may not be appropriate for this type of essay.`,
+        suggestion: 'Consider adjusting the formality to match your audience and purpose.'
       });
     }
-
-    const score = Math.max(0, 100 - (issues.length * 10));
-
-    return { issues, score };
-  }
-
-  private async analyzeStyle(text: string, context?: any) {
-    try {
-      // Use OpenAI for advanced style analysis
-      const prompt = `Analyze the writing style of the following text and provide scores (0-100) for tone, formality, clarity, and engagement. Also identify the overall tone:
-
-Text: "${text}"
-
-Respond in JSON format:
-{
-  "tone": "professional|casual|academic|persuasive|narrative",
-  "formality": 85,
-  "clarity_score": 78,
-  "engagement_score": 82
-}`;
-
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.3,
-        max_tokens: 200
-      });
-
-      const result = JSON.parse(response.choices[0].message.content || '{}');
-      
-      return {
-        tone: result.tone || 'neutral',
-        formality: result.formality || 50,
-        clarity_score: result.clarity_score || 50,
-        engagement_score: result.engagement_score || 50
-      };
-    } catch (error) {
-      logger.error('Error in style analysis:', error);
-      // Fallback to basic analysis
-      return {
-        tone: 'neutral',
-        formality: 50,
-        clarity_score: 50,
-        engagement_score: 50
-      };
-    }
-  }
-
-  private async generateWritingSuggestions(text: string, analysis: any): Promise<WritingSuggestion[]> {
-    const suggestions: WritingSuggestion[] = [];
-
-    // Readability suggestions
-    if (analysis.readability.score < 60) {
+    
+    if (styleAnalysis.voice.passive > 30) {
       suggestions.push({
-        type: 'improvement',
-        category: 'clarity',
-        message: 'Consider simplifying complex sentences for better readability',
-        confidence: 0.8
+        type: 'style',
+        severity: 'low',
+        message: 'High use of passive voice detected.',
+        suggestion: 'Consider using more active voice to make your writing more engaging.'
       });
     }
-
-    // Structure suggestions
-    if (analysis.structure.avg_sentence_length > 25) {
-      suggestions.push({
-        type: 'improvement',
-        category: 'structure',
-        message: 'Break up long sentences to improve flow',
-        confidence: 0.9
-      });
+    
+    // Add word limit suggestions
+    if (requirements?.wordLimit) {
+      const wordCount = this.splitIntoWords('').length; // This would be calculated from content
+      if (wordCount > requirements.wordLimit * 1.1) {
+        suggestions.push({
+          type: 'structure',
+          severity: 'high',
+          message: `Essay exceeds word limit by ${wordCount - requirements.wordLimit} words.`,
+          suggestion: 'Consider condensing your content to meet the word limit requirement.'
+        });
+      }
     }
-
-    if (analysis.structure.paragraphs < 3 && analysis.structure.words > 200) {
-      suggestions.push({
-        type: 'improvement',
-        category: 'structure',
-        message: 'Consider breaking the text into more paragraphs',
-        confidence: 0.7
-      });
-    }
-
-    // Vocabulary suggestions
-    if (analysis.vocabulary.repeated_words.length > 0) {
-      suggestions.push({
-        type: 'enhancement',
-        category: 'vocabulary',
-        message: `Consider varying these repeated words: ${analysis.vocabulary.repeated_words.slice(0, 3).join(', ')}`,
-        confidence: 0.6
-      });
-    }
-
-    // Style suggestions
-    if (analysis.style.engagement_score < 60) {
-      suggestions.push({
-        type: 'enhancement',
-        category: 'engagement',
-        message: 'Consider adding more engaging language or examples',
-        confidence: 0.7
-      });
-    }
-
+    
     return suggestions;
   }
 
-  private countSyllables(text: string): number {
-    const words = text.toLowerCase().match(/\b[a-z]+\b/g) || [];
-    return words.reduce((total, word) => {
-      const syllableCount = word.match(/[aeiouy]+/g)?.length || 1;
-      return total + Math.max(1, syllableCount);
-    }, 0);
+  private calculateScores(
+    grammarCheck: GrammarCheck,
+    styleAnalysis: StyleAnalysis,
+    readabilityAssessment: ReadabilityAssessment,
+    structureAnalysis: any,
+    originalityCheck: any
+  ) {
+    const grammar = grammarCheck.score;
+    const style = this.calculateStyleScore(styleAnalysis);
+    const clarity = this.calculateClarityScore(readabilityAssessment);
+    const impact = this.calculateImpactScore(styleAnalysis, structureAnalysis);
+    const originality = originalityCheck.score || 85;
+    
+    // Weighted overall score
+    const overall = Math.round(
+      (grammar * 0.25) + 
+      (style * 0.20) + 
+      (clarity * 0.20) + 
+      (impact * 0.20) + 
+      (originality * 0.15)
+    );
+    
+    return {
+      grammar: Math.round(grammar),
+      style: Math.round(style),
+      clarity: Math.round(clarity),
+      impact: Math.round(impact),
+      originality: Math.round(originality),
+      overall
+    };
   }
 
-  private async saveAnalysis(text: string, analysis: WritingAnalysis, context?: any) {
+  private determineReadinessLevel(scores: AnalysisResult['scores']): AnalysisResult['readinessLevel'] {
+    const { overall } = scores;
+    
+    if (overall >= 90) return 'excellent';
+    if (overall >= 75) return 'good';
+    if (overall >= 60) return 'needs_work';
+    return 'draft';
+  }
+
+  // Helper methods
+  private splitIntoWords(content: string): string[] {
+    return content.toLowerCase().match(/\b\w+\b/g) || [];
+  }
+
+  private splitIntoSentences(content: string): string[] {
+    return content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  }
+
+  private countSyllables(content: string): number {
+    const words = this.splitIntoWords(content);
+    return words.reduce((total, word) => total + this.countWordSyllables(word), 0);
+  }
+
+  private countWordSyllables(word: string): number {
+    word = word.toLowerCase();
+    if (word.length <= 3) return 1;
+    
+    const vowels = 'aeiouy';
+    let syllableCount = 0;
+    let previousWasVowel = false;
+    
+    for (let i = 0; i < word.length; i++) {
+      const isVowel = vowels.includes(word[i]);
+      if (isVowel && !previousWasVowel) {
+        syllableCount++;
+      }
+      previousWasVowel = isVowel;
+    }
+    
+    // Handle silent 'e'
+    if (word.endsWith('e')) {
+      syllableCount--;
+    }
+    
+    return Math.max(1, syllableCount);
+  }
+
+  private isPassiveVoice(sentence: string): boolean {
+    const passiveIndicators = [
+      /\b(am|is|are|was|were|being|been)\s+\w+ed\b/,
+      /\b(am|is|are|was|were|being|been)\s+\w+en\b/,
+      /\bby\s+\w+/
+    ];
+    
+    return passiveIndicators.some(pattern => pattern.test(sentence.toLowerCase()));
+  }
+
+  private async analyzeStructure(content: string, essayType: string): Promise<any> {
+    // Placeholder for structure analysis
+    return {
+      hasIntroduction: true,
+      hasConclusion: true,
+      paragraphCount: content.split(/\n\s*\n/).length,
+      score: 85
+    };
+  }
+
+  private async checkOriginality(content: string): Promise<any> {
+    // Placeholder for originality checking
+    return {
+      score: 90,
+      similarityPercentage: 5,
+      sources: []
+    };
+  }
+
+  private calculateStyleScore(styleAnalysis: StyleAnalysis): number {
+    let score = 100;
+    
+    if (!styleAnalysis.formality.appropriate) score -= 15;
+    if (styleAnalysis.voice.passive > 40) score -= 10;
+    if (styleAnalysis.sentenceVariety.score < 30) score -= 10;
+    
+    return Math.max(0, score);
+  }
+
+  private calculateClarityScore(readabilityAssessment: ReadabilityAssessment): number {
+    const gradeLevel = readabilityAssessment.fleschKincaid.gradeLevel;
+    
+    // Optimal grade level for college essays is 11-14
+    if (gradeLevel >= 11 && gradeLevel <= 14) return 95;
+    if (gradeLevel >= 9 && gradeLevel <= 16) return 85;
+    if (gradeLevel >= 7 && gradeLevel <= 18) return 75;
+    return 65;
+  }
+
+  private calculateImpactScore(styleAnalysis: StyleAnalysis, structureAnalysis: any): number {
+    let score = 80;
+    
+    if (styleAnalysis.tone.detected === 'positive') score += 10;
+    if (styleAnalysis.voice.active > 70) score += 10;
+    if (structureAnalysis.hasIntroduction && structureAnalysis.hasConclusion) score += 10;
+    
+    return Math.min(100, score);
+  }
+
+  private generateToneSuggestions(tone: string, confidence: number): string[] {
+    const suggestions = [];
+    
+    if (confidence < 0.7) {
+      suggestions.push('Consider making your tone more consistent throughout the essay.');
+    }
+    
+    if (tone === 'negative') {
+      suggestions.push('Try to frame challenges as learning opportunities or growth experiences.');
+    }
+    
+    return suggestions;
+  }
+
+  private isFormalityAppropriate(level: StyleAnalysis['formality']['level'], essayType: string): boolean {
+    const appropriateLevels = {
+      'personal_statement': ['formal', 'very_formal'],
+      'supplemental_essay': ['neutral', 'formal'],
+      'scholarship_essay': ['formal', 'very_formal'],
+      'cover_letter': ['formal', 'very_formal']
+    };
+    
+    return appropriateLevels[essayType]?.includes(level) || false;
+  }
+
+  private mapLanguageToolCategory(categoryId: string): 'grammar' | 'spelling' | 'punctuation' | 'style' {
+    if (categoryId.includes('GRAMMAR')) return 'grammar';
+    if (categoryId.includes('TYPOS')) return 'spelling';
+    if (categoryId.includes('PUNCTUATION')) return 'punctuation';
+    return 'style';
+  }
+
+  private mapLanguageToolSeverity(categoryId: string): 'low' | 'medium' | 'high' {
+    if (categoryId.includes('ERROR')) return 'high';
+    if (categoryId.includes('WARNING')) return 'medium';
+    return 'low';
+  }
+
+  private deduplicateErrors(errors: GrammarCheck['errors']): GrammarCheck['errors'] {
+    const seen = new Set();
+    return errors.filter(error => {
+      const key = `${error.position.start}-${error.position.end}-${error.message}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  private calculateGunningFog(content: string): number {
+    const sentences = this.splitIntoSentences(content);
+    const words = this.splitIntoWords(content);
+    const complexWords = words.filter(word => this.countWordSyllables(word) >= 3);
+    
+    const avgSentenceLength = words.length / sentences.length;
+    const complexWordPercentage = (complexWords.length / words.length) * 100;
+    
+    return 0.4 * (avgSentenceLength + complexWordPercentage);
+  }
+
+  private calculateSMOG(content: string): number {
+    const sentences = this.splitIntoSentences(content);
+    const words = this.splitIntoWords(content);
+    const complexWords = words.filter(word => this.countWordSyllables(word) >= 3);
+    
+    return 1.0430 * Math.sqrt(complexWords.length * (30 / sentences.length)) + 3.1291;
+  }
+
+  private calculateARI(content: string): number {
+    const sentences = this.splitIntoSentences(content);
+    const words = this.splitIntoWords(content);
+    const characters = content.replace(/\s/g, '').length;
+    
+    return 4.71 * (characters / words.length) + 0.5 * (words.length / sentences.length) - 21.43;
+  }
+
+  private calculateColemanLiau(content: string): number {
+    const sentences = this.splitIntoSentences(content);
+    const words = this.splitIntoWords(content);
+    const characters = content.replace(/\s/g, '').length;
+    
+    const L = (characters / words.length) * 100;
+    const S = (sentences.length / words.length) * 100;
+    
+    return 0.0588 * L - 0.296 * S - 15.8;
+  }
+
+  private generateReadabilityRecommendation(gradeLevel: number): string {
+    if (gradeLevel < 9) return 'Your writing may be too simple for a college-level audience.';
+    if (gradeLevel > 16) return 'Your writing may be too complex. Consider simplifying some sentences.';
+    return 'Your writing complexity is appropriate for your audience.';
+  }
+
+  private determineTargetAudience(gradeLevel: number): string {
+    if (gradeLevel < 6) return 'Elementary school';
+    if (gradeLevel < 9) return 'Middle school';
+    if (gradeLevel < 13) return 'High school';
+    if (gradeLevel < 16) return 'College';
+    return 'Graduate level';
+  }
+
+  private async storeAnalysisResult(userId: string, result: AnalysisResult): Promise<void> {
     try {
-      await this.prisma.writing_analyses.create({
+      await prisma.writingAnalysis.create({
         data: {
-          text_content: text,
-          analysis_results: analysis,
-          context: context,
-          created_at: new Date()
+          id: result.id,
+          userId,
+          scores: result.scores,
+          suggestions: result.suggestions,
+          metrics: result.metrics,
+          readinessLevel: result.readinessLevel,
+          createdAt: new Date()
         }
       });
     } catch (error) {
-      logger.error('Error saving analysis:', error);
-      // Don't throw - analysis should still work even if saving fails
+      console.error('Error storing analysis result:', error);
     }
+  }
+
+  private generateId(): string {
+    return `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 }

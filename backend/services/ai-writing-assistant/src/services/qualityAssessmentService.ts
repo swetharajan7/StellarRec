@@ -1,486 +1,771 @@
 import { PrismaClient } from '@prisma/client';
-import OpenAI from 'openai';
-import { logger } from '../utils/logger';
+import { WritingAnalysisService, AnalysisResult } from './writingAnalysisService';
+
+const prisma = new PrismaClient();
+
+export interface QualityAssessmentRequest {
+  content: string;
+  essayType: 'personal_statement' | 'supplemental_essay' | 'scholarship_essay' | 'cover_letter';
+  requirements?: {
+    wordLimit?: number;
+    prompts?: string[];
+    criteria?: string[];
+  };
+  userId: string;
+}
+
+export interface QualityScore {
+  category: string;
+  score: number;
+  maxScore: number;
+  weight: number;
+  feedback: string;
+  improvements: string[];
+}
 
 export interface QualityAssessment {
-  overall_score: number;
-  readiness_level: 'draft' | 'needs_work' | 'good' | 'excellent';
-  dimensions: {
-    content: QualityDimension;
-    structure: QualityDimension;
-    language: QualityDimension;
-    clarity: QualityDimension;
-    engagement: QualityDimension;
-    appropriateness: QualityDimension;
-  };
+  id: string;
+  overallScore: number;
+  maxScore: number;
+  percentage: number;
+  readinessLevel: 'not_ready' | 'needs_improvement' | 'good' | 'excellent';
+  scores: QualityScore[];
   strengths: string[];
-  areas_for_improvement: string[];
-  actionable_recommendations: Recommendation[];
-  comparison_to_benchmarks: BenchmarkComparison;
-  estimated_impact: string;
+  weaknesses: string[];
+  priorityImprovements: string[];
+  estimatedTimeToImprove: number; // in hours
+  submissionRecommendation: {
+    ready: boolean;
+    confidence: number;
+    reasoning: string;
+  };
+  comparison: {
+    averageScore: number;
+    percentile: number;
+    similarEssays: number;
+  };
 }
 
-export interface QualityDimension {
-  score: number;
-  level: 'poor' | 'fair' | 'good' | 'excellent';
-  feedback: string;
-  specific_issues: string[];
-  improvement_suggestions: string[];
+export interface ReadinessCheck {
+  ready: boolean;
+  confidence: number;
+  checklist: {
+    item: string;
+    completed: boolean;
+    importance: 'low' | 'medium' | 'high';
+    feedback?: string;
+  }[];
+  missingElements: string[];
+  criticalIssues: string[];
 }
 
-export interface Recommendation {
-  priority: 'high' | 'medium' | 'low';
-  category: 'content' | 'structure' | 'language' | 'style';
-  action: string;
-  expected_impact: string;
-  effort_required: 'low' | 'medium' | 'high';
-}
-
-export interface BenchmarkComparison {
-  percentile: number;
-  comparison_group: string;
-  similar_documents_analyzed: number;
-  key_differentiators: string[];
+export interface ComparisonData {
+  essayType: string;
+  averageScores: Record<string, number>;
+  percentileRanges: Record<string, { min: number; max: number }>;
+  commonStrengths: string[];
+  commonWeaknesses: string[];
 }
 
 export class QualityAssessmentService {
-  private openai: OpenAI;
+  private analysisService: WritingAnalysisService;
 
-  constructor(private prisma: PrismaClient) {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
+  constructor() {
+    this.analysisService = new WritingAnalysisService();
   }
 
-  async assessQuality(
-    text: string, 
-    documentType: string, 
-    context: any,
-    userId: string
-  ): Promise<QualityAssessment> {
+  async assessQuality(request: QualityAssessmentRequest): Promise<QualityAssessment> {
     try {
-      logger.info(`Assessing quality for ${documentType} by user ${userId}`);
-
-      const [
-        contentAssessment,
-        structureAssessment,
-        languageAssessment,
-        clarityAssessment,
-        engagementAssessment,
-        appropriatenessAssessment
-      ] = await Promise.all([
-        this.assessContent(text, documentType, context),
-        this.assessStructure(text, documentType),
-        this.assessLanguage(text, context),
-        this.assessClarity(text),
-        this.assessEngagement(text, documentType),
-        this.assessAppropriateness(text, documentType, context)
-      ]);
-
-      const dimensions = {
-        content: contentAssessment,
-        structure: structureAssessment,
-        language: languageAssessment,
-        clarity: clarityAssessment,
-        engagement: engagementAssessment,
-        appropriateness: appropriatenessAssessment
-      };
-
-      const overallScore = this.calculateOverallScore(dimensions);
-      const readinessLevel = this.determineReadinessLevel(overallScore, dimensions);
-
-      const [strengths, improvements] = this.identifyStrengthsAndImprovements(dimensions);
-      const recommendations = await this.generateRecommendations(text, dimensions, documentType);
-      const benchmarkComparison = await this.compareToBenchmarks(text, documentType, overallScore);
-
+      const assessmentId = this.generateId();
+      
+      // Get detailed analysis
+      const analysis = await this.analysisService.analyzeContent({
+        content: request.content,
+        type: request.essayType,
+        requirements: request.requirements,
+        userId: request.userId
+      });
+      
+      // Calculate quality scores for each category
+      const scores = await this.calculateQualityScores(analysis, request);
+      
+      // Calculate overall score
+      const overallScore = this.calculateOverallScore(scores);
+      const maxScore = scores.reduce((sum, score) => sum + score.maxScore, 0);
+      const percentage = Math.round((overallScore / maxScore) * 100);
+      
+      // Determine readiness level
+      const readinessLevel = this.determineReadinessLevel(percentage);
+      
+      // Identify strengths and weaknesses
+      const strengths = this.identifyStrengths(scores, analysis);
+      const weaknesses = this.identifyWeaknesses(scores, analysis);
+      
+      // Generate priority improvements
+      const priorityImprovements = this.generatePriorityImprovements(scores, analysis);
+      
+      // Estimate time to improve
+      const estimatedTimeToImprove = this.estimateImprovementTime(weaknesses, priorityImprovements);
+      
+      // Generate submission recommendation
+      const submissionRecommendation = this.generateSubmissionRecommendation(
+        percentage,
+        readinessLevel,
+        analysis
+      );
+      
+      // Get comparison data
+      const comparison = await this.getComparisonData(request.essayType, overallScore);
+      
       const assessment: QualityAssessment = {
-        overall_score: overallScore,
-        readiness_level: readinessLevel,
-        dimensions,
+        id: assessmentId,
+        overallScore,
+        maxScore,
+        percentage,
+        readinessLevel,
+        scores,
         strengths,
-        areas_for_improvement: improvements,
-        actionable_recommendations: recommendations,
-        comparison_to_benchmarks: benchmarkComparison,
-        estimated_impact: this.estimateImpact(readinessLevel, documentType)
+        weaknesses,
+        priorityImprovements,
+        estimatedTimeToImprove,
+        submissionRecommendation,
+        comparison
       };
-
-      // Save assessment
-      await this.saveAssessment(assessment, text, documentType, userId);
-
+      
+      // Store assessment
+      await this.storeAssessment(request.userId, assessment);
+      
       return assessment;
+      
     } catch (error) {
-      logger.error('Error in quality assessment:', error);
-      throw error;
+      console.error('Error assessing quality:', error);
+      throw new Error(`Failed to assess quality: ${error.message}`);
     }
   }
 
-  private async assessContent(text: string, documentType: string, context: any): Promise<QualityDimension> {
+  async checkReadiness(request: QualityAssessmentRequest): Promise<ReadinessCheck> {
     try {
-      const prompt = `Assess the content quality of this ${documentType}:
-
-Text: "${text}"
-Context: ${JSON.stringify(context)}
-
-Evaluate:
-1. Relevance to purpose
-2. Completeness of information
-3. Accuracy and credibility
-4. Depth of insights
-5. Supporting evidence/examples
-
-Respond in JSON:
-{
-  "score": 85,
-  "level": "good",
-  "feedback": "Overall content assessment",
-  "specific_issues": ["List of specific content issues"],
-  "improvement_suggestions": ["Specific suggestions for improvement"]
-}`;
-
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.3,
-        max_tokens: 500
-      });
-
-      return JSON.parse(response.choices[0].message.content || '{}');
+      // Get quality assessment
+      const assessment = await this.assessQuality(request);
+      
+      // Create readiness checklist
+      const checklist = this.createReadinessChecklist(request, assessment);
+      
+      // Identify missing elements
+      const missingElements = this.identifyMissingElements(request, assessment);
+      
+      // Identify critical issues
+      const criticalIssues = this.identifyCriticalIssues(assessment);
+      
+      // Determine overall readiness
+      const completedItems = checklist.filter(item => item.completed).length;
+      const totalItems = checklist.length;
+      const completionRate = completedItems / totalItems;
+      
+      const ready = completionRate >= 0.8 && criticalIssues.length === 0;
+      const confidence = Math.min(0.95, completionRate * (criticalIssues.length === 0 ? 1 : 0.5));
+      
+      return {
+        ready,
+        confidence,
+        checklist,
+        missingElements,
+        criticalIssues
+      };
+      
     } catch (error) {
-      logger.error('Error assessing content:', error);
-      return this.getDefaultDimension();
+      console.error('Error checking readiness:', error);
+      throw new Error(`Failed to check readiness: ${error.message}`);
     }
   }
 
-  private async assessStructure(text: string, documentType: string): Promise<QualityDimension> {
-    const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-    
-    let score = 70; // Base score
-    const issues: string[] = [];
-    const suggestions: string[] = [];
-
-    // Check paragraph count
-    if (paragraphs.length < 3 && text.length > 300) {
-      score -= 10;
-      issues.push('Too few paragraphs for the length of text');
-      suggestions.push('Break content into more logical paragraphs');
-    }
-
-    // Check paragraph balance
-    const avgParagraphLength = text.length / paragraphs.length;
-    if (avgParagraphLength > 200) {
-      score -= 5;
-      issues.push('Paragraphs are too long on average');
-      suggestions.push('Create shorter, more focused paragraphs');
-    }
-
-    // Check for introduction and conclusion
-    const hasIntro = paragraphs[0]?.length > 50;
-    const hasConclusion = paragraphs[paragraphs.length - 1]?.length > 50;
-    
-    if (!hasIntro) {
-      score -= 10;
-      issues.push('Weak or missing introduction');
-      suggestions.push('Strengthen the opening paragraph');
-    }
-
-    if (!hasConclusion && documentType !== 'letter') {
-      score -= 10;
-      issues.push('Weak or missing conclusion');
-      suggestions.push('Add a strong concluding paragraph');
-    }
-
-    const level = score >= 90 ? 'excellent' : score >= 75 ? 'good' : score >= 60 ? 'fair' : 'poor';
-
-    return {
-      score: Math.max(0, Math.min(100, score)),
-      level: level as any,
-      feedback: `Structure shows ${level} organization with ${paragraphs.length} paragraphs`,
-      specific_issues: issues,
-      improvement_suggestions: suggestions
-    };
-  }
-
-  private async assessLanguage(text: string, context: any): Promise<QualityDimension> {
+  async compareEssays(
+    essay1: string,
+    essay2: string,
+    essayType: string,
+    userId: string
+  ): Promise<{
+    essay1Score: number;
+    essay2Score: number;
+    comparison: {
+      category: string;
+      essay1: number;
+      essay2: number;
+      difference: number;
+      winner: 'essay1' | 'essay2' | 'tie';
+    }[];
+    recommendation: string;
+  }> {
     try {
-      const prompt = `Assess the language quality of this text:
-
-"${text}"
-
-Evaluate:
-1. Grammar and syntax
-2. Vocabulary appropriateness
-3. Sentence variety
-4. Word choice precision
-5. Professional tone
-
-Respond in JSON format with score (0-100), level, feedback, specific_issues, and improvement_suggestions.`;
-
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.2,
-        max_tokens: 400
+      // Assess both essays
+      const [assessment1, assessment2] = await Promise.all([
+        this.assessQuality({
+          content: essay1,
+          essayType: essayType as any,
+          userId
+        }),
+        this.assessQuality({
+          content: essay2,
+          essayType: essayType as any,
+          userId
+        })
+      ]);
+      
+      // Compare scores by category
+      const comparison = assessment1.scores.map(score1 => {
+        const score2 = assessment2.scores.find(s => s.category === score1.category);
+        const difference = score1.score - (score2?.score || 0);
+        
+        let winner: 'essay1' | 'essay2' | 'tie' = 'tie';
+        if (Math.abs(difference) > 2) {
+          winner = difference > 0 ? 'essay1' : 'essay2';
+        }
+        
+        return {
+          category: score1.category,
+          essay1: score1.score,
+          essay2: score2?.score || 0,
+          difference,
+          winner
+        };
       });
-
-      return JSON.parse(response.choices[0].message.content || '{}');
+      
+      // Generate recommendation
+      const recommendation = this.generateComparisonRecommendation(
+        assessment1,
+        assessment2,
+        comparison
+      );
+      
+      return {
+        essay1Score: assessment1.percentage,
+        essay2Score: assessment2.percentage,
+        comparison,
+        recommendation
+      };
+      
     } catch (error) {
-      logger.error('Error assessing language:', error);
-      return this.getDefaultDimension();
+      console.error('Error comparing essays:', error);
+      throw new Error(`Failed to compare essays: ${error.message}`);
     }
   }
 
-  private async assessClarity(text: string): Promise<QualityDimension> {
-    const words = text.split(/\s+/).length;
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
-    const avgSentenceLength = words / sentences;
+  private async calculateQualityScores(
+    analysis: AnalysisResult,
+    request: QualityAssessmentRequest
+  ): Promise<QualityScore[]> {
+    const scores: QualityScore[] = [];
     
-    let score = 80;
-    const issues: string[] = [];
-    const suggestions: string[] = [];
-
-    // Check sentence length
-    if (avgSentenceLength > 25) {
-      score -= 15;
-      issues.push('Sentences are too long on average');
-      suggestions.push('Break up complex sentences for better clarity');
-    } else if (avgSentenceLength < 10) {
-      score -= 5;
-      issues.push('Sentences might be too short');
-      suggestions.push('Consider combining some short sentences');
-    }
-
-    // Check for clarity indicators
-    const clarityWords = ['however', 'therefore', 'furthermore', 'moreover', 'consequently'];
-    const clarityCount = clarityWords.reduce((count, word) => 
-      count + (text.toLowerCase().match(new RegExp(`\\b${word}\\b`, 'g'))?.length || 0), 0
-    );
-
-    if (clarityCount / sentences < 0.1) {
-      score -= 10;
-      issues.push('Limited use of transitional phrases');
-      suggestions.push('Add more transitional words to improve flow');
-    }
-
-    const level = score >= 90 ? 'excellent' : score >= 75 ? 'good' : score >= 60 ? 'fair' : 'poor';
-
-    return {
-      score: Math.max(0, Math.min(100, score)),
-      level: level as any,
-      feedback: `Clarity is ${level} with average sentence length of ${Math.round(avgSentenceLength)} words`,
-      specific_issues: issues,
-      improvement_suggestions: suggestions
-    };
-  }
-
-  private async assessEngagement(text: string, documentType: string): Promise<QualityDimension> {
-    let score = 70;
-    const issues: string[] = [];
-    const suggestions: string[] = [];
-
-    // Check for engaging elements
-    const questionCount = (text.match(/\?/g) || []).length;
-    const exclamationCount = (text.match(/!/g) || []).length;
-    const personalPronouns = (text.toLowerCase().match(/\b(i|we|you|my|our|your)\b/g) || []).length;
-
-    if (documentType === 'essay' || documentType === 'personal_statement') {
-      if (personalPronouns < 5) {
-        score -= 10;
-        issues.push('Limited personal voice');
-        suggestions.push('Include more personal experiences and perspectives');
-      }
-    }
-
-    // Check for variety in sentence starters
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-    const starters = sentences.map(s => s.trim().split(/\s+/)[0]?.toLowerCase()).filter(Boolean);
-    const uniqueStarters = new Set(starters);
+    // Content Quality (25%)
+    scores.push({
+      category: 'Content Quality',
+      score: this.assessContentQuality(analysis, request),
+      maxScore: 25,
+      weight: 0.25,
+      feedback: this.generateContentFeedback(analysis),
+      improvements: this.generateContentImprovements(analysis)
+    });
     
-    if (uniqueStarters.size / starters.length < 0.7) {
-      score -= 10;
-      issues.push('Limited variety in sentence beginnings');
-      suggestions.push('Vary how you start your sentences');
-    }
-
-    const level = score >= 90 ? 'excellent' : score >= 75 ? 'good' : score >= 60 ? 'fair' : 'poor';
-
-    return {
-      score: Math.max(0, Math.min(100, score)),
-      level: level as any,
-      feedback: `Engagement level is ${level}`,
-      specific_issues: issues,
-      improvement_suggestions: suggestions
-    };
+    // Writing Mechanics (20%)
+    scores.push({
+      category: 'Writing Mechanics',
+      score: Math.round(analysis.scores.grammar * 0.2),
+      maxScore: 20,
+      weight: 0.20,
+      feedback: this.generateMechanicsFeedback(analysis),
+      improvements: this.generateMechanicsImprovements(analysis)
+    });
+    
+    // Structure & Organization (20%)
+    scores.push({
+      category: 'Structure & Organization',
+      score: this.assessStructure(analysis, request),
+      maxScore: 20,
+      weight: 0.20,
+      feedback: this.generateStructureFeedback(analysis),
+      improvements: this.generateStructureImprovements(analysis)
+    });
+    
+    // Clarity & Style (15%)
+    scores.push({
+      category: 'Clarity & Style',
+      score: Math.round((analysis.scores.clarity + analysis.scores.style) * 0.075),
+      maxScore: 15,
+      weight: 0.15,
+      feedback: this.generateClarityFeedback(analysis),
+      improvements: this.generateClarityImprovements(analysis)
+    });
+    
+    // Impact & Engagement (10%)
+    scores.push({
+      category: 'Impact & Engagement',
+      score: Math.round(analysis.scores.impact * 0.1),
+      maxScore: 10,
+      weight: 0.10,
+      feedback: this.generateImpactFeedback(analysis),
+      improvements: this.generateImpactImprovements(analysis)
+    });
+    
+    // Requirements Compliance (10%)
+    scores.push({
+      category: 'Requirements Compliance',
+      score: this.assessCompliance(analysis, request),
+      maxScore: 10,
+      weight: 0.10,
+      feedback: this.generateComplianceFeedback(analysis, request),
+      improvements: this.generateComplianceImprovements(analysis, request)
+    });
+    
+    return scores;
   }
 
-  private async assessAppropriateness(text: string, documentType: string, context: any): Promise<QualityDimension> {
-    let score = 80;
-    const issues: string[] = [];
-    const suggestions: string[] = [];
-
-    // Check formality level
-    const informalWords = ['gonna', 'wanna', 'kinda', 'sorta', 'yeah', 'ok', 'okay'];
-    const informalCount = informalWords.reduce((count, word) => 
-      count + (text.toLowerCase().match(new RegExp(`\\b${word}\\b`, 'g'))?.length || 0), 0
-    );
-
-    if (informalCount > 0 && (documentType === 'letter' || documentType === 'application')) {
-      score -= 15;
-      issues.push('Contains informal language inappropriate for the context');
-      suggestions.push('Replace informal expressions with more professional language');
-    }
-
-    // Check length appropriateness
-    const wordCount = text.split(/\s+/).length;
-    const expectedRanges = {
-      letter: { min: 200, max: 600 },
-      essay: { min: 300, max: 1000 },
-      personal_statement: { min: 400, max: 800 },
-      cover_letter: { min: 200, max: 400 }
-    };
-
-    const range = expectedRanges[documentType as keyof typeof expectedRanges];
-    if (range) {
-      if (wordCount < range.min) {
-        score -= 10;
-        issues.push(`Too short for a ${documentType} (${wordCount} words)`);
-        suggestions.push(`Expand content to reach ${range.min}-${range.max} words`);
-      } else if (wordCount > range.max) {
-        score -= 5;
-        issues.push(`Might be too long for a ${documentType} (${wordCount} words)`);
-        suggestions.push(`Consider condensing to ${range.min}-${range.max} words`);
-      }
-    }
-
-    const level = score >= 90 ? 'excellent' : score >= 75 ? 'good' : score >= 60 ? 'fair' : 'poor';
-
-    return {
-      score: Math.max(0, Math.min(100, score)),
-      level: level as any,
-      feedback: `Appropriateness is ${level} for ${documentType}`,
-      specific_issues: issues,
-      improvement_suggestions: suggestions
-    };
+  private calculateOverallScore(scores: QualityScore[]): number {
+    return scores.reduce((total, score) => total + score.score, 0);
   }
 
-  private calculateOverallScore(dimensions: any): number {
-    const weights = {
-      content: 0.25,
-      structure: 0.20,
-      language: 0.20,
-      clarity: 0.15,
-      engagement: 0.10,
-      appropriateness: 0.10
-    };
-
-    return Math.round(
-      Object.entries(weights).reduce((total, [key, weight]) => 
-        total + (dimensions[key].score * weight), 0
-      )
-    );
+  private determineReadinessLevel(percentage: number): QualityAssessment['readinessLevel'] {
+    if (percentage >= 90) return 'excellent';
+    if (percentage >= 75) return 'good';
+    if (percentage >= 60) return 'needs_improvement';
+    return 'not_ready';
   }
 
-  private determineReadinessLevel(overallScore: number, dimensions: any): 'draft' | 'needs_work' | 'good' | 'excellent' {
-    if (overallScore >= 90) return 'excellent';
-    if (overallScore >= 75) return 'good';
-    if (overallScore >= 60) return 'needs_work';
-    return 'draft';
-  }
-
-  private identifyStrengthsAndImprovements(dimensions: any): [string[], string[]] {
+  private identifyStrengths(scores: QualityScore[], analysis: AnalysisResult): string[] {
     const strengths: string[] = [];
-    const improvements: string[] = [];
-
-    Object.entries(dimensions).forEach(([key, dimension]: [string, any]) => {
-      if (dimension.score >= 80) {
-        strengths.push(`Strong ${key}: ${dimension.feedback}`);
-      } else if (dimension.score < 70) {
-        improvements.push(`${key.charAt(0).toUpperCase() + key.slice(1)}: ${dimension.feedback}`);
+    
+    // Identify high-scoring categories
+    scores.forEach(score => {
+      const percentage = (score.score / score.maxScore) * 100;
+      if (percentage >= 80) {
+        strengths.push(`Strong ${score.category.toLowerCase()}`);
       }
     });
-
-    return [strengths, improvements];
+    
+    // Add specific strengths from analysis
+    if (analysis.scores.grammar >= 90) {
+      strengths.push('Excellent grammar and mechanics');
+    }
+    
+    if (analysis.scores.originality >= 85) {
+      strengths.push('Highly original content');
+    }
+    
+    if (analysis.metrics.vocabularyComplexity >= 70) {
+      strengths.push('Rich vocabulary usage');
+    }
+    
+    return strengths;
   }
 
-  private async generateRecommendations(text: string, dimensions: any, documentType: string): Promise<Recommendation[]> {
-    const recommendations: Recommendation[] = [];
+  private identifyWeaknesses(scores: QualityScore[], analysis: AnalysisResult): string[] {
+    const weaknesses: string[] = [];
+    
+    // Identify low-scoring categories
+    scores.forEach(score => {
+      const percentage = (score.score / score.maxScore) * 100;
+      if (percentage < 60) {
+        weaknesses.push(`Weak ${score.category.toLowerCase()}`);
+      }
+    });
+    
+    // Add specific weaknesses from analysis
+    if (analysis.scores.grammar < 70) {
+      weaknesses.push('Grammar and mechanics need improvement');
+    }
+    
+    if (analysis.scores.clarity < 70) {
+      weaknesses.push('Content clarity could be improved');
+    }
+    
+    if (analysis.suggestions.filter(s => s.severity === 'high').length > 3) {
+      weaknesses.push('Multiple high-priority issues to address');
+    }
+    
+    return weaknesses;
+  }
 
-    // Generate recommendations based on lowest scoring dimensions
-    const sortedDimensions = Object.entries(dimensions)
-      .sort(([,a], [,b]) => (a as any).score - (b as any).score)
+  private generatePriorityImprovements(scores: QualityScore[], analysis: AnalysisResult): string[] {
+    const improvements: string[] = [];
+    
+    // Get improvements from lowest-scoring categories
+    const sortedScores = scores.sort((a, b) => (a.score / a.maxScore) - (b.score / b.maxScore));
+    
+    sortedScores.slice(0, 3).forEach(score => {
+      improvements.push(...score.improvements.slice(0, 2));
+    });
+    
+    // Add high-severity suggestions
+    const highSeveritySuggestions = analysis.suggestions
+      .filter(s => s.severity === 'high')
       .slice(0, 3);
+    
+    highSeveritySuggestions.forEach(suggestion => {
+      improvements.push(suggestion.suggestion);
+    });
+    
+    return improvements.slice(0, 5); // Limit to top 5
+  }
 
-    for (const [key, dimension] of sortedDimensions) {
-      const dim = dimension as any;
-      if (dim.score < 80) {
-        recommendations.push({
-          priority: dim.score < 60 ? 'high' : dim.score < 75 ? 'medium' : 'low',
-          category: key as any,
-          action: dim.improvement_suggestions[0] || `Improve ${key}`,
-          expected_impact: `Could increase ${key} score by 10-15 points`,
-          effort_required: dim.score < 50 ? 'high' : 'medium'
-        });
+  private estimateImprovementTime(weaknesses: string[], improvements: string[]): number {
+    // Base time estimation in hours
+    let hours = 0;
+    
+    // Add time based on number of weaknesses
+    hours += weaknesses.length * 0.5;
+    
+    // Add time based on number of improvements
+    hours += improvements.length * 0.3;
+    
+    // Minimum 1 hour, maximum 8 hours
+    return Math.max(1, Math.min(8, Math.round(hours * 10) / 10));
+  }
+
+  private generateSubmissionRecommendation(
+    percentage: number,
+    readinessLevel: QualityAssessment['readinessLevel'],
+    analysis: AnalysisResult
+  ): QualityAssessment['submissionRecommendation'] {
+    let ready = false;
+    let confidence = 0;
+    let reasoning = '';
+    
+    if (readinessLevel === 'excellent') {
+      ready = true;
+      confidence = 0.95;
+      reasoning = 'Your essay demonstrates excellent quality across all categories and is ready for submission.';
+    } else if (readinessLevel === 'good') {
+      ready = true;
+      confidence = 0.8;
+      reasoning = 'Your essay shows good quality with minor areas for improvement. Consider addressing the suggested improvements, but it\'s ready for submission.';
+    } else if (readinessLevel === 'needs_improvement') {
+      ready = false;
+      confidence = 0.6;
+      reasoning = 'Your essay needs improvement in several areas before submission. Focus on the priority improvements identified.';
+    } else {
+      ready = false;
+      confidence = 0.3;
+      reasoning = 'Your essay requires significant revision before submission. Consider working through the suggested improvements systematically.';
+    }
+    
+    return { ready, confidence, reasoning };
+  }
+
+  private async getComparisonData(
+    essayType: string,
+    score: number
+  ): Promise<QualityAssessment['comparison']> {
+    try {
+      // Get comparison data from database
+      const stats = await prisma.qualityAssessment.aggregate({
+        where: { essayType },
+        _avg: { overallScore: true },
+        _count: { id: true }
+      });
+      
+      const averageScore = stats._avg.overallScore || 75;
+      const similarEssays = stats._count.id || 100;
+      
+      // Calculate percentile (simplified)
+      const percentile = score > averageScore ? 75 : 25;
+      
+      return {
+        averageScore: Math.round(averageScore),
+        percentile,
+        similarEssays
+      };
+      
+    } catch (error) {
+      console.error('Error getting comparison data:', error);
+      return {
+        averageScore: 75,
+        percentile: 50,
+        similarEssays: 100
+      };
+    }
+  }
+
+  private createReadinessChecklist(
+    request: QualityAssessmentRequest,
+    assessment: QualityAssessment
+  ): ReadinessCheck['checklist'] {
+    const checklist: ReadinessCheck['checklist'] = [];
+    
+    // Word count check
+    if (request.requirements?.wordLimit) {
+      const wordCount = request.content.split(/\s+/).length;
+      const withinLimit = wordCount <= request.requirements.wordLimit * 1.1;
+      
+      checklist.push({
+        item: `Word count within limit (${wordCount}/${request.requirements.wordLimit})`,
+        completed: withinLimit,
+        importance: 'high',
+        feedback: withinLimit ? 'Word count is appropriate' : 'Reduce word count to meet requirements'
+      });
+    }
+    
+    // Grammar check
+    checklist.push({
+      item: 'Grammar and mechanics',
+      completed: assessment.scores.find(s => s.category === 'Writing Mechanics')!.score >= 16,
+      importance: 'high',
+      feedback: 'Ensure proper grammar, spelling, and punctuation'
+    });
+    
+    // Structure check
+    checklist.push({
+      item: 'Clear structure and organization',
+      completed: assessment.scores.find(s => s.category === 'Structure & Organization')!.score >= 16,
+      importance: 'high',
+      feedback: 'Essay should have clear introduction, body, and conclusion'
+    });
+    
+    // Content quality check
+    checklist.push({
+      item: 'Strong content and examples',
+      completed: assessment.scores.find(s => s.category === 'Content Quality')!.score >= 20,
+      importance: 'medium',
+      feedback: 'Include specific examples and compelling content'
+    });
+    
+    // Proofreading check
+    checklist.push({
+      item: 'Thoroughly proofread',
+      completed: assessment.percentage >= 80,
+      importance: 'medium',
+      feedback: 'Review for any remaining errors or improvements'
+    });
+    
+    return checklist;
+  }
+
+  private identifyMissingElements(
+    request: QualityAssessmentRequest,
+    assessment: QualityAssessment
+  ): string[] {
+    const missing: string[] = [];
+    
+    // Check for common missing elements based on essay type
+    if (request.essayType === 'personal_statement') {
+      if (!request.content.toLowerCase().includes('goal')) {
+        missing.push('Clear statement of future goals');
+      }
+      if (!request.content.toLowerCase().includes('experience')) {
+        missing.push('Specific examples or experiences');
       }
     }
-
-    return recommendations;
-  }
-
-  private async compareToBenchmarks(text: string, documentType: string, score: number): Promise<BenchmarkComparison> {
-    // Simulate benchmark comparison (in production, this would use real data)
-    const percentile = Math.min(95, Math.max(5, score + Math.random() * 10 - 5));
     
-    return {
-      percentile: Math.round(percentile),
-      comparison_group: `${documentType}s from similar applicants`,
-      similar_documents_analyzed: Math.floor(Math.random() * 1000) + 500,
-      key_differentiators: score > 80 ? 
-        ['Strong content development', 'Clear structure', 'Professional tone'] :
-        ['Needs content enhancement', 'Structure improvements needed', 'Language refinement required']
-    };
+    if (request.essayType === 'supplemental_essay') {
+      if (!request.content.toLowerCase().includes('university') && !request.content.toLowerCase().includes('college')) {
+        missing.push('Specific mention of the university');
+      }
+    }
+    
+    return missing;
   }
 
-  private estimateImpact(readinessLevel: string, documentType: string): string {
-    const impacts = {
-      excellent: `This ${documentType} is ready for submission and likely to make a strong positive impression`,
-      good: `This ${documentType} is well-developed and should be effective with minor refinements`,
-      needs_work: `This ${documentType} has potential but needs significant improvements before submission`,
-      draft: `This ${documentType} requires substantial revision across multiple areas`
-    };
-
-    return impacts[readinessLevel as keyof typeof impacts] || impacts.draft;
+  private identifyCriticalIssues(assessment: QualityAssessment): string[] {
+    const critical: string[] = [];
+    
+    // Check for critical quality issues
+    if (assessment.scores.find(s => s.category === 'Writing Mechanics')!.score < 12) {
+      critical.push('Serious grammar and mechanics issues');
+    }
+    
+    if (assessment.percentage < 50) {
+      critical.push('Overall quality below acceptable threshold');
+    }
+    
+    return critical;
   }
 
-  private getDefaultDimension(): QualityDimension {
-    return {
-      score: 70,
-      level: 'fair',
-      feedback: 'Assessment unavailable',
-      specific_issues: [],
-      improvement_suggestions: []
-    };
+  private generateComparisonRecommendation(
+    assessment1: QualityAssessment,
+    assessment2: QualityAssessment,
+    comparison: any[]
+  ): string {
+    const winner = assessment1.percentage > assessment2.percentage ? 'first' : 'second';
+    const difference = Math.abs(assessment1.percentage - assessment2.percentage);
+    
+    if (difference < 5) {
+      return 'Both essays are of similar quality. Consider combining the strengths of both versions.';
+    } else if (difference < 15) {
+      return `The ${winner} essay is slightly stronger. Consider incorporating elements from both versions.`;
+    } else {
+      return `The ${winner} essay is significantly stronger and should be your primary choice.`;
+    }
   }
 
-  private async saveAssessment(
-    assessment: QualityAssessment, 
-    text: string, 
-    documentType: string, 
-    userId: string
-  ) {
+  // Assessment helper methods
+  private assessContentQuality(analysis: AnalysisResult, request: QualityAssessmentRequest): number {
+    let score = 20; // Base score
+    
+    // Adjust based on analysis scores
+    if (analysis.scores.impact >= 85) score += 3;
+    else if (analysis.scores.impact < 70) score -= 3;
+    
+    if (analysis.scores.originality >= 85) score += 2;
+    else if (analysis.scores.originality < 70) score -= 2;
+    
+    return Math.max(0, Math.min(25, score));
+  }
+
+  private assessStructure(analysis: AnalysisResult, request: QualityAssessmentRequest): number {
+    let score = 16; // Base score
+    
+    // Check paragraph count
+    if (analysis.metrics.paragraphCount >= 3 && analysis.metrics.paragraphCount <= 6) {
+      score += 2;
+    } else {
+      score -= 1;
+    }
+    
+    // Check sentence variety
+    if (analysis.metrics.averageSentenceLength >= 15 && analysis.metrics.averageSentenceLength <= 25) {
+      score += 2;
+    }
+    
+    return Math.max(0, Math.min(20, score));
+  }
+
+  private assessCompliance(analysis: AnalysisResult, request: QualityAssessmentRequest): number {
+    let score = 8; // Base score
+    
+    // Check word limit compliance
+    if (request.requirements?.wordLimit) {
+      const wordCount = analysis.metrics.wordCount;
+      const limit = request.requirements.wordLimit;
+      
+      if (wordCount <= limit) {
+        score += 2;
+      } else if (wordCount <= limit * 1.1) {
+        score += 1;
+      } else {
+        score -= 2;
+      }
+    }
+    
+    return Math.max(0, Math.min(10, score));
+  }
+
+  // Feedback generation methods
+  private generateContentFeedback(analysis: AnalysisResult): string {
+    if (analysis.scores.impact >= 85) {
+      return 'Your content is engaging and impactful with strong examples and insights.';
+    } else if (analysis.scores.impact >= 70) {
+      return 'Your content is solid but could benefit from more specific examples or deeper insights.';
+    } else {
+      return 'Your content needs strengthening with more compelling examples and clearer arguments.';
+    }
+  }
+
+  private generateMechanicsFeedback(analysis: AnalysisResult): string {
+    if (analysis.scores.grammar >= 90) {
+      return 'Excellent grammar and mechanics with minimal errors.';
+    } else if (analysis.scores.grammar >= 75) {
+      return 'Good grammar with minor errors that should be corrected.';
+    } else {
+      return 'Grammar and mechanics need significant improvement.';
+    }
+  }
+
+  private generateStructureFeedback(analysis: AnalysisResult): string {
+    return 'Consider the logical flow and organization of your ideas.';
+  }
+
+  private generateClarityFeedback(analysis: AnalysisResult): string {
+    if (analysis.scores.clarity >= 80) {
+      return 'Your writing is clear and easy to follow.';
+    } else {
+      return 'Some sentences could be clearer and more concise.';
+    }
+  }
+
+  private generateImpactFeedback(analysis: AnalysisResult): string {
+    return 'Focus on making your writing more engaging and memorable.';
+  }
+
+  private generateComplianceFeedback(analysis: AnalysisResult, request: QualityAssessmentRequest): string {
+    return 'Ensure your essay meets all specified requirements.';
+  }
+
+  // Improvement generation methods
+  private generateContentImprovements(analysis: AnalysisResult): string[] {
+    return [
+      'Add more specific examples',
+      'Strengthen your main arguments',
+      'Include more personal insights'
+    ];
+  }
+
+  private generateMechanicsImprovements(analysis: AnalysisResult): string[] {
+    return [
+      'Proofread for grammar errors',
+      'Check spelling and punctuation',
+      'Review sentence structure'
+    ];
+  }
+
+  private generateStructureImprovements(analysis: AnalysisResult): string[] {
+    return [
+      'Improve paragraph transitions',
+      'Strengthen introduction and conclusion',
+      'Ensure logical flow of ideas'
+    ];
+  }
+
+  private generateClarityImprovements(analysis: AnalysisResult): string[] {
+    return [
+      'Simplify complex sentences',
+      'Use more precise language',
+      'Eliminate redundancy'
+    ];
+  }
+
+  private generateImpactImprovements(analysis: AnalysisResult): string[] {
+    return [
+      'Use more vivid language',
+      'Add emotional resonance',
+      'Create stronger opening and closing'
+    ];
+  }
+
+  private generateComplianceImprovements(analysis: AnalysisResult, request: QualityAssessmentRequest): string[] {
+    const improvements: string[] = [];
+    
+    if (request.requirements?.wordLimit && analysis.metrics.wordCount > request.requirements.wordLimit) {
+      improvements.push('Reduce word count to meet limit');
+    }
+    
+    improvements.push('Review all requirements carefully');
+    
+    return improvements;
+  }
+
+  private async storeAssessment(userId: string, assessment: QualityAssessment): Promise<void> {
     try {
-      await this.prisma.quality_assessments.create({
+      await prisma.qualityAssessment.create({
         data: {
-          user_id: userId,
-          document_type: documentType,
-          text_content: text,
-          overall_score: assessment.overall_score,
-          readiness_level: assessment.readiness_level,
-          assessment_results: assessment,
-          created_at: new Date()
+          id: assessment.id,
+          userId,
+          overallScore: assessment.overallScore,
+          percentage: assessment.percentage,
+          readinessLevel: assessment.readinessLevel,
+          scores: assessment.scores,
+          strengths: assessment.strengths,
+          weaknesses: assessment.weaknesses,
+          priorityImprovements: assessment.priorityImprovements,
+          estimatedTimeToImprove: assessment.estimatedTimeToImprove,
+          submissionRecommendation: assessment.submissionRecommendation,
+          comparison: assessment.comparison,
+          createdAt: new Date()
         }
       });
     } catch (error) {
-      logger.error('Error saving quality assessment:', error);
+      console.error('Error storing assessment:', error);
     }
+  }
+
+  private generateId(): string {
+    return `assessment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 }

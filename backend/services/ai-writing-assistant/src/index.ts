@@ -1,137 +1,344 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
+import compression from 'compression';
 import { config } from 'dotenv';
-import { PrismaClient } from '@prisma/client';
-import { createServer } from 'http';
-import { Server } from 'socket.io';
-import { logger } from './utils/logger';
-import { errorHandler } from './middleware/errorHandler';
-import { requestLogger } from './middleware/requestLogger';
-import { authMiddleware, socketAuthMiddleware } from './middleware/auth';
 
 // Import routes
-import healthRoutes from './routes/health';
-import analysisRoutes from './routes/analysis';
 import suggestionsRoutes from './routes/suggestions';
 import templatesRoutes from './routes/templates';
-import qualityRoutes from './routes/quality';
 
 // Import services
 import { WritingAnalysisService } from './services/writingAnalysisService';
-import { SuggestionService } from './services/suggestionService';
 import { TemplateGenerationService } from './services/templateGenerationService';
+import { SuggestionService } from './services/suggestionService';
 import { QualityAssessmentService } from './services/qualityAssessmentService';
 
 // Load environment variables
 config();
 
 const app = express();
-const server = createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
-    credentials: true
-  }
-});
-
-const port = process.env.PORT || 3008;
-
-// Initialize Prisma client
-const prisma = new PrismaClient();
+const PORT = process.env.PORT || 3015;
 
 // Initialize services
-const analysisService = new WritingAnalysisService(prisma);
-const suggestionService = new SuggestionService(prisma, io);
-const templateService = new TemplateGenerationService(prisma);
-const qualityService = new QualityAssessmentService(prisma);
+const analysisService = new WritingAnalysisService();
+const templateService = new TemplateGenerationService();
+const suggestionService = new SuggestionService();
+const qualityService = new QualityAssessmentService();
 
 // Middleware
 app.use(helmet());
+app.use(compression());
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true
 }));
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // AI operations are resource intensive
-  message: 'Too many requests from this IP, please try again later.'
-});
-
-app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Request logging
-app.use(requestLogger);
-
-// Routes
-app.use('/health', healthRoutes);
-app.use('/api/v1/analysis', authMiddleware, analysisRoutes);
-app.use('/api/v1/suggestions', authMiddleware, suggestionsRoutes);
-app.use('/api/v1/templates', authMiddleware, templatesRoutes);
-app.use('/api/v1/quality', authMiddleware, qualityRoutes);
-
-// Error handling
-app.use(errorHandler);
-
-// Socket.IO for real-time suggestions
-io.use(socketAuthMiddleware);
-
-io.on('connection', (socket) => {
-  logger.info(`User connected to AI Writing Assistant: ${socket.userId}`);
-
-  socket.on('analyze-text', async (data) => {
-    try {
-      const analysis = await analysisService.analyzeText(data.text, data.context);
-      socket.emit('analysis-result', analysis);
-    } catch (error) {
-      socket.emit('error', { message: 'Analysis failed' });
-    }
-  });
-
-  socket.on('get-suggestions', async (data) => {
-    try {
-      const suggestions = await suggestionService.generateSuggestions(
-        data.text, 
-        data.position, 
-        data.context,
-        socket.userId
-      );
-      socket.emit('suggestions-result', suggestions);
-    } catch (error) {
-      socket.emit('error', { message: 'Suggestion generation failed' });
-    }
-  });
-
-  socket.on('disconnect', () => {
-    logger.info(`User disconnected from AI Writing Assistant: ${socket.userId}`);
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'healthy', 
+    service: 'ai-writing-assistant',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
   });
 });
 
-// Graceful shutdown
-process.on('SIGTERM', async () => {
-  logger.info('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    prisma.$disconnect();
-    process.exit(0);
+// Analysis endpoints
+app.post('/api/v1/analysis/analyze', async (req, res) => {
+  try {
+    const { content, type, requirements, userId } = req.body;
+    
+    if (!content || !userId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Content and userId are required'
+      });
+    }
+
+    const analysis = await analysisService.analyzeContent({
+      content,
+      type: type || 'personal_statement',
+      requirements,
+      userId
+    });
+
+    res.json({
+      success: true,
+      data: analysis
+    });
+
+  } catch (error) {
+    console.error('Error analyzing content:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to analyze content'
+    });
+  }
+});
+
+app.post('/api/v1/analysis/grammar', async (req, res) => {
+  try {
+    const { content } = req.body;
+    
+    if (!content) {
+      return res.status(400).json({
+        success: false,
+        error: 'Content is required'
+      });
+    }
+
+    const grammarCheck = await analysisService.checkGrammar(content);
+
+    res.json({
+      success: true,
+      data: grammarCheck
+    });
+
+  } catch (error) {
+    console.error('Error checking grammar:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to check grammar'
+    });
+  }
+});
+
+app.post('/api/v1/analysis/style', async (req, res) => {
+  try {
+    const { content, essayType } = req.body;
+    
+    if (!content) {
+      return res.status(400).json({
+        success: false,
+        error: 'Content is required'
+      });
+    }
+
+    const styleAnalysis = await analysisService.analyzeStyle(content, essayType || 'personal_statement');
+
+    res.json({
+      success: true,
+      data: styleAnalysis
+    });
+
+  } catch (error) {
+    console.error('Error analyzing style:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to analyze style'
+    });
+  }
+});
+
+app.post('/api/v1/analysis/readability', async (req, res) => {
+  try {
+    const { content } = req.body;
+    
+    if (!content) {
+      return res.status(400).json({
+        success: false,
+        error: 'Content is required'
+      });
+    }
+
+    const readabilityAssessment = await analysisService.assessReadability(content);
+
+    res.json({
+      success: true,
+      data: readabilityAssessment
+    });
+
+  } catch (error) {
+    console.error('Error assessing readability:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to assess readability'
+    });
+  }
+});
+
+// Quality assessment endpoints
+app.post('/api/v1/quality/score', async (req, res) => {
+  try {
+    const { content, essayType, requirements, userId } = req.body;
+    
+    if (!content || !userId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Content and userId are required'
+      });
+    }
+
+    const assessment = await qualityService.assessQuality({
+      content,
+      essayType: essayType || 'personal_statement',
+      requirements,
+      userId
+    });
+
+    res.json({
+      success: true,
+      data: assessment
+    });
+
+  } catch (error) {
+    console.error('Error assessing quality:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to assess quality'
+    });
+  }
+});
+
+app.post('/api/v1/quality/readiness', async (req, res) => {
+  try {
+    const { content, essayType, requirements, userId } = req.body;
+    
+    if (!content || !userId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Content and userId are required'
+      });
+    }
+
+    const readinessCheck = await qualityService.checkReadiness({
+      content,
+      essayType: essayType || 'personal_statement',
+      requirements,
+      userId
+    });
+
+    res.json({
+      success: true,
+      data: readinessCheck
+    });
+
+  } catch (error) {
+    console.error('Error checking readiness:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to check readiness'
+    });
+  }
+});
+
+app.post('/api/v1/quality/compare', async (req, res) => {
+  try {
+    const { essay1, essay2, essayType, userId } = req.body;
+    
+    if (!essay1 || !essay2 || !userId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Both essays and userId are required'
+      });
+    }
+
+    const comparison = await qualityService.compareEssays(
+      essay1,
+      essay2,
+      essayType || 'personal_statement',
+      userId
+    );
+
+    res.json({
+      success: true,
+      data: comparison
+    });
+
+  } catch (error) {
+    console.error('Error comparing essays:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to compare essays'
+    });
+  }
+});
+
+app.get('/api/v1/quality/criteria', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      categories: [
+        {
+          name: 'Content Quality',
+          weight: 25,
+          description: 'Relevance, depth, and originality of content'
+        },
+        {
+          name: 'Writing Mechanics',
+          weight: 20,
+          description: 'Grammar, spelling, and punctuation'
+        },
+        {
+          name: 'Structure & Organization',
+          weight: 20,
+          description: 'Logical flow and essay structure'
+        },
+        {
+          name: 'Clarity & Style',
+          weight: 15,
+          description: 'Readability and writing style'
+        },
+        {
+          name: 'Impact & Engagement',
+          weight: 10,
+          description: 'Persuasiveness and reader engagement'
+        },
+        {
+          name: 'Requirements Compliance',
+          weight: 10,
+          description: 'Adherence to specified requirements'
+        }
+      ],
+      scoringScale: {
+        'excellent': { min: 90, max: 100 },
+        'good': { min: 75, max: 89 },
+        'needs_improvement': { min: 60, max: 74 },
+        'not_ready': { min: 0, max: 59 }
+      }
+    }
   });
 });
 
-process.on('SIGINT', async () => {
-  logger.info('SIGINT received, shutting down gracefully');
-  server.close(() => {
-    prisma.$disconnect();
-    process.exit(0);
+// Mount route modules
+app.use('/api/v1/suggestions', suggestionsRoutes);
+app.use('/api/v1/templates', templatesRoutes);
+
+// Error handling middleware
+app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Unhandled error:', error);
+  res.status(500).json({
+    success: false,
+    error: 'Internal server error'
+  });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    error: 'Endpoint not found'
   });
 });
 
 // Start server
-server.listen(port, () => {
-  logger.info(`AI Writing Assistant Service running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`AI Writing Assistant service running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
+  process.exit(0);
 });
 
 export default app;

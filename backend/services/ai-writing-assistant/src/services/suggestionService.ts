@@ -1,414 +1,772 @@
 import { PrismaClient } from '@prisma/client';
-import { Server } from 'socket.io';
-import OpenAI from 'openai';
-import { logger } from '../utils/logger';
+import axios from 'axios';
+
+const prisma = new PrismaClient();
+
+export interface SuggestionRequest {
+  content: string;
+  type: 'vocabulary' | 'structure' | 'tone' | 'clarity' | 'grammar';
+  context?: {
+    essayType?: string;
+    audience?: string;
+    tone?: string;
+    position?: {
+      start: number;
+      end: number;
+    };
+  };
+  userId: string;
+}
 
 export interface Suggestion {
   id: string;
-  type: 'grammar' | 'style' | 'vocabulary' | 'structure' | 'content';
-  category: 'correction' | 'improvement' | 'enhancement';
-  message: string;
-  original_text: string;
-  suggested_text: string;
-  position: { start: number; end: number };
+  type: 'vocabulary' | 'structure' | 'tone' | 'clarity' | 'grammar';
+  severity: 'low' | 'medium' | 'high';
+  original: string;
+  suggestion: string;
+  explanation: string;
+  position?: {
+    start: number;
+    end: number;
+  };
   confidence: number;
-  reasoning: string;
-  applied: boolean;
+  alternatives?: string[];
+  category?: string;
 }
 
-export interface SuggestionContext {
-  document_type: 'letter' | 'essay' | 'application';
-  target_audience: 'academic' | 'professional' | 'general';
-  writing_goal: 'persuasive' | 'informative' | 'narrative' | 'descriptive';
-  user_level: 'beginner' | 'intermediate' | 'advanced';
+export interface VocabularySuggestion extends Suggestion {
+  type: 'vocabulary';
+  wordType: 'adjective' | 'verb' | 'noun' | 'adverb';
+  synonyms: string[];
+  contextualFit: number;
+  formalityLevel: 'informal' | 'neutral' | 'formal' | 'academic';
+}
+
+export interface StructureSuggestion extends Suggestion {
+  type: 'structure';
+  structureType: 'paragraph' | 'sentence' | 'transition' | 'organization';
+  improvement: string;
+  example: string;
+}
+
+export interface ToneSuggestion extends Suggestion {
+  type: 'tone';
+  currentTone: string;
+  suggestedTone: string;
+  toneShift: 'more_formal' | 'less_formal' | 'more_personal' | 'more_professional';
 }
 
 export class SuggestionService {
-  private openai: OpenAI;
-
-  constructor(private prisma: PrismaClient, private io: Server) {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
+  async getSuggestions(request: SuggestionRequest): Promise<Suggestion[]> {
+    try {
+      let suggestions: Suggestion[] = [];
+      
+      switch (request.type) {
+        case 'vocabulary':
+          suggestions = await this.getVocabularySuggestions(request);
+          break;
+        case 'structure':
+          suggestions = await this.getStructureSuggestions(request);
+          break;
+        case 'tone':
+          suggestions = await this.getToneSuggestions(request);
+          break;
+        case 'clarity':
+          suggestions = await this.getClaritySuggestions(request);
+          break;
+        case 'grammar':
+          suggestions = await this.getGrammarSuggestions(request);
+          break;
+        default:
+          suggestions = await this.getAllSuggestions(request);
+      }
+      
+      // Store suggestions for analytics
+      await this.storeSuggestions(request.userId, suggestions);
+      
+      return suggestions.sort((a, b) => {
+        const severityOrder = { high: 3, medium: 2, low: 1 };
+        return severityOrder[b.severity] - severityOrder[a.severity];
+      });
+      
+    } catch (error) {
+      console.error('Error getting suggestions:', error);
+      throw new Error(`Failed to get suggestions: ${error.message}`);
+    }
   }
 
-  async generateSuggestions(
-    text: string, 
-    position: number, 
-    context: SuggestionContext,
-    userId: string
-  ): Promise<Suggestion[]> {
+  async getVocabularySuggestions(request: SuggestionRequest): Promise<VocabularySuggestion[]> {
     try {
-      logger.info(`Generating suggestions for user ${userId}`);
+      const suggestions: VocabularySuggestion[] = [];
+      const words = this.extractWords(request.content);
+      
+      for (const word of words) {
+        const wordSuggestions = await this.analyzeWord(word, request.context);
+        suggestions.push(...wordSuggestions);
+      }
+      
+      return suggestions;
+      
+    } catch (error) {
+      console.error('Error getting vocabulary suggestions:', error);
+      return [];
+    }
+  }
 
+  async getStructureSuggestions(request: SuggestionRequest): Promise<StructureSuggestion[]> {
+    try {
+      const suggestions: StructureSuggestion[] = [];
+      
+      // Analyze paragraph structure
+      const paragraphSuggestions = await this.analyzeParagraphStructure(request.content);
+      suggestions.push(...paragraphSuggestions);
+      
+      // Analyze sentence structure
+      const sentenceSuggestions = await this.analyzeSentenceStructure(request.content);
+      suggestions.push(...sentenceSuggestions);
+      
+      // Analyze transitions
+      const transitionSuggestions = await this.analyzeTransitions(request.content);
+      suggestions.push(...transitionSuggestions);
+      
+      // Analyze overall organization
+      const organizationSuggestions = await this.analyzeOrganization(request.content, request.context);
+      suggestions.push(...organizationSuggestions);
+      
+      return suggestions;
+      
+    } catch (error) {
+      console.error('Error getting structure suggestions:', error);
+      return [];
+    }
+  }
+
+  async getToneSuggestions(request: SuggestionRequest): Promise<ToneSuggestion[]> {
+    try {
+      const suggestions: ToneSuggestion[] = [];
+      
+      // Analyze current tone
+      const currentTone = await this.analyzeTone(request.content);
+      const targetTone = request.context?.tone || 'professional';
+      
+      if (currentTone !== targetTone) {
+        const toneShift = this.determineToneShift(currentTone, targetTone);
+        const toneSuggestions = await this.generateToneAdjustments(
+          request.content,
+          currentTone,
+          targetTone,
+          toneShift
+        );
+        suggestions.push(...toneSuggestions);
+      }
+      
+      return suggestions;
+      
+    } catch (error) {
+      console.error('Error getting tone suggestions:', error);
+      return [];
+    }
+  }
+
+  async getClaritySuggestions(request: SuggestionRequest): Promise<Suggestion[]> {
+    try {
+      const suggestions: Suggestion[] = [];
+      
+      // Analyze sentence clarity
+      const sentences = this.splitIntoSentences(request.content);
+      
+      for (let i = 0; i < sentences.length; i++) {
+        const sentence = sentences[i];
+        const claritySuggestions = await this.analyzeSentenceClarity(sentence, i);
+        suggestions.push(...claritySuggestions);
+      }
+      
+      // Analyze word choice clarity
+      const wordChoiceSuggestions = await this.analyzeWordChoiceClarity(request.content);
+      suggestions.push(...wordChoiceSuggestions);
+      
+      // Analyze logical flow
+      const flowSuggestions = await this.analyzeLogicalFlow(request.content);
+      suggestions.push(...flowSuggestions);
+      
+      return suggestions;
+      
+    } catch (error) {
+      console.error('Error getting clarity suggestions:', error);
+      return [];
+    }
+  }
+
+  async getGrammarSuggestions(request: SuggestionRequest): Promise<Suggestion[]> {
+    try {
+      // Use external grammar checking services
+      const [languageToolSuggestions, grammarSuggestions] = await Promise.allSettled([
+        this.getLanguageToolSuggestions(request.content),
+        this.getInternalGrammarSuggestions(request.content)
+      ]);
+      
+      const suggestions: Suggestion[] = [];
+      
+      if (languageToolSuggestions.status === 'fulfilled') {
+        suggestions.push(...languageToolSuggestions.value);
+      }
+      
+      if (grammarSuggestions.status === 'fulfilled') {
+        suggestions.push(...grammarSuggestions.value);
+      }
+      
+      // Remove duplicates
+      return this.deduplicateSuggestions(suggestions);
+      
+    } catch (error) {
+      console.error('Error getting grammar suggestions:', error);
+      return [];
+    }
+  }
+
+  async getAllSuggestions(request: SuggestionRequest): Promise<Suggestion[]> {
+    try {
       const [
-        grammarSuggestions,
-        styleSuggestions,
         vocabularySuggestions,
         structureSuggestions,
-        contentSuggestions
-      ] = await Promise.all([
-        this.generateGrammarSuggestions(text, position, context),
-        this.generateStyleSuggestions(text, position, context),
-        this.generateVocabularySuggestions(text, position, context),
-        this.generateStructureSuggestions(text, position, context),
-        this.generateContentSuggestions(text, position, context)
+        toneSuggestions,
+        claritySuggestions,
+        grammarSuggestions
+      ] = await Promise.allSettled([
+        this.getVocabularySuggestions(request),
+        this.getStructureSuggestions(request),
+        this.getToneSuggestions(request),
+        this.getClaritySuggestions(request),
+        this.getGrammarSuggestions(request)
       ]);
-
-      const allSuggestions = [
-        ...grammarSuggestions,
-        ...styleSuggestions,
-        ...vocabularySuggestions,
-        ...structureSuggestions,
-        ...contentSuggestions
-      ];
-
-      // Sort by confidence and relevance
-      const sortedSuggestions = allSuggestions
-        .sort((a, b) => b.confidence - a.confidence)
-        .slice(0, 10); // Limit to top 10 suggestions
-
-      // Save suggestions to database
-      await this.saveSuggestions(sortedSuggestions, userId, text);
-
-      return sortedSuggestions;
-    } catch (error) {
-      logger.error('Error generating suggestions:', error);
-      throw error;
-    }
-  }
-
-  private async generateGrammarSuggestions(
-    text: string, 
-    position: number, 
-    context: SuggestionContext
-  ): Promise<Suggestion[]> {
-    try {
-      const prompt = `Analyze the following text for grammar errors and provide specific corrections. Focus on the area around position ${position}:
-
-Text: "${text}"
-
-Provide up to 3 grammar corrections in JSON format:
-[
-  {
-    "original_text": "text with error",
-    "suggested_text": "corrected text",
-    "message": "Brief explanation of the error",
-    "reasoning": "Why this correction improves the text",
-    "position_start": 10,
-    "position_end": 25,
-    "confidence": 0.9
-  }
-]`;
-
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.2,
-        max_tokens: 500
-      });
-
-      const suggestions = JSON.parse(response.choices[0].message.content || '[]');
       
-      return suggestions.map((s: any) => ({
-        id: this.generateId(),
-        type: 'grammar',
-        category: 'correction',
-        message: s.message,
-        original_text: s.original_text,
-        suggested_text: s.suggested_text,
-        position: { start: s.position_start, end: s.position_end },
-        confidence: s.confidence,
-        reasoning: s.reasoning,
-        applied: false
-      }));
+      const allSuggestions: Suggestion[] = [];
+      
+      if (vocabularySuggestions.status === 'fulfilled') {
+        allSuggestions.push(...vocabularySuggestions.value);
+      }
+      if (structureSuggestions.status === 'fulfilled') {
+        allSuggestions.push(...structureSuggestions.value);
+      }
+      if (toneSuggestions.status === 'fulfilled') {
+        allSuggestions.push(...toneSuggestions.value);
+      }
+      if (claritySuggestions.status === 'fulfilled') {
+        allSuggestions.push(...claritySuggestions.value);
+      }
+      if (grammarSuggestions.status === 'fulfilled') {
+        allSuggestions.push(...grammarSuggestions.value);
+      }
+      
+      return this.deduplicateSuggestions(allSuggestions);
+      
     } catch (error) {
-      logger.error('Error generating grammar suggestions:', error);
+      console.error('Error getting all suggestions:', error);
       return [];
     }
   }
 
-  private async generateStyleSuggestions(
-    text: string, 
-    position: number, 
-    context: SuggestionContext
-  ): Promise<Suggestion[]> {
-    try {
-      const stylePrompt = this.buildStylePrompt(text, context);
+  private async analyzeWord(word: { text: string; position: { start: number; end: number } }, context?: SuggestionRequest['context']): Promise<VocabularySuggestion[]> {
+    const suggestions: VocabularySuggestion[] = [];
+    
+    // Check if word is overused
+    if (this.isOverusedWord(word.text)) {
+      const synonyms = await this.getSynonyms(word.text);
+      const bestSynonym = this.selectBestSynonym(synonyms, context);
       
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: stylePrompt }],
-        temperature: 0.4,
-        max_tokens: 600
-      });
-
-      const suggestions = JSON.parse(response.choices[0].message.content || '[]');
-      
-      return suggestions.map((s: any) => ({
-        id: this.generateId(),
-        type: 'style',
-        category: 'improvement',
-        message: s.message,
-        original_text: s.original_text,
-        suggested_text: s.suggested_text,
-        position: { start: s.position_start, end: s.position_end },
-        confidence: s.confidence,
-        reasoning: s.reasoning,
-        applied: false
-      }));
-    } catch (error) {
-      logger.error('Error generating style suggestions:', error);
-      return [];
+      if (bestSynonym) {
+        suggestions.push({
+          id: this.generateId(),
+          type: 'vocabulary',
+          severity: 'medium',
+          original: word.text,
+          suggestion: bestSynonym,
+          explanation: `Consider using "${bestSynonym}" instead of the overused word "${word.text}"`,
+          position: word.position,
+          confidence: 0.8,
+          alternatives: synonyms.slice(0, 3),
+          wordType: await this.getWordType(word.text),
+          synonyms,
+          contextualFit: 0.8,
+          formalityLevel: await this.getFormalityLevel(bestSynonym)
+        });
+      }
     }
-  }
-
-  private async generateVocabularySuggestions(
-    text: string, 
-    position: number, 
-    context: SuggestionContext
-  ): Promise<Suggestion[]> {
-    try {
-      const prompt = `Suggest vocabulary improvements for this ${context.document_type} targeting ${context.target_audience} audience:
-
-Text: "${text}"
-
-Provide up to 3 vocabulary enhancements in JSON format:
-[
-  {
-    "original_text": "basic word or phrase",
-    "suggested_text": "enhanced alternative",
-    "message": "Why this word choice is better",
-    "reasoning": "How it improves the writing",
-    "position_start": 15,
-    "position_end": 30,
-    "confidence": 0.8
-  }
-]`;
-
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.5,
-        max_tokens: 500
-      });
-
-      const suggestions = JSON.parse(response.choices[0].message.content || '[]');
+    
+    // Check for weak words
+    if (this.isWeakWord(word.text)) {
+      const strongerAlternatives = await this.getStrongerAlternatives(word.text);
       
-      return suggestions.map((s: any) => ({
-        id: this.generateId(),
-        type: 'vocabulary',
-        category: 'enhancement',
-        message: s.message,
-        original_text: s.original_text,
-        suggested_text: s.suggested_text,
-        position: { start: s.position_start, end: s.position_end },
-        confidence: s.confidence,
-        reasoning: s.reasoning,
-        applied: false
-      }));
-    } catch (error) {
-      logger.error('Error generating vocabulary suggestions:', error);
-      return [];
+      if (strongerAlternatives.length > 0) {
+        suggestions.push({
+          id: this.generateId(),
+          type: 'vocabulary',
+          severity: 'low',
+          original: word.text,
+          suggestion: strongerAlternatives[0],
+          explanation: `Consider using a stronger word like "${strongerAlternatives[0]}" instead of "${word.text}"`,
+          position: word.position,
+          confidence: 0.7,
+          alternatives: strongerAlternatives,
+          wordType: await this.getWordType(word.text),
+          synonyms: strongerAlternatives,
+          contextualFit: 0.7,
+          formalityLevel: await this.getFormalityLevel(strongerAlternatives[0])
+        });
+      }
     }
+    
+    return suggestions;
   }
 
-  private async generateStructureSuggestions(
-    text: string, 
-    position: number, 
-    context: SuggestionContext
-  ): Promise<Suggestion[]> {
-    const suggestions: Suggestion[] = [];
-
-    // Analyze paragraph structure
-    const paragraphs = text.split(/\n\s*\n/);
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-
-    // Check for paragraph length
+  private async analyzeParagraphStructure(content: string): Promise<StructureSuggestion[]> {
+    const suggestions: StructureSuggestion[] = [];
+    const paragraphs = content.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+    
     paragraphs.forEach((paragraph, index) => {
-      const words = paragraph.split(/\s+/).length;
-      if (words > 150) {
+      const sentences = this.splitIntoSentences(paragraph);
+      
+      // Check paragraph length
+      if (sentences.length < 3) {
         suggestions.push({
           id: this.generateId(),
           type: 'structure',
-          category: 'improvement',
-          message: 'This paragraph might be too long',
-          original_text: paragraph.substring(0, 50) + '...',
-          suggested_text: 'Consider breaking into 2-3 shorter paragraphs',
-          position: { start: 0, end: paragraph.length },
-          confidence: 0.7,
-          reasoning: 'Shorter paragraphs improve readability and flow',
-          applied: false
+          severity: 'medium',
+          original: paragraph.substring(0, 50) + '...',
+          suggestion: 'Expand this paragraph with more supporting details',
+          explanation: 'Paragraphs should typically contain 3-5 sentences to fully develop ideas',
+          confidence: 0.8,
+          structureType: 'paragraph',
+          improvement: 'Add more supporting sentences or examples',
+          example: 'Consider adding specific examples, evidence, or further explanation to strengthen your point.'
+        });
+      }
+      
+      if (sentences.length > 7) {
+        suggestions.push({
+          id: this.generateId(),
+          type: 'structure',
+          severity: 'medium',
+          original: paragraph.substring(0, 50) + '...',
+          suggestion: 'Consider breaking this paragraph into smaller ones',
+          explanation: 'Long paragraphs can be difficult to follow and may contain multiple ideas',
+          confidence: 0.8,
+          structureType: 'paragraph',
+          improvement: 'Split into 2-3 focused paragraphs',
+          example: 'Each paragraph should focus on one main idea with supporting details.'
         });
       }
     });
+    
+    return suggestions;
+  }
 
-    // Check sentence variety
-    const avgSentenceLength = sentences.reduce((sum, s) => sum + s.split(/\s+/).length, 0) / sentences.length;
-    if (avgSentenceLength > 25) {
+  private async analyzeSentenceStructure(content: string): Promise<StructureSuggestion[]> {
+    const suggestions: StructureSuggestion[] = [];
+    const sentences = this.splitIntoSentences(content);
+    
+    sentences.forEach((sentence, index) => {
+      const words = sentence.split(/\s+/);
+      
+      // Check sentence length
+      if (words.length > 30) {
+        suggestions.push({
+          id: this.generateId(),
+          type: 'structure',
+          severity: 'medium',
+          original: sentence,
+          suggestion: 'Consider breaking this long sentence into shorter ones',
+          explanation: 'Long sentences can be difficult to follow and may confuse readers',
+          confidence: 0.8,
+          structureType: 'sentence',
+          improvement: 'Split into 2-3 shorter sentences',
+          example: 'Use periods, semicolons, or coordinating conjunctions to create clearer sentence boundaries.'
+        });
+      }
+      
+      // Check for run-on sentences
+      if (this.isRunOnSentence(sentence)) {
+        suggestions.push({
+          id: this.generateId(),
+          type: 'structure',
+          severity: 'high',
+          original: sentence,
+          suggestion: 'This appears to be a run-on sentence',
+          explanation: 'Run-on sentences contain multiple independent clauses that should be separated',
+          confidence: 0.9,
+          structureType: 'sentence',
+          improvement: 'Separate independent clauses with proper punctuation',
+          example: 'Use periods, semicolons, or conjunctions to properly connect ideas.'
+        });
+      }
+    });
+    
+    return suggestions;
+  }
+
+  private async analyzeTransitions(content: string): Promise<StructureSuggestion[]> {
+    const suggestions: StructureSuggestion[] = [];
+    const paragraphs = content.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+    
+    for (let i = 1; i < paragraphs.length; i++) {
+      const currentParagraph = paragraphs[i];
+      const previousParagraph = paragraphs[i - 1];
+      
+      if (!this.hasTransition(currentParagraph, previousParagraph)) {
+        suggestions.push({
+          id: this.generateId(),
+          type: 'structure',
+          severity: 'low',
+          original: currentParagraph.substring(0, 50) + '...',
+          suggestion: 'Consider adding a transition to connect this paragraph to the previous one',
+          explanation: 'Transitions help readers follow your logical flow between ideas',
+          confidence: 0.7,
+          structureType: 'transition',
+          improvement: 'Add transitional words or phrases',
+          example: 'Use words like "Furthermore," "However," "In addition," or "On the other hand" to connect ideas.'
+        });
+      }
+    }
+    
+    return suggestions;
+  }
+
+  private async analyzeOrganization(content: string, context?: SuggestionRequest['context']): Promise<StructureSuggestion[]> {
+    const suggestions: StructureSuggestion[] = [];
+    
+    // Check for introduction and conclusion
+    const paragraphs = content.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+    
+    if (paragraphs.length > 2) {
+      const firstParagraph = paragraphs[0];
+      const lastParagraph = paragraphs[paragraphs.length - 1];
+      
+      if (!this.hasIntroductionElements(firstParagraph)) {
+        suggestions.push({
+          id: this.generateId(),
+          type: 'structure',
+          severity: 'medium',
+          original: firstParagraph.substring(0, 50) + '...',
+          suggestion: 'Consider strengthening your introduction',
+          explanation: 'A strong introduction should hook the reader and preview your main points',
+          confidence: 0.8,
+          structureType: 'organization',
+          improvement: 'Add a hook, background, and thesis statement',
+          example: 'Start with an engaging opening, provide context, and clearly state your main argument.'
+        });
+      }
+      
+      if (!this.hasConclusionElements(lastParagraph)) {
+        suggestions.push({
+          id: this.generateId(),
+          type: 'structure',
+          severity: 'medium',
+          original: lastParagraph.substring(0, 50) + '...',
+          suggestion: 'Consider strengthening your conclusion',
+          explanation: 'A strong conclusion should summarize key points and provide closure',
+          confidence: 0.8,
+          structureType: 'organization',
+          improvement: 'Summarize main points and end with impact',
+          example: 'Restate your thesis, summarize key arguments, and end with a memorable closing thought.'
+        });
+      }
+    }
+    
+    return suggestions;
+  }
+
+  private async analyzeTone(content: string): Promise<string> {
+    // Simplified tone analysis
+    const formalWords = ['furthermore', 'consequently', 'therefore', 'moreover'];
+    const informalWords = ['gonna', 'wanna', 'kinda', 'really', 'pretty'];
+    const personalWords = ['I', 'my', 'me', 'personally'];
+    
+    const words = content.toLowerCase().split(/\s+/);
+    const formalCount = words.filter(word => formalWords.includes(word)).length;
+    const informalCount = words.filter(word => informalWords.includes(word)).length;
+    const personalCount = words.filter(word => personalWords.includes(word)).length;
+    
+    if (formalCount > informalCount && formalCount > personalCount) return 'formal';
+    if (informalCount > formalCount) return 'informal';
+    if (personalCount > 5) return 'personal';
+    return 'neutral';
+  }
+
+  private determineToneShift(currentTone: string, targetTone: string): ToneSuggestion['toneShift'] {
+    if (currentTone === 'informal' && targetTone === 'formal') return 'more_formal';
+    if (currentTone === 'formal' && targetTone === 'personal') return 'more_personal';
+    if (currentTone === 'personal' && targetTone === 'formal') return 'more_professional';
+    return 'more_formal';
+  }
+
+  private async generateToneAdjustments(
+    content: string,
+    currentTone: string,
+    targetTone: string,
+    toneShift: ToneSuggestion['toneShift']
+  ): Promise<ToneSuggestion[]> {
+    const suggestions: ToneSuggestion[] = [];
+    
+    // This is a simplified implementation
+    suggestions.push({
+      id: this.generateId(),
+      type: 'tone',
+      severity: 'medium',
+      original: content.substring(0, 100) + '...',
+      suggestion: `Adjust the tone to be more ${targetTone}`,
+      explanation: `The current tone appears ${currentTone}, but ${targetTone} would be more appropriate`,
+      confidence: 0.7,
+      currentTone,
+      suggestedTone: targetTone,
+      toneShift
+    });
+    
+    return suggestions;
+  }
+
+  private async analyzeSentenceClarity(sentence: string, index: number): Promise<Suggestion[]> {
+    const suggestions: Suggestion[] = [];
+    
+    // Check for unclear pronoun references
+    if (this.hasUnclearPronouns(sentence)) {
       suggestions.push({
         id: this.generateId(),
-        type: 'structure',
-        category: 'improvement',
-        message: 'Consider varying sentence lengths',
-        original_text: 'Long sentences throughout',
-        suggested_text: 'Mix short and long sentences for better rhythm',
-        position: { start: 0, end: text.length },
-        confidence: 0.6,
-        reasoning: 'Sentence variety improves readability and engagement',
-        applied: false
+        type: 'clarity',
+        severity: 'medium',
+        original: sentence,
+        suggestion: 'Clarify pronoun references',
+        explanation: 'Make sure pronouns clearly refer to specific nouns',
+        confidence: 0.8
       });
     }
-
-    return suggestions.slice(0, 2); // Limit structure suggestions
-  }
-
-  private async generateContentSuggestions(
-    text: string, 
-    position: number, 
-    context: SuggestionContext
-  ): Promise<Suggestion[]> {
-    try {
-      const contentPrompt = `Analyze this ${context.document_type} for content improvements. The goal is ${context.writing_goal} writing for ${context.target_audience} audience:
-
-Text: "${text}"
-
-Suggest content enhancements in JSON format:
-[
-  {
-    "message": "Content improvement suggestion",
-    "original_text": "section that could be improved",
-    "suggested_text": "enhanced version or addition",
-    "reasoning": "Why this improves the content",
-    "position_start": 0,
-    "position_end": 50,
-    "confidence": 0.7
-  }
-]`;
-
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: contentPrompt }],
-        temperature: 0.6,
-        max_tokens: 400
-      });
-
-      const suggestions = JSON.parse(response.choices[0].message.content || '[]');
-      
-      return suggestions.slice(0, 2).map((s: any) => ({
+    
+    // Check for jargon or complex terms
+    const jargonWords = this.identifyJargon(sentence);
+    if (jargonWords.length > 0) {
+      suggestions.push({
         id: this.generateId(),
-        type: 'content',
-        category: 'enhancement',
-        message: s.message,
-        original_text: s.original_text,
-        suggested_text: s.suggested_text,
-        position: { start: s.position_start, end: s.position_end },
-        confidence: s.confidence,
-        reasoning: s.reasoning,
-        applied: false
-      }));
-    } catch (error) {
-      logger.error('Error generating content suggestions:', error);
-      return [];
+        type: 'clarity',
+        severity: 'low',
+        original: jargonWords.join(', '),
+        suggestion: 'Consider explaining or simplifying technical terms',
+        explanation: 'Technical jargon may not be clear to all readers',
+        confidence: 0.7
+      });
     }
+    
+    return suggestions;
   }
 
-  private buildStylePrompt(text: string, context: SuggestionContext): string {
-    const audienceGuidance = {
-      academic: 'formal, scholarly tone with precise language',
-      professional: 'professional, clear, and confident tone',
-      general: 'clear, engaging, and accessible language'
-    };
-
-    const goalGuidance = {
-      persuasive: 'compelling arguments and strong calls to action',
-      informative: 'clear explanations and logical organization',
-      narrative: 'engaging storytelling and vivid descriptions',
-      descriptive: 'rich details and sensory language'
-    };
-
-    return `Improve the writing style of this ${context.document_type} for ${audienceGuidance[context.target_audience]} with ${goalGuidance[context.writing_goal]}:
-
-Text: "${text}"
-
-Provide up to 3 style improvements in JSON format:
-[
-  {
-    "original_text": "text to improve",
-    "suggested_text": "improved version",
-    "message": "Style improvement explanation",
-    "reasoning": "How this enhances the writing",
-    "position_start": 10,
-    "position_end": 25,
-    "confidence": 0.8
-  }
-]`;
+  private async analyzeWordChoiceClarity(content: string): Promise<Suggestion[]> {
+    const suggestions: Suggestion[] = [];
+    
+    // Check for vague words
+    const vagueWords = ['thing', 'stuff', 'very', 'really', 'quite', 'somewhat'];
+    const words = this.extractWords(content);
+    
+    words.forEach(word => {
+      if (vagueWords.includes(word.text.toLowerCase())) {
+        suggestions.push({
+          id: this.generateId(),
+          type: 'clarity',
+          severity: 'low',
+          original: word.text,
+          suggestion: 'Use more specific language',
+          explanation: `"${word.text}" is vague - consider using more precise words`,
+          position: word.position,
+          confidence: 0.8
+        });
+      }
+    });
+    
+    return suggestions;
   }
 
-  async applySuggestion(suggestionId: string, userId: string): Promise<boolean> {
-    try {
-      await this.prisma.applied_suggestions.create({
-        data: {
-          suggestion_id: suggestionId,
-          user_id: userId,
-          applied_at: new Date()
+  private async analyzeLogicalFlow(content: string): Promise<Suggestion[]> {
+    const suggestions: Suggestion[] = [];
+    
+    // This is a simplified implementation
+    // In a real system, you would use more sophisticated NLP techniques
+    
+    return suggestions;
+  }
+
+  // Helper methods
+  private extractWords(content: string): { text: string; position: { start: number; end: number } }[] {
+    const words: { text: string; position: { start: number; end: number } }[] = [];
+    const regex = /\b\w+\b/g;
+    let match;
+    
+    while ((match = regex.exec(content)) !== null) {
+      words.push({
+        text: match[0],
+        position: {
+          start: match.index,
+          end: match.index + match[0].length
         }
       });
+    }
+    
+    return words;
+  }
 
-      // Emit real-time update
-      this.io.to(`user-${userId}`).emit('suggestion-applied', { suggestionId });
+  private splitIntoSentences(content: string): string[] {
+    return content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  }
 
+  private isOverusedWord(word: string): boolean {
+    const overusedWords = ['very', 'really', 'quite', 'pretty', 'thing', 'stuff', 'good', 'bad', 'nice'];
+    return overusedWords.includes(word.toLowerCase());
+  }
+
+  private isWeakWord(word: string): boolean {
+    const weakWords = ['okay', 'fine', 'alright', 'maybe', 'perhaps', 'might'];
+    return weakWords.includes(word.toLowerCase());
+  }
+
+  private async getSynonyms(word: string): Promise<string[]> {
+    // In a real implementation, you would use a thesaurus API
+    const synonymMap: Record<string, string[]> = {
+      'good': ['excellent', 'outstanding', 'remarkable', 'exceptional'],
+      'bad': ['poor', 'inadequate', 'substandard', 'disappointing'],
+      'very': ['extremely', 'exceptionally', 'remarkably', 'significantly'],
+      'thing': ['element', 'aspect', 'component', 'factor']
+    };
+    
+    return synonymMap[word.toLowerCase()] || [];
+  }
+
+  private selectBestSynonym(synonyms: string[], context?: SuggestionRequest['context']): string | null {
+    if (synonyms.length === 0) return null;
+    
+    // Simple selection - in a real system, you would use context analysis
+    return synonyms[0];
+  }
+
+  private async getWordType(word: string): Promise<VocabularySuggestion['wordType']> {
+    // Simplified word type detection
+    if (word.endsWith('ly')) return 'adverb';
+    if (word.endsWith('ed') || word.endsWith('ing')) return 'verb';
+    return 'noun';
+  }
+
+  private async getFormalityLevel(word: string): Promise<VocabularySuggestion['formalityLevel']> {
+    const formalWords = ['consequently', 'furthermore', 'nevertheless', 'exceptional'];
+    const informalWords = ['okay', 'stuff', 'thing', 'really'];
+    
+    if (formalWords.includes(word.toLowerCase())) return 'formal';
+    if (informalWords.includes(word.toLowerCase())) return 'informal';
+    return 'neutral';
+  }
+
+  private async getStrongerAlternatives(word: string): Promise<string[]> {
+    const alternatives: Record<string, string[]> = {
+      'okay': ['acceptable', 'satisfactory', 'adequate'],
+      'fine': ['excellent', 'satisfactory', 'appropriate'],
+      'maybe': ['perhaps', 'possibly', 'potentially']
+    };
+    
+    return alternatives[word.toLowerCase()] || [];
+  }
+
+  private isRunOnSentence(sentence: string): boolean {
+    // Simplified run-on detection
+    const conjunctions = sentence.match(/\b(and|but|or|so|yet)\b/g);
+    const commas = sentence.match(/,/g);
+    
+    return (conjunctions?.length || 0) > 2 && (commas?.length || 0) > 3;
+  }
+
+  private hasTransition(currentParagraph: string, previousParagraph: string): boolean {
+    const transitionWords = [
+      'furthermore', 'moreover', 'additionally', 'however', 'nevertheless',
+      'consequently', 'therefore', 'thus', 'meanwhile', 'similarly'
+    ];
+    
+    const firstSentence = currentParagraph.split('.')[0].toLowerCase();
+    return transitionWords.some(word => firstSentence.includes(word));
+  }
+
+  private hasIntroductionElements(paragraph: string): boolean {
+    // Simplified check for introduction elements
+    const sentences = this.splitIntoSentences(paragraph);
+    return sentences.length >= 2; // Basic check
+  }
+
+  private hasConclusionElements(paragraph: string): boolean {
+    // Simplified check for conclusion elements
+    const conclusionWords = ['conclusion', 'summary', 'finally', 'ultimately', 'therefore'];
+    return conclusionWords.some(word => paragraph.toLowerCase().includes(word));
+  }
+
+  private hasUnclearPronouns(sentence: string): boolean {
+    const pronouns = ['it', 'this', 'that', 'they', 'them'];
+    const words = sentence.toLowerCase().split(/\s+/);
+    
+    // Simple check - if sentence starts with a pronoun, it might be unclear
+    return pronouns.includes(words[0]);
+  }
+
+  private identifyJargon(sentence: string): string[] {
+    // Simplified jargon detection
+    const jargonWords = ['utilize', 'facilitate', 'implement', 'optimize', 'leverage'];
+    const words = sentence.toLowerCase().split(/\s+/);
+    
+    return words.filter(word => jargonWords.includes(word));
+  }
+
+  private async getLanguageToolSuggestions(content: string): Promise<Suggestion[]> {
+    // Placeholder for LanguageTool integration
+    return [];
+  }
+
+  private async getInternalGrammarSuggestions(content: string): Promise<Suggestion[]> {
+    // Simplified internal grammar checking
+    const suggestions: Suggestion[] = [];
+    
+    // Check for common grammar issues
+    if (content.includes("it's") && content.includes("its")) {
+      // This is a very basic check - real implementation would be more sophisticated
+    }
+    
+    return suggestions;
+  }
+
+  private deduplicateSuggestions(suggestions: Suggestion[]): Suggestion[] {
+    const seen = new Set();
+    return suggestions.filter(suggestion => {
+      const key = `${suggestion.original}-${suggestion.suggestion}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
       return true;
-    } catch (error) {
-      logger.error('Error applying suggestion:', error);
-      return false;
-    }
+    });
   }
 
-  async getSuggestionHistory(userId: string, limit: number = 50) {
-    try {
-      return await this.prisma.writing_suggestions.findMany({
-        where: { user_id: userId },
-        orderBy: { created_at: 'desc' },
-        take: limit,
-        include: {
-          applied_suggestions: true
-        }
-      });
-    } catch (error) {
-      logger.error('Error fetching suggestion history:', error);
-      throw error;
-    }
-  }
-
-  private async saveSuggestions(suggestions: Suggestion[], userId: string, originalText: string) {
+  private async storeSuggestions(userId: string, suggestions: Suggestion[]): Promise<void> {
     try {
       for (const suggestion of suggestions) {
-        await this.prisma.writing_suggestions.create({
+        await prisma.writingSuggestion.create({
           data: {
             id: suggestion.id,
-            user_id: userId,
+            userId,
             type: suggestion.type,
-            category: suggestion.category,
-            message: suggestion.message,
-            original_text: suggestion.original_text,
-            suggested_text: suggestion.suggested_text,
-            position_start: suggestion.position.start,
-            position_end: suggestion.position.end,
+            severity: suggestion.severity,
+            original: suggestion.original,
+            suggestion: suggestion.suggestion,
+            explanation: suggestion.explanation,
             confidence: suggestion.confidence,
-            reasoning: suggestion.reasoning,
-            source_text: originalText,
-            created_at: new Date()
+            position: suggestion.position || {},
+            alternatives: suggestion.alternatives || [],
+            createdAt: new Date()
           }
         });
       }
     } catch (error) {
-      logger.error('Error saving suggestions:', error);
-      // Don't throw - suggestions should still work even if saving fails
+      console.error('Error storing suggestions:', error);
     }
   }
 
   private generateId(): string {
-    return Math.random().toString(36).substring(2) + Date.now().toString(36);
+    return `suggestion_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 }

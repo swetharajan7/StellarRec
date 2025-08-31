@@ -1,0 +1,183 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model WritingAnalysis {
+  id             String   @id @default(cuid())
+  userId         String
+  content        String
+  essayType      String
+  scores         Json     // Analysis scores object
+  suggestions    Json     // Array of suggestions
+  metrics        Json     // Writing metrics object
+  readinessLevel String   // draft, needs_work, good, excellent
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([essayType])
+  @@index([createdAt])
+  @@map("writing_analyses")
+}
+
+model WritingSuggestion {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // vocabulary, structure, tone, clarity, grammar
+  severity    String   // low, medium, high
+  original    String
+  suggestion  String
+  explanation String
+  confidence  Float
+  position    Json     // Position object with start/end
+  alternatives Json    // Array of alternative suggestions
+  accepted    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([severity])
+  @@index([createdAt])
+  @@map("writing_suggestions")
+}
+
+model EssayTemplate {
+  id            String   @id @default(cuid())
+  userId        String?  // null for system templates
+  type          String   // personal_statement, supplemental_essay, etc.
+  title         String
+  description   String?
+  content       String   // JSON string of template structure
+  difficulty    String   // beginner, intermediate, advanced
+  estimatedTime Int      // in minutes
+  wordCount     Int
+  tags          String[] // Array of tags
+  isPublic      Boolean  @default(false)
+  usageCount    Int      @default(0)
+  rating        Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([type])
+  @@index([isPublic])
+  @@index([difficulty])
+  @@map("essay_templates")
+}
+
+model QualityAssessment {
+  id                       String   @id @default(cuid())
+  userId                   String
+  essayType                String
+  overallScore             Int
+  percentage               Int
+  readinessLevel           String   // not_ready, needs_improvement, good, excellent
+  scores                   Json     // Array of quality scores by category
+  strengths                String[] // Array of strengths
+  weaknesses               String[] // Array of weaknesses
+  priorityImprovements     String[] // Array of priority improvements
+  estimatedTimeToImprove   Float    // in hours
+  submissionRecommendation Json     // Recommendation object
+  comparison               Json     // Comparison data object
+  createdAt                DateTime @default(now())
+
+  @@index([userId])
+  @@index([essayType])
+  @@index([percentage])
+  @@index([createdAt])
+  @@map("quality_assessments")
+}
+
+model UserWritingProfile {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  writingStyle      String?  // analytical, narrative, descriptive, etc.
+  strengthAreas     String[] // Array of strength areas
+  improvementAreas  String[] // Array of areas needing improvement
+  preferredTone     String?  // professional, personal, academic, creative
+  vocabularyLevel   String?  // basic, intermediate, advanced
+  averageScore      Float?   // Average quality score across essays
+  totalAnalyses     Int      @default(0)
+  totalSuggestions  Int      @default(0)
+  acceptedSuggestions Int    @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("user_writing_profiles")
+}
+
+model WritingSession {
+  id               String   @id @default(cuid())
+  userId           String
+  essayType        String
+  startTime        DateTime @default(now())
+  endTime          DateTime?
+  duration         Int?     // in minutes
+  wordsWritten     Int      @default(0)
+  suggestionsUsed  Int      @default(0)
+  qualityImprovement Float? // Improvement in quality score
+  completed        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  @@index([userId])
+  @@index([essayType])
+  @@index([startTime])
+  @@map("writing_sessions")
+}
+
+model TemplateUsage {
+  id         String   @id @default(cuid())
+  templateId String
+  userId     String
+  usedAt     DateTime @default(now())
+  completed  Boolean  @default(false)
+  rating     Int?     // 1-5 rating
+  feedback   String?
+
+  template EssayTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
+  @@index([userId])
+  @@index([usedAt])
+  @@map("template_usage")
+}
+
+model WritingGoal {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // word_count, quality_score, completion_date
+  target      Json     // Target value/date
+  current     Json     // Current progress
+  deadline    DateTime?
+  achieved    Boolean  @default(false)
+  achievedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([type])
+  @@index([deadline])
+  @@map("writing_goals")
+}
+
+model FeedbackHistory {
+  id         String   @id @default(cuid())
+  userId     String
+  essayType  String
+  feedback   Json     // Structured feedback object
+  version    Int      // Version number of the essay
+  timestamp  DateTime @default(now())
+
+  @@index([userId])
+  @@index([essayType])
+  @@index([timestamp])
+  @@map("feedback_history")
+}
