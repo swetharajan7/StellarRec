@@ -1,0 +1,269 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdmissionPrediction {
+  id                    String   @id @default(cuid())
+  userId                String
+  universityId          String
+  programId             String?
+  admissionProbability  Float
+  confidence            Float
+  factors               Json
+  recommendations       String[]
+  riskLevel             String
+  competitiveAnalysis   Json
+  modelVersion          String
+  predictionDate        DateTime
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("admission_predictions")
+}
+
+model AdmissionTrend {
+  id                String   @id @default(cuid())
+  universityId      String
+  timeframe         String
+  period            String
+  acceptanceRate    Float
+  averageGPA        Float
+  averageTestScore  Float
+  applicantCount    Int
+  competitiveIndex  Float
+  createdAt         DateTime @default(now())
+
+  @@map("admission_trends")
+}
+
+model AdmissionHistory {
+  id           String   @id @default(cuid())
+  userId       String
+  universityId String
+  programId    String?
+  admitted     Boolean
+  gpa          Float?
+  satScore     Int?
+  actScore     Int?
+  admissionYear Int
+  createdAt    DateTime @default(now())
+
+  userProfile  UserProfile? @relation(fields: [userId], references: [id])
+  university   University?  @relation(fields: [universityId], references: [id])
+
+  @@map("admission_history")
+}
+
+model SuccessHistory {
+  id                String   @id @default(cuid())
+  userId            String
+  successful        Boolean
+  factors           Json
+  timelineAdherence Float?
+  createdAt         DateTime @default(now())
+
+  userProfile UserProfile? @relation(fields: [userId], references: [id])
+
+  @@map("success_history")
+}
+
+model FactorProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  factor    String
+  value     Float
+  timestamp DateTime @default(now())
+
+  @@map("factor_progress")
+}
+
+model OptimizedTimeline {
+  id             String              @id @default(cuid())
+  userId         String              @unique
+  totalDuration  Int
+  criticalPath   String[]
+  bufferTime     Int
+  riskAssessment Json
+  recommendations String[]
+  lastOptimized  DateTime
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  milestones     TimelineMilestone[]
+
+  @@map("optimized_timelines")
+}
+
+model TimelineMilestone {
+  id                    String   @id @default(cuid())
+  timelineId            String
+  title                 String
+  description           String
+  dueDate               DateTime
+  estimatedDuration     Int
+  priority              String
+  dependencies          String[]
+  category              String
+  status                String
+  completionProbability Float
+  bufferDays            Int
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  timeline OptimizedTimeline @relation(fields: [timelineId], references: [id], onDelete: Cascade)
+
+  @@map("timeline_milestones")
+}
+
+model EarlyWarning {
+  id             String    @id @default(cuid())
+  userId         String
+  type           String
+  severity       String
+  title          String
+  description    String
+  affectedItems  String[]
+  riskScore      Float
+  timeToImpact   Int
+  recommendations String[]
+  actionRequired Boolean
+  status         String
+  createdAt      DateTime  @default(now())
+  resolvedAt     DateTime?
+
+  @@map("early_warnings")
+}
+
+model AlertConfiguration {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  enabledAlerts        String[]
+  severityThreshold    String
+  notificationChannels String[]
+  quietHours           Json
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("alert_configurations")
+}
+
+model PerformanceHistory {
+  id               String   @id @default(cuid())
+  userId           String
+  gpa              Float?
+  testScore        Float?
+  engagementScore  Float?
+  createdAt        DateTime @default(now())
+
+  @@map("performance_history")
+}
+
+model UserActivity {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  lastActivity DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("user_activity")
+}
+
+model ApplicationDeadline {
+  id            String      @id @default(cuid())
+  applicationId String
+  title         String
+  date          DateTime
+  createdAt     DateTime    @default(now())
+
+  application   Application @relation(fields: [applicationId], references: [id])
+
+  @@map("application_deadlines")
+}
+
+model ModelTrainingResult {
+  id                String   @id @default(cuid())
+  modelId           String
+  modelType         String
+  version           String
+  metrics           Json
+  trainingDuration  Int
+  datasetSize       Int
+  features          String[]
+  hyperparameters   Json
+  validationResults Json
+  deploymentReady   Boolean
+  createdAt         DateTime @default(now())
+
+  @@map("model_training_results")
+}
+
+model ModelRetrainingSchedule {
+  id        String   @id @default(cuid())
+  modelType String   @unique
+  schedule  String
+  nextRun   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("model_retraining_schedules")
+}
+
+// Related models from other services (simplified references)
+model UserProfile {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  gpa                    Float?
+  satScore               Int?
+  actScore               Int?
+  testScores             Json?
+  extracurriculars       Json?
+  essays                 Json?
+  recommendations        Json?
+  engagementScore        Float?
+  communityServiceHours  Int?
+  intendedMajor          String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  admissionHistory SuccessHistory[]
+  successHistory   AdmissionHistory[]
+
+  @@map("user_profiles")
+}
+
+model University {
+  id             String   @id @default(cuid())
+  name           String
+  acceptanceRate Float?
+  averageGPA     Float?
+  averageSAT     Int?
+  averageACT     Int?
+  ranking        Int?
+  createdAt      DateTime @default(now())
+
+  admissionHistory AdmissionHistory[]
+
+  @@map("universities")
+}
+
+model Application {
+  id                     String   @id @default(cuid())
+  userId                 String
+  universityId           String
+  status                 String
+  deadline               DateTime
+  requiredRecommendations Int?
+  createdAt              DateTime @default(now())
+
+  deadlines ApplicationDeadline[]
+
+  @@map("applications")
+}
