@@ -1,0 +1,351 @@
+// Compliance Database Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Audit Log for all system activities
+model AuditLog {
+  id            String   @id @default(cuid())
+  timestamp     DateTime @default(now())
+  userId        String?
+  userEmail     String?
+  userRole      String?
+  action        String   // CREATE, READ, UPDATE, DELETE, LOGIN, LOGOUT, etc.
+  resource      String   // users, applications, letters, etc.
+  resourceId    String?
+  oldValues     Json?    // Previous state for updates
+  newValues     Json?    // New state for updates
+  ipAddress     String?
+  userAgent     String?
+  sessionId     String?
+  requestId     String?
+  endpoint      String?
+  httpMethod    String?
+  statusCode    Int?
+  errorMessage  String?
+  metadata      Json?    // Additional context
+  complianceFlags String[] // FERPA, GDPR, CCPA flags
+  
+  // Compliance categorization
+  dataCategory  DataCategory @default(GENERAL)
+  sensitivity   DataSensitivity @default(LOW)
+  
+  @@index([timestamp])
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([dataCategory])
+  @@map("audit_logs")
+}
+
+// Data Processing Records for GDPR compliance
+model DataProcessingRecord {
+  id                String   @id @default(cuid())
+  userId            String
+  userEmail         String
+  dataSubject       String   // Name of the data subject
+  processingPurpose String   // Purpose of data processing
+  legalBasis        LegalBasis
+  dataCategories    String[] // Types of personal data processed
+  recipients        String[] // Who receives the data
+  retentionPeriod   Int?     // Retention period in days
+  processingStart   DateTime @default(now())
+  processingEnd     DateTime?
+  consentGiven      Boolean  @default(false)
+  consentDate       DateTime?
+  consentWithdrawn  Boolean  @default(false)
+  consentWithdrawDate DateTime?
+  dataMinimized     Boolean  @default(false)
+  encrypted         Boolean  @default(false)
+  pseudonymized     Boolean  @default(false)
+  
+  // Data subject rights
+  accessRequests    DataSubjectRequest[]
+  
+  @@index([userId])
+  @@index([userEmail])
+  @@index([legalBasis])
+  @@map("data_processing_records")
+}
+
+// Data Subject Rights Requests (GDPR Article 15-22)
+model DataSubjectRequest {
+  id                String   @id @default(cuid())
+  requestId         String   @unique // External reference
+  userId            String
+  userEmail         String
+  requestType       DataSubjectRightType
+  requestDate       DateTime @default(now())
+  status            RequestStatus @default(PENDING)
+  completionDate    DateTime?
+  responseData      Json?    // Data provided in response
+  rejectionReason   String?
+  
+  // Processing details
+  verificationMethod String?
+  verificationDate   DateTime?
+  processingNotes    String?
+  
+  // Related processing record
+  processingRecordId String?
+  processingRecord   DataProcessingRecord? @relation(fields: [processingRecordId], references: [id])
+  
+  @@index([userId])
+  @@index([requestType])
+  @@index([status])
+  @@index([requestDate])
+  @@map("data_subject_requests")
+}
+
+// FERPA Educational Records Access Log
+model EducationalRecordAccess {
+  id              String   @id @default(cuid())
+  timestamp       DateTime @default(now())
+  studentId       String
+  studentEmail    String
+  accessorId      String   // Who accessed the record
+  accessorEmail   String
+  accessorRole    String   // student, parent, school_official, etc.
+  recordType      EducationalRecordType
+  recordId        String   // ID of the accessed record
+  accessPurpose   String   // Legitimate educational interest
+  accessMethod    String   // direct, proxy, api, etc.
+  ipAddress       String?
+  userAgent       String?
+  sessionId       String?
+  
+  // FERPA compliance fields
+  consentRequired Boolean  @default(false)
+  consentObtained Boolean  @default(false)
+  consentDate     DateTime?
+  disclosureType  DisclosureType @default(INTERNAL)
+  
+  @@index([studentId])
+  @@index([accessorId])
+  @@index([recordType])
+  @@index([timestamp])
+  @@map("educational_record_access")
+}
+
+// Data Retention Policies
+model DataRetentionPolicy {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  description     String
+  dataCategory    DataCategory
+  retentionPeriod Int      // Days to retain data
+  purgeMethod     PurgeMethod @default(SOFT_DELETE)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Policy rules
+  conditions      Json?    // Conditions for applying this policy
+  exceptions      Json?    // Exceptions to the policy
+  
+  // Execution tracking
+  lastExecuted    DateTime?
+  nextExecution   DateTime?
+  
+  @@map("data_retention_policies")
+}
+
+// Privacy Consent Management
+model PrivacyConsent {
+  id              String   @id @default(cuid())
+  userId          String
+  userEmail       String
+  consentType     ConsentType
+  purpose         String   // Specific purpose for consent
+  consentGiven    Boolean
+  consentDate     DateTime @default(now())
+  consentMethod   String   // web_form, email, phone, etc.
+  consentVersion  String   // Version of privacy policy
+  ipAddress       String?
+  userAgent       String?
+  
+  // Consent withdrawal
+  withdrawn       Boolean  @default(false)
+  withdrawnDate   DateTime?
+  withdrawnMethod String?
+  
+  // Consent renewal
+  expiryDate      DateTime?
+  renewalRequired Boolean  @default(false)
+  lastRenewal     DateTime?
+  
+  @@index([userId])
+  @@index([consentType])
+  @@index([consentGiven])
+  @@map("privacy_consents")
+}
+
+// Data Breach Incidents
+model DataBreachIncident {
+  id                String   @id @default(cuid())
+  incidentId        String   @unique
+  discoveryDate     DateTime @default(now())
+  incidentDate      DateTime // When the breach actually occurred
+  reportedDate      DateTime?
+  status            BreachStatus @default(INVESTIGATING)
+  severity          BreachSeverity
+  
+  // Breach details
+  description       String
+  affectedRecords   Int      @default(0)
+  affectedUsers     String[] // User IDs affected
+  dataTypes         String[] // Types of data compromised
+  breachCause       String?  // How the breach occurred
+  
+  // Response actions
+  containmentActions String?
+  notificationsSent  Boolean @default(false)
+  regulatoryReported Boolean @default(false)
+  
+  // Legal requirements
+  ferpaReportRequired Boolean @default(false)
+  gdprReportRequired  Boolean @default(false)
+  ccpaReportRequired  Boolean @default(false)
+  
+  @@index([status])
+  @@index([severity])
+  @@index([discoveryDate])
+  @@map("data_breach_incidents")
+}
+
+// Compliance Assessments
+model ComplianceAssessment {
+  id              String   @id @default(cuid())
+  assessmentDate  DateTime @default(now())
+  assessmentType  ComplianceType
+  assessor        String   // Who performed the assessment
+  status          AssessmentStatus @default(IN_PROGRESS)
+  
+  // Assessment results
+  overallScore    Float?   // 0-100 compliance score
+  findings        Json     // Detailed findings
+  recommendations Json     // Recommendations for improvement
+  
+  // Follow-up
+  nextAssessment  DateTime?
+  remediation     Json?    // Remediation actions taken
+  
+  @@index([assessmentType])
+  @@index([assessmentDate])
+  @@map("compliance_assessments")
+}
+
+// Enums
+enum DataCategory {
+  GENERAL
+  PERSONAL
+  SENSITIVE
+  EDUCATIONAL
+  FINANCIAL
+  HEALTH
+  BIOMETRIC
+}
+
+enum DataSensitivity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum LegalBasis {
+  CONSENT
+  CONTRACT
+  LEGAL_OBLIGATION
+  VITAL_INTERESTS
+  PUBLIC_TASK
+  LEGITIMATE_INTERESTS
+}
+
+enum DataSubjectRightType {
+  ACCESS           // Article 15
+  RECTIFICATION    // Article 16
+  ERASURE          // Article 17 (Right to be forgotten)
+  RESTRICT         // Article 18
+  PORTABILITY      // Article 20
+  OBJECT           // Article 21
+  AUTOMATED_DECISION // Article 22
+}
+
+enum RequestStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+  EXPIRED
+}
+
+enum EducationalRecordType {
+  TRANSCRIPT
+  GRADES
+  ATTENDANCE
+  DISCIPLINARY
+  COUNSELING
+  APPLICATION
+  RECOMMENDATION
+  ESSAY
+  FINANCIAL_AID
+}
+
+enum DisclosureType {
+  INTERNAL
+  EXTERNAL_CONSENT
+  EXTERNAL_NO_CONSENT
+  DIRECTORY_INFO
+  EMERGENCY
+}
+
+enum PurgeMethod {
+  SOFT_DELETE
+  HARD_DELETE
+  ANONYMIZE
+  ENCRYPT
+}
+
+enum ConsentType {
+  MARKETING
+  ANALYTICS
+  COOKIES
+  DATA_PROCESSING
+  THIRD_PARTY_SHARING
+  RESEARCH
+}
+
+enum BreachStatus {
+  INVESTIGATING
+  CONTAINED
+  RESOLVED
+  REPORTED
+}
+
+enum BreachSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ComplianceType {
+  FERPA
+  GDPR
+  CCPA
+  SOX
+  GENERAL
+}
+
+enum AssessmentStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
