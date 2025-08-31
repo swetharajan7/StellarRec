@@ -1,1 +1,99 @@
-# Netlify deployment configuration for StellarRec Frontend\n# Connects to all 32 backend services\n\n[build]\n  # Build command (if using a build process)\n  command = \"npm run build\"\n  # Directory to publish\n  publish = \".\"\n  # Functions directory (for serverless functions if needed)\n  functions = \"netlify/functions\"\n\n[build.environment]\n  # Environment variables for production\n  NODE_VERSION = \"18\"\n  NPM_VERSION = \"9\"\n\n# Redirect rules for SPA routing\n[[redirects]]\n  from = \"/api/*\"\n  to = \"https://api.stellarrec.com/:splat\"\n  status = 200\n  force = true\n  headers = {X-From = \"Netlify\"}\n\n[[redirects]]\n  from = \"/dashboard\"\n  to = \"/dashboard-enhanced.html\"\n  status = 200\n\n[[redirects]]\n  from = \"/*\"\n  to = \"/index.html\"\n  status = 200\n\n# Headers for security and performance\n[[headers]]\n  for = \"/*\"\n  [headers.values]\n    X-Frame-Options = \"DENY\"\n    X-XSS-Protection = \"1; mode=block\"\n    X-Content-Type-Options = \"nosniff\"\n    Referrer-Policy = \"strict-origin-when-cross-origin\"\n    Content-Security-Policy = \"default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.stellarrec.com wss://api.stellarrec.com;\"\n\n[[headers]]\n  for = \"*.js\"\n  [headers.values]\n    Cache-Control = \"public, max-age=31536000, immutable\"\n\n[[headers]]\n  for = \"*.css\"\n  [headers.values]\n    Cache-Control = \"public, max-age=31536000, immutable\"\n\n[[headers]]\n  for = \"*.html\"\n  [headers.values]\n    Cache-Control = \"public, max-age=0, must-revalidate\"\n\n# Form handling (for contact forms, etc.)\n[[forms]]\n  name = \"contact\"\n  action = \"/contact-success\"\n  \n# Edge functions (if needed for advanced features)\n[[edge_functions]]\n  function = \"auth-check\"\n  path = \"/dashboard/*\"\n\n# Plugin configuration\n[[plugins]]\n  package = \"@netlify/plugin-sitemap\"\n  \n[[plugins]]\n  package = \"netlify-plugin-minify-html\"\n  [plugins.inputs]\n    contexts = [\"production\"]\n\n# Environment-specific settings\n[context.production]\n  command = \"npm run build:prod\"\n  [context.production.environment]\n    API_URL = \"https://api.stellarrec.com\"\n    WEBSOCKET_URL = \"wss://api.stellarrec.com\"\n    ENVIRONMENT = \"production\"\n\n[context.staging]\n  command = \"npm run build:staging\"\n  [context.staging.environment]\n    API_URL = \"https://staging-api.stellarrec.com\"\n    WEBSOCKET_URL = \"wss://staging-api.stellarrec.com\"\n    ENVIRONMENT = \"staging\"\n\n[context.branch-deploy]\n  command = \"npm run build:dev\"\n  [context.branch-deploy.environment]\n    API_URL = \"https://dev-api.stellarrec.com\"\n    WEBSOCKET_URL = \"wss://dev-api.stellarrec.com\"\n    ENVIRONMENT = \"development\""
+# Netlify deployment configuration for StellarRec Frontend
+# Connects to all 32 backend services
+
+[build]
+  # Build command (if using a build process)
+  command = "npm run build"
+  # Directory to publish
+  publish = "."
+  # Functions directory (for serverless functions if needed)
+  functions = "netlify/functions"
+
+[build.environment]
+  # Environment variables for production
+  NODE_VERSION = "18"
+  NPM_VERSION = "9"
+
+# Redirect rules for SPA routing
+[[redirects]]
+  from = "/api/*"
+  to = "https://api.stellarrec.com/:splat"
+  status = 200
+  force = true
+  headers = {X-From = "Netlify"}
+
+[[redirects]]
+  from = "/dashboard"
+  to = "/dashboard.html"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers for security and performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.stellarrec.com wss://api.stellarrec.com;"
+
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Form handling (for contact forms, etc.)
+[[forms]]
+  name = "contact"
+  action = "/contact-success"
+  
+# Edge functions (if needed for advanced features)
+[[edge_functions]]
+  function = "auth-check"
+  path = "/dashboard/*"
+
+# Plugin configuration
+[[plugins]]
+  package = "@netlify/plugin-sitemap"
+  
+[[plugins]]
+  package = "netlify-plugin-minify-html"
+  [plugins.inputs]
+    contexts = ["production"]
+
+# Environment-specific settings
+[context.production]
+  command = "npm run build:prod"
+  [context.production.environment]
+    API_URL = "https://api.stellarrec.com"
+    WEBSOCKET_URL = "wss://api.stellarrec.com"
+    ENVIRONMENT = "production"
+
+[context.staging]
+  command = "npm run build:staging"
+  [context.staging.environment]
+    API_URL = "https://staging-api.stellarrec.com"
+    WEBSOCKET_URL = "wss://staging-api.stellarrec.com"
+    ENVIRONMENT = "staging"
+
+[context.branch-deploy]
+  command = "npm run build:dev"
+  [context.branch-deploy.environment]
+    API_URL = "https://dev-api.stellarrec.com"
+    WEBSOCKET_URL = "wss://dev-api.stellarrec.com"
+    ENVIRONMENT = "development"
