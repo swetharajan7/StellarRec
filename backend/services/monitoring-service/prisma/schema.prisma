@@ -1,0 +1,201 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model LogEntry {
+  id        String   @id @default(cuid())
+  timestamp DateTime @default(now())
+  level     String   // error, warn, info, debug
+  message   String
+  service   String
+  userId    String?
+  requestId String?
+  metadata  Json     @default("{}")
+  stack     String?
+  duration  Int?     // in milliseconds
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([service, timestamp])
+  @@index([level, timestamp])
+  @@index([userId])
+  @@index([requestId])
+  @@map("log_entries")
+}
+
+model HealthCheck {
+  id           String   @id @default(cuid())
+  service      String
+  status       String   // healthy, unhealthy, degraded
+  responseTime Int      // in milliseconds
+  timestamp    DateTime @default(now())
+  details      Json     @default("{}")
+  error        String?
+  createdAt    DateTime @default(now())
+
+  @@index([service, timestamp])
+  @@index([status])
+  @@map("health_checks")
+}
+
+model PerformanceMetrics {
+  id                String   @id @default(cuid())
+  service           String
+  timestamp         DateTime @default(now())
+  cpu               Float    @default(0)
+  memory            Float    @default(0)
+  responseTime      Float    @default(0)
+  throughput        Float    @default(0)
+  errorRate         Float    @default(0)
+  activeConnections Int      @default(0)
+  queueSize         Int      @default(0)
+  createdAt         DateTime @default(now())
+
+  @@index([service, timestamp])
+  @@map("performance_metrics")
+}
+
+model SystemMetrics {
+  id                  String   @id @default(cuid())
+  timestamp           DateTime @default(now())
+  cpuUsage            Float
+  cpuCores            Int
+  cpuSpeed            Float
+  cpuTemperature      Float?
+  memoryTotal         Int      // in MB
+  memoryUsed          Int      // in MB
+  memoryFree          Int      // in MB
+  memoryUsage         Float    // percentage
+  diskTotal           Int      // in GB
+  diskUsed            Int      // in GB
+  diskFree            Int      // in GB
+  diskUsage           Float    // percentage
+  networkBytesIn      BigInt   @default(0)
+  networkBytesOut     BigInt   @default(0)
+  networkPacketsIn    BigInt   @default(0)
+  networkPacketsOut   BigInt   @default(0)
+  loadAvg1            Float    @default(0)
+  loadAvg5            Float    @default(0)
+  loadAvg15           Float    @default(0)
+  processesTotal      Int      @default(0)
+  processesRunning    Int      @default(0)
+  processesSleeping   Int      @default(0)
+  createdAt           DateTime @default(now())
+
+  @@index([timestamp])
+  @@map("system_metrics")
+}
+
+model AlertRule {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  condition   String
+  threshold   Float
+  severity    String   // low, medium, high, critical
+  enabled     Boolean  @default(true)
+  service     String?
+  metric      String
+  operator    String   // gt, lt, eq, gte, lte
+  timeWindow  Int      // in minutes
+  cooldown    Int      // in minutes
+  channels    String[] // email, slack, webhook
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  alerts Alert[]
+
+  @@index([enabled])
+  @@index([service])
+  @@map("alert_rules")
+}
+
+model Alert {
+  id             String    @id @default(cuid())
+  ruleId         String
+  ruleName       String
+  service        String
+  metric         String
+  value          Float
+  threshold      Float
+  severity       String    // low, medium, high, critical
+  status         String    // active, resolved, acknowledged
+  triggeredAt    DateTime  @default(now())
+  resolvedAt     DateTime?
+  acknowledgedAt DateTime?
+  acknowledgedBy String?
+  message        String
+  metadata       Json      @default("{}")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  rule AlertRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([severity])
+  @@index([service])
+  @@index([triggeredAt])
+  @@map("alerts")
+}
+
+model PerformanceThreshold {
+  service           String
+  metric            String
+  warningThreshold  Float
+  criticalThreshold Float
+  enabled           Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@id([service, metric])
+  @@map("performance_thresholds")
+}
+
+model SystemThreshold {
+  metric            String   @id
+  warningThreshold  Float
+  criticalThreshold Float
+  enabled           Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("system_thresholds")
+}
+
+model PerformanceAlert {
+  id        String   @id @default(cuid())
+  service   String
+  metric    String
+  value     Float
+  threshold Float
+  severity  String   // warning, critical
+  timestamp DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([service, timestamp])
+  @@index([severity])
+  @@map("performance_alerts")
+}
+
+model SystemAlert {
+  id        String   @id @default(cuid())
+  metric    String
+  value     Float
+  threshold Float
+  severity  String   // warning, critical
+  timestamp DateTime @default(now())
+  message   String
+  createdAt DateTime @default(now())
+
+  @@index([timestamp])
+  @@index([severity])
+  @@map("system_alerts")
+}
