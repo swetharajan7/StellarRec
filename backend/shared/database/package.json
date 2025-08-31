@@ -1,0 +1,42 @@
+{
+  "name": "@stellarrec/database",
+  "version": "1.0.0",
+  "description": "Database performance optimization module for StellarRec",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.0",
+    "redis": "^4.6.0",
+    "ioredis": "^5.3.0",
+    "pg": "^8.11.0",
+    "pg-pool": "^3.6.0",
+    "node-cron": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/pg": "^8.10.0",
+    "typescript": "^5.3.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0"
+  },
+  "keywords": [
+    "database",
+    "performance",
+    "optimization",
+    "postgresql",
+    "redis",
+    "caching",
+    "connection-pooling"
+  ],
+  "author": "StellarRec Team",
+  "license": "MIT"
+}

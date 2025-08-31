@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import { OptimizedDatabaseClient } from '@stellarrec/database';
+import { createDatabaseConfig, validateDatabaseConfig } from '@stellarrec/database';
 
 // Extend PrismaClient with soft delete functionality
 export class DatabaseClient extends PrismaClient {
@@ -198,20 +200,32 @@ export class DatabaseClient extends PrismaClient {
   }
 }
 
-// Create singleton instance
+// Create optimized database instance
+const config = createDatabaseConfig();
+validateDatabaseConfig(config);
+
+export const optimizedDb = new OptimizedDatabaseClient(config);
+
+// Create singleton instance (legacy support)
 export const db = new DatabaseClient();
 
 // Connection management
 export async function connectDatabase() {
   try {
+    // Connect both legacy and optimized clients
     await db.$connect();
+    await optimizedDb.connect();
+    
     console.log('✅ Database connected successfully');
     
-    // Run health check
-    const health = await db.healthCheck();
+    // Run health check on optimized client
+    const health = await optimizedDb.getDatabaseHealth();
     console.log('📊 Database health:', health);
     
-    return db;
+    // Run initial performance analysis
+    await optimizedDb.analyzePerformance();
+    
+    return { db, optimizedDb };
   } catch (error) {
     console.error('❌ Database connection failed:', error);
     throw error;
@@ -221,6 +235,7 @@ export async function connectDatabase() {
 export async function disconnectDatabase() {
   try {
     await db.$disconnect();
+    await optimizedDb.disconnect();
     console.log('✅ Database disconnected successfully');
   } catch (error) {
     console.error('❌ Database disconnection failed:', error);
