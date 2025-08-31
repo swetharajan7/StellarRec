@@ -1,0 +1,262 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ReminderSchedule {
+  id            String   @id @default(cuid())
+  userId        String
+  type          String   // deadline, milestone, task, follow_up, custom
+  title         String
+  description   String?
+  targetDate    DateTime
+  priority      String   // low, medium, high, critical
+  category      String
+  metadata      Json     @default("{}")
+  status        String   @default("active") // active, paused, completed, cancelled
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  reminderTimes ReminderTime[]
+
+  @@index([userId])
+  @@index([targetDate])
+  @@index([status])
+  @@map("reminder_schedules")
+}
+
+model ReminderTime {
+  id          String    @id @default(cuid())
+  scheduleId  String
+  scheduledAt DateTime
+  type        String    // initial, follow_up, escalation, final
+  channel     String    // email, sms, push, in_app
+  status      String    @default("pending") // pending, sent, delivered, failed, cancelled
+  content     String?
+  templateId  String?
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  schedule      ReminderSchedule       @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  interactions  ReminderInteraction[]
+  deliveries    ReminderDelivery[]
+
+  @@index([scheduledAt])
+  @@index([status])
+  @@map("reminder_times")
+}
+
+model UserBehaviorProfile {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  responsiveness         Float    @default(0.5)
+  procrastinationTendency Float   @default(0.3)
+  preferredTimes         Int[]    // hours of day (0-23)
+  preferredDays          Int[]    // days of week (0-6)
+  channelPreferences     Json     @default("{}")
+  attentionSpan          Float    @default(4.0) // hours
+  effectiveLeadTime      Float    @default(3.0) // days
+  stressResponse         String   @default("neutral") // positive, negative, neutral
+  lastUpdated            DateTime @default(now())
+  createdAt              DateTime @default(now())
+
+  @@map("user_behavior_profiles")
+}
+
+model UserPersonalizationProfile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  preferredTone       String   @default("casual") // formal, casual, urgent, encouraging, gentle
+  preferredLength     String   @default("detailed") // brief, detailed, comprehensive
+  motivationalFactors String[] // achievement, recognition, growth, etc.
+  communicationStyle  String   @default("supportive") // direct, supportive, analytical, creative
+  personalDetails     Json     @default("{}")
+  responsePatterns    Json     @default("{}")
+  lastUpdated         DateTime @default(now())
+  createdAt           DateTime @default(now())
+
+  @@map("user_personalization_profiles")
+}
+
+model EscalationWorkflow {
+  id                String   @id @default(cuid())
+  name              String
+  description       String?
+  triggerConditions Json     // array of trigger conditions
+  escalationLevels  Json     // array of escalation levels
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  instances EscalationInstance[]
+
+  @@map("escalation_workflows")
+}
+
+model EscalationInstance {
+  id               String    @id @default(cuid())
+  workflowId       String
+  userId           String
+  reminderId       String
+  currentLevel     Int       @default(0)
+  status           String    @default("active") // active, resolved, cancelled, completed
+  triggeredAt      DateTime  @default(now())
+  lastEscalatedAt  DateTime?
+  resolvedAt       DateTime?
+  metadata         Json      @default("{}")
+  createdAt        DateTime  @default(now())
+
+  workflow EscalationWorkflow @relation(fields: [workflowId], references: [id])
+  actions  EscalationAction[]
+
+  @@index([status])
+  @@index([userId])
+  @@map("escalation_instances")
+}
+
+model EscalationAction {
+  id           String   @id @default(cuid())
+  escalationId String
+  level        Int
+  action       String   // notify, escalate, resolve, cancel
+  recipient    String
+  channel      String
+  executedAt   DateTime @default(now())
+  success      Boolean
+  response     String?
+
+  escalation EscalationInstance @relation(fields: [escalationId], references: [id], onDelete: Cascade)
+
+  @@map("escalation_actions")
+}
+
+model ReminderInteraction {
+  id              String    @id @default(cuid())
+  reminderId      String
+  userId          String
+  interactionType String    // sent, delivered, opened, clicked, responded, completed, dismissed
+  timestamp       DateTime  @default(now())
+  responseTime    Float?    // hours from sent to response
+  channel         String
+  content         String?
+  metadata        Json      @default("{}")
+  createdAt       DateTime  @default(now())
+
+  reminder ReminderTime @relation(fields: [reminderId], references: [id])
+
+  @@index([userId])
+  @@index([timestamp])
+  @@index([interactionType])
+  @@map("reminder_interactions")
+}
+
+model UserEffectivenessMetrics {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  totalInteractions     Int      @default(0)
+  effectiveInteractions Int      @default(0)
+  averageResponseTime   Float?   // hours
+  channelEffectiveness  Json     @default("{}")
+  timeEffectiveness     Json     @default("{}")
+  lastInteractionAt     DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("user_effectiveness_metrics")
+}
+
+model ABTest {
+  id        String   @id @default(cuid())
+  testName  String
+  variants  Json     // array of test variants
+  status    String   @default("running") // running, completed, cancelled
+  startDate DateTime
+  endDate   DateTime
+  results   Json?    // test results when completed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ab_tests")
+}
+
+model ReminderTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // deadline, milestone, task, follow_up, escalation
+  channel     String   // email, sms, push, in_app
+  tone        String   // formal, casual, urgent, encouraging, gentle
+  subject     String?  // for email/push
+  content     String
+  variables   String[] // template variables
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+
+  @@index([type])
+  @@index([channel])
+  @@map("reminder_templates")
+}
+
+model ReminderPreference {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  enabledChannels   String[] // email, sms, push, in_app
+  preferredTimes    Int[]    // hours of day
+  quietHours        Json     @default("{}")
+  frequency         Json     @default("{}")
+  categories        Json     @default("{}")
+  globalOptOut      Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("reminder_preferences")
+}
+
+model BehaviorAnalysis {
+  id                      String   @id @default(cuid())
+  userId                  String
+  analysisDate            DateTime @default(now())
+  responsiveness          Float
+  procrastinationTendency Float
+  preferredChannels       Json
+  preferredTimes          Json
+  effectivenessScores     Json
+  recommendations         String[]
+  confidence              Float
+  createdAt               DateTime @default(now())
+
+  @@index([userId])
+  @@index([analysisDate])
+  @@map("behavior_analyses")
+}
+
+model ReminderDelivery {
+  id           String    @id @default(cuid())
+  reminderId   String
+  userId       String
+  channel      String
+  status       String    // queued, sent, delivered, failed
+  providerId   String?   // external provider message ID
+  sentAt       DateTime?
+  deliveredAt  DateTime?
+  failedAt     DateTime?
+  error        String?
+  retryCount   Int       @default(0)
+  metadata     Json      @default("{}")
+  createdAt    DateTime  @default(now())
+
+  @@index([status])
+  @@index([userId])
+  @@map("reminder_deliveries")
+}
+
