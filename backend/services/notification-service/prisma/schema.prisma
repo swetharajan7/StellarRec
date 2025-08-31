@@ -1,0 +1,215 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model NotificationTemplate {
+  id           String   @id @default(cuid())
+  name         String
+  channel      String   // email, sms, push
+  subject      String?  // for email
+  title        String?  // for push
+  content      String
+  htmlContent  String?  // for email
+  textContent  String?  // for email
+  category     String   @default("general")
+  variables    String[]
+  active       Boolean  @default(true)
+  version      Int      @default(1)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdBy    String?
+
+  @@map("notification_templates")
+}
+
+model NotificationPreference {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  channels    Json     // { email: { enabled: true, verified: false }, sms: {...}, push: {...} }
+  categories  Json     // { category_name: { enabled: true, channels: ['email'], priority: 'high' } }
+  quietHours  Json     // { enabled: false, start: '22:00', end: '08:00', timezone: 'UTC' }
+  frequency   Json     // { digest: 'daily', reminders: 'all' }
+  globalOptOut Boolean @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("notification_preferences")
+}
+
+model ScheduledNotification {
+  id          String   @id @default(cuid())
+  channel     String   // email, sms, push
+  recipient   String
+  subject     String
+  content     Json     // notification content and metadata
+  scheduledAt DateTime
+  status      String   @default("scheduled") // scheduled, sent, failed, cancelled
+  priority    String   @default("normal")
+  userId      String?
+  category    String?
+  tags        String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("scheduled_notifications")
+}
+
+model DeliveryTracking {
+  id             String    @id @default(cuid())
+  notificationId String
+  channel        String    // email, sms, push
+  recipient      String
+  status         String    // sent, delivered, failed, bounced, opened, clicked, unsubscribed
+  providerId     String?   // external provider message ID
+  sentAt         DateTime?
+  deliveredAt    DateTime?
+  openedAt       DateTime?
+  clickedAt      DateTime?
+  failedAt       DateTime?
+  error          String?
+  retryCount     Int       @default(0)
+  metadata       Json      @default("{}")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([notificationId])
+  @@index([status])
+  @@index([channel])
+  @@map("delivery_tracking")
+}
+
+model DeviceRegistration {
+  id           String    @id @default(cuid())
+  userId       String
+  deviceToken  String
+  platform     String    // ios, android, web
+  subscription Json?     // web push subscription object
+  lastSeen     DateTime  @default(now())
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([userId, deviceToken])
+  @@map("device_registrations")
+}
+
+model ChannelVerification {
+  id         String    @id @default(cuid())
+  userId     String
+  channel    String    // email, sms
+  address    String    // email address or phone number
+  code       String
+  expiresAt  DateTime
+  verified   Boolean   @default(false)
+  verifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@map("channel_verifications")
+}
+
+model OptOutToken {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  token     String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("opt_out_tokens")
+}
+
+model WebhookEvent {
+  id        String   @id @default(cuid())
+  provider  String   // twilio, sendgrid, mailgun, firebase
+  event     String
+  data      Json
+  signature String?
+  timestamp DateTime @default(now())
+  processed Boolean  @default(false)
+
+  @@index([provider])
+  @@index([processed])
+  @@map("webhook_events")
+}
+
+model WebhookEndpoint {
+  id          String   @id @default(cuid())
+  url         String
+  events      String[] // list of events to subscribe to
+  secret      String?  // for signature verification
+  active      Boolean  @default(true)
+  retryPolicy Json     // { maxRetries: 3, retryDelay: 60 }
+  headers     Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  deliveries WebhookDelivery[]
+  retries    WebhookRetry[]
+
+  @@map("webhook_endpoints")
+}
+
+model WebhookDelivery {
+  id         String          @id @default(cuid())
+  endpointId String
+  event      String
+  payload    Json
+  success    Boolean
+  statusCode Int
+  error      String?
+  timestamp  DateTime        @default(now())
+
+  endpoint   WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@map("webhook_deliveries")
+}
+
+model WebhookRetry {
+  id          String          @id @default(cuid())
+  endpointId  String
+  event       String
+  payload     Json
+  retryAt     DateTime
+  attempts    Int             @default(0)
+  maxAttempts Int
+  createdAt   DateTime        @default(now())
+
+  endpoint    WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@map("webhook_retries")
+}
+
+model RetryQueue {
+  id         String   @id @default(cuid())
+  deliveryId String
+  retryAt    DateTime
+  retryCount Int
+  createdAt  DateTime @default(now())
+
+  @@index([retryAt])
+  @@map("retry_queue")
+}
+
+model NotificationLog {
+  id             String   @id @default(cuid())
+  userId         String?
+  channel        String
+  type           String   // sent, delivered, failed, opened, clicked
+  notificationId String?
+  templateId     String?
+  recipient      String
+  subject        String?
+  metadata       Json     @default("{}")
+  timestamp      DateTime @default(now())
+
+  @@index([userId])
+  @@index([channel])
+  @@index([timestamp])
+  @@map("notification_logs")
+}
