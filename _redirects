@@ -1,0 +1,1 @@
+# Netlify redirects for StellarRec\n\n# Redirect dashboard to enhanced version\n/dashboard /dashboard-enhanced.html 200\n/dashboard.html /dashboard-enhanced.html 200\n\n# API proxy to backend\n/api/* https://api.stellarrec.com/:splat 200\n\n# WebSocket proxy\n/ws/* wss://api.stellarrec.com/:splat 200\n\n# SPA fallback\n/* /index.html 200"
