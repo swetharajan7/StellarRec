@@ -700,82 +700,37 @@
         </div>
     </footer>
 
-    <!-- Enhanced video loading and debugging script -->
+    <!-- GIF loading and debugging script -->
     <script>
         (function () {
-            const video = document.querySelector('.hero-video');
-            if (!video) {
-                console.error('Hero video element not found');
+            const heroImage = document.querySelector('.hero-video');
+            if (!heroImage) {
+                console.error('Hero image element not found');
                 return;
             }
 
-            console.log('Video element found:', video);
-            console.log('Video src:', video.querySelector('source')?.src);
+            console.log('Hero GIF element found:', heroImage);
+            console.log('GIF src:', heroImage.src);
 
-            // Enhanced play function with better error handling
-            const tryPlay = async () => {
-                try {
-                    console.log('Attempting to play video...');
-                    await video.play();
-                    console.log('Video playing successfully');
-                } catch (error) {
-                    console.warn('Autoplay blocked or failed:', error);
-                    // Show a play button or message if autoplay fails
-                    if (error.name === 'NotAllowedError') {
-                        console.log('Autoplay blocked by browser policy');
-                    }
-                }
-            };
-
-            // Multiple triggers to ensure video plays
-            video.addEventListener('loadeddata', () => {
-                console.log('Video data loaded');
-                tryPlay();
-            });
-
-            video.addEventListener('canplay', () => {
-                console.log('Video can play');
-                tryPlay();
-            });
-
-            video.addEventListener('error', (e) => {
-                console.error('Video error:', e, video.error);
-            });
-
-            // Try to play when page becomes visible
-            document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible' && video.paused) {
-                    tryPlay();
-                }
-            });
-
-            // Try to play on page load
-            window.addEventListener('load', tryPlay);
-
-            // Try to play immediately if DOM is ready
-            if (document.readyState === 'complete') {
-                setTimeout(tryPlay, 100);
+            // Check if GIF is already loaded
+            if (heroImage.complete && heroImage.naturalHeight !== 0) {
+                console.log('GIF already loaded successfully');
+            } else {
+                console.log('GIF still loading...');
             }
 
-            // Manual play/pause with 'p' key for testing
+            // Manual visibility toggle with 'p' key for testing
             window.addEventListener('keydown', (e) => {
                 if (e.key.toLowerCase() === 'p') {
-                    if (video.paused) {
-                        tryPlay();
+                    if (heroImage.style.display === 'none') {
+                        heroImage.style.display = '';
+                        console.log('GIF shown');
                     } else {
-                        video.pause();
-                        console.log('Video paused');
+                        heroImage.style.display = 'none';
+                        console.log('GIF hidden');
                     }
                 }
             });
-
-            // Force reload video if it fails to load after 5 seconds
-            setTimeout(() => {
-                if (video.readyState === 0) {
-                    console.log('Video not loaded after 5s, attempting reload...');
-                    video.load();
-                }
-            }, 5000);
         })();
     </script>
 </body>
