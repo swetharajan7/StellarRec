@@ -490,19 +490,10 @@
         <!-- Fallback static image layer (kept under the video just in case) -->
         <div class="hero-background-image" aria-hidden="true"></div>
 
-        <!-- Background video -->
-        <video class="hero-video" autoplay muted playsinline loop preload="metadata"
-            poster="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-            onloadstart="console.log('Video loading started')" onloadeddata="console.log('Video data loaded')"
-            oncanplay="console.log('Video can play')" onplay="console.log('Video started playing')"
-            onerror="console.error('Video error:', this.error); console.log('Falling back to local video')">
-            <!-- Using working local video for now -->
-            <source src="assets/videos/university-campus-bridge.mp4" type="video/mp4" />
-            <!-- Fallback message -->
-            <p style="color: white; text-align: center; padding: 2rem;">
-                Your browser doesn't support video playback. Please update your browser for the best experience.
-            </p>
-        </video>
+        <!-- Background GIF (your iStock video converted to GIF) -->
+        <img class="hero-video" src="assets/videos/iStock-high.gif" alt="University campus background" 
+            onload="console.log('GIF loaded successfully')"
+            onerror="console.error('GIF failed to load, showing fallback'); this.style.display='none'; document.querySelector('.hero-background-image').style.opacity='1';" />
 
         <!-- Gradient and vignette overlays above the video -->
         <div class="hero-gradient-overlay" aria-hidden="true"></div>
