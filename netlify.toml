@@ -3,7 +3,7 @@
 
 [build]
   # Build command (if using a build process)
-  command = "npm run build"
+  command = "echo 'No build needed for static site'"
   # Directory to publish
   publish = "."
   # Functions directory (for serverless functions if needed)
