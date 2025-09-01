@@ -1,14 +1,7 @@
 # Netlify deployment configuration for StellarRec Frontend
-# Connects to all 32 backend services
 
 [build]
-  command = ""
   publish = "."
-
-[build.environment]
-  # Environment variables for production
-  NODE_VERSION = "18"
-  NPM_VERSION = "9"
 
 # Redirect rules for SPA routing
 [[redirects]]
@@ -63,33 +56,7 @@
   function = "auth-check"
   path = "/dashboard/*"
 
-# Plugin configuration
-[[plugins]]
-  package = "@netlify/plugin-sitemap"
-  
-[[plugins]]
-  package = "netlify-plugin-minify-html"
-  [plugins.inputs]
-    contexts = ["production"]
-
 # Environment-specific settings
-[context.production]
-  command = "npm run build:prod"
-  [context.production.environment]
-    API_URL = "https://api.stellarrec.com"
-    WEBSOCKET_URL = "wss://api.stellarrec.com"
-    ENVIRONMENT = "production"
-
-[context.staging]
-  command = "npm run build:staging"
-  [context.staging.environment]
-    API_URL = "https://staging-api.stellarrec.com"
-    WEBSOCKET_URL = "wss://staging-api.stellarrec.com"
-    ENVIRONMENT = "staging"
-
-[context.branch-deploy]
-  command = "npm run build:dev"
-  [context.branch-deploy.environment]
-    API_URL = "https://dev-api.stellarrec.com"
-    WEBSOCKET_URL = "wss://dev-api.stellarrec.com"
-    ENVIRONMENT = "development"
+[context.production.environment]
+  API_URL = "https://api.stellarrec.com"
+  ENVIRONMENT = "production"
