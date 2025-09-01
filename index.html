@@ -144,10 +144,22 @@
             /* below overlays and content */
             filter: saturate(1.1) contrast(1.08) brightness(0.9);
             transition: filter 0.3s ease;
+            opacity: 1;
         }
 
         .hero:hover .hero-video {
             filter: saturate(1.15) contrast(1.1) brightness(0.95);
+        }
+
+        /* Ensure video is visible when loaded */
+        .hero-video[data-loaded="true"] {
+            opacity: 1;
+            z-index: -3;
+        }
+
+        /* Show fallback image if video fails */
+        .hero-video[data-error="true"] {
+            display: none;
         }
 
         /* Optional static image fallback (kept, but placed under overlays too) */
@@ -479,11 +491,16 @@
         <div class="hero-background-image" aria-hidden="true"></div>
 
         <!-- Background video -->
-        <video class="hero-video" autoplay muted playsinline loop preload="auto"
-            poster="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80">
+        <video class="hero-video" autoplay muted playsinline loop preload="metadata"
+            poster="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+            onloadstart="console.log('Video loading started')"
+            oncanplay="console.log('Video can play')"
+            onerror="console.error('Video error:', this.error)">
             <source src="assets/videos/university-campus-bridge.mp4" type="video/mp4" />
-            <!-- Fallback for older browsers -->
-            <source src="assets/videos/university-campus-bridge.webm" type="video/webm" />
+            <!-- Fallback message -->
+            <p style="color: white; text-align: center; padding: 2rem;">
+                Your browser doesn't support video playback. Please update your browser for the best experience.
+            </p>
         </video>
 
         <!-- Gradient and vignette overlays above the video -->
@@ -691,29 +708,82 @@
         </div>
     </footer>
 
-    <!-- Optional: Pause video on user request via keyboard 'p' -->
+    <!-- Enhanced video loading and debugging script -->
     <script>
         (function () {
             const video = document.querySelector('.hero-video');
-            if (!video) return;
+            if (!video) {
+                console.error('Hero video element not found');
+                return;
+            }
 
-            // If autoplay is blocked, try to play once the page becomes interactive
-            const tryPlay = () => {
-                const p = video.play();
-                if (p && typeof p.then === 'function') p.catch(() => {/* ignore autoplay rejection */ });
+            console.log('Video element found:', video);
+            console.log('Video src:', video.querySelector('source')?.src);
+
+            // Enhanced play function with better error handling
+            const tryPlay = async () => {
+                try {
+                    console.log('Attempting to play video...');
+                    await video.play();
+                    console.log('Video playing successfully');
+                } catch (error) {
+                    console.warn('Autoplay blocked or failed:', error);
+                    // Show a play button or message if autoplay fails
+                    if (error.name === 'NotAllowedError') {
+                        console.log('Autoplay blocked by browser policy');
+                    }
+                }
             };
-            document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') tryPlay();
-            });
-            window.addEventListener('load', tryPlay);
 
-            // Simple toggle with "p" for accessibility/testing
-            window.addEventListener('keydown', (e) => {
-                if (e.key.toLowerCase() === 'p') {
-                    if (video.paused) video.play();
-                    else video.pause();
+            // Multiple triggers to ensure video plays
+            video.addEventListener('loadeddata', () => {
+                console.log('Video data loaded');
+                tryPlay();
+            });
+
+            video.addEventListener('canplay', () => {
+                console.log('Video can play');
+                tryPlay();
+            });
+
+            video.addEventListener('error', (e) => {
+                console.error('Video error:', e, video.error);
+            });
+
+            // Try to play when page becomes visible
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible' && video.paused) {
+                    tryPlay();
                 }
             });
+
+            // Try to play on page load
+            window.addEventListener('load', tryPlay);
+
+            // Try to play immediately if DOM is ready
+            if (document.readyState === 'complete') {
+                setTimeout(tryPlay, 100);
+            }
+
+            // Manual play/pause with 'p' key for testing
+            window.addEventListener('keydown', (e) => {
+                if (e.key.toLowerCase() === 'p') {
+                    if (video.paused) {
+                        tryPlay();
+                    } else {
+                        video.pause();
+                        console.log('Video paused');
+                    }
+                }
+            });
+
+            // Force reload video if it fails to load after 5 seconds
+            setTimeout(() => {
+                if (video.readyState === 0) {
+                    console.log('Video not loaded after 5s, attempting reload...');
+                    video.load();
+                }
+            }, 5000);
         })();
     </script>
 </body>
