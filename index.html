@@ -133,7 +133,7 @@
             /* safety background */
         }
 
-        /* Background VIDEO as the hero background */
+        /* Background GIF as the hero background */
         .hero-video {
             position: absolute;
             inset: 0;
@@ -145,6 +145,8 @@
             filter: saturate(1.1) contrast(1.08) brightness(0.9);
             transition: filter 0.3s ease;
             opacity: 1;
+            display: block;
+            /* Ensure GIF is visible */
         }
 
         .hero:hover .hero-video {
