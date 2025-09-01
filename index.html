@@ -493,9 +493,10 @@
         <!-- Background video -->
         <video class="hero-video" autoplay muted playsinline loop preload="metadata"
             poster="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-            onloadstart="console.log('Video loading started')"
-            oncanplay="console.log('Video can play')"
+            onloadstart="console.log('Video loading started')" oncanplay="console.log('Video can play')"
             onerror="console.error('Video error:', this.error)">
+            <!-- Your new iStock video from GitHub releases -->
+            <source src="https://github.com/swetharajan7/StellarRec/releases/download/v1.0.0/iStock.mp4" type="video/mp4" />
             <source src="assets/videos/university-campus-bridge.mp4" type="video/mp4" />
             <!-- Fallback message -->
             <p style="color: white; text-align: center; padding: 2rem;">
