@@ -2,6 +2,7 @@
 
 [build]
   publish = "."
+  command = "echo 'Building StellarRec Frontend...'"
 
 # Redirect rules for SPA routing
 [[redirects]]
