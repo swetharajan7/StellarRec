@@ -1,0 +1,2634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StellarRec™ - AI-Powered College Application Platform</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background: #f8f9fa; color: #333; }
+        
+        .sidebar {
+            position: fixed; left: 0; top: 0; width: 280px; height: 100vh;
+            background: linear-gradient(135deg, #1976d2 0%, #7c4dff 100%);
+            color: white; z-index: 1000; overflow-y: auto;
+        }
+        
+        .sidebar-header { padding: 2rem 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .logo { display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+        .user-info { display: flex; align-items: center; gap: 1rem; }
+        .user-avatar { width: 50px; height: 50px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        
+        .nav-menu { padding: 1rem 0; }
+        .nav-item { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; color: rgba(255, 255, 255, 0.8); text-decoration: none; transition: all 0.3s ease; border-left: 3px solid transparent; }
+        .nav-item:hover, .nav-item.active { background: rgba(255, 255, 255, 0.1); color: white; border-left-color: #ffeb3b; }
+        
+        .main-content { margin-left: 280px; min-height: 100vh; }
+        .top-bar { background: white; padding: 1rem 2rem; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); display: flex; justify-content: space-between; align-items: center; }
+        .page-title { font-size: 1.5rem; font-weight: 600; color: #333; }
+        
+        .user-type-toggle { display: flex; background: #f0f0f0; border-radius: 25px; padding: 0.25rem; }
+        .toggle-btn { padding: 0.5rem 1rem; border: none; background: transparent; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; }
+        .toggle-btn.active { background: #1976d2; color: white; }
+        
+        .content-area { padding: 2rem; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .dashboard-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; }
+        .dashboard-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12); }
+        
+        .card-header { display: flex; align-items: center; margin-bottom: 1rem; }
+        .card-icon { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; margin-right: 1rem; }
+        .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .card-subtitle { color: #666; font-size: 0.9rem; }
+        
+        .progress-bar { width: 100%; height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; margin: 1rem 0; }
+        .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+        
+        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: #1976d2; color: white; }
+        .btn-primary:hover { background: #1565c0; transform: translateY(-2px); }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); }
+        .stat-number { font-size: 2rem; font-weight: 700; color: #1976d2; margin-bottom: 0.5rem; }
+        .stat-label { color: #666; font-size: 0.9rem; }
+        
+        .dashboard-section { display: none; }
+        .dashboard-section.active { display: block; }
+        
+        /* University Directory Styles */
+        .university-search { margin-bottom: 2rem; }
+        .search-filters { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .filter-group label { font-weight: 500; color: #333; font-size: 0.9rem; }
+        .filter-select, .search-input { padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; transition: border-color 0.3s ease; }
+        .filter-select:focus, .search-input:focus { outline: none; border-color: #1976d2; }
+        .search-input { min-width: 300px; }
+        
+        .university-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; max-height: 600px; overflow-y: auto; padding-right: 1rem; }
+        .university-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; border: 2px solid transparent; cursor: pointer; }
+        .university-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12); border-color: #1976d2; }
+        .university-card.selected { border-color: #1976d2; background: #f3f8ff; }
+        
+        .university-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+        .university-logo { width: 60px; height: 60px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #1976d2; flex-shrink: 0; }
+        .university-info h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem; color: #333; }
+        .university-location { color: #666; font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .university-type { background: #e3f2fd; color: #1976d2; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem; font-weight: 500; }
+        
+        .university-stats { display: flex; gap: 1rem; margin-top: 1rem; }
+        .stat { text-align: center; }
+        .stat-value { font-weight: 600; color: #1976d2; font-size: 0.9rem; }
+        .stat-label { color: #666; font-size: 0.8rem; }
+        
+        .selected-universities { margin-top: 2rem; padding: 1.5rem; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); }
+        .selected-count { color: #1976d2; font-weight: 600; margin-bottom: 1rem; }
+        .selected-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .selected-tag { background: #1976d2; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; }
+        .remove-tag { cursor: pointer; background: rgba(255, 255, 255, 0.2); border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
+        .remove-tag:hover { background: rgba(255, 255, 255, 0.3); }
+        
+        /* Additional StellarRec Styles */
+        .notification-bell { position: relative; cursor: pointer; padding: 0.5rem; }
+        .notification-badge { 
+            position: absolute; top: 0; right: 0; background: #f44336; color: white; 
+            border-radius: 50%; width: 20px; height: 20px; font-size: 0.8rem; 
+            display: flex; align-items: center; justify-content: center; 
+        }
+        
+        .top-bar-actions { display: flex; align-items: center; gap: 1rem; }
+        
+        .section-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 2rem; 
+        }
+        .section-description { color: #666; font-size: 0.9rem; margin: 0; }
+        
+        /* Letter Management Styles */
+        .letter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; }
+        .letter-card { 
+            background: white; border-radius: 12px; padding: 1.5rem; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); 
+        }
+        .letter-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .letter-info h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+        .letter-student { color: #1976d2; font-weight: 500; margin-bottom: 0.25rem; }
+        .letter-meta { color: #666; font-size: 0.9rem; }
+        
+        .status-badge { 
+            padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem; font-weight: 500; 
+        }
+        .status-badge.active { background: #e8f5e8; color: #4caf50; }
+        .status-badge.pending { background: #fff3e0; color: #ff9800; }
+        .status-badge.delivered { background: #e3f2fd; color: #1976d2; }
+        .status-badge.approved { background: #e8f5e8; color: #4caf50; }
+        .status-badge.in-transit { background: #fff3e0; color: #ff9800; }
+        
+        .letter-stats { 
+            display: flex; gap: 2rem; margin: 1rem 0; padding: 1rem 0; 
+            border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; 
+        }
+        .stat-item { text-align: center; }
+        .stat-value { display: block; font-size: 1.5rem; font-weight: 600; color: #1976d2; }
+        .stat-label { font-size: 0.8rem; color: #666; }
+        
+        .letter-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        
+        /* Delivery Tracking Styles */
+        .tracking-filters { display: flex; gap: 1rem; }
+        .delivery-table { background: white; border-radius: 12px; overflow: hidden; }
+        .table-header, .table-row { 
+            display: grid; 
+            grid-template-columns: 1fr 1.5fr 1fr 1fr 1.2fr 0.8fr; 
+            gap: 1rem; padding: 1rem; align-items: center; 
+        }
+        .table-header { 
+            background: #f5f5f5; font-weight: 600; color: #333; 
+            border-bottom: 1px solid #e0e0e0; 
+        }
+        .table-row { border-bottom: 1px solid #f0f0f0; }
+        .table-row:hover { background: #f9f9f9; }
+        
+        .method-badge { 
+            padding: 0.25rem 0.5rem; border-radius: 10px; font-size: 0.8rem; font-weight: 500; 
+        }
+        .method-badge.api { background: #e8f5e8; color: #4caf50; }
+        .method-badge.secure-inbox { background: #e3f2fd; color: #1976d2; }
+        .method-badge.email { background: #fff3e0; color: #ff9800; }
+        
+        .btn-icon { 
+            background: none; border: none; cursor: pointer; padding: 0.5rem; 
+            border-radius: 50%; transition: background 0.3s ease; 
+        }
+        .btn-icon:hover { background: #f0f0f0; }
+        
+        /* Consent Management Styles */
+        .consent-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.5rem; }
+        .consent-card { 
+            background: white; border-radius: 12px; padding: 1.5rem; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); 
+        }
+        .consent-card.pending { border-left: 4px solid #ff9800; }
+        .consent-card.approved { border-left: 4px solid #4caf50; }
+        
+        .consent-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .student-info h3 { margin-bottom: 0.25rem; }
+        .student-info p { color: #666; font-size: 0.9rem; }
+        
+        .consent-request, .consent-details { 
+            background: #f9f9f9; padding: 1rem; border-radius: 8px; margin: 1rem 0; 
+        }
+        .consent-request p, .consent-details p { margin-bottom: 0.5rem; }
+        .consent-request p:last-child, .consent-details p:last-child { margin-bottom: 0; }
+        
+        .consent-actions { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+        .btn-approve { 
+            background: #4caf50; color: white; border: none; padding: 0.5rem 1rem; 
+            border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; 
+        }
+        .btn-decline { 
+            background: #f44336; color: white; border: none; padding: 0.5rem 1rem; 
+            border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; 
+        }
+        
+        /* Delivery List Styles */
+        .delivery-list { margin: 1rem 0; }
+        .delivery-item { 
+            display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0; 
+            border-bottom: 1px solid #f0f0f0; 
+        }
+        .delivery-item:last-child { border-bottom: none; }
+        .delivery-status.delivered { color: #4caf50; font-weight: bold; }
+        .delivery-time { margin-left: auto; color: #666; font-size: 0.9rem; }
+        
+        /* Approval List Styles */
+        .approval-list { margin: 1rem 0; }
+        .approval-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 1rem; background: #f9f9f9; border-radius: 8px; margin-bottom: 0.5rem; 
+        }
+        .approval-details { color: #666; font-size: 0.9rem; margin-top: 0.25rem; }
+        .approval-actions { display: flex; gap: 0.5rem; }
+        .approval-actions .btn-approve, .approval-actions .btn-decline { 
+            width: 35px; height: 35px; border-radius: 50%; display: flex; 
+            align-items: center; justify-content: center; font-size: 1.2rem; 
+        }
+        
+        /* Stella Chatbot Styles */
+        .stella-chatbot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .stella-widget {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #1976d2, #7c4dff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(25, 118, 210, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .stella-widget:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(25, 118, 210, 0.4);
+        }
+
+        .stella-widget .material-icons {
+            color: white;
+            font-size: 28px;
+        }
+
+        .stella-pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1976d2, #7c4dff);
+            opacity: 0.6;
+            animation: stellaPulse 2s infinite;
+        }
+
+        @keyframes stellaPulse {
+            0% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 0.3; }
+            100% { transform: scale(1); opacity: 0.6; }
+        }
+
+        .stella-chat-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .stella-chat-window.open {
+            display: flex;
+            animation: stellaSlideUp 0.3s ease-out;
+        }
+
+        @keyframes stellaSlideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .stella-header {
+            background: linear-gradient(135deg, #1976d2, #7c4dff);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stella-header-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .stella-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stella-avatar .material-icons {
+            color: #ffeb3b;
+            font-size: 24px;
+        }
+
+        .stella-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stella-info p {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .stella-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .stella-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .stella-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .stella-message {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .stella-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .stella-message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stella-message.stella .stella-message-avatar {
+            background: linear-gradient(135deg, #1976d2, #7c4dff);
+            color: white;
+        }
+
+        .stella-message.user .stella-message-avatar {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .stella-message-content {
+            background: #f5f5f5;
+            padding: 0.75rem 1rem;
+            border-radius: 16px;
+            max-width: 80%;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .stella-message.stella .stella-message-content {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border-bottom-left-radius: 4px;
+        }
+
+        .stella-message.user .stella-message-content {
+            background: #1976d2;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .stella-quick-actions {
+            padding: 0 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stella-quick-btn {
+            background: #f0f0f0;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .stella-quick-btn:hover {
+            background: #1976d2;
+            color: white;
+            border-color: #1976d2;
+        }
+
+        .stella-input-area {
+            padding: 1rem;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .stella-input {
+            flex: 1;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .stella-input:focus {
+            border-color: #1976d2;
+        }
+
+        .stella-send-btn {
+            width: 40px;
+            height: 40px;
+            background: #1976d2;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .stella-send-btn:hover {
+            background: #1565c0;
+            transform: scale(1.05);
+        }
+
+        .stella-send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .stella-typing {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        .stella-typing-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .stella-typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #1976d2;
+            border-radius: 50%;
+            animation: stellaTyping 1.4s infinite;
+        }
+
+        .stella-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .stella-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes stellaTyping {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        /* Footer Styles */
+        .dashboard-footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        /* Enhanced Dashboard Features */
+        .section-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #1976d2;
+            color: #1976d2;
+        }
+
+        .btn-outline:hover {
+            background: #1976d2;
+            color: white;
+        }
+
+        /* AI Assistant Panel */
+        .ai-assistant-panel {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 2px solid #1976d2;
+        }
+
+        .ai-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ai-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #1976d2, #7c4dff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .ai-info h3 {
+            margin-bottom: 0.25rem;
+            color: #1976d2;
+        }
+
+        .ai-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .close-panel {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .close-panel:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .ai-suggestions {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .suggestion-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .suggestion-icon {
+            font-size: 2rem;
+        }
+
+        .suggestion-content h4 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .suggestion-content p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .btn-apply {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.3s ease;
+        }
+
+        .btn-apply:hover {
+            background: #45a049;
+        }
+
+        /* Analytics Dashboard */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-placeholder {
+            height: 200px;
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* University Matching */
+        .matching-engine {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .match-input-panel h3 {
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        .match-results {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .match-grid {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .match-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .match-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .high-match {
+            border-color: #4caf50;
+            background: linear-gradient(135deg, #e8f5e8, #f1f8e9);
+        }
+
+        .medium-match {
+            border-color: #ff9800;
+            background: linear-gradient(135deg, #fff3e0, #fef7e0);
+        }
+
+        .match-score {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1976d2;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .university-info {
+            flex: 1;
+        }
+
+        .university-info h4 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .university-info p {
+            color: #666;
+            margin-bottom: 0.75rem;
+        }
+
+        .match-reasons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .reason-tag {
+            background: #1976d2;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Template Library */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .template-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .template-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .template-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .template-type {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .template-preview {
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 8px;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 1rem;
+            border-left: 4px solid #1976d2;
+        }
+
+        .template-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        /* Performance Insights */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .insight-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .insight-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .insight-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-trend {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .trend-up {
+            color: #4caf50;
+        }
+
+        .trend-down {
+            color: #f44336;
+        }
+
+        /* Collaboration Tools */
+        .collaboration-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        .collaborator-list {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .collaborator-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #1976d2;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .collaborator-status {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .status-online {
+            background: #4caf50;
+        }
+
+        .status-away {
+            background: #ff9800;
+        }
+
+        .collaboration-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .stella-chat-window {
+                width: 320px;
+                height: 450px;
+                bottom: 70px;
+                right: -10px;
+            }
+            
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
+            .main-content { margin-left: 0; }
+            .content-area { padding: 1rem; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .letter-grid { grid-template-columns: 1fr; }
+            .consent-grid { grid-template-columns: 1fr; }
+            .table-header, .table-row { grid-template-columns: 1fr; }
+            .tracking-filters { flex-direction: column; }
+            .top-bar-actions { flex-direction: column; gap: 0.5rem; }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">
+                <span class="material-icons">star</span>
+                stellarrec
+            </a>
+            <div class="user-info">
+                <div class="user-avatar">
+                    <span class="material-icons" id="userIcon">person</span>
+                </div>
+                <div class="user-details">
+                    <h3 id="userName">Dr. Sarah Chen</h3>
+                    <p id="userRole">Recommender</p>
+                    <p id="userAffiliation" style="font-size: 0.8rem; opacity: 0.8;">MIT Computer Science</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="nav-menu" id="navMenu">
+            <!-- Navigation will be populated based on user role -->
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h1 class="page-title" id="pageTitle">Letter Management Dashboard</h1>
+            <div class="top-bar-actions">
+                <div class="user-type-toggle">
+                    <button class="toggle-btn" onclick="switchUserType('student')">Student View</button>
+                    <button class="toggle-btn active" onclick="switchUserType('recommender')">Recommender View</button>
+                    <button class="toggle-btn" onclick="switchUserType('institution')">Institution View</button>
+
+                </div>
+                <div class="notification-bell">
+                    <span class="material-icons">notifications</span>
+                    <span class="notification-badge" id="notificationCount">3</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <!-- RECOMMENDER DASHBOARD -->
+            <div class="dashboard-section active" id="recommender-overview">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">Active Letters</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">24</div>
+                        <div class="stat-label">Total Deliveries</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Pending Approvals</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">96%</div>
+                        <div class="stat-label">Delivery Success Rate</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #4caf50, #66bb6a);">
+                                <span class="material-icons">assignment_turned_in</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Recent Deliveries</div>
+                                <div class="card-subtitle">5 letters delivered today</div>
+                            </div>
+                        </div>
+                        <div class="delivery-list">
+                            <div class="delivery-item">
+                                <span class="delivery-status delivered">✓</span>
+                                <span>MIT - Alex Chen - STEM Grad 2025</span>
+                                <span class="delivery-time">2 hours ago</span>
+                            </div>
+                            <div class="delivery-item">
+                                <span class="delivery-status delivered">✓</span>
+                                <span>Stanford - Maria Rodriguez - CS PhD</span>
+                                <span class="delivery-time">4 hours ago</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="showSection('delivery-tracking')">View All Deliveries</button>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #ff9800, #ffb74d);">
+                                <span class="material-icons">pending_actions</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Pending Approvals</div>
+                                <div class="card-subtitle">3 new destination requests</div>
+                            </div>
+                        </div>
+                        <div class="approval-list">
+                            <div class="approval-item">
+                                <div class="approval-info">
+                                    <strong>David Kim</strong> wants to add <strong>CMU</strong>
+                                    <div class="approval-details">STEM Grad 2025 • Expires in 2 days</div>
+                                </div>
+                                <div class="approval-actions">
+                                    <button class="btn-approve">✓</button>
+                                    <button class="btn-decline">✗</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="showSection('consent-management')">Manage All Approvals</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LETTER MANAGEMENT SECTION -->
+            <div class="dashboard-section" id="letter-management">
+                <div class="section-header">
+                    <h2>Letter Management</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-outline" onclick="showAIAssistant()">
+                            <span class="material-icons">auto_awesome</span>
+                            AI Writing Assistant
+                        </button>
+                        <button class="btn btn-outline" onclick="showTemplateLibrary()">
+                            <span class="material-icons">library_books</span>
+                            Templates
+                        </button>
+                        <button class="btn btn-primary" onclick="showLetterUpload()">
+                            <span class="material-icons">add</span>
+                            Create New Letter
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Writing Assistant Panel -->
+                <div class="ai-assistant-panel" id="aiAssistantPanel" style="display: none;">
+                    <div class="ai-panel-header">
+                        <div class="ai-avatar">
+                            <span class="material-icons">auto_awesome</span>
+                        </div>
+                        <div class="ai-info">
+                            <h3>Stella AI Writing Assistant</h3>
+                            <p>Get real-time suggestions to improve your letter</p>
+                        </div>
+                        <button class="close-panel" onclick="hideAIAssistant()">
+                            <span class="material-icons">close</span>
+                        </button>
+                    </div>
+                    <div class="ai-suggestions">
+                        <div class="suggestion-card">
+                            <div class="suggestion-icon">💡</div>
+                            <div class="suggestion-content">
+                                <h4>Strengthen Opening</h4>
+                                <p>Consider starting with a specific example of the student's achievements</p>
+                                <button class="btn-apply">Apply Suggestion</button>
+                            </div>
+                        </div>
+                        <div class="suggestion-card">
+                            <div class="suggestion-icon">📊</div>
+                            <div class="suggestion-content">
+                                <h4>Add Quantifiable Results</h4>
+                                <p>Include specific metrics or rankings to strengthen your recommendation</p>
+                                <button class="btn-apply">Apply Suggestion</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="letter-grid">
+                    <div class="letter-card">
+                        <div class="letter-header">
+                            <div class="letter-info">
+                                <h3>STEM Graduate Programs 2025</h3>
+                                <p class="letter-student">For: Alex Chen, Maria Rodriguez, David Kim</p>
+                                <p class="letter-meta">Created: Jan 15, 2025 • Last updated: Jan 20, 2025</p>
+                            </div>
+                            <div class="letter-status">
+                                <span class="status-badge active">Active</span>
+                            </div>
+                        </div>
+                        
+                        <div class="letter-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">12</span>
+                                <span class="stat-label">Deliveries</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">3</span>
+                                <span class="stat-label">Students</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">8</span>
+                                <span class="stat-label">Universities</span>
+                            </div>
+                        </div>
+
+                        <div class="letter-actions">
+                            <button class="btn btn-outline" onclick="viewLetter('stem-2025')">View Letter</button>
+                            <button class="btn btn-outline" onclick="editLetter('stem-2025')">Edit</button>
+                            <button class="btn btn-outline" onclick="viewDeliveries('stem-2025')">Track Deliveries</button>
+                        </div>
+                    </div>
+
+                    <div class="letter-card">
+                        <div class="letter-header">
+                            <div class="letter-info">
+                                <h3>Business School Applications 2025</h3>
+                                <p class="letter-student">For: Sarah Johnson</p>
+                                <p class="letter-meta">Created: Dec 10, 2024 • Last updated: Jan 18, 2025</p>
+                            </div>
+                            <div class="letter-status">
+                                <span class="status-badge active">Active</span>
+                            </div>
+                        </div>
+                        
+                        <div class="letter-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">6</span>
+                                <span class="stat-label">Deliveries</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">1</span>
+                                <span class="stat-label">Students</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">6</span>
+                                <span class="stat-label">Universities</span>
+                            </div>
+                        </div>
+
+                        <div class="letter-actions">
+                            <button class="btn btn-outline" onclick="viewLetter('business-2025')">View Letter</button>
+                            <button class="btn btn-outline" onclick="editLetter('business-2025')">Edit</button>
+                            <button class="btn btn-outline" onclick="viewDeliveries('business-2025')">Track Deliveries</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DELIVERY TRACKING SECTION -->
+            <div class="dashboard-section" id="delivery-tracking">
+                <div class="section-header">
+                    <h2>Delivery Tracking</h2>
+                    <div class="tracking-filters">
+                        <select class="filter-select">
+                            <option>All Letters</option>
+                            <option>STEM Graduate 2025</option>
+                            <option>Business School 2025</option>
+                        </select>
+                        <select class="filter-select">
+                            <option>All Statuses</option>
+                            <option>Delivered</option>
+                            <option>In Transit</option>
+                            <option>Failed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="delivery-table">
+                    <div class="table-header">
+                        <div class="col-student">Student</div>
+                        <div class="col-university">University</div>
+                        <div class="col-method">Delivery Method</div>
+                        <div class="col-status">Status</div>
+                        <div class="col-timestamp">Timestamp</div>
+                        <div class="col-actions">Actions</div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div class="col-student">Alex Chen</div>
+                        <div class="col-university">MIT EECS</div>
+                        <div class="col-method">
+                            <span class="method-badge api">Native API</span>
+                        </div>
+                        <div class="col-status">
+                            <span class="status-badge delivered">Delivered</span>
+                        </div>
+                        <div class="col-timestamp">Jan 22, 2025 2:30 PM</div>
+                        <div class="col-actions">
+                            <button class="btn-icon" onclick="viewDeliveryDetails('del-001')">
+                                <span class="material-icons">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="col-student">Maria Rodriguez</div>
+                        <div class="col-university">Stanford CS</div>
+                        <div class="col-method">
+                            <span class="method-badge secure-inbox">Secure Inbox</span>
+                        </div>
+                        <div class="col-status">
+                            <span class="status-badge delivered">Delivered</span>
+                        </div>
+                        <div class="col-timestamp">Jan 22, 2025 1:15 PM</div>
+                        <div class="col-actions">
+                            <button class="btn-icon" onclick="viewDeliveryDetails('del-002')">
+                                <span class="material-icons">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="col-student">David Kim</div>
+                        <div class="col-university">CMU SCS</div>
+                        <div class="col-method">
+                            <span class="method-badge email">Secure Email</span>
+                        </div>
+                        <div class="col-status">
+                            <span class="status-badge in-transit">In Transit</span>
+                        </div>
+                        <div class="col-timestamp">Jan 22, 2025 3:45 PM</div>
+                        <div class="col-actions">
+                            <button class="btn-icon" onclick="retryDelivery('del-003')">
+                                <span class="material-icons">refresh</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONSENT MANAGEMENT SECTION -->
+            <div class="dashboard-section" id="consent-management">
+                <div class="section-header">
+                    <h2>Consent & Approval Management</h2>
+                    <p class="section-description">Manage student requests and destination approvals</p>
+                </div>
+
+                <div class="consent-grid">
+                    <div class="consent-card pending">
+                        <div class="consent-header">
+                            <div class="student-info">
+                                <h3>David Kim</h3>
+                                <p>STEM Graduate Programs 2025</p>
+                            </div>
+                            <div class="consent-status">
+                                <span class="status-badge pending">Pending Approval</span>
+                            </div>
+                        </div>
+                        
+                        <div class="consent-request">
+                            <p><strong>New Destination Request:</strong> Carnegie Mellon University - School of Computer Science</p>
+                            <p><strong>Program Type:</strong> PhD Computer Science</p>
+                            <p><strong>Delivery Method:</strong> Secure Email (FERPA Compliant)</p>
+                            <p><strong>Student Visibility:</strong> Status only (sealed letter)</p>
+                        </div>
+
+                        <div class="consent-actions">
+                            <button class="btn btn-approve" onclick="approveDestination('req-001')">
+                                <span class="material-icons">check</span>
+                                Approve
+                            </button>
+                            <button class="btn btn-decline" onclick="declineDestination('req-001')">
+                                <span class="material-icons">close</span>
+                                Decline
+                            </button>
+                            <button class="btn btn-outline" onclick="viewConsentDetails('req-001')">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="consent-card approved">
+                        <div class="consent-header">
+                            <div class="student-info">
+                                <h3>Alex Chen</h3>
+                                <p>STEM Graduate Programs 2025</p>
+                            </div>
+                            <div class="consent-status">
+                                <span class="status-badge approved">Approved</span>
+                            </div>
+                        </div>
+                        
+                        <div class="consent-details">
+                            <p><strong>Approved Destinations:</strong> MIT, Stanford, Berkeley, Caltech</p>
+                            <p><strong>Reuse Policy:</strong> Allowed for STEM programs until Dec 2025</p>
+                            <p><strong>Student Visibility:</strong> Full access granted</p>
+                            <p><strong>Last Updated:</strong> Jan 15, 2025</p>
+                        </div>
+
+                        <div class="consent-actions">
+                            <button class="btn btn-outline" onclick="editConsent('consent-001')">
+                                Edit Permissions
+                            </button>
+                            <button class="btn btn-outline" onclick="viewConsentLog('consent-001')">
+                                View Audit Log
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STUDENT DASHBOARD -->
+            <div class="dashboard-section" id="student-overview">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Active Requests</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Letters Sent</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">Universities Applied</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Pending Approvals</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #1976d2, #42a5f5);">
+                                <span class="material-icons">mail</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Recommendation Requests</div>
+                                <div class="card-subtitle">5 active requests</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="showSection('student-requests')">Manage Requests</button>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #4caf50, #66bb6a);">
+                                <span class="material-icons">track_changes</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Application Tracking</div>
+                                <div class="card-subtitle">Real-time delivery status</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="showSection('student-tracking')">Track Applications</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INSTITUTION DASHBOARD -->
+            <div class="dashboard-section" id="institution-overview">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">156</div>
+                        <div class="stat-label">Letters Received Today</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">2,847</div>
+                        <div class="stat-label">Total This Cycle</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">98.5%</div>
+                        <div class="stat-label">API Uptime</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">45</div>
+                        <div class="stat-label">Active Programs</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #ff9800, #ffb74d);">
+                                <span class="material-icons">inbox</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Letter Inbox</div>
+                                <div class="card-subtitle">156 new letters today</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="showSection('institution-inbox')">View Inbox</button>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #7c4dff, #9c27b0);">
+                                <span class="material-icons">settings</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Integration Settings</div>
+                                <div class="card-subtitle">API & delivery configuration</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="showSection('institution-settings')">Configure</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN DASHBOARD -->
+            <div class="dashboard-section" id="admin-overview">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">12,456</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3,892</div>
+                        <div class="stat-label">Active Letters</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">847</div>
+                        <div class="stat-label">Partner Institutions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">99.2%</div>
+                        <div class="stat-label">System Uptime</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #f44336, #ef5350);">
+                                <span class="material-icons">security</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Trust & Safety</div>
+                                <div class="card-subtitle">5 flagged accounts</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="showSection('admin-security')">Review Flags</button>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #607d8b, #78909c);">
+                                <span class="material-icons">analytics</span>
+                            </div>
+                            <div>
+                                <div class="card-title">System Analytics</div>
+                                <div class="card-subtitle">Performance & usage metrics</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="showSection('admin-analytics')">View Analytics</button>
+                    </div>
+                </div>
+            </div>
+            <!-- MISSING SECTIONS -->
+            
+            <!-- NOTIFICATIONS SECTION -->
+            <div class="dashboard-section" id="notifications">
+                <div class="section-header">
+                    <h2>Notifications</h2>
+                    <p class="section-description">Manage your notification preferences and view recent alerts</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Notification Center</h3>
+                    <p>All notifications and alerts will be displayed here.</p>
+                </div>
+            </div>
+
+            <!-- STUDENT REQUESTS SECTION -->
+            <div class="dashboard-section" id="student-requests">
+                <div class="section-header">
+                    <h2>My Requests</h2>
+                    <p class="section-description">Manage your letter of recommendation requests</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Request Management</h3>
+                    <p>Your letter requests and their status will be displayed here.</p>
+                </div>
+            </div>
+
+            <!-- STUDENT TRACKING SECTION -->
+            <div class="dashboard-section" id="student-tracking">
+                <div class="section-header">
+                    <h2>Application Tracking</h2>
+                    <p class="section-description">Track your university applications and letter deliveries</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Application Status</h3>
+                    <p>Track the status of your applications and letter deliveries here.</p>
+                </div>
+            </div>
+
+            <!-- UNIVERSITY SEARCH SECTION -->
+            <div class="dashboard-section" id="university-search">
+                <div class="section-header">
+                    <h2>AI University Matching</h2>
+                    <p class="section-description">Get personalized university recommendations based on your profile</p>
+                </div>
+
+                <!-- AI Matching Engine -->
+                <div class="matching-engine">
+                    <div class="match-input-panel">
+                        <h3>Tell us about yourself</h3>
+                        <div class="input-grid">
+                            <div class="input-group">
+                                <label>Academic Focus</label>
+                                <select class="form-select">
+                                    <option>Computer Science</option>
+                                    <option>Engineering</option>
+                                    <option>Business</option>
+                                    <option>Medicine</option>
+                                    <option>Liberal Arts</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>GPA Range</label>
+                                <select class="form-select">
+                                    <option>3.8 - 4.0</option>
+                                    <option>3.5 - 3.7</option>
+                                    <option>3.0 - 3.4</option>
+                                    <option>Below 3.0</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Location Preference</label>
+                                <select class="form-select">
+                                    <option>No Preference</option>
+                                    <option>East Coast</option>
+                                    <option>West Coast</option>
+                                    <option>Midwest</option>
+                                    <option>International</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="generateMatches()">
+                            <span class="material-icons">psychology</span>
+                            Generate AI Matches
+                        </button>
+                    </div>
+
+                    <div class="match-results" id="matchResults" style="display: none;">
+                        <h3>Your AI-Powered Matches</h3>
+                        <div class="match-grid">
+                            <div class="match-card high-match">
+                                <div class="match-score">95%</div>
+                                <div class="university-info">
+                                    <h4>Stanford University</h4>
+                                    <p>Computer Science Program</p>
+                                    <div class="match-reasons">
+                                        <span class="reason-tag">Strong CS Program</span>
+                                        <span class="reason-tag">Research Focus</span>
+                                        <span class="reason-tag">Location Match</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline">Learn More</button>
+                            </div>
+                            <div class="match-card medium-match">
+                                <div class="match-score">87%</div>
+                                <div class="university-info">
+                                    <h4>MIT</h4>
+                                    <p>Computer Science & Engineering</p>
+                                    <div class="match-reasons">
+                                        <span class="reason-tag">Top Tier</span>
+                                        <span class="reason-tag">Innovation Hub</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline">Learn More</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INSTITUTION INBOX SECTION -->
+            <div class="dashboard-section" id="institution-inbox">
+                <div class="section-header">
+                    <h2>Letter Inbox</h2>
+                    <p class="section-description">Manage incoming letters of recommendation</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Incoming Letters</h3>
+                    <p>Letters of recommendation received through StellarRec will appear here.</p>
+                </div>
+            </div>
+
+            <!-- INSTITUTION SETTINGS SECTION -->
+            <div class="dashboard-section" id="institution-settings">
+                <div class="section-header">
+                    <h2>Integration Settings</h2>
+                    <p class="section-description">Configure your institution's StellarRec integration</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>API Configuration</h3>
+                    <p>Configure API endpoints, authentication, and delivery preferences.</p>
+                </div>
+            </div>
+
+            <!-- INSTITUTION ANALYTICS SECTION -->
+            <div class="dashboard-section" id="institution-analytics">
+                <div class="section-header">
+                    <h2>Analytics</h2>
+                    <p class="section-description">View analytics and insights for your institution</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Institution Analytics</h3>
+                    <p>Analytics and reporting for letter processing and student applications.</p>
+                </div>
+            </div>
+
+            <!-- ADMIN SECURITY SECTION -->
+            <div class="dashboard-section" id="admin-security">
+                <div class="section-header">
+                    <h2>Trust & Safety</h2>
+                    <p class="section-description">Monitor security and safety across the platform</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Security Dashboard</h3>
+                    <p>Security monitoring, fraud detection, and safety controls.</p>
+                </div>
+            </div>
+
+            <!-- ADMIN ANALYTICS SECTION -->
+            <div class="dashboard-section" id="admin-analytics">
+                <div class="section-header">
+                    <h2>System Analytics</h2>
+                    <p class="section-description">Platform-wide analytics and performance metrics</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Platform Analytics</h3>
+                    <p>System-wide analytics, performance metrics, and usage statistics.</p>
+                </div>
+            </div>
+
+            <!-- ADMIN USERS SECTION -->
+            <div class="dashboard-section" id="admin-users">
+                <div class="section-header">
+                    <h2>User Management</h2>
+                    <p class="section-description">Manage users and their permissions</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>User Administration</h3>
+                    <p>User management, permissions, and account administration.</p>
+                </div>
+            </div>
+
+            <!-- ADMIN INSTITUTIONS SECTION -->
+            <div class="dashboard-section" id="admin-institutions">
+                <div class="section-header">
+                    <h2>Institution Partners</h2>
+                    <p class="section-description">Manage institutional partnerships and integrations</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Partner Management</h3>
+                    <p>Manage institutional partnerships, integrations, and onboarding.</p>
+                </div>
+            </div>
+
+            <!-- SMART ANALYTICS DASHBOARD -->
+            <div class="dashboard-section" id="analytics-dashboard">
+                <div class="section-header">
+                    <h2>Smart Analytics Dashboard</h2>
+                    <p class="section-description">AI-powered insights and data visualization</p>
+                </div>
+
+                <div class="analytics-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Letter Performance</h3>
+                            <span class="material-icons">trending_up</span>
+                        </div>
+                        <div class="chart-placeholder">
+                            📊 Interactive Chart: Letter Success Rates Over Time
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>University Preferences</h3>
+                            <span class="material-icons">pie_chart</span>
+                        </div>
+                        <div class="chart-placeholder">
+                            🥧 Pie Chart: Top Universities by Application Volume
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Delivery Methods</h3>
+                            <span class="material-icons">bar_chart</span>
+                        </div>
+                        <div class="chart-placeholder">
+                            📈 Bar Chart: API vs Email vs Portal Deliveries
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>AI Suggestions Impact</h3>
+                            <span class="material-icons">psychology</span>
+                        </div>
+                        <div class="chart-placeholder">
+                            🧠 Line Chart: Letters with AI Help vs Traditional
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TEMPLATE LIBRARY -->
+            <div class="dashboard-section" id="template-library">
+                <div class="section-header">
+                    <h2>Letter Templates Library</h2>
+                    <p class="section-description">Pre-built templates optimized for different programs and institutions</p>
+                </div>
+
+                <div class="template-grid">
+                    <div class="template-card" onclick="useTemplate('stem-grad')">
+                        <div class="template-header">
+                            <h3>STEM Graduate Programs</h3>
+                            <span class="template-type">Academic</span>
+                        </div>
+                        <div class="template-preview">
+                            "I am writing to provide my strongest recommendation for [Student Name], who has demonstrated exceptional analytical thinking and research capabilities in my [Course/Lab]..."
+                        </div>
+                        <div class="template-stats">
+                            <span>Used 847 times</span>
+                            <span>⭐ 4.9/5 rating</span>
+                        </div>
+                        <button class="btn btn-primary">Use Template</button>
+                    </div>
+
+                    <div class="template-card" onclick="useTemplate('business-school')">
+                        <div class="template-header">
+                            <h3>Business School MBA</h3>
+                            <span class="template-type">Professional</span>
+                        </div>
+                        <div class="template-preview">
+                            "Having worked closely with [Student Name] for [Duration], I can confidently attest to their leadership abilities and strategic thinking that make them an ideal MBA candidate..."
+                        </div>
+                        <div class="template-stats">
+                            <span>Used 623 times</span>
+                            <span>⭐ 4.8/5 rating</span>
+                        </div>
+                        <button class="btn btn-primary">Use Template</button>
+                    </div>
+
+                    <div class="template-card" onclick="useTemplate('medical-school')">
+                        <div class="template-header">
+                            <h3>Medical School</h3>
+                            <span class="template-type">Healthcare</span>
+                        </div>
+                        <div class="template-preview">
+                            "I recommend [Student Name] for medical school admission based on their compassionate patient care, clinical acumen, and dedication to healthcare excellence..."
+                        </div>
+                        <div class="template-stats">
+                            <span>Used 412 times</span>
+                            <span>⭐ 4.9/5 rating</span>
+                        </div>
+                        <button class="btn btn-primary">Use Template</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PERFORMANCE INSIGHTS -->
+            <div class="dashboard-section" id="performance-insights">
+                <div class="section-header">
+                    <h2>Performance Insights</h2>
+                    <p class="section-description">Track your recommendation success metrics and impact</p>
+                </div>
+
+                <div class="insights-grid">
+                    <div class="insight-card">
+                        <div class="insight-icon" style="background: linear-gradient(135deg, #4caf50, #66bb6a);">
+                            <span class="material-icons">school</span>
+                        </div>
+                        <div class="insight-value">94%</div>
+                        <div class="insight-label">Acceptance Rate</div>
+                        <div class="insight-trend trend-up">↗ +5% vs last year</div>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-icon" style="background: linear-gradient(135deg, #1976d2, #42a5f5);">
+                            <span class="material-icons">speed</span>
+                        </div>
+                        <div class="insight-value">2.3</div>
+                        <div class="insight-label">Avg Days to Deliver</div>
+                        <div class="insight-trend trend-up">↗ 15% faster</div>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-icon" style="background: linear-gradient(135deg, #ff9800, #ffb74d);">
+                            <span class="material-icons">star</span>
+                        </div>
+                        <div class="insight-value">4.9</div>
+                        <div class="insight-label">Student Rating</div>
+                        <div class="insight-trend trend-up">↗ Excellent feedback</div>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-icon" style="background: linear-gradient(135deg, #7c4dff, #9575cd);">
+                            <span class="material-icons">psychology</span>
+                        </div>
+                        <div class="insight-value">87%</div>
+                        <div class="insight-label">AI Enhancement Usage</div>
+                        <div class="insight-trend trend-up">↗ +23% adoption</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>Recent Achievements</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span style="color: #4caf50; font-size: 1.5rem;">🏆</span>
+                            <div>
+                                <strong>Top Performer Badge</strong>
+                                <p style="color: #666; font-size: 0.9rem; margin: 0;">Achieved 95%+ acceptance rate for Q4 2024</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span style="color: #1976d2; font-size: 1.5rem;">⚡</span>
+                            <div>
+                                <strong>Speed Champion</strong>
+                                <p style="color: #666; font-size: 0.9rem; margin: 0;">Fastest letter delivery times in your department</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLLABORATION TOOLS -->
+            <div class="dashboard-section" id="collaboration-tools">
+                <div class="section-header">
+                    <h2>Collaboration Tools</h2>
+                    <p class="section-description">Work together with colleagues and students on recommendations</p>
+                </div>
+
+                <div class="collaboration-panel">
+                    <h3>Active Collaborations</h3>
+                    <div class="collaborator-list">
+                        <div class="collaborator-avatar">
+                            SC
+                            <div class="collaborator-status status-online"></div>
+                        </div>
+                        <div class="collaborator-avatar">
+                            MJ
+                            <div class="collaborator-status status-away"></div>
+                        </div>
+                        <div class="collaborator-avatar">
+                            DK
+                            <div class="collaborator-status status-online"></div>
+                        </div>
+                        <button class="btn btn-outline" onclick="inviteCollaborator()">
+                            <span class="material-icons">person_add</span>
+                            Invite
+                        </button>
+                    </div>
+                    
+                    <div class="collaboration-actions">
+                        <button class="btn btn-primary" onclick="startCollabSession()">
+                            <span class="material-icons">edit</span>
+                            Start Co-Writing Session
+                        </button>
+                        <button class="btn btn-outline" onclick="shareForReview()">
+                            <span class="material-icons">rate_review</span>
+                            Share for Review
+                        </button>
+                        <button class="btn btn-outline" onclick="scheduleDiscussion()">
+                            <span class="material-icons">schedule</span>
+                            Schedule Discussion
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #4caf50, #66bb6a);">
+                                <span class="material-icons">group_work</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Shared Letters</div>
+                                <div class="card-subtitle">3 letters in collaborative editing</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary">View Shared Work</button>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #ff9800, #ffb74d);">
+                                <span class="material-icons">feedback</span>
+                            </div>
+                            <div>
+                                <div class="card-title">Peer Reviews</div>
+                                <div class="card-subtitle">2 reviews pending your input</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary">Review Letters</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+        <div class="container">
+            <p>&copy; 2025 <span style="color: #ffeb3b; font-weight: 600;">StellarRec™</span>. All rights reserved. |
+                Making recommendations stellar since 2025 🚀</p>
+        </div>
+    </footer>
+
+    <script>
+        // StellarRec™ Dashboard System
+        let currentUserType = 'recommender';
+        let currentSection = 'recommender-overview';
+        
+        // User data simulation
+        const userData = {
+            recommender: {
+                name: "Dr. Sarah Chen",
+                role: "Recommender",
+                affiliation: "MIT Computer Science",
+                icon: "school",
+                stats: { activeLetters: 8, totalDeliveries: 24, pendingApprovals: 3, successRate: "96%" }
+            },
+            student: {
+                name: "Alex Johnson",
+                role: "Student",
+                affiliation: "Senior, Computer Science",
+                icon: "person",
+                stats: { activeRequests: 5, lettersSent: 12, universitiesApplied: 8, pendingApprovals: 3 }
+            },
+            institution: {
+                name: "MIT Admissions",
+                role: "Institution",
+                affiliation: "Graduate Admissions Office",
+                icon: "business",
+                stats: { lettersToday: 156, totalCycle: 2847, apiUptime: "98.5%", activePrograms: 45 }
+            },
+            admin: {
+                name: "System Admin",
+                role: "Administrator",
+                affiliation: "StellarRec Platform",
+                icon: "admin_panel_settings",
+                stats: { totalUsers: 12456, activeLetters: 3892, partnerInstitutions: 847, systemUptime: "99.2%" }
+            }
+        };
+
+        // Navigation menus for different user types
+        const navigationMenus = {
+            recommender: [
+                { id: 'recommender-overview', icon: 'dashboard', label: 'Overview' },
+                { id: 'letter-management', icon: 'mail', label: 'Letter Management' },
+                { id: 'delivery-tracking', icon: 'track_changes', label: 'Delivery Tracking' },
+                { id: 'consent-management', icon: 'verified_user', label: 'Consent Management' },
+                { id: 'notifications', icon: 'notifications', label: 'Notifications' }
+            ],
+            student: [
+                { id: 'student-overview', icon: 'dashboard', label: 'Overview' },
+                { id: 'student-requests', icon: 'mail_outline', label: 'My Requests' },
+                { id: 'student-tracking', icon: 'track_changes', label: 'Application Tracking' },
+                { id: 'university-search', icon: 'school', label: 'Find Universities' }
+            ],
+            institution: [
+                { id: 'institution-overview', icon: 'dashboard', label: 'Overview' },
+                { id: 'institution-inbox', icon: 'inbox', label: 'Letter Inbox' },
+                { id: 'institution-settings', icon: 'settings', label: 'Integration Settings' },
+                { id: 'institution-analytics', icon: 'analytics', label: 'Analytics' }
+            ],
+            admin: [
+                { id: 'admin-overview', icon: 'dashboard', label: 'Overview' },
+                { id: 'admin-security', icon: 'security', label: 'Trust & Safety' },
+                { id: 'admin-analytics', icon: 'analytics', label: 'System Analytics' },
+                { id: 'admin-users', icon: 'people', label: 'User Management' },
+                { id: 'admin-institutions', icon: 'business', label: 'Institution Partners' }
+            ]
+        };
+
+        // Initialize dashboard
+        function initializeDashboard() {
+            try {
+                updateUserInterface();
+                updateNavigation();
+                updateStats();
+                showSection(currentSection);
+            } catch (error) {
+                console.error('Dashboard initialization error:', error);
+            }
+        }
+
+        // Switch user type
+        function switchUserType(userType) {
+            currentUserType = userType;
+            
+            // Update active toggle button
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update section based on user type
+            currentSection = userType + '-overview';
+            
+            updateUserInterface();
+            updateNavigation();
+            updateStats();
+            showSection(currentSection);
+        }
+
+        // Update user interface elements
+        function updateUserInterface() {
+            const user = userData[currentUserType];
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userRole').textContent = user.role;
+            document.getElementById('userAffiliation').textContent = user.affiliation;
+            document.getElementById('userIcon').textContent = user.icon;
+            
+            // Update page title
+            const titles = {
+                recommender: 'Letter Management Dashboard',
+                student: 'Application Tracking Dashboard',
+                institution: 'Letter Intake Dashboard',
+                admin: 'System Administration Dashboard'
+            };
+            document.getElementById('pageTitle').textContent = titles[currentUserType];
+        }
+
+        // Update navigation menu
+        function updateNavigation() {
+            const navMenu = document.getElementById('navMenu');
+            const menu = navigationMenus[currentUserType];
+            
+            navMenu.innerHTML = menu.map(item => `
+                <a href="#" class="nav-item ${item.id === currentSection ? 'active' : ''}" 
+                   onclick="showSection('${item.id}')">
+                    <span class="material-icons">${item.icon}</span>
+                    ${item.label}
+                </a>
+            `).join('');
+        }
+
+        // Update statistics
+        function updateStats() {
+            const stats = userData[currentUserType].stats;
+            const statCards = document.querySelectorAll('.stat-number');
+            const statValues = Object.values(stats);
+            
+            statCards.forEach((card, index) => {
+                if (statValues[index]) {
+                    card.textContent = statValues[index];
+                }
+            });
+        }
+
+        // Show specific section
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+                currentSection = sectionId;
+            }
+            
+            // Update navigation active state
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const activeNavItem = document.querySelector(`[onclick="showSection('${sectionId}')"]`);
+            if (activeNavItem) {
+                activeNavItem.classList.add('active');
+            }
+        }
+
+        // Letter management functions
+        function showLetterUpload() {
+            alert('Letter upload modal would open here. Features:\n\n• Paste text, upload DOC/PDF, or connect Google Docs\n• Set reuse policy and visibility rules\n• Define expiry date\n• Add e-signature integration');
+        }
+
+        function viewLetter(letterId) {
+            alert(`Viewing letter: ${letterId}\n\nThis would show:\n• Full letter content\n• Metadata and version history\n• Current consent settings\n• Delivery history`);
+        }
+
+        function editLetter(letterId) {
+            alert(`Editing letter: ${letterId}\n\nFeatures:\n• Version control with audit trail\n• Student notification of changes\n• Re-delivery options\n• Lock letter for cycle option`);
+        }
+
+        function viewDeliveries(letterId) {
+            showSection('delivery-tracking');
+        }
+
+        // Delivery tracking functions
+        function viewDeliveryDetails(deliveryId) {
+            alert(`Delivery Details: ${deliveryId}\n\n• Delivery method: Native API\n• Status: Successfully delivered\n• Receipt ID: MIT-2025-001847\n• Timestamp: Jan 22, 2025 2:30 PM\n• Checksum verified: ✓`);
+        }
+
+        function retryDelivery(deliveryId) {
+            alert(`Retrying delivery: ${deliveryId}\n\nSystem will:\n• Check consent scope\n• Apply fallback delivery method\n• Generate new secure link\n• Send notification to student`);
+        }
+
+        // Consent management functions
+        function approveDestination(requestId) {
+            alert(`Approving destination request: ${requestId}\n\n✓ CMU added to approved destinations\n✓ Student notified\n✓ Letter queued for delivery\n✓ Audit log updated`);
+        }
+
+        function declineDestination(requestId) {
+            alert(`Declining destination request: ${requestId}\n\n✗ Request declined\n✗ Student notified with reason\n✓ Audit log updated`);
+        }
+
+        function viewConsentDetails(requestId) {
+            alert(`Consent Details: ${requestId}\n\n• Student: David Kim\n• Program: PhD Computer Science\n• Institution: Carnegie Mellon University\n• Delivery: Secure Email (FERPA)\n• Visibility: Status only (sealed)\n• Expiry: Dec 31, 2025`);
+        }
+
+        function editConsent(consentId) {
+            alert(`Editing consent: ${consentId}\n\nModifiable settings:\n• Destination list\n• Reuse policy\n• Student visibility\n• Expiry date\n• Delivery preferences`);
+        }
+
+        function viewConsentLog(consentId) {
+            alert(`Consent Audit Log: ${consentId}\n\n• Jan 15, 2025 - Initial consent granted\n• Jan 18, 2025 - MIT added to destinations\n• Jan 20, 2025 - Stanford added\n• Jan 22, 2025 - Berkeley added\n\nAll changes logged with timestamps and actor IDs`);
+        }
+
+        // Notification system
+        function updateNotificationCount() {
+            const counts = {
+                recommender: 3,
+                student: 2,
+                institution: 8,
+                admin: 12
+            };
+            document.getElementById('notificationCount').textContent = counts[currentUserType];
+        }
+
+        // Simulated real-time updates
+        function simulateRealTimeUpdates() {
+            setInterval(() => {
+                // Simulate delivery status updates
+                const deliveryItems = document.querySelectorAll('.delivery-item');
+                if (deliveryItems.length > 0 && Math.random() > 0.8) {
+                    // Randomly update a delivery status
+                    console.log('Real-time delivery update received');
+                }
+                
+                // Update notification count occasionally
+                if (Math.random() > 0.9) {
+                    updateNotificationCount();
+                }
+            }, 5000);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                initializeDashboard();
+                simulateRealTimeUpdates();
+                initializeStella();
+            } catch (error) {
+                console.error('Dashboard initialization error:', error);
+            }
+        });
+
+        // Stella Chatbot Implementation
+        class StellaChatbot {
+            constructor() {
+                this.isOpen = false;
+                this.conversationHistory = [];
+                this.knowledgeBase = this.initializeKnowledgeBase();
+                this.currentUserType = currentUserType;
+            }
+
+            initializeKnowledgeBase() {
+                return {
+                    greetings: {
+                        patterns: ['hello', 'hi', 'hey', 'start', 'help'],
+                        responses: [
+                            "Hi there! I'm Stella, your StellarRec guide! ⭐ How can I help you navigate the recommendation universe today?",
+                            "Hello! Welcome to StellarRec! I'm Stella, and I'm here to help make your recommendation process stellar! What would you like to know?",
+                            "Hey! I'm Stella, your AI assistant for all things StellarRec! Ready to explore the galaxy of recommendations? 🚀"
+                        ]
+                    },
+                    platform_overview: {
+                        patterns: ['what is stellarrec', 'how does it work', 'platform', 'overview', 'explain'],
+                        responses: [
+                            "StellarRec revolutionizes letter of recommendation management! 🌟 Recommenders write once and send to multiple universities through our smart routing system. It's like having a recommendation rocket ship that delivers to the entire academic universe!",
+                            "Think of StellarRec as your recommendation mission control! Professors upload one canonical letter per student per program type, then we handle secure delivery to all target universities via API, secure inbox, or compliant email. One upload, unlimited reach! 🚀"
+                        ]
+                    },
+                    recommender_workflow: {
+                        patterns: ['recommender', 'professor', 'upload', 'letter management', 'how to write'],
+                        responses: [
+                            "For recommenders, StellarRec is a game-changer! 📝 Upload your letter once, set reuse policies and visibility rules, then approve destinations as students add them. We handle all the delivery logistics - API integration, secure email, SFTP - whatever each university prefers!",
+                            "As a recommender, you maintain one canonical letter per student per program type (like 'STEM Grad 2025'). Set who can receive it, whether students can view it, and expiry dates. When students add new universities, you get a simple one-tap approval prompt! ⭐"
+                        ]
+                    },
+                    student_workflow: {
+                        patterns: ['student', 'application', 'request', 'how to apply', 'get recommendations'],
+                        responses: [
+                            "Students love StellarRec because it makes getting recommendations easier! 🎓 Create requests, list your target universities, and track real-time delivery status. Your recommenders write once, but you can reach unlimited schools!",
+                            "Here's your student journey: 1) Request recommendations from professors, 2) List target universities, 3) Get approvals, 4) Track deliveries in real-time with status updates like 'sent,' 'received,' 'viewed.' It's that stellar! ✨"
+                        ]
+                    },
+                    delivery_tracking: {
+                        patterns: ['tracking', 'delivery', 'status', 'sent', 'received'],
+                        responses: [
+                            "Our delivery tracking is out of this world! 🛸 We use smart routing - Native API for partner schools, secure inbox via SFTP, compliant email with signed URLs, or manual portal as fallback. You see real-time status: sent → received → viewed → acknowledged!",
+                            "Every delivery gets a receipt! API response IDs, SFTP acknowledgments, email confirmations - we capture it all. Plus, our system automatically retries with fallback methods if the first attempt fails. Your letters always reach their destination! 🎯"
+                        ]
+                    },
+                    security_privacy: {
+                        patterns: ['security', 'privacy', 'safe', 'encryption', 'ferpa', 'gdpr'],
+                        responses: [
+                            "Security is our North Star! 🔒 We use field-level encryption for PII, KMS-managed envelope encryption for documents, and TLS 1.2+ for all transit. FERPA-aligned controls for educational records, GDPR compliance with consent management, and zero-trust architecture throughout!",
+                            "Your data is stellar-safe! Letters are hashed, encrypted, and versioned. We support FERPA-style waivers where students see only status, not content. All consent decisions are captured in immutable audit logs with timestamps and actor IDs. Privacy by design! 🛡️"
+                        ]
+                    },
+                    institutions: {
+                        patterns: ['institution', 'university', 'school', 'partner', 'integration'],
+                        responses: [
+                            "We work with 800+ partner institutions! 🏛️ Universities can receive letters via our Native API (preferred), secure HTTPS/SFTP inbox, or compliant email. Non-partners get secure download links with time-boxed access. Everyone gets what they need!",
+                            "Institution integration is seamless! Partner schools get OAuth-secured API delivery with instant receipts. Others use our secure inbox or receive DKIM/DMARC-aligned emails with signed URLs. We adapt to each university's preferred intake method! 🌐"
+                        ]
+                    },
+                    getting_started: {
+                        patterns: ['get started', 'begin', 'start', 'demo', 'sign up', 'how to'],
+                        responses: [
+                            "Ready to launch your stellar journey? 🚀 Click 'Get Started' to create your account, or try our interactive demo first! Students can invite recommenders, and professors can start uploading letters immediately. The universe of recommendations awaits!",
+                            "Getting started is easy as starlight! ✨ Choose your role (Student, Recommender, or Institution), complete verification, and you're ready to revolutionize recommendations! Want to see it in action first? Check out our demo!"
+                        ]
+                    }
+                };
+            }
+
+            init() {
+                this.createWidget();
+                this.bindEvents();
+                this.loadConversationHistory();
+            }
+
+            createWidget() {
+                const chatbotHTML = `
+                    <div class="stella-chatbot">
+                        <div class="stella-widget" id="stellaWidget">
+                            <div class="stella-pulse"></div>
+                            <span class="material-icons">auto_awesome</span>
+                        </div>
+                        <div class="stella-chat-window" id="stellaChatWindow">
+                            <div class="stella-header">
+                                <div class="stella-header-info">
+                                    <div class="stella-avatar">
+                                        <span class="material-icons">star</span>
+                                    </div>
+                                    <div class="stella-info">
+                                        <h3>Stella</h3>
+                                        <p>Your StellarRec AI Guide</p>
+                                    </div>
+                                </div>
+                                <button class="stella-close" id="stellaClose">
+                                    <span class="material-icons">close</span>
+                                </button>
+                            </div>
+                            <div class="stella-messages" id="stellaMessages">
+                                <!-- Messages will be populated here -->
+                            </div>
+                            <div class="stella-quick-actions" id="stellaQuickActions">
+                                <button class="stella-quick-btn" onclick="stellaBot.sendQuickMessage('How does StellarRec work?')">How it works</button>
+                                <button class="stella-quick-btn" onclick="stellaBot.sendQuickMessage('Help with letter management')">Letter Management</button>
+                                <button class="stella-quick-btn" onclick="stellaBot.sendQuickMessage('Track my deliveries')">Track Deliveries</button>
+                                <button class="stella-quick-btn" onclick="stellaBot.sendQuickMessage('Security and privacy')">Security</button>
+                            </div>
+                            <div class="stella-input-area">
+                                <input type="text" class="stella-input" id="stellaInput" placeholder="Ask Stella anything about StellarRec..." maxlength="500">
+                                <button class="stella-send-btn" id="stellaSendBtn">
+                                    <span class="material-icons">send</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', chatbotHTML);
+            }
+
+            bindEvents() {
+                const widget = document.getElementById('stellaWidget');
+                const closeBtn = document.getElementById('stellaClose');
+                const sendBtn = document.getElementById('stellaSendBtn');
+                const input = document.getElementById('stellaInput');
+
+                widget.addEventListener('click', () => this.toggleChat());
+                closeBtn.addEventListener('click', () => this.closeChat());
+                sendBtn.addEventListener('click', () => this.sendMessage());
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.sendMessage();
+                });
+                input.addEventListener('input', () => {
+                    sendBtn.disabled = input.value.trim() === '';
+                });
+            }
+
+            toggleChat() {
+                const chatWindow = document.getElementById('stellaChatWindow');
+                this.isOpen = !this.isOpen;
+                
+                if (this.isOpen) {
+                    chatWindow.classList.add('open');
+                    if (this.conversationHistory.length === 0) {
+                        this.addWelcomeMessage();
+                    }
+                    document.getElementById('stellaInput').focus();
+                } else {
+                    chatWindow.classList.remove('open');
+                }
+            }
+
+            closeChat() {
+                document.getElementById('stellaChatWindow').classList.remove('open');
+                this.isOpen = false;
+            }
+
+            addWelcomeMessage() {
+                const welcomeMessages = [
+                    "Welcome to StellarRec! I'm Stella, your AI guide to the recommendation universe! ⭐",
+                    `I see you're in ${currentUserType} mode. I can help you with ${this.getUserTypeHelp()} and answer any questions about our platform!`,
+                    "What would you like to explore today? 🚀"
+                ];
+                
+                welcomeMessages.forEach((message, index) => {
+                    setTimeout(() => {
+                        this.addMessage('stella', message);
+                    }, index * 1000);
+                });
+            }
+
+            getUserTypeHelp() {
+                const helpText = {
+                    recommender: "letter management, delivery tracking, and consent approvals",
+                    student: "creating requests, tracking applications, and finding universities",
+                    institution: "letter intake, API integration, and analytics",
+                    admin: "system monitoring, user management, and security oversight"
+                };
+                return helpText[currentUserType] || "navigating the platform";
+            }
+
+            sendMessage() {
+                const input = document.getElementById('stellaInput');
+                const message = input.value.trim();
+                
+                if (message) {
+                    this.addMessage('user', message);
+                    input.value = '';
+                    document.getElementById('stellaSendBtn').disabled = true;
+                    
+                    this.showTyping();
+                    setTimeout(() => {
+                        this.hideTyping();
+                        this.generateResponse(message);
+                    }, 1500);
+                }
+            }
+
+            sendQuickMessage(message) {
+                this.addMessage('user', message);
+                this.showTyping();
+                setTimeout(() => {
+                    this.hideTyping();
+                    this.generateResponse(message);
+                }, 1000);
+            }
+
+            generateResponse(userMessage) {
+                const response = this.findBestResponse(userMessage.toLowerCase());
+                this.addMessage('stella', response);
+            }
+
+            findBestResponse(message) {
+                let bestMatch = null;
+                let bestScore = 0;
+
+                for (const [category, data] of Object.entries(this.knowledgeBase)) {
+                    for (const pattern of data.patterns) {
+                        if (message.includes(pattern)) {
+                            const score = pattern.length / message.length;
+                            if (score > bestScore) {
+                                bestScore = score;
+                                bestMatch = data;
+                            }
+                        }
+                    }
+                }
+
+                if (bestMatch) {
+                    const responses = bestMatch.responses;
+                    return responses[Math.floor(Math.random() * responses.length)];
+                } else {
+                    return this.getFallbackResponse();
+                }
+            }
+
+            getFallbackResponse() {
+                const fallbacks = [
+                    "That's a great question! I'm still learning about that specific topic. Let me connect you with our team for detailed help! 🌟",
+                    "I want to make sure I give you the best answer! Could you try rephrasing that, or would you like me to show you our main features? ⭐",
+                    "Hmm, I'm not quite sure about that one yet! Try asking about letter management, delivery tracking, or how StellarRec works in general! 🚀",
+                    "I'm constantly expanding my knowledge! For now, you might want to check out our demo or contact our support team for that specific question! ✨"
+                ];
+                return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+            }
+
+            addMessage(sender, content) {
+                const messagesContainer = document.getElementById('stellaMessages');
+                const messageHTML = `
+                    <div class="stella-message ${sender}">
+                        <div class="stella-message-avatar">
+                            <span class="material-icons">${sender === 'stella' ? 'star' : 'person'}</span>
+                        </div>
+                        <div class="stella-message-content">
+                            ${content}
+                        </div>
+                    </div>
+                `;
+                messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                this.conversationHistory.push({ sender, content, timestamp: new Date() });
+                this.saveConversationHistory();
+            }
+
+            showTyping() {
+                const messagesContainer = document.getElementById('stellaMessages');
+                const typingHTML = `
+                    <div class="stella-message stella" id="stellaTyping">
+                        <div class="stella-message-avatar">
+                            <span class="material-icons">star</span>
+                        </div>
+                        <div class="stella-message-content">
+                            <div class="stella-typing">
+                                <span>Stella is typing</span>
+                                <div class="stella-typing-dots">
+                                    <div class="stella-typing-dot"></div>
+                                    <div class="stella-typing-dot"></div>
+                                    <div class="stella-typing-dot"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                messagesContainer.insertAdjacentHTML('beforeend', typingHTML);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            hideTyping() {
+                const typingElement = document.getElementById('stellaTyping');
+                if (typingElement) {
+                    typingElement.remove();
+                }
+            }
+
+            loadConversationHistory() {
+                const saved = localStorage.getItem('stellaConversation');
+                if (saved) {
+                    this.conversationHistory = JSON.parse(saved);
+                    this.conversationHistory.forEach(msg => {
+                        this.addMessage(msg.sender, msg.content);
+                    });
+                }
+            }
+
+            saveConversationHistory() {
+                localStorage.setItem('stellaConversation', JSON.stringify(this.conversationHistory));
+            }
+        }
+
+        // Enhanced Dashboard Functions
+
+        // AI Assistant Functions
+        function showAIAssistant() {
+            document.getElementById('aiAssistantPanel').style.display = 'block';
+        }
+
+        function hideAIAssistant() {
+            document.getElementById('aiAssistantPanel').style.display = 'none';
+        }
+
+        function showTemplateLibrary() {
+            showSection('template-library');
+        }
+
+        // University Matching Functions
+        function generateMatches() {
+            const results = document.getElementById('matchResults');
+            results.style.display = 'block';
+            
+            // Simulate AI processing
+            setTimeout(() => {
+                alert('🎯 AI Analysis Complete!\n\nBased on your profile, we found 12 excellent matches.\nTop recommendations:\n\n• Stanford (95% match) - Strong CS program alignment\n• MIT (87% match) - Research opportunities\n• UC Berkeley (82% match) - Location preference\n\nWould you like to add these to your application list?');
+            }, 1500);
+        }
+
+        // Template Functions
+        function useTemplate(templateId) {
+            const templates = {
+                'stem-grad': 'STEM Graduate Programs Template',
+                'business-school': 'Business School MBA Template', 
+                'medical-school': 'Medical School Template'
+            };
+            
+            alert(`📝 Loading ${templates[templateId]}...\n\nThis template includes:\n• Optimized structure for ${templateId.replace('-', ' ')}\n• AI-suggested key phrases\n• Success-proven language patterns\n• Customizable sections\n\nTemplate loaded into letter editor!`);
+        }
+
+        // Collaboration Functions
+        function inviteCollaborator() {
+            alert('👥 Invite Collaborator\n\nEnter email address to invite:\n• Co-authors can edit letters\n• Real-time collaboration\n• Comment and suggestion system\n• Version control included\n\nInvitation sent!');
+        }
+
+        function startCollabSession() {
+            alert('✏️ Starting Collaborative Writing Session\n\n• Real-time editing enabled\n• All collaborators notified\n• Auto-save every 30 seconds\n• Chat sidebar activated\n\nSession started! Others can join now.');
+        }
+
+        function shareForReview() {
+            alert('📋 Share for Review\n\nSharing options:\n• Send review link to colleagues\n• Set review deadline\n• Enable comment permissions\n• Track review status\n\nReview link generated and shared!');
+        }
+
+        function scheduleDiscussion() {
+            alert('📅 Schedule Discussion\n\nMeeting options:\n• Video call integration\n• Calendar invites sent\n• Agenda auto-generated\n• Letter context shared\n\nMeeting scheduled for tomorrow 2 PM!');
+        }
+
+        // Performance Insights Functions
+        function viewDetailedAnalytics() {
+            showSection('analytics-dashboard');
+        }
+
+        // Enhanced Navigation
+        function addNavigationItem(userType, item) {
+            if (!navigationMenus[userType]) return;
+            navigationMenus[userType].push(item);
+        }
+
+        // Add new sections to navigation menus
+        navigationMenus.recommender.push(
+            { id: 'analytics-dashboard', icon: 'analytics', label: 'Smart Analytics' },
+            { id: 'template-library', icon: 'library_books', label: 'Templates' },
+            { id: 'performance-insights', icon: 'insights', label: 'Performance' },
+            { id: 'collaboration-tools', icon: 'group_work', label: 'Collaboration' }
+        );
+
+        navigationMenus.student.push(
+            { id: 'performance-insights', icon: 'insights', label: 'My Progress' }
+        );
+
+        navigationMenus.institution.push(
+            { id: 'analytics-dashboard', icon: 'analytics', label: 'Analytics' }
+        );
+
+        navigationMenus.admin.push(
+            { id: 'analytics-dashboard', icon: 'analytics', label: 'Platform Analytics' }
+        );
+
+        // Initialize Stella
+        let stellaBot;
+        function initializeStella() {
+            try {
+                stellaBot = new StellaChatbot();
+                stellaBot.init();
+            } catch (error) {
+                console.error('Stella initialization error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
+<!-- API Client and Dashboard Integration -->
+<script src="frontend/js/api-client.js"></script>
+<script src="frontend/js/dashboard-controller.js"></script>
+<script src="frontend/js/stella-chatbot.js"></script>

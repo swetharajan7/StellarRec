@@ -2,12 +2,7 @@
 # Connects to all 32 backend services
 
 [build]
-  # Build command (if using a build process)
-  command = "echo 'No build needed for static site'"
-  # Directory to publish
   publish = "."
-  # Functions directory (for serverless functions if needed)
-  functions = "netlify/functions"
 
 [build.environment]
   # Environment variables for production
