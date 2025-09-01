@@ -6,8 +6,8 @@
 # API proxy to backend
 /api/* https://api.stellarrec.com/:splat 200
 
-# WebSocket proxy
-/ws/* wss://api.stellarrec.com/:splat 200
+# WebSocket proxy (commented out - not supported in basic Netlify)
+# /ws/* wss://api.stellarrec.com/:splat 200
 
 # SPA fallback
 /* /index.html 200

@@ -493,11 +493,16 @@
         <!-- Background video -->
         <video class="hero-video" autoplay muted playsinline loop preload="metadata"
             poster="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-            onloadstart="console.log('Video loading started')" oncanplay="console.log('Video can play')"
-            onerror="console.error('Video error:', this.error)">
+            onloadstart="console.log('Video loading started')" 
+            onloadeddata="console.log('Video data loaded')"
+            oncanplay="console.log('Video can play')"
+            onplay="console.log('Video started playing')"
+            onerror="console.error('Video error:', this.error); console.log('Falling back to local video')">
             <!-- Your new iStock video from GitHub releases -->
-            <source src="https://github.com/swetharajan7/StellarRec/releases/download/v1.0.0/iStock.mp4" type="video/mp4" />
-            <source src="assets/videos/university-campus-bridge.mp4" type="video/mp4" />
+            <source src="https://github.com/swetharajan7/StellarRec/releases/download/v1.0.0/iStock.mp4"
+                type="video/mp4" onerror="console.log('GitHub video failed, trying local')" />
+            <source src="assets/videos/university-campus-bridge.mp4" type="video/mp4" 
+                onerror="console.log('Local video also failed')" />
             <!-- Fallback message -->
             <p style="color: white; text-align: center; padding: 2rem;">
                 Your browser doesn't support video playback. Please update your browser for the best experience.
