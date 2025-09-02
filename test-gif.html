@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GIF Test</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #000; color: white; }
+        .test-gif { 
+            width: 100%; 
+            max-width: 800px; 
+            height: auto; 
+            border: 2px solid #fff; 
+        }
+        .info { 
+            margin: 20px 0; 
+            font-family: monospace; 
+        }
+    </style>
+</head>
+<body>
+    <h1>GIF Loading Test</h1>
+    <div class="info" id="info">Loading...</div>
+    <img class="test-gif" src="assets/videos/iStock-high.gif" alt="Test GIF" 
+         onload="document.getElementById('info').innerHTML = '✅ GIF loaded successfully! Dimensions: ' + this.naturalWidth + 'x' + this.naturalHeight;"
+         onerror="document.getElementById('info').innerHTML = '❌ GIF failed to load';">
+    
+    <script>
+        console.log('Testing GIF at:', window.location.origin + '/assets/videos/iStock-high.gif');
+        
+        fetch('assets/videos/iStock-high.gif', { method: 'HEAD' })
+            .then(response => {
+                console.log('Fetch response:', response.status, response.statusText);
+                console.log('Content-Type:', response.headers.get('content-type'));
+                console.log('Content-Length:', response.headers.get('content-length'));
+            })
+            .catch(error => console.error('Fetch error:', error));
+    </script>
+</body>
+</html>
