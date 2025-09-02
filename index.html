@@ -34,11 +34,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Roboto', sans-serif;
@@ -47,465 +43,155 @@
             background: #fff;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
         /* Navigation */
         nav {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+            position: fixed; top: 0; left: 0; right: 0;
             z-index: 1000;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
         }
-
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1976d2;
-            text-decoration: none;
-        }
-
-        .nav-buttons {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px solid #1976d2;
-            color: #1976d2;
-        }
-
-        .btn-outline:hover {
-            background: #1976d2;
-            color: #fff;
-        }
-
-        .btn-primary {
-            background: #1976d2;
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            background: #1565c0;
-            transform: translateY(-2px);
-        }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; }
+        .logo { display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; color: #1976d2; text-decoration: none; }
+        .nav-buttons { display: flex; gap: 1rem; }
+        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-block; transition: all 0.3s ease; cursor: pointer; }
+        .btn-outline { background: transparent; border: 2px solid #1976d2; color: #1976d2; }
+        .btn-outline:hover { background: #1976d2; color: #fff; }
+        .btn-primary { background: #1976d2; color: #fff; }
+        .btn-primary:hover { background: #1565c0; transform: translateY(-2px); }
 
         /* Hero Section */
         .hero {
             min-height: 100vh;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: white;
-            overflow: hidden;
-            background: #000;
-            /* safety background */
+            position: relative; /* stacking context */
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; color: white; overflow: hidden;
+            background: #000; /* safety background */
         }
 
-        /* Background GIF as the hero background */
+        /* Background GIF as the hero background (normalized stacking) */
         .hero-video {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center center;
-            z-index: -2 !important;
-            /* Above fallback, below overlays */
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover; object-position: center center;
+            z-index: 0;              /* BASE content layer */
             filter: saturate(1.1) contrast(1.08) brightness(0.9);
             transition: filter 0.3s ease, opacity 0.5s ease;
-            opacity: 1 !important;
-            display: block !important;
-            /* Force GIF visibility */
-            min-width: 100%;
-            min-height: 100%;
+            opacity: 1; display: block;
+            min-width: 100%; min-height: 100%;
         }
+        .hero:hover .hero-video { filter: saturate(1.15) contrast(1.1) brightness(0.95); }
 
-        .hero:hover .hero-video {
-            filter: saturate(1.15) contrast(1.1) brightness(0.95);
-        }
-
-        /* Animated fallback background (above GIF, below overlays) */
+        /* Fallback background (sits UNDER the GIF; only visible on error) */
         .hero-background-image {
-            position: absolute;
-            inset: 0;
+            position: absolute; inset: 0;
             background:
-                linear-gradient(45deg, rgba(25, 118, 210, 0.1) 0%, transparent 50%, rgba(124, 77, 255, 0.1) 100%),
+                linear-gradient(45deg, rgba(25,118,210,0.1) 0%, transparent 50%, rgba(124,77,255,0.1) 100%),
                 url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover;
-            z-index: -3;
+            z-index: -1; /* behind GIF */
             transition: transform 0.3s ease, opacity 0.5s ease;
-            opacity: 0;
-            /* Hidden by default, show only if GIF fails */
+            opacity: 0; /* hidden unless GIF fails */
             animation: subtleMove 20s ease-in-out infinite;
         }
 
         @keyframes subtleMove {
-
-            0%,
-            100% {
-                transform: scale(1) translateX(0);
-                background-position: center center;
-            }
-
-            25% {
-                transform: scale(1.02) translateX(-10px);
-                background-position: 48% center;
-            }
-
-            50% {
-                transform: scale(1.01) translateX(0);
-                background-position: center 48%;
-            }
-
-            75% {
-                transform: scale(1.02) translateX(10px);
-                background-position: 52% center;
-            }
+            0%, 100% { transform: scale(1) translateX(0); background-position: center center; }
+            25% { transform: scale(1.02) translateX(-10px); background-position: 48% center; }
+            50% { transform: scale(1.01) translateX(0); background-position: center 48%; }
+            75% { transform: scale(1.02) translateX(10px); background-position: 52% center; }
         }
 
-        /* Show fallback only when GIF fails */
-        .hero-video[data-error="true"]~.hero-background-image {
-            opacity: 1;
-        }
+        /* Show fallback when GIF fails */
+        .hero-video[data-error="true"] ~ .hero-background-image { opacity: 1; }
 
-        /* Ensure GIF is visible when loaded */
-        .hero-video[data-loaded="true"] {
-            opacity: 1 !important;
-            display: block !important;
-            z-index: -4 !important;
-        }
-
-        /* Force GIF to be above fallback when loaded */
-        .hero-video[data-loaded="true"] {
-            z-index: -2 !important;
-        }
-
-        .hero:hover .hero-background-image {
-            transform: scale(1.05);
-        }
-
-        /* Gradient overlay above the video */
+        /* Overlays ABOVE the GIF */
         .hero-gradient-overlay {
-            position: absolute;
-            inset: 0;
+            position: absolute; inset: 0;
             background: linear-gradient(135deg,
-                    rgba(25, 118, 210, 0.3) 0%,
-                    rgba(124, 77, 255, 0.25) 50%,
-                    rgba(255, 235, 59, 0.1) 100%);
-            z-index: -2;
+                    rgba(25,118,210,0.3) 0%,
+                    rgba(124,77,255,0.25) 50%,
+                    rgba(255,235,59,0.1) 100%);
+            z-index: 1;
         }
-
-        /* Vignette overlay above gradient */
         .hero-image-overlay {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
-            z-index: -1;
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%);
+            z-index: 2;
         }
 
         .hero-content {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-            position: relative;
-            z-index: 10;
+            max-width: 800px; margin: 0 auto; padding: 2rem;
+            position: relative; z-index: 10;
             backdrop-filter: blur(2px);
-            background: rgba(255, 255, 255, 0.10);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            background: rgba(255,255,255,0.10);
+            border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
 
         /* Giant gold star */
-        .stellar-star {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto 2rem;
-            position: relative;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .star-svg {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 0 40px rgba(255, 235, 59, 1)) drop-shadow(0 0 20px rgba(255, 235, 59, 0.8));
-        }
-
-        .star-path {
-            fill: url(#starGradient);
-            stroke: #ffeb3b;
-            stroke-width: 2;
-            animation: pulse 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0) rotate(0);
-            }
-
-            50% {
-                transform: translateY(-20px) rotate(5deg);
-            }
-        }
-
-        @keyframes pulse {
-            0% {
-                stroke-width: 2;
-            }
-
-            100% {
-                stroke-width: 4;
-            }
-        }
+        .stellar-star { width: 200px; height: 200px; margin: 0 auto 2rem; position: relative; animation: float 6s ease-in-out infinite; }
+        .star-svg { width: 100%; height: 100%; filter: drop-shadow(0 0 40px rgba(255,235,59,1)) drop-shadow(0 0 20px rgba(255,235,59,0.8)); }
+        .star-path { fill: url(#starGradient); stroke: #ffeb3b; stroke-width: 2; animation: pulse 2s ease-in-out infinite alternate; }
+        @keyframes float { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-20px) rotate(5deg); } }
+        @keyframes pulse { 0% { stroke-width: 2; } 100% { stroke-width: 4; } }
 
         /* Headline over the video */
         .hero-title {
-            font-size: 4rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
+            font-size: 4rem; font-weight: 700; margin-bottom: 1rem;
             background: linear-gradient(45deg, #ffeb3b, #ffc107, #ff9800);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-
         .hero-tagline {
-            font-size: 2rem;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.95);
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
-            margin-top: 1rem;
-            letter-spacing: 0.5px;
+            font-size: 2rem; font-weight: 600; color: rgba(255,255,255,0.95);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.7); margin-top: 1rem; letter-spacing: 0.5px;
         }
 
         /* Tiny floating stars layer - stays on TOP of everything */
-        .floating-elements {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 20;
-        }
-
+        .floating-elements { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
         .floating-star {
-            position: absolute;
-            font-size: 1.5rem;
-            opacity: 0.85;
-            animation: floatStar 8s ease-in-out infinite;
-            pointer-events: none;
-            mix-blend-mode: screen;
-            text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+            position: absolute; font-size: 1.5rem; opacity: 0.85;
+            animation: floatStar 8s ease-in-out infinite; pointer-events: none; mix-blend-mode: screen;
+            text-shadow: 0 0 12px rgba(255,255,255,0.8);
         }
-
-        @keyframes floatStar {
-
-            0%,
-            100% {
-                transform: translateY(0) rotate(0);
-                opacity: 0.8;
-            }
-
-            50% {
-                transform: translateY(-30px) rotate(180deg);
-                opacity: 1;
-            }
-        }
+        @keyframes floatStar { 0%,100% { transform: translateY(0) rotate(0); opacity: 0.8; } 50% { transform: translateY(-30px) rotate(180deg); opacity: 1; } }
 
         /* University Carousel */
-        .trusted-banner {
-            background: #f8f9fa;
-            padding: 3rem 0;
-            text-align: center;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .trusted-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 2rem;
-        }
-
-        .university-carousel {
-            overflow: hidden;
-            white-space: nowrap;
-            position: relative;
-            width: 100%;
-        }
-
-        .university-track {
-            display: inline-flex;
-            animation: scroll 30s linear infinite;
-            gap: 3rem;
-            align-items: center;
-            width: max-content;
-        }
-
-        .university-item {
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 1rem;
-            min-width: 120px;
-            text-align: center;
-        }
-
-        .university-logo {
-            width: 80px;
-            height: 80px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            font-size: 2rem;
-            color: #1976d2;
-            overflow: hidden;
-        }
-
-        .university-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            padding: 8px;
-        }
-
-        .university-name {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #333;
-            text-align: center;
-            white-space: normal;
-            max-width: 120px;
-        }
-
-        @keyframes scroll {
-            0% {
-                transform: translateX(0);
-            }
-
-            100% {
-                transform: translateX(-50%);
-            }
-        }
+        .trusted-banner { background: #f8f9fa; padding: 3rem 0; text-align: center; width: 100%; overflow: hidden; }
+        .trusted-title { font-size: 1.5rem; font-weight: 600; color: #333; margin-bottom: 2rem; }
+        .university-carousel { overflow: hidden; white-space: nowrap; position: relative; width: 100%; }
+        .university-track { display: inline-flex; animation: scroll 30s linear infinite; gap: 3rem; align-items: center; width: max-content; }
+        .university-item { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1rem; min-width: 120px; text-align: center; }
+        .university-logo { width: 80px; height: 80px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 2rem; color: #1976d2; overflow: hidden; }
+        .university-logo img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
+        .university-name { font-size: 0.9rem; font-weight: 600; color: #333; text-align: center; white-space: normal; max-width: 120px; }
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
         /* Footer */
-        footer {
-            background: #333;
-            color: white;
-            text-align: center;
-            padding: 2rem 0;
-        }
+        footer { background: #333; color: white; text-align: center; padding: 2rem 0; }
 
         /* Accessibility / Motion preferences */
         @media (prefers-reduced-motion: reduce) {
-
-            .stellar-star,
-            .floating-star,
-            .university-track {
-                animation: none !important;
-            }
-
-            .hero:hover .hero-background-image {
-                transform: none;
-            }
-
-            .university-track {
-                transform: translateX(-25%);
-            }
+            .stellar-star, .floating-star, .university-track { animation: none !important; }
+            .hero:hover .hero-background-image { transform: none; }
+            .university-track { transform: translateX(-25%); }
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .hero {
-                background-attachment: scroll;
-            }
-
-            .hero-content {
-                padding: 1.5rem;
-                margin: 1rem;
-                backdrop-filter: blur(3px);
-                background: rgba(255, 255, 255, 0.15);
-            }
-
-            .hero-title {
-                font-size: 3rem;
-            }
-
-            .hero-tagline {
-                font-size: 1.5rem;
-            }
-
-            .stellar-star {
-                width: 150px;
-                height: 150px;
-            }
-
-            .nav-buttons {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .btn {
-                padding: 0.5rem 1rem;
-                font-size: 0.9rem;
-            }
-
-            .university-track {
-                gap: 2rem;
-            }
-
-            .university-item {
-                min-width: 100px;
-                padding: 0.5rem;
-            }
-
-            .university-logo {
-                width: 60px;
-                height: 60px;
-            }
-
-            .university-name {
-                font-size: 0.8rem;
-                max-width: 100px;
-            }
+            .hero { background-attachment: scroll; }
+            .hero-content { padding: 1.5rem; margin: 1rem; backdrop-filter: blur(3px); background: rgba(255,255,255,0.15); }
+            .hero-title { font-size: 3rem; }
+            .hero-tagline { font-size: 1.5rem; }
+            .stellar-star { width: 150px; height: 150px; }
+            .nav-buttons { flex-direction: column; gap: 0.5rem; }
+            .btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
+            .university-track { gap: 2rem; }
+            .university-item { min-width: 100px; padding: 0.5rem; }
+            .university-logo { width: 60px; height: 60px; }
+            .university-name { font-size: 0.8rem; max-width: 100px; }
         }
     </style>
 </head>
@@ -526,17 +212,21 @@
         </div>
     </nav>
 
-    <!-- Hero Section with VIDEO background -->
+    <!-- Hero Section with GIF background -->
     <section class="hero" aria-label="Hero with background video">
-        <!-- Fallback static image layer (kept under the video just in case) -->
+        <!-- Fallback static image layer (under the GIF) -->
         <div class="hero-background-image" aria-hidden="true"></div>
 
-        <!-- Background GIF (your iStock video converted to GIF) -->
-        <img class="hero-video" src="assets/videos/iStock-high.gif" alt="University campus background"
-            onload="console.log('✅ GIF loaded successfully'); this.setAttribute('data-loaded', 'true'); console.log('Setting data-loaded attribute');"
-            onerror="console.error('❌ GIF failed to load, keeping fallback visible'); this.style.display='none'; this.setAttribute('data-error', 'true');" />
+        <!-- Background GIF -->
+        <img
+            class="hero-video"
+            src="/assets/videos/iStock-high.gif?v=20250902"
+            alt="University campus background"
+            onload="this.setAttribute('data-loaded','true')"
+            onerror="this.style.display='none'; document.querySelector('.hero-background-image').style.opacity='1'; this.setAttribute('data-error','true');"
+        />
 
-        <!-- Gradient and vignette overlays above the video -->
+        <!-- Overlays above the GIF -->
         <div class="hero-gradient-overlay" aria-hidden="true"></div>
         <div class="hero-image-overlay" aria-hidden="true"></div>
 
@@ -562,7 +252,7 @@
             <div class="floating-star" style="top: 95%; left: 40%; animation-delay: 3.2s;">⭐</div>
         </div>
 
-        <!-- Foreground content (giant gold star + “stellarrec” text) -->
+        <!-- Foreground content -->
         <div class="container">
             <div class="hero-content">
                 <div class="stellar-star" aria-hidden="true">
@@ -727,127 +417,38 @@
         </div>
     </footer>
 
-    <!-- GIF loading and debugging script -->
+    <!-- GIF loading and fallback script (simplified) -->
     <script>
         (function () {
             const heroImage = document.querySelector('.hero-video');
             const fallbackImage = document.querySelector('.hero-background-image');
+            if (!heroImage) return;
 
-            if (!heroImage) {
-                console.error('Hero image element not found');
-                return;
-            }
-
-            console.log('🎬 Hero GIF Debug Info:');
-            console.log('- Element found:', heroImage);
-            console.log('- GIF src:', heroImage.src);
-            console.log('- Current display:', window.getComputedStyle(heroImage).display);
-            console.log('- Current opacity:', window.getComputedStyle(heroImage).opacity);
-            console.log('- Current z-index:', window.getComputedStyle(heroImage).zIndex);
-
-            // Force GIF visibility immediately
-            heroImage.style.opacity = '1';
-            heroImage.style.display = 'block';
-            heroImage.style.zIndex = '-2';
-            
-            // Hide fallback immediately to let GIF show
-            if (fallbackImage) {
-                fallbackImage.style.opacity = '0';
-                console.log('🙈 Hid fallback to show GIF');
-            }
-            
-            console.log('🚀 Forced initial GIF visibility');
-
-            // Check if GIF is already loaded
+            // If already loaded from cache
             if (heroImage.complete && heroImage.naturalHeight !== 0) {
-                console.log('✅ GIF already loaded successfully');
-                console.log('- Natural dimensions:', heroImage.naturalWidth + 'x' + heroImage.naturalHeight);
                 heroImage.setAttribute('data-loaded', 'true');
-                console.log('🎯 Forced data-loaded attribute');
             } else {
-                console.log('⏳ GIF still loading...');
-
-                // Set up a timeout to check loading status
+                // Wait up to 5s, then reveal fallback if needed
                 setTimeout(() => {
                     if (heroImage.complete && heroImage.naturalHeight !== 0) {
-                        console.log('✅ GIF loaded after timeout');
                         heroImage.setAttribute('data-loaded', 'true');
-                        console.log('🎯 Set data-loaded after timeout');
                     } else {
-                        console.log('❌ GIF failed to load within timeout - keeping fallback');
                         heroImage.style.display = 'none';
                         heroImage.setAttribute('data-error', 'true');
+                        if (fallbackImage) fallbackImage.style.opacity = '1';
                     }
-                }, 5000); // Increased timeout for large GIF
+                }, 5000);
             }
 
-            // Manual visibility toggle with 'p' key for testing
-            window.addEventListener('keydown', (e) => {
-                if (e.key.toLowerCase() === 'p') {
-                    if (heroImage.style.display === 'none') {
-                        heroImage.style.display = '';
-                        console.log('👁️ GIF shown');
-                    } else {
-                        heroImage.style.display = 'none';
-                        console.log('🙈 GIF hidden');
-                    }
-                }
-
-                // Toggle fallback with 'f' key
-                if (e.key.toLowerCase() === 'f' && fallbackImage) {
-                    if (fallbackImage.style.opacity === '1') {
-                        fallbackImage.style.opacity = '0';
-                        console.log('🙈 Fallback hidden');
-                    } else {
-                        fallbackImage.style.opacity = '1';
-                        console.log('👁️ Fallback shown');
-                    }
-                }
-
-                // Force GIF visibility with 'g' key
-                if (e.key.toLowerCase() === 'g') {
-                    heroImage.setAttribute('data-loaded', 'true');
-                    heroImage.style.opacity = '1';
-                    heroImage.style.display = 'block';
-                    heroImage.style.zIndex = '-4';
-                    if (fallbackImage) fallbackImage.style.opacity = '0';
-                    console.log('🎬 GIF visibility forced with G key');
-                }
-            });
-
-            // Test direct URL access
-            fetch('assets/videos/iStock-high.gif', { method: 'HEAD' })
-                .then(response => {
-                    if (response.ok) {
-                        console.log('✅ GIF file is accessible via fetch');
-                        console.log('- Content-Type:', response.headers.get('content-type'));
-                        console.log('- Content-Length:', response.headers.get('content-length'));
-                    } else {
-                        console.error('❌ GIF file not accessible:', response.status, response.statusText);
-                    }
+            // Optional: quick path check (HEAD)
+            fetch('/assets/videos/iStock-high.gif?v=20250902', { method: 'HEAD' })
+                .then(r => {
+                    if (!r.ok && fallbackImage) fallbackImage.style.opacity = '1';
                 })
-                .catch(error => {
-                    console.error('❌ Error fetching GIF:', error);
+                .catch(() => {
+                    if (fallbackImage) fallbackImage.style.opacity = '1';
                 });
-
-            // Log when page is fully loaded
-            window.addEventListener('load', () => {
-                console.log('📄 Page fully loaded');
-                console.log('- GIF complete:', heroImage.complete);
-                console.log('- GIF natural height:', heroImage.naturalHeight);
-                console.log('- GIF display:', window.getComputedStyle(heroImage).display);
-
-                // Final check and force visibility if GIF is loaded
-                if (heroImage.complete && heroImage.naturalHeight !== 0) {
-                    heroImage.setAttribute('data-loaded', 'true');
-                    heroImage.style.opacity = '1';
-                    heroImage.style.display = 'block';
-                    heroImage.style.zIndex = '-4';
-                    console.log('🚀 Final GIF visibility forced');
-                }
-            });
         })();
     </script>
 </body>
-
 </html>
