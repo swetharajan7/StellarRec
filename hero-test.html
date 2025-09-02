@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hero GIF Test - Minimal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; }
+        
+        .hero {
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .hero-video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            opacity: 1;
+            display: block;
+        }
+
+        .hero-fallback {
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover;
+            z-index: 0;
+            opacity: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            background: rgba(0,0,0,0.5);
+            padding: 2rem;
+            border-radius: 10px;
+        }
+
+        .status {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="status" id="status">Loading...</div>
+    
+    <section class="hero">
+        <div class="hero-fallback"></div>
+        <img class="hero-video" src="assets/videos/iStock-high.gif" alt="Hero GIF"
+             onload="onGifLoad()" onerror="onGifError()">
+        
+        <div class="hero-content">
+            <h1>🌟 StellarRec Hero Test</h1>
+            <p>Testing GIF visibility in minimal setup</p>
+            <p>Press 'G' to toggle GIF, 'F' to toggle fallback</p>
+        </div>
+    </section>
+
+    <script>
+        const status = document.getElementById('status');
+        const gif = document.querySelector('.hero-video');
+        const fallback = document.querySelector('.hero-fallback');
+
+        function updateStatus(msg) {
+            status.textContent = msg;
+            console.log(msg);
+        }
+
+        function onGifLoad() {
+            updateStatus('✅ GIF loaded successfully!');
+            gif.style.zIndex = '2';
+            fallback.style.opacity = '0';
+        }
+
+        function onGifError() {
+            updateStatus('❌ GIF failed to load');
+            gif.style.display = 'none';
+            fallback.style.opacity = '1';
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'g') {
+                gif.style.display = gif.style.display === 'none' ? 'block' : 'none';
+                updateStatus('Toggled GIF: ' + (gif.style.display === 'none' ? 'hidden' : 'visible'));
+            }
+            if (e.key.toLowerCase() === 'f') {
+                fallback.style.opacity = fallback.style.opacity === '1' ? '0' : '1';
+                updateStatus('Toggled fallback: ' + (fallback.style.opacity === '1' ? 'visible' : 'hidden'));
+            }
+        });
+
+        // Initial status
+        updateStatus('🎬 Testing GIF loading...');
+        
+        // Check if already loaded
+        if (gif.complete && gif.naturalHeight !== 0) {
+            onGifLoad();
+        }
+    </script>
+</body>
+</html>
