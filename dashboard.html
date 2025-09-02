@@ -358,6 +358,11 @@
             background: #e3f2fd;
         }
 
+        .university-card:focus {
+            outline: 2px solid #1976d2;
+            outline-offset: 2px;
+        }
+
         .university-header {
             display: flex;
             align-items: center;
@@ -593,6 +598,108 @@
             box-shadow: 0 8px 25px rgba(25, 118, 210, 0.3);
         }
 
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #666;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #1976d2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1565c0;
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .container {
@@ -610,6 +717,11 @@
             .header-content {
                 flex-direction: column;
                 gap: 1rem;
+            }
+
+            .modal {
+                margin: 1rem;
+                width: calc(100% - 2rem);
             }
         }
     </style>
@@ -641,6 +753,14 @@
                         <div class="view-label">
                             <div class="view-name">Student</div>
                             <div class="view-description">Track applications</div>
+                        </div>
+                    </div>
+                    <div style="border-top: 1px solid #f0f0f0; margin: 0.5rem 0;"></div>
+                    <div class="dropdown-item" onclick="toggleMockAPI()">
+                        <span class="material-icons">api</span>
+                        <div class="view-label">
+                            <div class="view-name">API Mode</div>
+                            <div class="view-description" id="apiModeDesc">Using mock data</div>
                         </div>
                     </div>
                 </div>
@@ -749,9 +869,69 @@
         </div>
     </div>
 
+    <!-- Modal for confirmations -->
+    <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Confirm Action</h2>
+                <button class="modal-close" onclick="closeModal()" aria-label="Close modal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-content" id="modalContent">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-actions" id="modalActions">
+                <!-- Dynamic actions -->
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Sample university data
-        const universities = [
+        // Environment and feature flags
+        const USE_MOCK = localStorage.getItem('sr_use_mock') !== '0';
+        const API_URL = window.ENV?.API_URL || 'https://api.stellarrec.com';
+        
+        // Toast notification system
+        function toast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'error' ? '#f44336' : type === 'success' ? '#4caf50' : '#2196f3'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+        
+        // Add toast animations to head
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Sample university data (fallback)
+        const mockUniversities = [
             { id: 1, name: "Harvard University", location: "Cambridge, MA", logo: "H" },
             { id: 2, name: "Stanford University", location: "Stanford, CA", logo: "S" },
             { id: 3, name: "MIT", location: "Cambridge, MA", logo: "MIT" },
@@ -774,22 +954,88 @@
             { id: 20, name: "UCLA", location: "Los Angeles, CA", logo: "UCLA" }
         ];
 
+        let universities = [];
+        let filteredUniversities = [];
         let selectedUniversities = [];
         let uploadedFile = null;
         let currentView = 'recommender';
+        let searchDebounceTimer = null;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function () {
-            renderUniversities(universities);
+            loadUniversities();
             setupFileUpload();
             setupSearch();
             setupClickOutside();
+            updateAPIToggle();
         });
+
+        // Load universities from API or mock
+        async function loadUniversities() {
+            try {
+                if (USE_MOCK) {
+                    universities = mockUniversities;
+                    filteredUniversities = universities;
+                    renderUniversities(filteredUniversities);
+                    return;
+                }
+
+                const response = await fetch(`${API_URL}/universities`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                universities = await response.json();
+                filteredUniversities = universities;
+                renderUniversities(filteredUniversities);
+                toast('Universities loaded successfully', 'success');
+            } catch (error) {
+                console.error('Failed to load universities:', error);
+                universities = mockUniversities;
+                filteredUniversities = universities;
+                renderUniversities(filteredUniversities);
+                showDatasetError(error.message);
+            }
+        }
+
+        function showDatasetError(errorMsg) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'dataset-error';
+            errorDiv.innerHTML = `
+                <div style="background: #ffebee; border: 1px solid #f44336; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; text-align: center;">
+                    <span class="material-icons" style="color: #f44336; font-size: 2rem;">error</span>
+                    <h3 style="color: #f44336; margin: 0.5rem 0;">Failed to load universities</h3>
+                    <p style="color: #666; margin-bottom: 1rem;">Error: ${errorMsg}</p>
+                    <button onclick="retryDatasetLoad()" style="background: #f44336; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+                        <span class="material-icons" style="font-size: 1rem; vertical-align: middle;">refresh</span>
+                        Retry
+                    </button>
+                </div>
+            `;
+            document.querySelector('.university-section').prepend(errorDiv);
+        }
+
+        function retryDatasetLoad() {
+            document.querySelector('.dataset-error')?.remove();
+            loadUniversities();
+        }
 
         // User dropdown functionality
         function toggleUserDropdown() {
             const dropdown = document.getElementById('userDropdown');
             dropdown.classList.toggle('show');
+        }
+
+        function toggleMockAPI() {
+            const newUseMock = !USE_MOCK;
+            localStorage.setItem('sr_use_mock', newUseMock ? '1' : '0');
+            toast(`Switched to ${newUseMock ? 'mock' : 'real'} API. Reloading...`, 'info');
+            setTimeout(() => location.reload(), 1000);
+        }
+
+        function updateAPIToggle() {
+            const desc = document.getElementById('apiModeDesc');
+            if (desc) {
+                desc.textContent = USE_MOCK ? 'Using mock data' : 'Using real API';
+            }
         }
 
         function switchView(view) {
@@ -873,8 +1119,16 @@
         }
 
         function handleFile(file) {
+            // Validate file type
             if (file.type !== 'application/pdf') {
-                alert('Please upload a PDF file.');
+                toast('Please upload a PDF file only', 'error');
+                return;
+            }
+
+            // Validate file size (20MB limit)
+            const maxSize = 20 * 1024 * 1024;
+            if (file.size > maxSize) {
+                toast('File too large. Maximum size is 20MB', 'error');
                 return;
             }
 
@@ -893,24 +1147,63 @@
             updateSendButton();
         }
 
-        // University search and selection
+        // University search and selection with debounce
         function setupSearch() {
             const searchInput = document.getElementById('universitySearch');
             searchInput.addEventListener('input', (e) => {
                 const query = e.target.value.toLowerCase();
-                const filtered = universities.filter(uni =>
+                
+                // Clear previous timer
+                if (searchDebounceTimer) {
+                    clearTimeout(searchDebounceTimer);
+                }
+                
+                // Debounce search by 300ms
+                searchDebounceTimer = setTimeout(() => {
+                    performSearch(query);
+                }, 300);
+            });
+        }
+
+        function performSearch(query) {
+            if (!query.trim()) {
+                filteredUniversities = universities;
+            } else {
+                filteredUniversities = universities.filter(uni =>
                     uni.name.toLowerCase().includes(query) ||
                     uni.location.toLowerCase().includes(query)
                 );
-                renderUniversities(filtered);
-            });
+            }
+            
+            renderUniversities(filteredUniversities);
         }
 
         function renderUniversities(universitiesToRender) {
             const grid = document.getElementById('universityGrid');
+            
+            if (universitiesToRender.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+                        <span class="material-icons" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;">search_off</span>
+                        <h3 style="color: #666; margin-bottom: 0.5rem;">No universities found</h3>
+                        <p style="color: #999; margin-bottom: 1rem;">Try adjusting your search terms</p>
+                        <button onclick="clearSearch()" style="background: #1976d2; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+                            <span class="material-icons" style="font-size: 1rem; vertical-align: middle;">clear</span>
+                            Clear filters
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
             grid.innerHTML = universitiesToRender.map(uni => `
                 <div class="university-card ${selectedUniversities.includes(uni.id) ? 'selected' : ''}" 
-                     onclick="toggleUniversity(${uni.id})">
+                     onclick="toggleUniversity(${uni.id})"
+                     onkeydown="handleUniversityKeydown(event, ${uni.id})"
+                     tabindex="0"
+                     role="button"
+                     aria-pressed="${selectedUniversities.includes(uni.id)}"
+                     aria-label="Select ${uni.name}">
                     <div class="university-header">
                         <div class="university-logo">${uni.logo}</div>
                         <div>
@@ -922,6 +1215,19 @@
             `).join('');
         }
 
+        function clearSearch() {
+            document.getElementById('universitySearch').value = '';
+            filteredUniversities = universities;
+            renderUniversities(filteredUniversities);
+        }
+
+        function handleUniversityKeydown(event, id) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                toggleUniversity(id);
+            }
+        }
+
         function toggleUniversity(id) {
             if (selectedUniversities.includes(id)) {
                 selectedUniversities = selectedUniversities.filter(uId => uId !== id);
@@ -929,7 +1235,7 @@
                 selectedUniversities.push(id);
             }
 
-            renderUniversities(universities);
+            renderUniversities(filteredUniversities);
             updateSelectedList();
             updateSendButton();
         }
@@ -957,18 +1263,7 @@
             sendBtn.disabled = !canSend;
         }
 
-        // Send letters functionality
-        function sendLetters() {
-            if (!uploadedFile || selectedUniversities.length === 0) return;
 
-            // Hide other sections and show progress
-            document.getElementById('progressSection').style.display = 'block';
-            document.querySelector('.upload-section').style.display = 'none';
-            document.querySelector('.university-section').style.display = 'none';
-            document.querySelector('.selected-section').style.display = 'none';
-
-            simulateDelivery();
-        }
 
         function simulateDelivery() {
             const progressFill = document.getElementById('progressFill');
@@ -1037,6 +1332,110 @@
             // Clear progress section
             document.getElementById('deliveryList').innerHTML = '';
             document.getElementById('progressFill').style.width = '0%';
+        }
+
+        // Modal functionality with focus trap
+        let modalPreviousFocus = null;
+        let modalFocusableElements = [];
+
+        function showModal(title, content, actions) {
+            modalPreviousFocus = document.activeElement;
+            
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('modalActions').innerHTML = actions;
+            
+            const modal = document.getElementById('modalOverlay');
+            modal.classList.add('show');
+            
+            // Set up focus trap
+            setupFocusTrap();
+            
+            // Focus first actionable element
+            const firstButton = modal.querySelector('button:not(.modal-close)');
+            if (firstButton) {
+                firstButton.focus();
+            } else {
+                modal.querySelector('.modal-close').focus();
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modalOverlay');
+            modal.classList.remove('show');
+            
+            // Restore focus
+            if (modalPreviousFocus) {
+                modalPreviousFocus.focus();
+                modalPreviousFocus = null;
+            }
+            
+            // Clean up event listeners
+            document.removeEventListener('keydown', handleModalKeydown);
+        }
+
+        function setupFocusTrap() {
+            const modal = document.getElementById('modalOverlay');
+            modalFocusableElements = modal.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            
+            document.addEventListener('keydown', handleModalKeydown);
+        }
+
+        function handleModalKeydown(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+                return;
+            }
+            
+            if (e.key === 'Tab') {
+                const firstElement = modalFocusableElements[0];
+                const lastElement = modalFocusableElements[modalFocusableElements.length - 1];
+                
+                if (e.shiftKey) {
+                    if (document.activeElement === firstElement) {
+                        e.preventDefault();
+                        lastElement.focus();
+                    }
+                } else {
+                    if (document.activeElement === lastElement) {
+                        e.preventDefault();
+                        firstElement.focus();
+                    }
+                }
+            }
+        }
+
+        // Enhanced send letters with confirmation modal
+        function sendLetters() {
+            if (!uploadedFile || selectedUniversities.length === 0) return;
+
+            const selectedNames = selectedUniversities.map(id => 
+                universities.find(u => u.id === id)?.name
+            ).join(', ');
+
+            showModal(
+                'Confirm Submission',
+                `<p>Send recommendation letter to <strong>${selectedUniversities.length}</strong> universities?</p>
+                 <div style="max-height: 150px; overflow-y: auto; margin: 1rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                     <small>${selectedNames}</small>
+                 </div>`,
+                `<button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                 <button class="btn btn-primary" onclick="confirmSendLetters()">Send Letters</button>`
+            );
+        }
+
+        function confirmSendLetters() {
+            closeModal();
+            
+            // Hide other sections and show progress
+            document.getElementById('progressSection').style.display = 'block';
+            document.querySelector('.upload-section').style.display = 'none';
+            document.querySelector('.university-section').style.display = 'none';
+            document.querySelector('.selected-section').style.display = 'none';
+
+            simulateDelivery();
         }
     </script>
 </body>
