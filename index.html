@@ -7,18 +7,17 @@
   <title>StellarRec - AI-Powered University Applications | Updated</title>
   <meta name="description"
     content="Transform your university application process with AI-powered recommendations, content optimization, and intelligent workflow management." />
-  <!-- Deployment timestamp: 2025-09-02-00:30 -->
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://stellarrec.in/">
+  <meta property="og:url" content="https://stellarrec.netlify.app/">
   <meta property="og:title" content="StellarRec - AI-Powered University Applications">
   <meta property="og:description"
     content="Transform your university application process with AI-powered recommendations, content optimization, and intelligent workflow management.">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://stellarrec.in/">
+  <meta property="twitter:url" content="https://stellarrec.netlify.app/">
   <meta property="twitter:title" content="StellarRec - AI-Powered University Applications">
   <meta property="twitter:description"
     content="Transform your university application process with AI-powered recommendations, content optimization, and intelligent workflow management.">
@@ -132,19 +131,18 @@
       background: #000;
     }
 
-    /* Background video as hero background */
+    /* Background video */
     .hero-video {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center center;
-      z-index: -2;
+      object-position: center;
+      z-index: 0; /* fixed from -2 */
       filter: saturate(1.1) contrast(1.08) brightness(0.9);
     }
 
-    /* Gradient overlay above the video */
     .hero-gradient-overlay {
       position: absolute;
       inset: 0;
@@ -152,15 +150,14 @@
           rgba(25, 118, 210, 0.3) 0%,
           rgba(124, 77, 255, 0.25) 50%,
           rgba(255, 235, 59, 0.1) 100%);
-      z-index: -1;
+      z-index: 1;
     }
 
-    /* Vignette overlay above gradient */
     .hero-image-overlay {
       position: absolute;
       inset: 0;
       background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
-      z-index: 0;
+      z-index: 2;
     }
 
     .hero-content {
@@ -256,7 +253,8 @@
 
   <!-- Hero Section with VIDEO background -->
   <section class="hero" aria-label="Hero with background video">
-    <video class="hero-video" autoplay muted loop playsinline>
+    <video class="hero-video" autoplay muted loop playsinline preload="auto"
+      poster="https://via.placeholder.com/1920x1080.png?text=Loading+StellarRec">
       <source src="https://github.com/swetharajan7/StellarRec/releases/download/v1.0-video/iStock-720p.mp4" type="video/mp4">
     </video>
 
@@ -302,4 +300,5 @@
   </footer>
 </body>
 </html>
+
 
