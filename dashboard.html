@@ -45,9 +45,18 @@
             gap: 0.5rem;
             font-size: 1.8rem;
             font-weight: 700;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
         }
 
         .user-info {
+            position: relative;
             display: flex;
             align-items: center;
             gap: 1rem;
@@ -62,6 +71,88 @@
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .user-avatar:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .user-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-header {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .dropdown-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .dropdown-item.active {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .dropdown-item .material-icons {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        .dropdown-item.active .material-icons {
+            color: #1976d2;
+        }
+        
+        .view-label {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .view-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .view-description {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.1rem;
         }
 
         /* Main Container */
@@ -528,13 +619,30 @@
     <!-- Header -->
     <div class="header">
         <div class="header-content">
-            <div class="logo">
+            <a href="index.html" class="logo">
                 <span class="material-icons">star</span>
                 stellarrec
-            </div>
+            </a>
             <div class="user-info">
-                <div class="user-avatar">
+                <div class="user-avatar" onclick="toggleUserDropdown()">
                     <span class="material-icons">person</span>
+                </div>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="dropdown-header">Switch View</div>
+                    <div class="dropdown-item active" onclick="switchView('recommender')">
+                        <span class="material-icons">edit</span>
+                        <div class="view-label">
+                            <div class="view-name">Recommender</div>
+                            <div class="view-description">Write & send letters</div>
+                        </div>
+                    </div>
+                    <div class="dropdown-item" onclick="switchView('student')">
+                        <span class="material-icons">school</span>
+                        <div class="view-label">
+                            <div class="view-name">Student</div>
+                            <div class="view-description">Track applications</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -668,13 +776,67 @@
 
         let selectedUniversities = [];
         let uploadedFile = null;
+        let currentView = 'recommender';
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function () {
             renderUniversities(universities);
             setupFileUpload();
             setupSearch();
+            setupClickOutside();
         });
+
+        // User dropdown functionality
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function switchView(view) {
+            currentView = view;
+            
+            // Update active state in dropdown
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.dropdown-item').classList.add('active');
+            
+            // Update dashboard content based on view
+            updateDashboardForView(view);
+            
+            // Close dropdown
+            document.getElementById('userDropdown').classList.remove('show');
+        }
+
+        function updateDashboardForView(view) {
+            const heroTitle = document.querySelector('.hero-title');
+            const heroSubtitle = document.querySelector('.hero-subtitle');
+            const uploadTitle = document.querySelector('.upload-title');
+            
+            if (view === 'student') {
+                heroTitle.textContent = 'Track Your Applications';
+                heroSubtitle.textContent = 'Monitor the status of your recommendation letters and university applications.';
+                uploadTitle.textContent = 'Request Recommendation Letter';
+                
+                // Could add student-specific functionality here
+                // For now, we'll keep the same interface but with different messaging
+            } else {
+                heroTitle.textContent = 'One Upload. Multiple Universities.';
+                heroSubtitle.textContent = 'Upload your recommendation letter once and send it to multiple US universities instantly.';
+                uploadTitle.textContent = 'Upload Recommendation Letter';
+            }
+        }
+
+        function setupClickOutside() {
+            document.addEventListener('click', function(event) {
+                const userInfo = document.querySelector('.user-info');
+                const dropdown = document.getElementById('userDropdown');
+                
+                if (!userInfo.contains(event.target)) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        }
 
         // File upload functionality
         function setupFileUpload() {
