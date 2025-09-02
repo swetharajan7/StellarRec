@@ -141,8 +141,8 @@
             height: 100%;
             object-fit: cover;
             object-position: center center;
-            z-index: -4;
-            /* Bottom layer - below everything */
+            z-index: -2 !important;
+            /* Above fallback, below overlays */
             filter: saturate(1.1) contrast(1.08) brightness(0.9);
             transition: filter 0.3s ease, opacity 0.5s ease;
             opacity: 1 !important;
@@ -165,8 +165,8 @@
                 url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover;
             z-index: -3;
             transition: transform 0.3s ease, opacity 0.5s ease;
-            opacity: 1;
-            /* Show by default, hide when GIF loads */
+            opacity: 0;
+            /* Hidden by default, show only if GIF fails */
             animation: subtleMove 20s ease-in-out infinite;
         }
 
@@ -194,9 +194,9 @@
             }
         }
 
-        /* Hide fallback when GIF loads successfully */
-        .hero-video[data-loaded="true"]~.hero-background-image {
-            opacity: 0;
+        /* Show fallback only when GIF fails */
+        .hero-video[data-error="true"]~.hero-background-image {
+            opacity: 1;
         }
 
         /* Ensure GIF is visible when loaded */
@@ -204,6 +204,11 @@
             opacity: 1 !important;
             display: block !important;
             z-index: -4 !important;
+        }
+
+        /* Force GIF to be above fallback when loaded */
+        .hero-video[data-loaded="true"] {
+            z-index: -2 !important;
         }
 
         .hero:hover .hero-background-image {
@@ -740,6 +745,19 @@
             console.log('- Current opacity:', window.getComputedStyle(heroImage).opacity);
             console.log('- Current z-index:', window.getComputedStyle(heroImage).zIndex);
 
+            // Force GIF visibility immediately
+            heroImage.style.opacity = '1';
+            heroImage.style.display = 'block';
+            heroImage.style.zIndex = '-2';
+            
+            // Hide fallback immediately to let GIF show
+            if (fallbackImage) {
+                fallbackImage.style.opacity = '0';
+                console.log('🙈 Hid fallback to show GIF');
+            }
+            
+            console.log('🚀 Forced initial GIF visibility');
+
             // Check if GIF is already loaded
             if (heroImage.complete && heroImage.naturalHeight !== 0) {
                 console.log('✅ GIF already loaded successfully');
@@ -785,7 +803,7 @@
                         console.log('👁️ Fallback shown');
                     }
                 }
-                
+
                 // Force GIF visibility with 'g' key
                 if (e.key.toLowerCase() === 'g') {
                     heroImage.setAttribute('data-loaded', 'true');
@@ -818,7 +836,7 @@
                 console.log('- GIF complete:', heroImage.complete);
                 console.log('- GIF natural height:', heroImage.naturalHeight);
                 console.log('- GIF display:', window.getComputedStyle(heroImage).display);
-                
+
                 // Final check and force visibility if GIF is loaded
                 if (heroImage.complete && heroImage.naturalHeight !== 0) {
                     heroImage.setAttribute('data-loaded', 'true');
