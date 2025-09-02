@@ -140,58 +140,50 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            z-index: -3;
-            /* below overlays and content */
+            z-index: -4;
+            /* Bottom layer - below everything */
             filter: saturate(1.1) contrast(1.08) brightness(0.9);
             transition: filter 0.3s ease;
-            opacity: 1;
-            display: block;
-            /* Ensure GIF is visible */
+            opacity: 1 !important;
+            display: block !important;
+            /* Force GIF visibility */
         }
 
         .hero:hover .hero-video {
             filter: saturate(1.15) contrast(1.1) brightness(0.95);
         }
 
-        /* Ensure video is visible when loaded */
-        .hero-video[data-loaded="true"] {
-            opacity: 1;
-            z-index: -3;
-        }
-
-        /* Show fallback image if video fails */
-        .hero-video[data-error="true"] {
-            display: none;
-        }
-
-        /* Optional static image fallback (kept, but placed under overlays too) */
+        /* Optional static image fallback (above GIF, below overlays) */
         .hero-background-image {
             position: absolute;
             inset: 0;
             background: url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover;
-            z-index: -4;
+            z-index: -3;
             transition: transform 0.3s ease;
+            opacity: 0;
+            /* Hidden by default, shown only if GIF fails */
         }
 
         .hero:hover .hero-background-image {
             transform: scale(1.05);
         }
 
-        /* Gradient + subtle vignette overlays above the video */
+        /* Gradient overlay above the video */
         .hero-gradient-overlay {
             position: absolute;
             inset: 0;
             background: linear-gradient(135deg,
-                    rgba(25, 118, 210, 0.4) 0%,
-                    rgba(124, 77, 255, 0.35) 50%,
-                    rgba(255, 235, 59, 0.15) 100%);
+                    rgba(25, 118, 210, 0.3) 0%,
+                    rgba(124, 77, 255, 0.25) 50%,
+                    rgba(255, 235, 59, 0.1) 100%);
             z-index: -2;
         }
 
+        /* Vignette overlay above gradient */
         .hero-image-overlay {
             position: absolute;
             inset: 0;
-            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.35) 100%);
+            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
             z-index: -1;
         }
 
@@ -494,8 +486,8 @@
 
         <!-- Background GIF (your iStock video converted to GIF) -->
         <img class="hero-video" src="assets/videos/iStock-high.gif" alt="University campus background"
-            onload="console.log('GIF loaded successfully')"
-            onerror="console.error('GIF failed to load, showing fallback'); this.style.display='none'; document.querySelector('.hero-background-image').style.opacity='1';" />
+            onload="console.log('GIF loaded successfully'); this.setAttribute('data-loaded', 'true');"
+            onerror="console.error('GIF failed to load, trying fallback'); this.style.display='none'; this.setAttribute('data-error', 'true'); document.querySelector('.hero-background-image').style.opacity='1';" />
 
         <!-- Gradient and vignette overlays above the video -->
         <div class="hero-gradient-overlay" aria-hidden="true"></div>
@@ -600,7 +592,7 @@
                         </div>
                         <div class="university-name">Princeton University</div>
                     </div>
-                    
+
                     <div class="university-item">
                         <div class="university-logo">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/a/a1/Seal_of_University_of_California%2C_Berkeley.svg"
@@ -658,7 +650,7 @@
                         </div>
                         <div class="university-name">Princeton University</div>
                     </div>
-                    
+
                     <div class="university-item">
                         <div class="university-logo">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/a/a1/Seal_of_University_of_California%2C_Berkeley.svg"
@@ -692,19 +684,39 @@
     <script>
         (function () {
             const heroImage = document.querySelector('.hero-video');
+            const fallbackImage = document.querySelector('.hero-background-image');
+
             if (!heroImage) {
                 console.error('Hero image element not found');
                 return;
             }
 
-            console.log('Hero GIF element found:', heroImage);
-            console.log('GIF src:', heroImage.src);
+            console.log('🎬 Hero GIF Debug Info:');
+            console.log('- Element found:', heroImage);
+            console.log('- GIF src:', heroImage.src);
+            console.log('- Current display:', window.getComputedStyle(heroImage).display);
+            console.log('- Current opacity:', window.getComputedStyle(heroImage).opacity);
+            console.log('- Current z-index:', window.getComputedStyle(heroImage).zIndex);
 
             // Check if GIF is already loaded
             if (heroImage.complete && heroImage.naturalHeight !== 0) {
-                console.log('GIF already loaded successfully');
+                console.log('✅ GIF already loaded successfully');
+                console.log('- Natural dimensions:', heroImage.naturalWidth + 'x' + heroImage.naturalHeight);
             } else {
-                console.log('GIF still loading...');
+                console.log('⏳ GIF still loading...');
+
+                // Set up a timeout to check loading status
+                setTimeout(() => {
+                    if (heroImage.complete && heroImage.naturalHeight !== 0) {
+                        console.log('✅ GIF loaded after timeout');
+                    } else {
+                        console.log('❌ GIF failed to load within timeout');
+                        if (fallbackImage) {
+                            fallbackImage.style.opacity = '1';
+                            console.log('🔄 Fallback image activated');
+                        }
+                    }
+                }, 3000);
             }
 
             // Manual visibility toggle with 'p' key for testing
@@ -712,12 +724,31 @@
                 if (e.key.toLowerCase() === 'p') {
                     if (heroImage.style.display === 'none') {
                         heroImage.style.display = '';
-                        console.log('GIF shown');
+                        console.log('👁️ GIF shown');
                     } else {
                         heroImage.style.display = 'none';
-                        console.log('GIF hidden');
+                        console.log('🙈 GIF hidden');
                     }
                 }
+
+                // Toggle fallback with 'f' key
+                if (e.key.toLowerCase() === 'f' && fallbackImage) {
+                    if (fallbackImage.style.opacity === '1') {
+                        fallbackImage.style.opacity = '0';
+                        console.log('🙈 Fallback hidden');
+                    } else {
+                        fallbackImage.style.opacity = '1';
+                        console.log('👁️ Fallback shown');
+                    }
+                }
+            });
+
+            // Log when page is fully loaded
+            window.addEventListener('load', () => {
+                console.log('📄 Page fully loaded');
+                console.log('- GIF complete:', heroImage.complete);
+                console.log('- GIF natural height:', heroImage.naturalHeight);
+                console.log('- GIF display:', window.getComputedStyle(heroImage).display);
             });
         })();
     </script>
