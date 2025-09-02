@@ -140,13 +140,16 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center center;
             z-index: -4;
             /* Bottom layer - below everything */
             filter: saturate(1.1) contrast(1.08) brightness(0.9);
-            transition: filter 0.3s ease;
+            transition: filter 0.3s ease, opacity 0.5s ease;
             opacity: 1 !important;
             display: block !important;
             /* Force GIF visibility */
+            min-width: 100%;
+            min-height: 100%;
         }
 
         .hero:hover .hero-video {
@@ -157,7 +160,7 @@
         .hero-background-image {
             position: absolute;
             inset: 0;
-            background: 
+            background:
                 linear-gradient(45deg, rgba(25, 118, 210, 0.1) 0%, transparent 50%, rgba(124, 77, 255, 0.1) 100%),
                 url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover;
             z-index: -3;
@@ -168,27 +171,39 @@
         }
 
         @keyframes subtleMove {
-            0%, 100% { 
-                transform: scale(1) translateX(0); 
+
+            0%,
+            100% {
+                transform: scale(1) translateX(0);
                 background-position: center center;
             }
-            25% { 
-                transform: scale(1.02) translateX(-10px); 
+
+            25% {
+                transform: scale(1.02) translateX(-10px);
                 background-position: 48% center;
             }
-            50% { 
-                transform: scale(1.01) translateX(0); 
+
+            50% {
+                transform: scale(1.01) translateX(0);
                 background-position: center 48%;
             }
-            75% { 
-                transform: scale(1.02) translateX(10px); 
+
+            75% {
+                transform: scale(1.02) translateX(10px);
                 background-position: 52% center;
             }
         }
 
         /* Hide fallback when GIF loads successfully */
-        .hero-video[data-loaded="true"] ~ .hero-background-image {
+        .hero-video[data-loaded="true"]~.hero-background-image {
             opacity: 0;
+        }
+
+        /* Ensure GIF is visible when loaded */
+        .hero-video[data-loaded="true"] {
+            opacity: 1 !important;
+            display: block !important;
+            z-index: -4 !important;
         }
 
         .hero:hover .hero-background-image {
@@ -513,7 +528,7 @@
 
         <!-- Background GIF (your iStock video converted to GIF) -->
         <img class="hero-video" src="assets/videos/iStock-high.gif" alt="University campus background"
-            onload="console.log('✅ GIF loaded successfully'); this.setAttribute('data-loaded', 'true');"
+            onload="console.log('✅ GIF loaded successfully'); this.setAttribute('data-loaded', 'true'); console.log('Setting data-loaded attribute');"
             onerror="console.error('❌ GIF failed to load, keeping fallback visible'); this.style.display='none'; this.setAttribute('data-error', 'true');" />
 
         <!-- Gradient and vignette overlays above the video -->
@@ -729,6 +744,8 @@
             if (heroImage.complete && heroImage.naturalHeight !== 0) {
                 console.log('✅ GIF already loaded successfully');
                 console.log('- Natural dimensions:', heroImage.naturalWidth + 'x' + heroImage.naturalHeight);
+                heroImage.setAttribute('data-loaded', 'true');
+                console.log('🎯 Forced data-loaded attribute');
             } else {
                 console.log('⏳ GIF still loading...');
 
@@ -736,14 +753,14 @@
                 setTimeout(() => {
                     if (heroImage.complete && heroImage.naturalHeight !== 0) {
                         console.log('✅ GIF loaded after timeout');
+                        heroImage.setAttribute('data-loaded', 'true');
+                        console.log('🎯 Set data-loaded after timeout');
                     } else {
-                        console.log('❌ GIF failed to load within timeout');
-                        if (fallbackImage) {
-                            fallbackImage.style.opacity = '1';
-                            console.log('🔄 Fallback image activated');
-                        }
+                        console.log('❌ GIF failed to load within timeout - keeping fallback');
+                        heroImage.style.display = 'none';
+                        heroImage.setAttribute('data-error', 'true');
                     }
-                }, 3000);
+                }, 5000); // Increased timeout for large GIF
             }
 
             // Manual visibility toggle with 'p' key for testing
@@ -768,6 +785,16 @@
                         console.log('👁️ Fallback shown');
                     }
                 }
+                
+                // Force GIF visibility with 'g' key
+                if (e.key.toLowerCase() === 'g') {
+                    heroImage.setAttribute('data-loaded', 'true');
+                    heroImage.style.opacity = '1';
+                    heroImage.style.display = 'block';
+                    heroImage.style.zIndex = '-4';
+                    if (fallbackImage) fallbackImage.style.opacity = '0';
+                    console.log('🎬 GIF visibility forced with G key');
+                }
             });
 
             // Test direct URL access
@@ -791,6 +818,15 @@
                 console.log('- GIF complete:', heroImage.complete);
                 console.log('- GIF natural height:', heroImage.naturalHeight);
                 console.log('- GIF display:', window.getComputedStyle(heroImage).display);
+                
+                // Final check and force visibility if GIF is loaded
+                if (heroImage.complete && heroImage.naturalHeight !== 0) {
+                    heroImage.setAttribute('data-loaded', 'true');
+                    heroImage.style.opacity = '1';
+                    heroImage.style.display = 'block';
+                    heroImage.style.zIndex = '-4';
+                    console.log('🚀 Final GIF visibility forced');
+                }
             });
         })();
     </script>
