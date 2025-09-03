@@ -328,6 +328,42 @@
             border-color: #1976d2;
         }
 
+        /* Autosuggestions */
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s ease;
+        }
+
+        .suggestion-item:hover,
+        .suggestion-item.highlighted {
+            background: #f3f8ff;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .university-search {
+            position: relative;
+        }
+
         .university-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -816,6 +852,7 @@
 
             <div class="university-search">
                 <input type="text" class="search-input" placeholder="Search universities..." id="universitySearch" />
+                <div class="search-suggestions" id="searchSuggestions"></div>
             </div>
 
             <div class="university-grid" id="universityGrid">
@@ -1148,10 +1185,16 @@
         }
 
         // University search and selection with debounce
+        // University search and selection with debounce and autosuggestions
+        let selectedSuggestionIndex = -1;
+        
         function setupSearch() {
             const searchInput = document.getElementById('universitySearch');
+            const suggestions = document.getElementById('searchSuggestions');
+            
             searchInput.addEventListener('input', (e) => {
                 const query = e.target.value.toLowerCase();
+                selectedSuggestionIndex = -1;
                 
                 // Clear previous timer
                 if (searchDebounceTimer) {
@@ -1161,7 +1204,35 @@
                 // Debounce search by 300ms
                 searchDebounceTimer = setTimeout(() => {
                     performSearch(query);
+                    showSuggestions(query);
                 }, 300);
+            });
+
+            // Handle keyboard navigation for suggestions
+            searchInput.addEventListener('keydown', (e) => {
+                const suggestionItems = suggestions.querySelectorAll('.suggestion-item');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, suggestionItems.length - 1);
+                    updateSuggestionHighlight(suggestionItems);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
+                    updateSuggestionHighlight(suggestionItems);
+                } else if (e.key === 'Enter' && selectedSuggestionIndex >= 0) {
+                    e.preventDefault();
+                    suggestionItems[selectedSuggestionIndex].click();
+                } else if (e.key === 'Escape') {
+                    hideSuggestions();
+                }
+            });
+
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.university-search')) {
+                    hideSuggestions();
+                }
             });
         }
 
@@ -1176,6 +1247,56 @@
             }
             
             renderUniversities(filteredUniversities);
+        }
+
+        function showSuggestions(query) {
+            const suggestions = document.getElementById('searchSuggestions');
+            
+            if (!query.trim()) {
+                hideSuggestions();
+                return;
+            }
+
+            const matches = universities.filter(uni =>
+                uni.name.toLowerCase().includes(query) ||
+                uni.location.toLowerCase().includes(query)
+            ).slice(0, 5); // Show max 5 suggestions
+
+            if (matches.length === 0) {
+                hideSuggestions();
+                return;
+            }
+
+            suggestions.innerHTML = matches.map(uni => `
+                <div class="suggestion-item" onclick="selectSuggestion('${uni.name}')">
+                    <strong>${highlightMatch(uni.name, query)}</strong>
+                    <div style="font-size: 0.9rem; color: #666;">${uni.location}</div>
+                </div>
+            `).join('');
+
+            suggestions.style.display = 'block';
+        }
+
+        function hideSuggestions() {
+            document.getElementById('searchSuggestions').style.display = 'none';
+            selectedSuggestionIndex = -1;
+        }
+
+        function selectSuggestion(universityName) {
+            document.getElementById('universitySearch').value = universityName;
+            hideSuggestions();
+            performSearch(universityName.toLowerCase());
+        }
+
+        function updateSuggestionHighlight(suggestionItems) {
+            suggestionItems.forEach((item, index) => {
+                item.classList.toggle('highlighted', index === selectedSuggestionIndex);
+            });
+        }
+
+        function highlightMatch(text, query) {
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<mark style="background: #ffeb3b; padding: 0;">$1</mark>');
         }
 
         function renderUniversities(universitiesToRender) {
