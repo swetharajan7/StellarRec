@@ -148,6 +148,40 @@
       .header-content { flex-direction:column; gap:1rem; }
       .filter-bar { grid-template-columns:1fr 1fr; }
     }
+
+    /* --- Autosuggest popover --- */
+    .suggest-popover {
+      position: absolute;
+      z-index: 2000;
+      width: 100%;
+      max-height: 280px;
+      overflow-y: auto;
+      margin-top: .25rem;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0,0,0,.08);
+    }
+    .suggest-item {
+      padding: .6rem .8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .95rem;
+    }
+    .suggest-item[aria-selected="true"],
+    .suggest-item:hover {
+      background: #f3f8ff;
+    }
+    .suggest-muted {
+      color: #6b7280;
+      font-size: .85rem;
+    }
+    .suggest-highlight {
+      font-weight: 700;
+    }
+    .university-search { position: relative; }
   </style>
 </head>
 <body>
@@ -429,1284 +463,1479 @@
   <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
 
   <script>
+/* -----------------------------------------------------------
+   STELLARREC — CLEANED CORE + AUTOSUGGEST (integrated)
+   ----------------------------------------------------------- */
+
+/* ---------- Safe shims (so missing globals don’t break UI) ---------- */
+const SR_LOG = (typeof window.SR_LOG === 'object') ? window.SR_LOG : {
+  consoleEnabled: () => false,
+  setConsoleEnabled: () => {},
+  log: () => {}
+};
+const SR_AUTH = (typeof window.SR_AUTH === 'object') ? window.SR_AUTH : {
+  getAccessToken: () => null,
+  refreshTokens: async () => false,
+  startGentleSignInFlow: () => {},
+  waitForLogin: async () => {},
+  resolvePostLoginWaiters: () => {},
+  setTokens: () => {}
+};
+function srRefreshAuthRow() {}
+function srRenderAuditBanner() {}
+function setupCopyLink() {}
+function setupBulkImport() {}
+function applyShareFromURL() {}
+function buildShareURL() { return location.pathname + location.search + location.hash; }
+function srEnsureProgressControls() {}
+const SR_BULK = {
+  paused:false, canceled:false,
+  reset(){ this.paused=false; this.canceled=false; },
+  track(){},
+};
+
+/* --------------------- Utilities --------------------- */
+const norm = (s) => (s || '').toString().trim().toLowerCase();
+
+function escapeHtml(s){
+  return (s ?? '').toString()
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+function truncate(s, n=80){
+  const t = (s ?? '').toString();
+  return t.length > n ? (t.slice(0, n-1) + '…') : t;
+}
+function getActiveStudentId() {
+  return (window.studentProfile && (studentProfile.id || studentProfile.email)) || '';
+}
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+function startNewUpload(){ location.reload(); } // simple reset
+
+/* --------------------- State --------------------- */
+let universities = [];
+let filtered = [];
+let uploadedFile = null;
+let currentView = 'recommender';
+
+const filters = { q: '', state: '', type: '', level: '', sort: 'name_asc' };
+let page = 1;
+let pageSize = 40;
+let flashNextRender = false;
+
+const CACHE_KEY = 'sr_us_institutions_v1';
+
+/* --- Persistence keys --- */
+const PERSIST = {
+  student:  'sr_student_profile_v1',
+  hybrid:   'sr_hybrid_sets_v1',
+  filters:  'sr_filter_state_v1',
+  view:     'sr_view_v1',
+};
+
+function persistAll() {
+  try {
+    if (studentProfile) localStorage.setItem(PERSIST.student, JSON.stringify(studentProfile));
+    localStorage.setItem(PERSIST.hybrid, JSON.stringify({
+      studentUnitIds: Array.from(studentUnitIds),
+      added: Array.from(addedByRecommender),
+      removed: Array.from(removedByRecommender),
+    }));
+    localStorage.setItem(PERSIST.filters, JSON.stringify({ ...filters, page, pageSize }));
+    localStorage.setItem(PERSIST.view, currentView);
+  } catch {}
+}
+function hydrateAll() {
+  try {
+    const v = localStorage.getItem(PERSIST.view);
+    if (v) currentView = v;
+
+    const f = localStorage.getItem(PERSIST.filters);
+    if (f) {
+      const o = JSON.parse(f);
+      Object.assign(filters, {
+        q: o.q || '', state: o.state || '', type: o.type || '',
+        level: o.level || '', sort: o.sort || 'name_asc'
+      });
+      page = o.page || 1;
+      pageSize = o.pageSize || 40;
+
+      const ids = {
+        universitySearch: 'q', stateFilter: 'state', typeFilter:'type',
+        levelFilter:'level', sortBy:'sort', pageSize:'pageSize'
+      };
+      Object.entries(ids).forEach(([elId, key]) => {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        if (key === 'q') el.value = filters.q;
+        else if (key === 'pageSize') el.value = String(pageSize);
+        else el.value = filters[key];
+      });
+    }
+
+    const s   = localStorage.getItem(PERSIST.student);
+    const hyb = localStorage.getItem(PERSIST.hybrid);
+    if (s) {
+      studentProfile = JSON.parse(s);
+      document.getElementById('studentTitle').textContent = studentProfile.name || 'Student';
+      document.getElementById('allowEditsToggle').checked = !!studentProfile.allowRecommenderEdits;
+    }
+    if (hyb) {
+      const H = JSON.parse(hyb);
+      studentUnitIds = new Set((H && H.studentUnitIds) || []);
+      addedByRecommender.clear(); removedByRecommender.clear();
+      (H && H.added || []).forEach(id => addedByRecommender.add(id));
+      (H && H.removed || []).forEach(id => removedByRecommender.add(id));
+    }
+  } catch {}
+}
+function persistAndSync() {
+  persistAll();
+  try { history.replaceState(null,'', buildShareURL()); } catch {}
+}
+
+/* --- Hybrid selection model --- */
+let studentProfile = null;
+let studentUnitIds = new Set();
+let addedByRecommender = new Set();
+let removedByRecommender = new Set();
+
+function getEffectiveSelection() {
+  const base = new Set(studentUnitIds);
+  removedByRecommender.forEach(id => base.delete(id));
+  addedByRecommender.forEach(id => base.add(id));
+  return base;
+}
+
+/* --- Mock/Real API toggle --- */
+function getUseMock() {
+  const v = localStorage.getItem('sr_use_mock');
+  return v === null ? true : v !== '0';
+}
+function setUseMock(on) {
+  localStorage.setItem('sr_use_mock', on ? '1' : '0');
+  location.reload();
+}
+(function syncMockFromURL(){
+  const p = new URLSearchParams(location.search);
+  if (p.has('mock')) {
+    const val = p.get('mock') === '1';
+    localStorage.setItem('sr_use_mock', val ? '1' : '0');
+  }
+})();
+
+/* --------------------- Web worker for filtering (optional) --------------------- */
+let filterWorker = null;
+let filteringInFlight = 0;
+
+function initFilterWorker(){
+  if (filterWorker) return;
+  const code = `
     let universities = [];
-    let filtered = [];
-    let uploadedFile = null;
-    let currentView = 'recommender';
-
-    // classic filters / paging
-    const filters = { q: '', state: '', type: '', level: '', sort: 'name_asc' };
-    let page = 1;
-    let pageSize = 40;
-    let flashNextRender = false;
-
-    // caching
-    const CACHE_KEY = 'sr_us_institutions_v1';
-
-    // --- Persistence (Task 5) ---
-    const PERSIST = {
-      student:  'sr_student_profile_v1',
-      hybrid:   'sr_hybrid_sets_v1',
-      filters:  'sr_filter_state_v1',
-      view:     'sr_view_v1',
-    };
-
-    function persistAll() {
-      try {
-        if (studentProfile) localStorage.setItem(PERSIST.student, JSON.stringify(studentProfile));
-        localStorage.setItem(PERSIST.hybrid, JSON.stringify({
-          studentUnitIds: Array.from(studentUnitIds),
-          added: Array.from(addedByRecommender),
-          removed: Array.from(removedByRecommender),
-        }));
-        localStorage.setItem(PERSIST.filters, JSON.stringify({ ...filters, page, pageSize }));
-        localStorage.setItem(PERSIST.view, currentView);
-      } catch {}
-    }
-    function hydrateAll() {
-      try {
-        const v = localStorage.getItem(PERSIST.view);
-        if (v) currentView = v;
-
-        const f = localStorage.getItem(PERSIST.filters);
-        if (f) {
-          const o = JSON.parse(f);
-          Object.assign(filters, {
-            q: o.q || '', state: o.state || '', type: o.type || '', level: o.level || '', sort: o.sort || 'name_asc'
-          });
-          page = o.page || 1;
-          pageSize = o.pageSize || 40;
-
-          const ids = {
-            universitySearch: 'q', stateFilter: 'state', typeFilter:'type', levelFilter:'level', sortBy:'sort', pageSize:'pageSize'
-          };
-          Object.entries(ids).forEach(([elId, key]) => {
-            const el = document.getElementById(elId);
-            if (!el) return;
-            if (key === 'q') el.value = filters.q;
-            else if (key === 'pageSize') el.value = String(pageSize);
-            else el.value = filters[key];
-          });
-        }
-
-        const s   = localStorage.getItem(PERSIST.student);
-        const hyb = localStorage.getItem(PERSIST.hybrid);
-        if (s) {
-          studentProfile = JSON.parse(s);
-          document.getElementById('studentTitle').textContent = studentProfile.name || 'Student';
-          document.getElementById('allowEditsToggle').checked = !!studentProfile.allowRecommenderEdits;
-        }
-        if (hyb) {
-          const H = JSON.parse(hyb);
-          studentUnitIds = new Set((H && H.studentUnitIds) || []);
-          addedByRecommender.clear(); removedByRecommender.clear();
-          (H && H.added || []).forEach(id => addedByRecommender.add(id));
-          (H && H.removed || []).forEach(id => removedByRecommender.add(id));
-        }
-      } catch {}
-    }
-    function persistAfterRender() { persistAll(); }
-    function persistAndSync() {
-      persistAfterRender();
-      try { history.replaceState(null,'', buildShareURL()); } catch {}
-    }
-
-    // --- Hybrid model state ---
-    let studentProfile = null;                 // { id, name, allowRecommenderEdits, selectedUnitIds: number[] }
-    let studentUnitIds = new Set();            // preselected by student
-    let addedByRecommender = new Set();        // new items added by recommender
-    let removedByRecommender = new Set();      // items removed from student list by recommender
-
-    // derive effective selection
-    function getEffectiveSelection() {
-      const base = new Set(studentUnitIds);
-      removedByRecommender.forEach(id => base.delete(id));
-      addedByRecommender.forEach(id => base.add(id));
-      return base;
-    }
-
-    /* --- Mock/Real API toggle (Task 1) --- */
-    function getUseMock() {
-      const v = localStorage.getItem('sr_use_mock');
-      return v === null ? true : v !== '0';
-    }
-    function setUseMock(on) {
-      localStorage.setItem('sr_use_mock', on ? '1' : '0');
-      location.reload();
-    }
-    (function syncMockFromURL(){
-      const p = new URLSearchParams(location.search);
-      if (p.has('mock')) {
-        const val = p.get('mock') === '1';
-        localStorage.setItem('sr_use_mock', val ? '1' : '0');
+    const norm = s => (s||'').toLowerCase();
+    onmessage = (e) => {
+      const { type, payload } = e.data || {};
+      if (type === 'prime') {
+        universities = payload || [];
+        postMessage({ type:'primed', count: universities.length });
+        return;
       }
-    })();
-
-    // --- Inline Web Worker (Task 8) ---
-    let filterWorker = null;
-    function initFilterWorker(){
-      if (filterWorker) return;
-      const code = `
-        let universities = [];
-        function norm(s){ return (s||'').toLowerCase(); }
-        onmessage = (e) => {
-          const { type, payload } = e.data || {};
-          if (type === 'prime') {
-            universities = payload || [];
-            postMessage({ type:'primed', count: universities.length });
-            return;
-          }
-          if (type === 'filter') {
-            const { filters, page, pageSize } = payload;
-            const q = norm(filters.q||'');
-            let arr = universities.filter(u=>{
-              const qOk = !q || (u.name && norm(u.name).includes(q)) || (u.city && norm(u.city).includes(q)) || (u.state && norm(u.state).includes(q));
-              const stOk = !filters.state || u.state === filters.state;
-              const tyOk = !filters.type || u.control === filters.type;
-              const lvOk = !filters.level || u.level === filters.level;
-              return qOk && stOk && tyOk && lvOk;
-            });
-            if (filters.sort === 'name_asc') {
-              arr.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
-            } else if (filters.sort === 'state_asc') {
-              arr.sort((a,b)=> (a.state||'').localeCompare(b.state||'') || (a.name||'').localeCompare(b.name||''));
-            }
-            const total = arr.length;
-            const start = Math.max(0, (page-1)*pageSize);
-            const slice = arr.slice(start, start+pageSize);
-            postMessage({ type:'result', slice, total });
-          }
-        };
-      `;
-      const blob = new Blob([code], { type:'application/javascript' });
-      filterWorker = new Worker(URL.createObjectURL(blob));
-    }
-
-    let filteringInFlight = 0;
-    function computeFilteredAsync() {
-      if (!filterWorker) { computeFiltered(); renderPage(); updateMeta(); return; }
-      // keep local 'filtered' up to date for other features (select page, etc.)
-      computeFiltered();
-      const ticket = ++filteringInFlight;
-      filterWorker.onmessage = (ev) => {
-        if (ticket !== filteringInFlight) return; // stale
-        const { type, slice, total } = ev.data || {};
-        if (type === 'result') {
-          const grid = document.getElementById('universityGrid');
-          grid.innerHTML = '';
-          renderUniversities(slice);
-
-          const totalPages = Math.max(1, Math.ceil(total / pageSize));
-          document.getElementById('pageInfo').textContent = `Page ${Math.min(page, totalPages)} of ${totalPages}`;
-          document.getElementById('prevPage').disabled = (page <= 1);
-          document.getElementById('nextPage').disabled = (page >= totalPages);
-          document.getElementById('resultMeta').textContent = `Showing ${slice.length ? ((page-1)*pageSize+1) : 0}-${Math.min(total, page*pageSize)} of ${total} (from ${universities.length} total)`;
-
-          const empty = document.getElementById('emptyState');
-          if (total === 0) { grid.style.display='none'; if (empty) empty.style.display='block'; }
-          else { grid.style.display='grid'; if (empty) empty.style.display='none'; }
-        }
-      };
-      filterWorker.postMessage({ type:'filter', payload: { filters, page, pageSize }});
-    }
-
-    function refreshList() {
-      // Prefer worker for rendering; still compute 'filtered' synchronously for internal logic.
-      if (filterWorker) computeFilteredAsync();
-      else { computeFiltered(); renderPage(); updateMeta(); }
-    }
-
-    document.addEventListener('DOMContentLoaded', async function () {
-      // [SR INSERT] Observability toggle + Sign-in item injection
-      (function srInsertMenuItems(){
-        const dd = document.getElementById('userDropdown');
-        if (!dd) return;
-
-        // Console logging toggle row
-        const li = document.createElement('div');
-        li.className = 'dropdown-item';
-        li.innerHTML = `
-          <span class="material-icons">bug_report</span>
-          <div class="view-label">
-            <div class="view-name">Console logs</div>
-            <div class="view-description">Toggle in-browser event logs</div>
-          </div>
-          <input id="logToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
-        `;
-        dd.appendChild(li);
-
-        // Sign in / Sign out dynamic row (appears if unauthenticated)
-        const authRow = document.createElement('div');
-        authRow.id = 'authRow';
-        authRow.className = 'dropdown-item';
-        dd.appendChild(authRow);
-      })();
-
-      // Wire mock toggle UI
-      const mockEl = document.getElementById('mockToggle');
-      if (mockEl) {
-        mockEl.checked = getUseMock();
-        mockEl.addEventListener('change', (e) => setUseMock(e.target.checked));
-      }
-
-      // [SR INSERT] Init logger toggle state
-      const logEl = document.getElementById('logToggle');
-      if (logEl) {
-        logEl.checked = SR_LOG.consoleEnabled();
-        logEl.addEventListener('change', (e)=> SR_LOG.setConsoleEnabled(!!e.target.checked));
-      }
-      // [SR INSERT] Reflect auth row state
-      srRefreshAuthRow();
-
-      // [SR INSERT] Handle login callback via URL (?token=... for demo)
-      (function applyTokenFromURL(){
-        const p = new URLSearchParams(location.search);
-        const tok = p.get('token');
-        if (tok) {
-          SR_AUTH.setTokens({
-            accessToken: tok,
-            refreshToken: p.get('rt') || 'demo-refresh',
-            expiresAt: Date.now() + 55*60*1000
-          });
-          toast('Signed in.', 'success');
-          srRefreshAuthRow();
-          history.replaceState(null, '', location.pathname + location.hash);
-          SR_AUTH.resolvePostLoginWaiters();
-        }
-      })();
-
-      try {
-        // ---- session cache (fast back/refresh) ----
-        const cached = sessionStorage.getItem(CACHE_KEY);
-        if (cached) {
-          try {
-            const cachedData = JSON.parse(cached);
-            if (Array.isArray(cachedData) || (cachedData && typeof cachedData === 'object')) {
-              console.log('Using cached dataset');
-              initializeWithData(cachedData);
-              return;
-            }
-          } catch {}
-        }
-
-        // ---- tolerant loader, absolute path for Netlify route, GitHub fallback ----
-        let data;
-        const candidates = [
-          "/assets/videos/us_institutions_by_state_2023.json",
-          "/assets/videos/us_institutions_by_state_2023.min.json",
-          "https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/videos/us_institutions_by_state_2023.json"
-        ];
-        for (const url of candidates) {
-          try {
-            const resp = await fetch(url + (url.startsWith('http') ? '' : `?v=${Date.now()}`));
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-            const txt = await resp.text();
-            const fixed = txt
-              .replace(/\b-?Infinity\b/g, "null")
-              .replace(/\bNaN\b/g, "null")
-              .replace(/,\s*([}\]])/g, "$1");
-            data = JSON.parse(fixed);
-            break;
-          } catch (e) {
-            console.warn('⚠️ Fallback to next candidate for', url, e);
-          }
-        }
-        if (!data) throw new Error('No dataset source could be loaded.');
-        sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
-        initializeWithData(data);
-      } catch (err) {
-        console.error("❌ Failed to load university dataset", err);
-        const meta = document.getElementById('resultMeta');
-        if (meta) meta.textContent = 'Failed to load universities.';
-        toast(`Failed to load dataset: ${err.message || err}`, 'error');
-
-        // Show empty-state + retry
-        const empty = document.getElementById('emptyState');
-        if (empty) {
-          empty.style.display = 'block';
-          document.getElementById('universityGrid').style.display = 'none';
-          const retryBtn = document.getElementById('retryLoadBtn');
-          if (retryBtn) {
-            retryBtn.style.display = 'inline-block';
-            retryBtn.onclick = () => location.reload();
-          }
-          const clearBtn = document.getElementById('clearFiltersBtn');
-          if (clearBtn) clearBtn.onclick = () => resetAllFilters();
-        }
-      }
-    });
-
-    function initializeWithData(data) {
-      universities = Array.isArray(data) ? data : (data && typeof data === 'object' ? Object.values(data).flat() : []);
-      // Normalize expected fields
-      universities = universities.map(u => ({
-        unitid:  u.unitid ?? u.UNITID ?? u.id,
-        name:    u.name   ?? u.INSTNM ?? 'Unknown',
-        city:    u.city   ?? u.CITY   ?? '',
-        state:   u.state  ?? u.STABBR ?? '',
-        control: u.control?? u.CONTROL?? '',
-        level:   u.level  ?? u.ICLEVEL?? '',
-        sector:  u.sector ?? u.SECTOR ?? '',
-        website: u.website?? u.WEBADDR?? ''
-      }));
-      console.log('Loaded universities:', universities.length);
-
-      // Worker: prime with data
-      initFilterWorker();
-      if (filterWorker) filterWorker.postMessage({ type:'prime', payload: universities });
-
-      // Kick off UI
-      setupFileUpload();
-      setupSearch();
-      setupClickOutside();
-      setupFilterHandlers();
-      setupPagingHandlers();
-      setupUniversitySelect();
-
-      // Student bar wiring
-      document.getElementById('loadStudentBtn').addEventListener('click', () => {
-        const id = document.getElementById('studentIdInput').value.trim();
-        if (!id) { toast('Enter a student ID or email.', 'error', { ttl: 2000 }); return; }
-        loadStudentProfile(id);
-      });
-      document.getElementById('allowEditsToggle').addEventListener('change', (e) => {
-        if (studentProfile) studentProfile.allowRecommenderEdits = e.target.checked;
-        renderPage();
-        updateSelectedList();
-        persistAndSync();
-        // [SR INSERT] Event: toggle edits
-        SR_LOG.log({ type: "filter_apply", filters: { allowRecommenderEdits: !!e.target.checked } });
-        srRenderAuditBanner();
-      });
-
-      // Clear filters button (empty-state)
-      document.getElementById('clearFiltersBtn')?.addEventListener('click', resetAllFilters);
-
-      // Medium-lifts: hydrate persisted state & share URL (Tasks 5 & 6)
-      hydrateAll();
-      applyShareFromURL();
-      setupCopyLink();
-      setupBulkImport();
-
-      refreshList();
-      updateSelectedList();
-      srRenderAuditBanner();
-
-      // Auto-load via URL param
-      const params = new URLSearchParams(location.search);
-      const sid = params.get('student');
-      if (sid) loadStudentProfile(sid);
-
-      persistAndSync();
-    }
-
-    /* ----- UI: dropdown menu ----- */
-    function toggleUserDropdown() {
-      document.getElementById('userDropdown').classList.toggle('show');
-    }
-    function switchView(view, ev) {
-      currentView = view;
-      document.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
-      if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
-      updateDashboardForView(view);
-      document.getElementById('userDropdown').classList.remove('show');
-      persistAndSync();
-      // [SR INSERT] Event
-      SR_LOG.log({ type: "search", query: `switch_view:${view}` });
-    }
-    function updateDashboardForView(view) {
-      const heroTitle = document.querySelector('.hero-title');
-      const heroSubtitle = document.querySelector('.hero-subtitle');
-      const uploadTitle = document.querySelector('.upload-title');
-      if (view === 'student') {
-        heroTitle.textContent = 'Track Your Applications';
-        heroSubtitle.textContent = 'Monitor the status of your recommendation letters and university applications.';
-        uploadTitle.textContent = 'Request Recommendation Letter';
-      } else {
-        heroTitle.textContent = 'One Upload. Multiple Universities.';
-        heroSubtitle.textContent = 'Upload your recommendation letter once and send it to multiple US universities instantly.';
-        uploadTitle.textContent = 'Upload Recommendation Letter';
-      }
-    }
-    function setupClickOutside() {
-      document.addEventListener('click', function (event) {
-        const userInfo = document.querySelector('.user-info');
-        const dropdown = document.getElementById('userDropdown');
-        if (!userInfo.contains(event.target)) dropdown.classList.remove('show');
-      });
-    }
-
-    /* ----- Upload ----- */
-    function setupFileUpload() {
-      const fileInput = document.getElementById('fileInput');
-      const uploadSection = document.getElementById('uploadSection');
-      fileInput.addEventListener('change', handleFileUpload);
-      uploadSection.addEventListener('dragover', (e) => { e.preventDefault(); uploadSection.classList.add('dragover'); });
-      uploadSection.addEventListener('dragleave', () => uploadSection.classList.remove('dragover'));
-      uploadSection.addEventListener('drop', (e) => {
-        e.preventDefault(); uploadSection.classList.remove('dragover');
-        if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
-      });
-    }
-    function handleFileUpload(e) { if (e.target.files[0]) handleFile(e.target.files[0]); }
-    function handleFile(file) {
-      if (file.type !== 'application/pdf') { toast('Please upload a PDF file.', 'error'); return; }
-      uploadedFile = file;
-      document.getElementById('fileName').textContent = file.name;
-      document.getElementById('fileSize').textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB • Uploaded successfully`;
-      document.getElementById('uploadedFile').style.display = 'block';
-      toast('PDF attached. Ready to send.', 'success');
-      updateSendButton();
-      persistAndSync();
-      // [SR INSERT] Event
-      SR_LOG.log({ type: "dataset_load", datasetId: "uploaded_pdf", ms: file.size || 0 });
-    }
-    function removeFile() {
-      uploadedFile = null;
-      document.getElementById('uploadedFile').style.display = 'none';
-      document.getElementById('fileInput').value = '';
-      updateSendButton();
-      persistAndSync();
-    }
-
-    /* ----- Search + Filters ----- */
-    function debounce(fn, wait=300) {
-      let t;
-      return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
-    }
-
-    function setupSearch() {
-      const searchInput = document.getElementById('universitySearch');
-      const searchApplyBtn = document.getElementById('searchApplyBtn');
-
-      const run = () => {
-        filters.q = searchInput.value.trim().toLowerCase();
-        page = 1; flashNextRender = true;
-        refreshList();
-        persistAndSync();
-        // [SR INSERT] Event
-        SR_LOG.log({ type: "search", query: filters.q });
-      };
-
-      const runDebounced = debounce(run, 280);
-
-      // Instant apply button
-      searchApplyBtn.addEventListener('click', run);
-
-      // Debounced live search (Task 3)
-      searchInput.addEventListener('input', runDebounced);
-
-      // Keyboard affordances
-      searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); run(); }
-        if (e.key === 'Escape') {
-          e.preventDefault();
-          searchInput.value = ''; run();
-        }
-      });
-    }
-
-    function setupFilterHandlers() {
-      const stateFilter = document.getElementById('stateFilter');
-      const typeFilter  = document.getElementById('typeFilter');
-      const levelFilter = document.getElementById('levelFilter');
-      const sortBy      = document.getElementById('sortBy');
-      const applyBtn    = document.getElementById('filterApplyBtn');
-
-      applyBtn.addEventListener('click', () => {
-        filters.state = stateFilter.value;
-        filters.type  = typeFilter.value;
-        filters.level = levelFilter.value;
-        filters.sort  = sortBy.value;
-        page = 1; flashNextRender = true;
-        refreshList();
-        persistAndSync();
-        // [SR INSERT] Event
-        SR_LOG.log({ type: "filter_apply", filters: { ...filters } });
-      });
-
-      // Reset filters
-      document.getElementById('resetBtn').addEventListener('click', () => {
-        resetAllFilters();
-        toast('Filters reset.', 'info', { ttl: 2000 });
-      });
-
-      // Select all visible on current page
-      document.getElementById('selectPageBtn').addEventListener('click', () => {
-        const start = (page - 1) * pageSize;
-        const end = Math.min(filtered.length, start + pageSize);
-        const effective = getEffectiveSelection();
-        filtered.slice(start, end).forEach(u => effective.add(u.unitid));
-        // reconcile to hybrid sets:
-        filtered.slice(start, end).forEach(u => {
-          if (studentUnitIds.has(u.unitid)) {
-            removedByRecommender.delete(u.unitid);
-          } else {
-            addedByRecommender.add(u.unitid);
-          }
+      if (type === 'filter') {
+        const { filters, page, pageSize } = payload;
+        const q = norm(filters.q||'');
+        let arr = universities.filter(u=>{
+          const qOk = !q || (u.name && norm(u.name).includes(q)) || (u.city && norm(u.city).includes(q)) || (u.state && norm(u.state).includes(q));
+          const stOk = !filters.state || u.state === filters.state;
+          const tyOk = !filters.type || u.control === filters.type;
+          const lvOk = !filters.level || u.level === filters.level;
+          return qOk && stOk && tyOk && lvOk;
         });
-        renderPage(); updateSelectedList(); updateSendButton();
-        persistAndSync();
-        toast('Selected all on current page.', 'success', { ttl: 1500 });
-      });
-    }
-
-    function resetAllFilters() {
-      document.getElementById('universitySearch').value = '';
-      document.getElementById('stateFilter').value = '';
-      document.getElementById('typeFilter').value  = '';
-      document.getElementById('levelFilter').value = '';
-      document.getElementById('sortBy').value      = 'name_asc';
-      filters.q = filters.state = filters.type = filters.level = '';
-      filters.sort = 'name_asc';
-      page = 1; flashNextRender = true;
-      refreshList();
-      persistAndSync();
-    }
-
-    function computeFiltered() {
-      filtered = universities.filter(u => {
-        const q = filters.q;
-        const qOk =
-          !q ||
-          (u.name  && u.name.toLowerCase().includes(q)) ||
-          (u.city  && u.city.toLowerCase().includes(q)) ||
-          (u.state && u.state.toLowerCase().includes(q));
-        const stOk = !filters.state || u.state === filters.state;
-        const tyOk = !filters.type  || u.control === filters.type;
-        const lvOk = !filters.level || u.level   === filters.level;
-        return qOk && stOk && tyOk && lvOk;
-      });
-
-      if (filters.sort === 'name_asc') {
-        filtered.sort((a,b) => (a.name||'').localeCompare(b.name||''));
-      } else if (filters.sort === 'state_asc') {
-        filtered.sort((a,b) => (a.state||'').localeCompare(b.state||'') || (a.name||'').localeCompare(b.name||''));
-      }
-
-      populateUniversitySelectOptions(filtered.length ? filtered : universities);
-    }
-
-    /* ----- Pagination ----- */
-    function setupPagingHandlers() {
-      document.getElementById('prevPage').addEventListener('click', () => {
-        const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-        if (page > 1) { page--; }
-        if (page < 1) page = 1;
-        refreshList();
-        persistAndSync();
-      });
-      document.getElementById('nextPage').addEventListener('click', () => {
-        const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-        if (page < totalPages) { page++; }
-        refreshList();
-        persistAndSync();
-      });
-      document.getElementById('pageSize').addEventListener('change', (e) => {
-        pageSize = parseInt(e.target.value, 10) || 40;
-        page = 1; refreshList();
-        persistAndSync();
-      });
-    }
-    function renderPage() {
-      const start = (page - 1) * pageSize;
-      const end   = start + pageSize;
-      const slice = filtered.slice(start, end);
-      renderUniversities(slice);
-      updatePager();
-
-      // Empty state toggle (Task 2)
-      const grid = document.getElementById('universityGrid');
-      const empty = document.getElementById('emptyState');
-      if (filtered.length === 0) {
-        if (grid) grid.style.display = 'none';
-        if (empty) {
-          empty.style.display = 'block';
-          const retryBtn = document.getElementById('retryLoadBtn');
-          if (retryBtn) retryBtn.style.display = 'none'; // only shown for loader failure
+        if (filters.sort === 'name_asc') {
+          arr.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+        } else if (filters.sort === 'state_asc') {
+          arr.sort((a,b)=> (a.state||'').localeCompare(b.state||'') || (a.name||'').localeCompare(b.name||''));
         }
-      } else {
-        if (empty) empty.style.display = 'none';
-        if (grid) grid.style.display = 'grid';
+        const total = arr.length;
+        const start = Math.max(0, (page-1)*pageSize);
+        const slice = arr.slice(start, start+pageSize);
+        postMessage({ type:'result', slice, total });
       }
-    }
-    function updatePager() {
-      const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+    };
+  `;
+  const blob = new Blob([code], { type:'application/javascript' });
+  filterWorker = new Worker(URL.createObjectURL(blob));
+}
+
+function computeFiltered() {
+  filtered = universities.filter(u => {
+    const q = norm(filters.q);
+    const qOk =
+      !q ||
+      (u.name  && norm(u.name).includes(q)) ||
+      (u.city  && norm(u.city).includes(q)) ||
+      (u.state && norm(u.state).includes(q));
+    const stOk = !filters.state || u.state === filters.state;
+    const tyOk = !filters.type  || u.control === filters.type;
+    const lvOk = !filters.level || u.level   === filters.level;
+    return qOk && stOk && tyOk && lvOk;
+  });
+
+  if (filters.sort === 'name_asc') {
+    filtered.sort((a,b) => (a.name||'').localeCompare(b.name||''));
+  } else if (filters.sort === 'state_asc') {
+    filtered.sort((a,b) => (a.state||'').localeCompare(b.state||'') || (a.name||'').localeCompare(b.name||''));
+  }
+
+  populateUniversitySelectOptions(filtered.length ? filtered : universities);
+}
+
+function computeFilteredAsync() {
+  if (!filterWorker) { computeFiltered(); renderPage(); updateMeta(); return; }
+  computeFiltered(); // keep local up to date
+  const ticket = ++filteringInFlight;
+  filterWorker.onmessage = (ev) => {
+    if (ticket !== filteringInFlight) return;
+    const { type, slice, total } = ev.data || {};
+    if (type === 'result') {
+      const grid = document.getElementById('universityGrid');
+      grid.innerHTML = '';
+      renderUniversities(slice);
+
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
       document.getElementById('pageInfo').textContent = `Page ${Math.min(page, totalPages)} of ${totalPages}`;
       document.getElementById('prevPage').disabled = (page <= 1);
       document.getElementById('nextPage').disabled = (page >= totalPages);
-      updateMeta();
-    }
-    function updateMeta() {
-      const start = filtered.length ? ((page - 1) * pageSize + 1) : 0;
-      const end   = Math.min(filtered.length, page * pageSize);
-      document.getElementById('resultMeta').textContent = `Showing ${start}-${end} of ${filtered.length} (from ${universities.length} total)`;
-    }
+      document.getElementById('resultMeta').textContent = `Showing ${slice.length ? ((page-1)*pageSize+1) : 0}-${Math.min(total, page*pageSize)} of ${total} (from ${universities.length} total)`;
 
-    /* ----- Render + Selection (uses effective selection) ----- */
-    function renderUniversities(list) {
-      const grid = document.getElementById('universityGrid');
-      grid.innerHTML = '';
-      const frag = document.createDocumentFragment();
-      const effective = getEffectiveSelection();
+      const empty = document.getElementById('emptyState');
+      if (total === 0) { grid.style.display='none'; if (empty) empty.style.display='block'; }
+      else { grid.style.display='grid'; if (empty) empty.style.display='none'; }
+    }
+  };
+  filterWorker.postMessage({ type:'filter', payload: { filters, page, pageSize }});
+}
 
-      list.forEach(uni => {
-        const card = document.createElement('div');
-        card.className = 'university-card' + (effective.has(uni.unitid) ? ' selected' : '');
-        card.setAttribute('role','listitem');
-        card.title = uni.sector || uni.control || '';
-        card.addEventListener('click', () => toggleUniversity(uni.unitid));
-        card.innerHTML = `
-          <div class="university-header">
-            <div class="university-logo">${(uni.name||'?').charAt(0)}</div>
-            <div>
-              <div class="university-name">${uni.name || 'Unknown Institution'}</div>
-              <div class="university-location">${uni.city || ''}${(uni.city && uni.state) ? ', ' : ''}${uni.state || ''}</div>
-              ${(uni.level || uni.control) ? `<span class="university-pill">${[uni.control, uni.level].filter(Boolean).join(' • ')}</span>` : ''}
-            </div>
-          </div>`;
-        if (flashNextRender) { card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'), 750); }
-        frag.appendChild(card);
+function refreshList() {
+  if (filterWorker) computeFilteredAsync();
+  else { computeFiltered(); renderPage(); updateMeta(); }
+}
+
+/* --------------------- DOM Ready --------------------- */
+document.addEventListener('DOMContentLoaded', async function () {
+  // Inject menu extras (safe if absent)
+  (function srInsertMenuItems(){
+    const dd = document.getElementById('userDropdown');
+    if (!dd) return;
+
+    const li = document.createElement('div');
+    li.className = 'dropdown-item';
+    li.innerHTML = `
+      <span class="material-icons">bug_report</span>
+      <div class="view-label">
+        <div class="view-name">Console logs</div>
+        <div class="view-description">Toggle in-browser event logs</div>
+      </div>
+      <input id="logToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
+    `;
+    dd.appendChild(li);
+
+    const authRow = document.createElement('div');
+    authRow.id = 'authRow';
+    authRow.className = 'dropdown-item';
+    dd.appendChild(authRow);
+  })();
+
+  // Wire mock toggle UI
+  const mockEl = document.getElementById('mockToggle');
+  if (mockEl) {
+    mockEl.checked = getUseMock();
+    mockEl.addEventListener('change', (e) => setUseMock(e.target.checked));
+  }
+
+  const logEl = document.getElementById('logToggle');
+  if (logEl) {
+    logEl.checked = SR_LOG.consoleEnabled();
+    logEl.addEventListener('change', (e)=> SR_LOG.setConsoleEnabled(!!e.target.checked));
+  }
+  srRefreshAuthRow();
+
+  (function applyTokenFromURL(){
+    const p = new URLSearchParams(location.search);
+    const tok = p.get('token');
+    if (tok) {
+      SR_AUTH.setTokens({
+        accessToken: tok,
+        refreshToken: p.get('rt') || 'demo-refresh',
+        expiresAt: Date.now() + 55*60*1000
       });
-
-      grid.appendChild(frag);
-      if (flashNextRender) flashNextRender = false;
+      toast('Signed in.', 'success');
+      srRefreshAuthRow();
+      history.replaceState(null, '', location.pathname + location.hash);
+      SR_AUTH.resolvePostLoginWaiters();
     }
+  })();
 
-    // Hybrid toggle behavior
-    function toggleUniversity(unitid) {
-      const allowEdits = document.getElementById('allowEditsToggle').checked;
-
-      if (!studentProfile || allowEdits) {
-        if (studentUnitIds.has(unitid)) {
-          if (removedByRecommender.has(unitid)) removedByRecommender.delete(unitid);
-          else removedByRecommender.add(unitid);
-          addedByRecommender.delete(unitid);
-        } else {
-          if (addedByRecommender.has(unitid)) addedByRecommender.delete(unitid);
-          else addedByRecommender.add(unitid);
-        }
-      } else {
-        if (studentUnitIds.has(unitid)) {
-          if (removedByRecommender.has(unitid)) removedByRecommender.delete(unitid);
-          else removedByRecommender.add(unitid);
-        } else {
-          toast('Student has locked the list. You cannot add new universities.', 'error');
-        }
-      }
-
-      renderPage();
-      updateSelectedList();
-      updateSendButton();
-      persistAndSync();
-      // [SR INSERT] Event
-      SR_LOG.log({ type: "status_counts", counts: { selected: getEffectiveSelection().size } });
-      srRenderAuditBanner();
-    }
-
-    function removeFromEffective(unitid) {
-      if (studentUnitIds.has(unitid)) {
-        removedByRecommender.add(unitid);
-        addedByRecommender.delete(unitid);
-      } else {
-        addedByRecommender.delete(unitid);
-      }
-      renderPage();
-      updateSelectedList();
-      updateSendButton();
-      persistAndSync();
-      srRenderAuditBanner();
-    }
-
-    function updateSelectedList() {
-      const selectedList = document.getElementById('selectedList');
-      const selectedCount = document.getElementById('selectedCount');
-
-      const effective = getEffectiveSelection();
-      selectedCount.textContent = `${effective.size} universities selected`;
-
-      const chips = [];
-      effective.forEach(unitid => {
-        const uni = filtered.find(u => u.unitid === unitid) || universities.find(u => u.unitid === unitid);
-        const name = uni ? uni.name : 'Unknown';
-        const badges = [];
-        if (studentUnitIds.has(unitid)) badges.push('<span class="badge badge-student">Student</span>');
-        if (addedByRecommender.has(unitid)) badges.push('<span class="badge badge-added">You added</span>');
-        chips.push(`
-          <div class="selected-tag">
-            ${name}
-            ${badges.length ? `<span style="margin-left:.35rem; display:inline-flex; gap:.25rem;">${badges.join('')}</span>` : ''}
-            <div class="remove-tag" title="Remove from sending" onclick="removeFromEffective(${JSON.stringify(unitid)})">×</div>
-          </div>
-        `);
-      });
-      selectedList.innerHTML = chips.join('');
-    }
-
-    function updateSendButton() {
-      const sendBtn = document.getElementById('sendBtn');
-      const effective = getEffectiveSelection();
-      sendBtn.disabled = !(uploadedFile && effective.size > 0);
-    }
-
-    /* ----- Browse-all dropdown wiring ----- */
-    function setupUniversitySelect() {
-      populateUniversitySelectOptions(universities);
-      const sel = document.getElementById('universitySelect');
-      sel.addEventListener('change', (e) => {
-        const val = e.target.value; if (!val) return;
-        // Reset filters so the selected uni is visible
-        filters.q = filters.state = filters.type = filters.level = '';
-        document.getElementById('universitySearch').value = '';
-        document.getElementById('stateFilter').value = '';
-        document.getElementById('typeFilter').value  = '';
-        document.getElementById('levelFilter').value = '';
-        refreshList();
-        const idx = filtered.findIndex(u => String(u.unitid) === String(val));
-        if (idx >= 0) {
-          page = Math.floor(idx / pageSize) + 1;
-          refreshList();
-          // flash/highlight target card
-          requestAnimationFrame(() => {
-            const cards = Array.from(document.querySelectorAll('.university-card'));
-            const startIdx = (page - 1) * pageSize;
-            const card = cards[idx - startIdx];
-            if (card) { card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'), 1200); card.scrollIntoView({behavior:'smooth', block:'nearest'}); }
-          });
-          // selecting from dropdown → add it (as student or recommender add)
-          if (studentUnitIds.has(Number(val))) {
-            removedByRecommender.delete(Number(val));
-          } else {
-            addedByRecommender.add(Number(val));
-          }
-          updateSelectedList(); updateSendButton();
-          persistAndSync();
-        }
-        sel.selectedIndex = 0; // reset placeholder
-      });
-    }
-    function populateUniversitySelectOptions(list) {
-      const sel = document.getElementById('universitySelect'); if (!sel) return;
-      sel.length = 1; // keep placeholder
-      const sorted = [...list].sort((a,b) => (a.name||'').localeCompare(b.name||''));
-      const frag = document.createDocumentFragment();
-      sorted.forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u.unitid;
-        opt.textContent = `${u.name || 'Unknown Institution'}${u.city || u.state ? ' — ' : ''}${[u.city,u.state].filter(Boolean).join(', ')}`;
-        frag.appendChild(opt);
-      });
-      sel.appendChild(frag);
-    }
-
-    /* ----- Student profile (mock loader + URL param) ----- */
-    async function fetchStudentProfile(studentIdOrEmail) {
-      // localStorage override (for QA)
-      const key = `sr_student_${studentIdOrEmail}`;
-      const ls = localStorage.getItem(key);
-      if (ls) return JSON.parse(ls);
-
-      // Mock fallback: pick 10 from first 400
-      const picks = [];
-      const pool = [...universities].slice(0, 400);
-      while (picks.length < 10 && pool.length) {
-        const idx = Math.floor(Math.random() * pool.length);
-        picks.push(pool[idx].unitid);
-        pool.splice(idx, 1);
-      }
-      return {
-        id: studentIdOrEmail,
-        name: `Student ${studentIdOrEmail}`,
-        allowRecommenderEdits: true,
-        selectedUnitIds: picks
-      };
-
-      // Real API sample:
-      // const r = await fetch(`${API_URL}/students/${encodeURIComponent(studentIdOrEmail)}`, { credentials: 'include' });
-      // if (!r.ok) throw new Error('Failed to fetch student');
-      // return await r.json();
-    }
-
-    async function loadStudentProfile(studentIdOrEmail) {
+  /* Load dataset (cache → fallbacks) */
+  try {
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    if (cached) {
       try {
-        const prof = await fetchStudentProfile(studentIdOrEmail);
-        studentProfile = prof;
-        studentUnitIds = new Set(prof.selectedUnitIds || []);
-        addedByRecommender.clear();
-        removedByRecommender.clear();
-
-        document.getElementById('studentTitle').textContent = `${prof.name}`;
-        document.getElementById('studentMeta').textContent =
-          `Preselected: ${studentUnitIds.size} universities • Edits ${prof.allowRecommenderEdits ? 'allowed' : 'locked'}`;
-        document.getElementById('allowEditsToggle').checked = !!prof.allowRecommenderEdits;
-
-        // Jump to first student pick to visually confirm
-        refreshList();
-        if (studentUnitIds.size) {
-          const first = Array.from(studentUnitIds)[0];
-          const idx = filtered.findIndex(u => u.unitid === first);
-          if (idx >= 0) page = Math.floor(idx / pageSize) + 1;
+        const cachedData = JSON.parse(cached);
+        if (Array.isArray(cachedData) || (cachedData && typeof cachedData === 'object')) {
+          initializeWithData(cachedData);
+          return;
         }
-        refreshList();
-        updateSelectedList();
-        toast(`Loaded ${prof.name} with ${studentUnitIds.size} preselected universities.`, 'success');
-        persistAndSync();
-        // [SR INSERT] Event
-        SR_LOG.log({ type: "dataset_load", datasetId: "student_profile", ms: 0 });
-        srRenderAuditBanner();
-      } catch (e) {
-        console.error(e);
-        toast('Could not load student profile.', 'error');
-      }
-    }
-
-    /* ===== Upload + Polling API (with Mock) ===== */
-
-    /** Toggle from UI/localStorage (Task 1) */
-    let USE_MOCK = getUseMock();
-
-    /** Optional: if you store a token after login */
-    const getAuthToken = () => (SR_AUTH.getAccessToken() || localStorage.getItem('token') || null);
-
-    /** Resolve API base from window.ENV or fallback */
-    const API_BASE =
-      (window.ENV && window.ENV.API_URL) ||
-      (typeof API_URL !== "undefined" ? API_URL : "https://api.stellarrec.com");
-
-    // [SR INSERT] fetch with bearer, 401→refresh→retry→gentle sign-in
-    async function fetchWithAuth(input, init={}, _retrying=false) {
-      const headers = new Headers(init.headers || {});
-      const tok = SR_AUTH.getAccessToken();
-      if (tok) headers.set('Authorization', `Bearer ${tok}`);
-
-      const res = await fetch(input, { ...init, headers });
-
-      if (res.status !== 401) return res;
-
-      // prevent loops on auth endpoints
-      const url = typeof input === 'string' ? input : (input && input.url) || '';
-      if (_retrying || url.includes('/auth/refresh')) return res;
-
-      // try refresh
-      const ok = await SR_AUTH.refreshTokens();
-      if (ok) return fetchWithAuth(input, init, true);
-
-      // gentle sign-in flow: show toast + open menu, wait until login completes, then retry once
-      SR_AUTH.startGentleSignInFlow();
-      await SR_AUTH.waitForLogin();
-      return fetchWithAuth(input, init, true);
-    }
-
-    const API_REAL = {
-      async submitLetter({ studentId, unitIds, file }) {
-        const fd = new FormData();
-        fd.append("studentId", String(studentId || ""));
-        unitIds.forEach(id => fd.append("universityIds[]", String(id)));
-        fd.append("file", file);
-
-        const resp = await fetchWithAuth(`${API_BASE}/letters`, {
-          method: "POST",
-          body: fd,
-        });
-        if (!resp.ok) throw await httpError(resp);
-        return resp.json(); // { jobId, recipients:[{unitid,status}] }
-      },
-      async getJob(jobId) {
-        const resp = await fetchWithAuth(`${API_BASE}/letters/${encodeURIComponent(jobId)}`);
-        if (!resp.ok) throw await httpError(resp);
-        return resp.json(); // { jobId, recipients:[{unitid,status,message?}], done:boolean }
-      },
-      async cancelJob(jobId) {
-        try {
-          await fetchWithAuth(`${API_BASE}/letters/${encodeURIComponent(jobId)}`, { method: "DELETE" });
-        } catch {}
-      },
-    };
-
-    function authHeaders() {
-      const token = getAuthToken();
-      return token ? { Authorization: `Bearer ${token}` } : {};
-    }
-
-    async function httpError(resp) {
-      let msg = `HTTP ${resp.status}`;
-      try {
-        const data = await resp.json();
-        if (data && (data.error || data.message)) msg += `: ${data.error || data.message}`;
       } catch {}
-      // [SR INSERT] nicer surfacing for 403/409
-      if (resp.status === 403) msg = 'You don’t have permission to perform this action (403).';
-      if (resp.status === 409) msg = 'This item was changed elsewhere. Please refresh and try again (409).';
-      return new Error(msg);
     }
 
-    /* Mock adapter */
-    const API_MOCK = {
-      async submitLetter({ studentId, unitIds, file }) {
-        const jobId = `mock-${Date.now()}`;
-        const recipients = unitIds.map(uid => ({ unitid: uid, status: "pending" }));
-        window.__MOCK_JOBS__ = window.__MOCK_JOBS__ || {};
-        window.__MOCK_JOBS__[jobId] = { jobId, recipients, cursor: 0, done: false };
-        return { jobId, recipients };
-      },
-      async getJob(jobId) {
-        await sleep(500 + Math.random() * 500);
-        const store = window.__MOCK_JOBS__ && window.__MOCK_JOBS__[jobId];
-        if (!store) throw new Error("Mock job not found");
-        const step = 3 + Math.floor(Math.random() * 3);
-        const end = Math.min(store.cursor + step, store.recipients.length);
-        for (let i = store.cursor; i < end; i++) {
-          const r = store.recipients[i];
-          const roll = Math.random();
-          if (roll < 0.85) r.status = "delivered";
-          else if (roll < 0.95) { r.status = "error"; r.message = "Temporary failure"; }
-          else { r.status = "error"; r.message = "Permanent failure"; }
-        }
-        store.cursor = end;
-        store.done = end >= store.recipients.length;
-        return { jobId: store.jobId, recipients: store.recipients, done: store.done };
-      },
-      async cancelJob(jobId) {
-        if (window.__MOCK_JOBS__) delete window.__MOCK_JOBS__[jobId];
-      },
-    };
-
-    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-    const API = USE_MOCK ? API_MOCK : API_REAL;
-
-    /* ----- Accessible modal focus trap (Task 4) ----- */
-    let lastFocusedEl = null;
-
-    function getFocusable(container) {
-      return Array.from(container.querySelectorAll(
-        'a[href],button:not([disabled]),textarea,input[type="text"],input[type="email"],input[type="number"],input[type="search"],input[type="checkbox"],select,[tabindex]:not([tabindex="-1"])'
-      )).filter(el => el.offsetParent !== null);
-    }
-
-    function openModal(modal) {
-      lastFocusedEl = document.activeElement;
-      modal.style.display = 'flex';
-      const focusables = getFocusable(modal);
-      (focusables[0] || modal).focus();
-
-      function trap(e) {
-        if (e.key === 'Tab') {
-          const items = getFocusable(modal);
-          if (!items.length) return;
-          const first = items[0], last = items[items.length - 1];
-          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-        } else if (e.key === 'Escape') {
-          e.preventDefault();
-          closeModal(modal);
-        }
+    let data;
+    const candidates = [
+      "/assets/videos/us_institutions_by_state_2023.json",
+      "/assets/videos/us_institutions_by_state_2023.min.json",
+      "https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/videos/us_institutions_by_state_2023.json"
+    ];
+    for (const url of candidates) {
+      try {
+        const resp = await fetch(url + (url.startsWith('http') ? '' : `?v=${Date.now()}`));
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const txt = await resp.text();
+        const fixed = txt
+          .replace(/\b-?Infinity\b/g, "null")
+          .replace(/\bNaN\b/g, "null")
+          .replace(/,\s*([}\]])/g, "$1");
+        data = JSON.parse(fixed);
+        break;
+      } catch (e) {
+        console.warn('Fallback to next candidate for', url, e);
       }
-      modal.__trapHandler__ = trap;
-      document.addEventListener('keydown', trap);
     }
+    if (!data) throw new Error('No dataset source could be loaded.');
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    initializeWithData(data);
+  } catch (err) {
+    console.error("Failed to load university dataset", err);
+    const meta = document.getElementById('resultMeta');
+    if (meta) meta.textContent = 'Failed to load universities.';
+    toast(`Failed to load dataset: ${err.message || err}`, 'error');
 
-    function closeModal(modal) {
-      modal.style.display = 'none';
-      document.removeEventListener('keydown', modal.__trapHandler__ || (()=>{}));
-      modal.__trapHandler__ = null;
-      if (lastFocusedEl && typeof lastFocusedEl.focus === 'function') lastFocusedEl.focus();
-    }
-
-    /** Confirm modal → on confirm, call proceedSend(effectiveSet) */
-    function sendLetters() {
-      const effective = getEffectiveSelection();
-      if (!uploadedFile || effective.size === 0) return;
-
-      const included = Array.from(effective);
-      const removed  = Array.from(studentUnitIds).filter(id => !effective.has(id));
-      const added    = Array.from(effective).filter(id => !studentUnitIds.has(id));
-
-      const renderList = (ids) => ids.map(id => {
-        const uni = universities.find(u => u.unitid === id);
-        return `<div>- ${uni ? uni.name : id}</div>`;
-      }).join('');
-
-      document.getElementById('modalIncluded').innerHTML = renderList(included);
-      document.getElementById('modalRemoved').innerHTML  = removed.length ? renderList(removed) : '<div>None</div>';
-      document.getElementById('modalAdded').innerHTML    = added.length ? renderList(added) : '<div>None</div>';
-
-      document.getElementById('modalIncludedCount').textContent = included.length;
-      document.getElementById('modalRemovedCount').textContent  = removed.length;
-      document.getElementById('modalAddedCount').textContent    = added.length;
-
-      const studentName = studentProfile ? studentProfile.name : 'this student';
-      document.getElementById('modalSummary').innerHTML =
-        `You’re about to send to <b>${included.length}</b> universities for <b>${studentName}</b>. Review differences from the student’s list below.`;
-
-      const modal = document.getElementById('confirmModal');
-      toast('Review recipients, then press Enter to send.', 'info', { ttl: 2500 });
-      openModal(modal);
-
-      const close = () => closeModal(modal);
-      document.getElementById('modalCloseBtn').onclick = close;
-      document.getElementById('modalCancelBtn').onclick = close;
-      document.getElementById('modalConfirmBtn').onclick = async () => {
-        close();
-        await proceedSend(effective);
-      };
-    }
-
-    /** Start API job(s), poll, and paint progress */
-    async function proceedSend(effectiveSet) {
-      document.getElementById('progressSection').style.display = 'block';
-      document.querySelector('.upload-section').style.display = 'none';
-      document.querySelector('.university-section').style.display = 'none';
-      document.querySelector('.selected-section').style.display = 'none';
-
-      // [SR INSERT] Add Pause/Resume and Cancel buttons (circuit-breaker)
-      srEnsureProgressControls();
-
-      const ids = Array.from(effectiveSet);
-      renderInitialDeliveryRows(ids);
-
-      const CHUNK_SIZE = 100;
-      const chunks = [];
-      for (let i = 0; i < ids.length; i += CHUNK_SIZE) chunks.push(ids.slice(i, i + CHUNK_SIZE));
-
-      const combined = new Map(); // unitid -> { status, message? }
-      ids.forEach(id => combined.set(id, { status: 'pending' }));
-
-      SR_LOG.log({ type: "send_start", campaignId: "ui", total: ids.length });
-
-      SR_BULK.reset();
-
-      for (let batchIndex = 0; batchIndex < chunks.length; batchIndex++) {
-        if (SR_BULK.canceled) break;
-        const batch = chunks[batchIndex];
-        try {
-          const { jobId } = await API.submitLetter({
-            studentId: getActiveStudentId(),
-            unitIds: batch,
-            file: uploadedFile
-          });
-
-          SR_BULK.track(jobId);
-
-          await srPollJobWithControls(jobId, (recipients) => {
-            recipients.forEach(r => {
-              combined.set(r.unitid, { status: r.status, message: r.message });
-              paintDeliveryRow(r.unitid, r.status, r.message);
-            });
-            updateProgressBar(combined);
-          });
-
-        } catch (err) {
-          console.error('Batch failed', err);
-          batch.forEach(id => {
-            combined.set(id, { status: 'error', message: String(err.message || err) });
-            paintDeliveryRow(id, 'error', String(err.message || err));
-          });
-          updateProgressBar(combined);
-        }
+    const empty = document.getElementById('emptyState');
+    if (empty) {
+      empty.style.display = 'block';
+      document.getElementById('universityGrid').style.display = 'none';
+      const retryBtn = document.getElementById('retryLoadBtn');
+      if (retryBtn) {
+        retryBtn.style.display = 'inline-block';
+        retryBtn.onclick = () => location.reload();
       }
+      const clearBtn = document.getElementById('clearFiltersBtn');
+      if (clearBtn) clearBtn.onclick = () => resetAllFilters();
+    }
+  }
+});
 
-      if (SR_BULK.canceled) {
-        document.getElementById('progressText').textContent = 'Canceled';
-        toast('Canceled. No further work will be performed.', 'info');
+/* --------------------- Initialize with data --------------------- */
+function initializeWithData(data) {
+  universities = Array.isArray(data) ? data : (data && typeof data === 'object' ? Object.values(data).flat() : []);
+  universities = universities.map(u => ({
+    unitid:  u.unitid ?? u.UNITID ?? u.id,
+    name:    u.name   ?? u.INSTNM ?? 'Unknown',
+    city:    u.city   ?? u.CITY   ?? '',
+    state:   u.state  ?? u.STABBR ?? '',
+    control: u.control?? u.CONTROL?? '',
+    level:   u.level  ?? u.ICLEVEL?? '',
+    sector:  u.sector ?? u.SECTOR ?? '',
+    website: u.website?? u.WEBADDR?? ''
+  }));
+  initFilterWorker();
+  if (filterWorker) filterWorker.postMessage({ type:'prime', payload: universities });
+
+  setupFileUpload();
+  setupSearch();          // includes autosuggest + Apply handling
+  setupClickOutside();
+  setupFilterHandlers();
+  setupPagingHandlers();
+  setupUniversitySelect();
+
+  document.getElementById('loadStudentBtn').addEventListener('click', () => {
+    const id = document.getElementById('studentIdInput').value.trim();
+    if (!id) { toast('Enter a student ID or email.', 'error', { ttl: 2000 }); return; }
+    loadStudentProfile(id);
+  });
+  document.getElementById('allowEditsToggle').addEventListener('change', (e) => {
+    if (studentProfile) studentProfile.allowRecommenderEdits = e.target.checked;
+    renderPage(); updateSelectedList(); persistAndSync();
+    SR_LOG.log({ type: "filter_apply", filters: { allowRecommenderEdits: !!e.target.checked } });
+    srRenderAuditBanner();
+  });
+
+  document.getElementById('clearFiltersBtn')?.addEventListener('click', resetAllFilters);
+
+  hydrateAll();
+  applyShareFromURL();
+  setupCopyLink();
+  setupBulkImport();
+
+  refreshList();
+  updateSelectedList();
+  srRenderAuditBanner();
+
+  const params = new URLSearchParams(location.search);
+  const sid = params.get('student');
+  if (sid) loadStudentProfile(sid);
+
+  persistAndSync();
+}
+
+/* --------------------- UI: dropdown & view --------------------- */
+function toggleUserDropdown() {
+  document.getElementById('userDropdown').classList.toggle('show');
+}
+function switchView(view, ev) {
+  currentView = view;
+  document.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
+  if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
+  updateDashboardForView(view);
+  document.getElementById('userDropdown').classList.remove('show');
+  persistAndSync();
+  SR_LOG.log({ type: "search", query: `switch_view:${view}` });
+}
+function updateDashboardForView(view) {
+  const heroTitle = document.querySelector('.hero-title');
+  const heroSubtitle = document.querySelector('.hero-subtitle');
+  const uploadTitle = document.querySelector('.upload-title');
+  if (view === 'student') {
+    heroTitle.textContent = 'Track Your Applications';
+    heroSubtitle.textContent = 'Monitor the status of your recommendation letters and university applications.';
+    uploadTitle.textContent = 'Request Recommendation Letter';
+  } else {
+    heroTitle.textContent = 'One Upload. Multiple Universities.';
+    heroSubtitle.textContent = 'Upload your recommendation letter once and send it to multiple US universities instantly.';
+    uploadTitle.textContent = 'Upload Recommendation Letter';
+  }
+}
+function setupClickOutside() {
+  document.addEventListener('click', function (event) {
+    const userInfo = document.querySelector('.user-info');
+    const dropdown = document.getElementById('userDropdown');
+    if (userInfo && dropdown && !userInfo.contains(event.target)) dropdown.classList.remove('show');
+  });
+}
+
+/* --------------------- Upload --------------------- */
+function setupFileUpload() {
+  const fileInput = document.getElementById('fileInput');
+  const uploadSection = document.getElementById('uploadSection');
+  fileInput.addEventListener('change', handleFileUpload);
+  uploadSection.addEventListener('dragover', (e) => { e.preventDefault(); uploadSection.classList.add('dragover'); });
+  uploadSection.addEventListener('dragleave', () => uploadSection.classList.remove('dragover'));
+  uploadSection.addEventListener('drop', (e) => {
+    e.preventDefault(); uploadSection.classList.remove('dragover');
+    if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+  });
+}
+function handleFileUpload(e) { if (e.target.files[0]) handleFile(e.target.files[0]); }
+function handleFile(file) {
+  if (file.type !== 'application/pdf') { toast('Please upload a PDF file.', 'error'); return; }
+  uploadedFile = file;
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileSize').textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB • Uploaded successfully`;
+  document.getElementById('uploadedFile').style.display = 'block';
+  toast('PDF attached. Ready to send.', 'success');
+  updateSendButton(); persistAndSync();
+  SR_LOG.log({ type: "dataset_load", datasetId: "uploaded_pdf", ms: file.size || 0 });
+}
+function removeFile() {
+  uploadedFile = null;
+  document.getElementById('uploadedFile').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  updateSendButton(); persistAndSync();
+}
+
+/* --------------------- Search + Autosuggest --------------------- */
+function debounce(fn, wait=300) {
+  let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
+}
+
+let suggestWrap, activeIndex = -1, currentSuggestions = [];
+
+function setupSearch() {
+  const searchInput = document.getElementById('universitySearch');
+  const searchApplyBtn = document.getElementById('searchApplyBtn');
+
+  // Create suggestion popover
+  suggestWrap = document.createElement('div');
+  suggestWrap.className = 'suggest-popover';
+  suggestWrap.id = 'suggestPopover';
+  suggestWrap.setAttribute('role', 'listbox');
+  suggestWrap.style.display = 'none';
+  searchInput.parentNode.appendChild(suggestWrap);
+
+  const run = (fromApply=false) => {
+    filters.q = searchInput.value.trim().toLowerCase();
+    page = 1; flashNextRender = true;
+    refreshList();
+    persistAndSync();
+    if (fromApply) closeSuggest();
+    SR_LOG.log({ type: "search", query: filters.q });
+  };
+
+  const runDebounced = debounce(() => {
+    // live filter while typing
+    run(false);
+    // update suggestions as user types
+    renderSuggestions(searchInput.value);
+  }, 150);
+
+  // Apply with button
+  searchApplyBtn.addEventListener('click', () => run(true));
+
+  // Debounced live search + autosuggest
+  searchInput.addEventListener('input', runDebounced);
+
+  // Keyboard affordances
+  searchInput.addEventListener('keydown', (e) => {
+    const hasOpen = suggestWrap && suggestWrap.style.display !== 'none';
+    if (e.key === 'Enter') {
+      if (hasOpen && activeIndex >= 0 && currentSuggestions[activeIndex]) {
+        // choose highlighted suggestion
+        pickSuggestion(currentSuggestions[activeIndex]);
+        e.preventDefault();
         return;
       }
-
-      finalizeProgress(combined);
-      offerRetryFailed(combined);
+      e.preventDefault();
+      run(true);
+      return;
     }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      if (hasOpen) { closeSuggest(); return; }
+      searchInput.value = ''; run(true);
+    }
+    if (hasOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+      e.preventDefault();
+      const max = currentSuggestions.length - 1;
+      if (e.key === 'ArrowDown') activeIndex = (activeIndex + 1 > max) ? 0 : activeIndex + 1;
+      if (e.key === 'ArrowUp')   activeIndex = (activeIndex - 1 < 0)   ? max : activeIndex - 1;
+      updateActiveSuggestion();
+    }
+  });
 
-    /** Poll loop with exponential backoff */
-    async function pollJob(jobId, onUpdate) {
-      let attempt = 0;
-      const MAX_WAIT = 45_000;
-      const started = Date.now();
+  // Suggestions click outside
+  document.addEventListener('click', (ev) => {
+    if (!suggestWrap) return;
+    if (ev.target === suggestWrap || suggestWrap.contains(ev.target)) return;
+    if (ev.target === searchInput) return;
+    closeSuggest();
+  });
+}
 
-      while (true) {
-        if (Date.now() - started > MAX_WAIT) throw new Error('Timed out while sending. Please try again.');
-        try {
-          const snapshot = await API.getJob(jobId);
-          if (typeof onUpdate === 'function') onUpdate(snapshot.recipients || []);
-          if (snapshot.done) return;
-          attempt++;
-          const wait = Math.min(4000, 600 * Math.pow(1.4, attempt));
-          await sleep(wait);
-        } catch (err) {
-          attempt++;
-          if (attempt >= 6) throw err;
-          await sleep(800 * attempt);
-        }
+function renderSuggestions(query) {
+  if (!suggestWrap) return;
+  const q = norm(query);
+  if (!q) { closeSuggest(); return; }
+
+  // Build lightweight match list (prefix > contains)
+  const name = (u)=> u.name || '';
+  const city = (u)=> u.city || '';
+  const state= (u)=> u.state || '';
+
+  // Pre-filter once
+  let candidates = universities;
+  // score: startsWith name (2), includes name (1.5), includes city/state (1)
+  const scored = [];
+  for (let i=0; i<candidates.length; i++) {
+    const nm = name(candidates[i]); const nmL = norm(nm);
+    const ctL = norm(city(candidates[i])); const stL = norm(state(candidates[i]));
+    let score = 0;
+    if (nmL.startsWith(q)) score = 2;
+    else if (nmL.includes(q)) score = 1.5;
+    else if (ctL.includes(q) || stL.includes(q)) score = 1;
+    if (score > 0) scored.push([score, candidates[i]]);
+    if (scored.length > 600) break; // cap early for speed
+  }
+  scored.sort((a,b)=> b[0] - a[0] || (a[1].name||'').localeCompare(b[1].name||''));
+  const list = scored.slice(0, 10).map(x=>x[1]);
+  currentSuggestions = list;
+  activeIndex = list.length ? 0 : -1;
+
+  if (!list.length) { closeSuggest(); return; }
+
+  // Render items
+  suggestWrap.innerHTML = '';
+  list.forEach((u, idx) => {
+    const item = document.createElement('div');
+    item.className = 'suggest-item';
+    item.setAttribute('role','option');
+    item.setAttribute('aria-selected', idx === activeIndex ? 'true' : 'false');
+
+    const nm = escapeHtml(u.name || 'Unknown');
+    const loc = escapeHtml([u.city, u.state].filter(Boolean).join(', '));
+    const marked = highlight(nm, query);
+
+    item.innerHTML = `
+      <span class="material-icons" aria-hidden="true" style="font-size:1rem;">school</span>
+      <div>
+        <div>${marked}</div>
+        ${loc ? `<div class="suggest-muted">${loc}</div>` : ''}
+      </div>
+    `;
+    item.addEventListener('mouseenter', ()=> { activeIndex = idx; updateActiveSuggestion(); });
+    item.addEventListener('click', () => pickSuggestion(u));
+    suggestWrap.appendChild(item);
+  });
+
+  suggestWrap.style.display = 'block';
+}
+
+function highlight(text, query){
+  const q = norm(query);
+  if (!q) return text;
+  const i = norm(text).indexOf(q);
+  if (i < 0) return text;
+  return escapeHtml(text.slice(0, i)) +
+         `<span class="suggest-highlight">${escapeHtml(text.slice(i, i+q.length))}</span>` +
+         escapeHtml(text.slice(i+q.length));
+}
+function updateActiveSuggestion(){
+  if (!suggestWrap) return;
+  Array.from(suggestWrap.children).forEach((el, i) => {
+    el.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false');
+  });
+}
+function closeSuggest(){
+  if (!suggestWrap) return;
+  suggestWrap.style.display = 'none';
+  activeIndex = -1; currentSuggestions = [];
+}
+function pickSuggestion(u){
+  // Put the name in the search box, apply filter, and scroll to the card
+  const input = document.getElementById('universitySearch');
+  input.value = u.name || '';
+  filters.q = norm(u.name);
+  page = 1; flashNextRender = true;
+  refreshList(); persistAndSync(); closeSuggest();
+
+  // Jump to and flash that card, also select it for convenience
+  const idx = filtered.findIndex(x => String(x.unitid) === String(u.unitid));
+  if (idx >= 0) {
+    page = Math.floor(idx / pageSize) + 1;
+    refreshList();
+    requestAnimationFrame(() => {
+      const cards = Array.from(document.querySelectorAll('.university-card'));
+      const startIdx = (page - 1) * pageSize;
+      const card = cards[idx - startIdx];
+      if (card) { card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'), 1000); card.scrollIntoView({behavior:'smooth', block:'nearest'}); }
+    });
+  }
+}
+
+/* --------------------- Filters / pagination --------------------- */
+function setupFilterHandlers() {
+  const stateFilter = document.getElementById('stateFilter');
+  const typeFilter  = document.getElementById('typeFilter');
+  const levelFilter = document.getElementById('levelFilter');
+  const sortBy      = document.getElementById('sortBy');
+  const applyBtn    = document.getElementById('filterApplyBtn');
+
+  applyBtn.addEventListener('click', () => {
+    filters.state = stateFilter.value;
+    filters.type  = typeFilter.value;
+    filters.level = levelFilter.value;
+    filters.sort  = sortBy.value;
+    page = 1; flashNextRender = true;
+    refreshList(); persistAndSync();
+    SR_LOG.log({ type: "filter_apply", filters: { ...filters } });
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    resetAllFilters();
+    toast('Filters reset.', 'info', { ttl: 2000 });
+  });
+
+  document.getElementById('selectPageBtn').addEventListener('click', () => {
+    const start = (page - 1) * pageSize;
+    const end = Math.min(filtered.length, start + pageSize);
+    const effective = getEffectiveSelection();
+    filtered.slice(start, end).forEach(u => effective.add(u.unitid));
+    filtered.slice(start, end).forEach(u => {
+      if (studentUnitIds.has(u.unitid)) {
+        removedByRecommender.delete(u.unitid);
+      } else {
+        addedByRecommender.add(u.unitid);
       }
+    });
+    renderPage(); updateSelectedList(); updateSendButton();
+    persistAndSync();
+    toast('Selected all on current page.', 'success', { ttl: 1500 });
+  });
+}
+function resetAllFilters() {
+  document.getElementById('universitySearch').value = '';
+  document.getElementById('stateFilter').value = '';
+  document.getElementById('typeFilter').value  = '';
+  document.getElementById('levelFilter').value = '';
+  document.getElementById('sortBy').value      = 'name_asc';
+  filters.q = filters.state = filters.type = filters.level = '';
+  filters.sort = 'name_asc';
+  page = 1; flashNextRender = true;
+  refreshList();
+  persistAndSync();
+}
+
+/* Pagination */
+function setupPagingHandlers() {
+  document.getElementById('prevPage').addEventListener('click', () => {
+    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+    if (page > 1) { page--; }
+    if (page < 1) page = 1;
+    refreshList(); persistAndSync();
+  });
+  document.getElementById('nextPage').addEventListener('click', () => {
+    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+    if (page < totalPages) { page++; }
+    refreshList(); persistAndSync();
+  });
+  document.getElementById('pageSize').addEventListener('change', (e) => {
+    pageSize = parseInt(e.target.value, 10) || 40;
+    page = 1; refreshList(); persistAndSync();
+  });
+}
+
+function renderPage() {
+  const start = (page - 1) * pageSize;
+  const end   = start + pageSize;
+  const slice = filtered.slice(start, end);
+  renderUniversities(slice);
+  updatePager();
+
+  const grid = document.getElementById('universityGrid');
+  const empty = document.getElementById('emptyState');
+  if (filtered.length === 0) {
+    if (grid) grid.style.display = 'none';
+    if (empty) {
+      empty.style.display = 'block';
+      const retryBtn = document.getElementById('retryLoadBtn');
+      if (retryBtn) retryBtn.style.display = 'none';
     }
+  } else {
+    if (empty) empty.style.display = 'none';
+    if (grid) grid.style.display = 'grid';
+  }
+}
+function updatePager() {
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  document.getElementById('pageInfo').textContent = `Page ${Math.min(page, totalPages)} of ${totalPages}`;
+  document.getElementById('prevPage').disabled = (page <= 1);
+  document.getElementById('nextPage').disabled = (page >= totalPages);
+  updateMeta();
+}
+function updateMeta() {
+  const start = filtered.length ? ((page - 1) * pageSize + 1) : 0;
+  const end   = Math.min(filtered.length, page * pageSize);
+  document.getElementById('resultMeta').textContent = `Showing ${start}-${end} of ${filtered.length} (from ${universities.length} total)`;
+}
 
-    /* ----- [SR INSERT] Controlled poll with pause/backoff cap ----- */
-    async function srPollJobWithControls(jobId, onUpdate) {
-      let attempt = 0;
-      const BASE = 500, CAP = 10_000;
-      while (true) {
-        // honor pause
-        while (SR_BULK.paused && !SR_BULK.canceled) { await sleep(200); }
-        if (SR_BULK.canceled) return;
+/* --------------------- Render + selection --------------------- */
+function renderUniversities(list) {
+  const grid = document.getElementById('universityGrid');
+  grid.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  const effective = getEffectiveSelection();
 
-        try {
-          const snapshot = await API.getJob(jobId);
-          onUpdate?.(snapshot.recipients || []);
-          if (snapshot.done) return;
-          attempt++;
-          const next = Math.min(CAP, Math.floor(BASE * Math.pow(2, attempt-1) * (0.9 + Math.random()*0.2)));
-          SR_LOG.log({ type: "retry", op: "poll", attempt, waitMs: next });
-          await sleep(next);
-        } catch (e) {
-          attempt++;
-          const next = Math.min(CAP, 800 * attempt);
-          SR_LOG.log({ type: "error", op: "poll", message: String(e?.message||e), code: 0 });
-          await sleep(next);
-          if (attempt > 6) throw e;
-        }
-      }
+  list.forEach(uni => {
+    const card = document.createElement('div');
+    card.className = 'university-card' + (effective.has(uni.unitid) ? ' selected' : '');
+    card.setAttribute('role','listitem');
+    card.title = uni.sector || uni.control || '';
+    card.addEventListener('click', () => toggleUniversity(uni.unitid));
+    card.innerHTML = `
+      <div class="university-header">
+        <div class="university-logo">${escapeHtml((uni.name||'?').charAt(0))}</div>
+        <div>
+          <div class="university-name">${escapeHtml(uni.name || 'Unknown Institution')}</div>
+          <div class="university-location">${escapeHtml(uni.city || '')}${(uni.city && uni.state) ? ', ' : ''}${escapeHtml(uni.state || '')}</div>
+          ${(uni.level || uni.control) ? `<span class="university-pill">${[uni.control, uni.level].filter(Boolean).map(escapeHtml).join(' • ')}</span>` : ''}
+        </div>
+      </div>`;
+    if (flashNextRender) { card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'), 750); }
+    frag.appendChild(card);
+  });
+
+  grid.appendChild(frag);
+  if (flashNextRender) flashNextRender = false;
+}
+
+function toggleUniversity(unitid) {
+  const allowEdits = document.getElementById('allowEditsToggle').checked;
+
+  if (!studentProfile || allowEdits) {
+    if (studentUnitIds.has(unitid)) {
+      if (removedByRecommender.has(unitid)) removedByRecommender.delete(unitid);
+      else removedByRecommender.add(unitid);
+      addedByRecommender.delete(unitid);
+    } else {
+      if (addedByRecommender.has(unitid)) addedByRecommender.delete(unitid);
+      else addedByRecommender.add(unitid);
     }
+  } else {
+    if (studentUnitIds.has(unitid)) {
+      if (removedByRecommender.has(unitid)) removedByRecommender.delete(unitid);
+      else removedByRecommender.add(unitid);
+    } else {
+      toast('Student has locked the list. You cannot add new universities.', 'error');
+    }
+  }
 
-    /* ----- Progress UI helpers ----- */
-    function renderInitialDeliveryRows(unitIds) {
-      const deliveryList = document.getElementById('deliveryList');
-      deliveryList.innerHTML = '';
-      unitIds.forEach(uid => {
-        const uni = universities.find(u => String(u.unitid) === String(uid));
-        const name = uni ? uni.name : `#${uid}`;
-        const row = document.createElement('div');
-        row.className = 'delivery-item';
-        row.id = `delivery-${uid}`;
-        row.innerHTML = `
-          <div class="delivery-status pending">⏳</div>
-          <div>${escapeHtml(name)}</div>
-          <div class="delivery-msg" style="margin-left:auto;color:#ff9800;">Sending...</div>
-        `;
-        deliveryList.appendChild(row);
+  renderPage(); updateSelectedList(); updateSendButton();
+  persistAndSync();
+  SR_LOG.log({ type: "status_counts", counts: { selected: getEffectiveSelection().size } });
+  srRenderAuditBanner();
+}
+
+function removeFromEffective(unitid) {
+  if (studentUnitIds.has(unitid)) {
+    removedByRecommender.add(unitid);
+    addedByRecommender.delete(unitid);
+  } else {
+    addedByRecommender.delete(unitid);
+  }
+  renderPage(); updateSelectedList(); updateSendButton();
+  persistAndSync(); srRenderAuditBanner();
+}
+
+function updateSelectedList() {
+  const selectedList = document.getElementById('selectedList');
+  const selectedCount = document.getElementById('selectedCount');
+
+  const effective = getEffectiveSelection();
+  selectedCount.textContent = `${effective.size} universities selected`;
+
+  const chips = [];
+  effective.forEach(unitid => {
+    const uni = filtered.find(u => u.unitid === unitid) || universities.find(u => u.unitid === unitid);
+    const name = uni ? uni.name : 'Unknown';
+    const badges = [];
+    if (studentUnitIds.has(unitid)) badges.push('<span class="badge badge-student">Student</span>');
+    if (addedByRecommender.has(unitid)) badges.push('<span class="badge badge-added">You added</span>');
+    chips.push(`
+      <div class="selected-tag">
+        ${escapeHtml(name)}
+        ${badges.length ? `<span style="margin-left:.35rem; display:inline-flex; gap:.25rem;">${badges.join('')}</span>` : ''}
+        <div class="remove-tag" title="Remove from sending" onclick="removeFromEffective(${JSON.stringify(unitid)})">×</div>
+      </div>
+    `);
+  });
+  selectedList.innerHTML = chips.join('');
+}
+
+function updateSendButton() {
+  const sendBtn = document.getElementById('sendBtn');
+  const effective = getEffectiveSelection();
+  sendBtn.disabled = !(uploadedFile && effective.size > 0);
+}
+
+/* --------------------- Browse-all select --------------------- */
+function setupUniversitySelect() {
+  populateUniversitySelectOptions(universities);
+  const sel = document.getElementById('universitySelect');
+  sel.addEventListener('change', (e) => {
+    const val = e.target.value; if (!val) return;
+    filters.q = filters.state = filters.type = filters.level = '';
+    document.getElementById('universitySearch').value = '';
+    document.getElementById('stateFilter').value = '';
+    document.getElementById('typeFilter').value  = '';
+    document.getElementById('levelFilter').value = '';
+    refreshList();
+    const idx = filtered.findIndex(u => String(u.unitid) === String(val));
+    if (idx >= 0) {
+      page = Math.floor(idx / pageSize) + 1;
+      refreshList();
+      requestAnimationFrame(() => {
+        const cards = Array.from(document.querySelectorAll('.university-card'));
+        const startIdx = (page - 1) * pageSize;
+        const card = cards[idx - startIdx];
+        if (card) { card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'), 1200); card.scrollIntoView({behavior:'smooth', block:'nearest'}); }
       });
-      updateProgressBarFromPending(unitIds.length);
+      if (studentUnitIds.has(Number(val))) removedByRecommender.delete(Number(val));
+      else addedByRecommender.add(Number(val));
+      updateSelectedList(); updateSendButton(); persistAndSync();
     }
+    sel.selectedIndex = 0;
+  });
+}
+function populateUniversitySelectOptions(list) {
+  const sel = document.getElementById('universitySelect'); if (!sel) return;
+  sel.length = 1;
+  const sorted = [...list].sort((a,b) => (a.name||'').localeCompare(b.name||''));
+  const frag = document.createDocumentFragment();
+  sorted.forEach(u => {
+    const opt = document.createElement('option');
+    opt.value = u.unitid;
+    const loc = [u.city,u.state].filter(Boolean).join(', ');
+    opt.textContent = `${u.name || 'Unknown Institution'}${loc ? ' — ' + loc : ''}`;
+    frag.appendChild(opt);
+  });
+  sel.appendChild(frag);
+}
 
-    function paintDeliveryRow(unitid, status, message) {
-      const row = document.getElementById(`delivery-${unitid}`);
-      if (!row) return;
-      const statusEl = row.querySelector('.delivery-status');
-      const msgEl = row.querySelector('.delivery-msg');
+/* --------------------- Student profile (mock) --------------------- */
+async function fetchStudentProfile(studentIdOrEmail) {
+  const key = `sr_student_${studentIdOrEmail}`;
+  const ls = localStorage.getItem(key);
+  if (ls) return JSON.parse(ls);
 
-      if (status === 'delivered' || status === 'success') {
-        statusEl.className = 'delivery-status success';
-        statusEl.textContent = '✓';
-        msgEl.style.color = '#4caf50';
-        msgEl.textContent = 'Delivered';
-      } else if (status === 'error' || status === 'failed') {
-        statusEl.className = 'delivery-status error';
-        statusEl.textContent = '!';
-        msgEl.style.color = '#f44336';
-        msgEl.textContent = message ? truncate(message, 80) : 'Failed';
-      } else {
-        statusEl.className = 'delivery-status pending';
-        statusEl.textContent = '⏳';
-        msgEl.style.color = '#ff9800';
-        msgEl.textContent = 'Sending...';
+  const picks = [];
+  const pool = [...universities].slice(0, 400);
+  while (picks.length < 10 && pool.length) {
+    const idx = Math.floor(Math.random() * pool.length);
+    picks.push(pool[idx].unitid);
+    pool.splice(idx, 1);
+  }
+  return { id: studentIdOrEmail, name: `Student ${studentIdOrEmail}`, allowRecommenderEdits: true, selectedUnitIds: picks };
+}
+async function loadStudentProfile(studentIdOrEmail) {
+  try {
+    const prof = await fetchStudentProfile(studentIdOrEmail);
+    studentProfile = prof;
+    studentUnitIds = new Set(prof.selectedUnitIds || []);
+    addedByRecommender.clear();
+    removedByRecommender.clear();
+
+    document.getElementById('studentTitle').textContent = `${prof.name}`;
+    document.getElementById('studentMeta').textContent =
+      `Preselected: ${studentUnitIds.size} universities • Edits ${prof.allowRecommenderEdits ? 'allowed' : 'locked'}`;
+    document.getElementById('allowEditsToggle').checked = !!prof.allowRecommenderEdits;
+
+    refreshList();
+    if (studentUnitIds.size) {
+      const first = Array.from(studentUnitIds)[0];
+      const idx = filtered.findIndex(u => u.unitid === first);
+      if (idx >= 0) page = Math.floor(idx / pageSize) + 1;
+    }
+    refreshList(); updateSelectedList();
+    toast(`Loaded ${prof.name} with ${studentUnitIds.size} preselected universities.`, 'success');
+    persistAndSync();
+    SR_LOG.log({ type: "dataset_load", datasetId: "student_profile", ms: 0 });
+    srRenderAuditBanner();
+  } catch (e) {
+    console.error(e);
+    toast('Could not load student profile.', 'error');
+  }
+}
+
+/* --------------------- Send workflow (mock/real API split kept) --------------------- */
+let USE_MOCK = getUseMock();
+const getAuthToken = () => (SR_AUTH.getAccessToken() || localStorage.getItem('token') || null);
+const API_BASE =
+  (window.ENV && window.ENV.API_URL) ||
+  (typeof API_URL !== "undefined" ? API_URL : "https://api.stellarrec.com");
+
+async function fetchWithAuth(input, init={}, _retrying=false) {
+  const headers = new Headers(init.headers || {});
+  const tok = SR_AUTH.getAccessToken();
+  if (tok) headers.set('Authorization', `Bearer ${tok}`);
+  const res = await fetch(input, { ...init, headers });
+  if (res.status !== 401) return res;
+
+  const url = typeof input === 'string' ? input : (input && input.url) || '';
+  if (_retrying || url.includes('/auth/refresh')) return res;
+
+  const ok = await SR_AUTH.refreshTokens();
+  if (ok) return fetchWithAuth(input, init, true);
+
+  SR_AUTH.startGentleSignInFlow();
+  await SR_AUTH.waitForLogin();
+  return fetchWithAuth(input, init, true);
+}
+
+async function httpError(resp) {
+  let msg = `HTTP ${resp.status}`;
+  try {
+    const data = await resp.json();
+    if (data && (data.error || data.message)) msg += `: ${data.error || data.message}`;
+  } catch {}
+  if (resp.status === 403) msg = 'You don’t have permission to perform this action (403).';
+  if (resp.status === 409) msg = 'This item was changed elsewhere. Please refresh and try again (409).';
+  return new Error(msg);
+}
+
+const API_REAL = {
+  async submitLetter({ studentId, unitIds, file }) {
+    const fd = new FormData();
+    fd.append("studentId", String(studentId || ""));
+    unitIds.forEach(id => fd.append("universityIds[]", String(id)));
+    fd.append("file", file);
+    const resp = await fetchWithAuth(`${API_BASE}/letters`, { method: "POST", body: fd });
+    if (!resp.ok) throw await httpError(resp);
+    return resp.json();
+  },
+  async getJob(jobId) {
+    const resp = await fetchWithAuth(`${API_BASE}/letters/${encodeURIComponent(jobId)}`);
+    if (!resp.ok) throw await httpError(resp);
+    return resp.json();
+  },
+  async cancelJob(jobId) {
+    try { await fetchWithAuth(`${API_BASE}/letters/${encodeURIComponent(jobId)}`, { method: "DELETE" }); } catch {}
+  },
+};
+const API_MOCK = {
+  async submitLetter({ unitIds }) {
+    const jobId = `mock-${Date.now()}`;
+    const recipients = unitIds.map(uid => ({ unitid: uid, status: "pending" }));
+    window.__MOCK_JOBS__ = window.__MOCK_JOBS__ || {};
+    window.__MOCK_JOBS__[jobId] = { jobId, recipients, cursor: 0, done: false };
+    return { jobId, recipients };
+  },
+  async getJob(jobId) {
+    await sleep(500 + Math.random() * 500);
+    const store = window.__MOCK_JOBS__ && window.__MOCK_JOBS__[jobId];
+    if (!store) throw new Error("Mock job not found");
+    const step = 3 + Math.floor(Math.random() * 3);
+    const end = Math.min(store.cursor + step, store.recipients.length);
+    for (let i = store.cursor; i < end; i++) {
+      const r = store.recipients[i];
+      const roll = Math.random();
+      if (roll < 0.85) r.status = "delivered";
+      else if (roll < 0.95) { r.status = "error"; r.message = "Temporary failure"; }
+      else { r.status = "error"; r.message = "Permanent failure"; }
+    }
+    store.cursor = end;
+    store.done = end >= store.recipients.length;
+    return { jobId: store.jobId, recipients: store.recipients, done: store.done };
+  },
+  async cancelJob(jobId) { if (window.__MOCK_JOBS__) delete window.__MOCK_JOBS__[jobId]; },
+};
+const API = USE_MOCK ? API_MOCK : API_REAL;
+
+/* Progress + modal */
+let lastFocusedEl = null;
+function getFocusable(container) {
+  return Array.from(container.querySelectorAll('a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])'))
+    .filter(el => el.offsetParent !== null);
+}
+function openModal(modal) {
+  lastFocusedEl = document.activeElement;
+  modal.style.display = 'flex';
+  const focusables = getFocusable(modal);
+  (focusables[0] || modal).focus();
+
+  function trap(e) {
+    if (e.key === 'Tab') {
+      const items = getFocusable(modal);
+      if (!items.length) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    } else if (e.key === 'Escape') {
+      e.preventDefault(); closeModal(modal);
+    }
+  }
+  modal.__trapHandler__ = trap;
+  document.addEventListener('keydown', trap);
+}
+function closeModal(modal) {
+  modal.style.display = 'none';
+  document.removeEventListener('keydown', modal.__trapHandler__ || (()=>{}));
+  modal.__trapHandler__ = null;
+  if (lastFocusedEl && typeof lastFocusedEl.focus === 'function') lastFocusedEl.focus();
+}
+
+function sendLetters() {
+  const effective = getEffectiveSelection();
+  if (!uploadedFile || effective.size === 0) return;
+
+  const included = Array.from(effective);
+  const removed  = Array.from(studentUnitIds).filter(id => !effective.has(id));
+  const added    = Array.from(effective).filter(id => !studentUnitIds.has(id));
+
+  const renderList = (ids) => ids.map(id => {
+    const uni = universities.find(u => u.unitid === id);
+    return `<div>- ${escapeHtml(uni ? uni.name : String(id))}</div>`;
+  }).join('');
+
+  document.getElementById('modalIncluded').innerHTML = renderList(included);
+  document.getElementById('modalRemoved').innerHTML  = removed.length ? renderList(removed) : '<div>None</div>';
+  document.getElementById('modalAdded').innerHTML    = added.length ? renderList(added) : '<div>None</div>';
+
+  document.getElementById('modalIncludedCount').textContent = included.length;
+  document.getElementById('modalRemovedCount').textContent  = removed.length;
+  document.getElementById('modalAddedCount').textContent    = added.length;
+
+  const studentName = studentProfile ? studentProfile.name : 'this student';
+  document.getElementById('modalSummary').innerHTML =
+    `You’re about to send to <b>${included.length}</b> universities for <b>${escapeHtml(studentName)}</b>. Review differences
+
+<script>
+  const modal = document.getElementById('confirmModal');
+  toast('Review recipients, then press Enter to send.', 'info', { ttl: 2500 });
+  openModal(modal);
+
+  const close = () => closeModal(modal);
+  document.getElementById('modalCloseBtn').onclick = close;
+  document.getElementById('modalCancelBtn').onclick = close;
+  document.getElementById('modalConfirmBtn').onclick = async () => {
+    close();
+    await proceedSend(effective);
+  };
+
+  /** Start API job(s), poll, and paint progress */
+  async function proceedSend(effectiveSet) {
+    document.getElementById('progressSection').style.display = 'block';
+    document.querySelector('.upload-section').style.display = 'none';
+    document.querySelector('.university-section').style.display = 'none';
+    document.querySelector('.selected-section').style.display = 'none';
+
+    // Add Pause/Resume and Cancel buttons (circuit-breaker)
+    srEnsureProgressControls();
+
+    const ids = Array.from(effectiveSet);
+    renderInitialDeliveryRows(ids);
+
+    const CHUNK_SIZE = 100;
+    const chunks = [];
+    for (let i = 0; i < ids.length; i += CHUNK_SIZE) chunks.push(ids.slice(i, i + CHUNK_SIZE));
+
+    const combined = new Map(); // unitid -> { status, message? }
+    ids.forEach(id => combined.set(id, { status: 'pending' }));
+
+    SR_LOG.log({ type: "send_start", campaignId: "ui", total: ids.length });
+
+    SR_BULK.reset();
+
+    for (let batchIndex = 0; batchIndex < chunks.length; batchIndex++) {
+      if (SR_BULK.canceled) break;
+      const batch = chunks[batchIndex];
+      try {
+        const { jobId } = await API.submitLetter({
+          studentId: getActiveStudentId(),
+          unitIds: batch,
+          file: uploadedFile
+        });
+
+        SR_BULK.track(jobId);
+
+        await srPollJobWithControls(jobId, (recipients) => {
+          recipients.forEach(r => {
+            combined.set(r.unitid, { status: r.status, message: r.message });
+            paintDeliveryRow(r.unitid, r.status, r.message);
+          });
+          updateProgressBar(combined);
+        });
+
+      } catch (err) {
+        console.error('Batch failed', err);
+        batch.forEach(id => {
+          combined.set(id, { status: 'error', message: String(err.message || err) });
+          paintDeliveryRow(id, 'error', String(err.message || err));
+        });
+        updateProgressBar(combined);
       }
     }
 
-    function updateProgressBar(combinedMap) {
-      const total = combinedMap.size;
-      let done = 0;
-      combinedMap.forEach(v => { if (v.status === 'delivered' || v.status === 'success' || v.status === 'error' || v.status === 'failed') done++; });
-      const pct = Math.round((done / total) * 100);
-      document.getElementById('progressFill').style.width = `${pct}%`;
-      const progressText = document.getElementById('progressText');
-      const delivered = [...combinedMap.values()].filter(v => v.status === 'delivered' || v.status === 'success').length;
-      const failed = [...combinedMap.values()].filter(v => v.status === 'error' || v.status === 'failed').length;
-      progressText.textContent = `Completed ${done}/${total} • Delivered ${delivered} • Failed ${failed}`;
+    if (SR_BULK.canceled) {
+      document.getElementById('progressText').textContent = 'Canceled';
+      toast('Canceled. No further work will be performed.', 'info');
+      return;
     }
 
-    function updateProgressBarFromPending(total) {
-      document.getElementById('progressFill').style.width = '0%';
-      const progressText = document.getElementById('progressText');
-      progressText.textContent = `Sending to ${total} universities...`;
-    }
+    finalizeProgress(combined);
+    offerRetryFailed(combined);
+  }
 
-    function finalizeProgress(combinedMap) {
-      const total = combinedMap.size;
-      const delivered = [...combinedMap.values()].filter(v => v.status === 'delivered' || v.status === 'success').length;
-      const failed = [...combinedMap.values()].filter(v => v.status === 'error' || v.status === 'failed').length;
+  /** Poll loop with exponential backoff */
+  async function pollJob(jobId, onUpdate) {
+    let attempt = 0;
+    const MAX_WAIT = 45_000;
+    const started = Date.now();
 
-      document.getElementById('progressFill').style.width = '100%';
-      const progressText = document.getElementById('progressText');
-      if (failed === 0) {
-        progressText.textContent = 'All letters sent successfully!';
-        toast('All letters sent successfully!', 'success', { ttl: 4500 });
-        setTimeout(() => {
-          document.getElementById('progressSection').style.display = 'none';
-          document.getElementById('successSection').style.display = 'block';
-        }, 800);
-      } else {
-        progressText.textContent = `Finished with ${failed} failed out of ${total}. You can retry failed ones.`;
-        toast('Some deliveries failed. You can retry the failed ones.', 'error', { ttl: 5000 });
+    while (true) {
+      if (Date.now() - started > MAX_WAIT) throw new Error('Timed out while sending. Please try again.');
+      try {
+        const snapshot = await API.getJob(jobId);
+        if (typeof onUpdate === 'function') onUpdate(snapshot.recipients || []);
+        if (snapshot.done) return;
+        attempt++;
+        const wait = Math.min(4000, 600 * Math.pow(1.4, attempt));
+        await sleep(wait);
+      } catch (err) {
+        attempt++;
+        if (attempt >= 6) throw err;
+        await sleep(800 * attempt);
       }
     }
+  }
 
-    function offerRetryFailed(combinedMap) {
-      const failedIds = [];
-      combinedMap.forEach((v, k) => { if (v.status === 'error' || v.status === 'failed') failedIds.push(k); });
-      if (failedIds.length === 0) return;
+  /* Controlled poll with pause/backoff cap */
+  async function srPollJobWithControls(jobId, onUpdate) {
+    let attempt = 0;
+    const BASE = 500, CAP = 10_000;
+    while (true) {
+      // honor pause
+      while (SR_BULK.paused && !SR_BULK.canceled) { await sleep(200); }
+      if (SR_BULK.canceled) return;
 
-      let btn = document.getElementById('retryFailedBtn');
-      if (!btn) {
-        btn = document.createElement('button');
-        btn.id = 'retryFailedBtn';
-        btn.className = 'apply-btn';
-        btn.style.marginTop = '0.75rem';
-        btn.textContent = 'Retry failed';
-        document.getElementById('progressSection').appendChild(btn);
+      try {
+        const snapshot = await API.getJob(jobId);
+        onUpdate?.(snapshot.recipients || []);
+        if (snapshot.done) return;
+        attempt++;
+        const next = Math.min(CAP, Math.floor(BASE * Math.pow(2, attempt-1) * (0.9 + Math.random()*0.2)));
+        SR_LOG.log({ type: "retry", op: "poll", attempt, waitMs: next });
+        await sleep(next);
+      } catch (e) {
+        attempt++;
+        const next = Math.min(CAP, 800 * attempt);
+        SR_LOG.log({ type: "error", op: "poll", message: String(e?.message||e), code: 0 });
+        await sleep(next);
+        if (attempt > 6) throw e;
       }
-      btn.onclick = async () => {
-        toast('Retrying failed deliveries…', 'info');
-        btn.disabled = true;
-        failedIds.forEach(id => paintDeliveryRow(id, 'pending'));
+    }
+  }
+
+  /* Progress UI helpers */
+  function renderInitialDeliveryRows(unitIds) {
+    const deliveryList = document.getElementById('deliveryList');
+    deliveryList.innerHTML = '';
+    unitIds.forEach(uid => {
+      const uni = universities.find(u => String(u.unitid) === String(uid));
+      const name = uni ? uni.name : `#${uid}`;
+      const row = document.createElement('div');
+      row.className = 'delivery-item';
+      row.id = `delivery-${uid}`;
+      row.innerHTML = `
+        <div class="delivery-status pending">⏳</div>
+        <div>${escapeHtml(name)}</div>
+        <div class="delivery-msg" style="margin-left:auto;color:#ff9800;">Sending...</div>
+      `;
+      deliveryList.appendChild(row);
+    });
+    updateProgressBarFromPending(unitIds.length);
+  }
+
+  function paintDeliveryRow(unitid, status, message) {
+    const row = document.getElementById(`delivery-${unitid}`);
+    if (!row) return;
+    const statusEl = row.querySelector('.delivery-status');
+    const msgEl = row.querySelector('.delivery-msg');
+
+    if (status === 'delivered' || status === 'success') {
+      statusEl.className = 'delivery-status success';
+      statusEl.textContent = '✓';
+      msgEl.style.color = '#4caf50';
+      msgEl.textContent = 'Delivered';
+    } else if (status === 'error' || status === 'failed') {
+      statusEl.className = 'delivery-status error';
+      statusEl.textContent = '!';
+      msgEl.style.color = '#f44336';
+      msgEl.textContent = message ? truncate(message, 80) : 'Failed';
+    } else {
+      statusEl.className = 'delivery-status pending';
+      statusEl.textContent = '⏳';
+      msgEl.style.color = '#ff9800';
+      msgEl.textContent = 'Sending...';
+    }
+  }
+
+  function updateProgressBar(combinedMap) {
+    const total = combinedMap.size;
+    let done = 0;
+    combinedMap.forEach(v => { if (v.status === 'delivered' || v.status === 'success' || v.status === 'error' || v.status === 'failed') done++; });
+    const pct = Math.round((done / total) * 100);
+    document.getElementById('progressFill').style.width = `${pct}%`;
+    const progressText = document.getElementById('progressText');
+    const delivered = [...combinedMap.values()].filter(v => v.status === 'delivered' || v.status === 'success').length;
+    const failed = [...combinedMap.values()].filter(v => v.status === 'error' || v.status === 'failed').length;
+    progressText.textContent = `Completed ${done}/${total} • Delivered ${delivered} • Failed ${failed}`;
+  }
+
+  function updateProgressBarFromPending(total) {
+    document.getElementById('progressFill').style.width = '0%';
+    const progressText = document.getElementById('progressText');
+    progressText.textContent = `Sending to ${total} universities...`;
+  }
+
+  function finalizeProgress(combinedMap) {
+    const total = combinedMap.size;
+    const delivered = [...combinedMap.values()].filter(v => v.status === 'delivered' || v.status === 'success').length;
+    const failed = [...combinedMap.values()].filter(v => v.status === 'error' || v.status === 'failed').length;
+
+    document.getElementById('progressFill').style.width = '100%';
+    const progressText = document.getElementById('progressText');
+    if (failed === 0) {
+      progressText.textContent = 'All letters sent successfully!';
+      toast('All letters sent successfully!', 'success', { ttl: 4500 });
+      setTimeout(() => {
+        document.getElementById('progressSection').style.display = 'none';
+        document.getElementById('successSection').style.display = 'block';
+      }, 800);
+    } else {
+      progressText.textContent = `Finished with ${failed} failed out of ${total}. You can retry failed ones.`;
+      toast('Some deliveries failed. You can retry the failed ones.', 'error', { ttl: 5000 });
+    }
+  }
+
+  function offerRetryFailed(combinedMap) {
+    const failedIds = [];
+    combinedMap.forEach((v, k) => { if (v.status === 'error' || v.status === 'failed') failedIds.push(k); });
+    if (failedIds.length === 0) return;
+
+    let btn = document.getElementById('retryFailedBtn');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.id = 'retryFailedBtn';
+      btn.className = 'apply-btn';
+      btn.style.marginTop = '0.75rem';
+      btn.textContent = 'Retry failed';
+      document.getElementById('progressSection').appendChild(btn);
+    }
+    btn.onclick = async () => {
+      toast('Retrying failed deliveries…', 'info');
+      btn.disabled = true;
+      failedIds.forEach(id => paintDeliveryRow(id, 'pending'));
+      try {
+        const { jobId } = await API.submitLetter({
+          studentId: getActiveStudentId(),
+          unitIds: failedIds,
+          file: uploadedFile
+        });
+        await srPollJobWithControls(jobId, (recipients) => {
+          recipients.forEach(r => paintDeliveryRow(r.unitid, r.status, r.message));
+          const combined = new Map();
+          Array.from(document.querySelectorAll('[id^="delivery-"]')).forEach(row => {
+            const uid = row.id.replace('delivery-','');
+            const statusEl = row.querySelector('.delivery-status');
+            const msgEl = row.querySelector('.delivery-msg');
+            let status = 'pending';
+            if (statusEl.classList.contains('success')) status = 'delivered';
+            if (statusEl.classList.contains('error')) status = 'error';
+            combined.set(uid, { status, message: msgEl?.textContent || '' });
+          });
+          updateProgressBar(combined);
+        });
+      } catch (e) {
+        console.error('Retry failed', e);
+        toast('Retry failed. Please try again later.', 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    };
+  }
+
+  /* --- Toast helpers --- */
+  function toast(message, type='info', opts={}) {
+    const wrap = document.getElementById('toastWrap'); if (!wrap) return;
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    const icon = type === 'success' ? '✓' : (type === 'error' ? '!' : 'ℹ︎');
+    el.innerHTML = `
+      <div class="icon" aria-hidden="true">${icon}</div>
+      <div class="msg">${escapeHtml(String(message))}</div>
+      <button class="x" aria-label="Dismiss">✕</button>
+    `;
+    el.querySelector('.x').onclick = () => wrap.removeChild(el);
+    wrap.appendChild(el);
+    const ttl = opts.ttl ?? 3500;
+    if (ttl > 0) {
+      setTimeout(() => { if (el.parentNode) wrap.removeChild(el); }, ttl);
+    }
+    return el;
+  }
+
+  /* --- Small utilities referenced above (safe fallbacks) --- */
+
+  // Basic HTML escaper for safety in toast/delivery rows
+  function escapeHtml(s='') {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function truncate(s='', n=80) {
+    const str = String(s);
+    return str.length > n ? str.slice(0, n - 1) + '…' : str;
+  }
+
+  // Sleep (guard in case it's not defined elsewhere)
+  if (typeof window.sleep !== 'function') {
+    window.sleep = (ms) => new Promise(r => setTimeout(r, ms));
+  }
+
+  // Minimal logger (no-op console toggle)
+  const SR_LOG = window.SR_LOG || (() => {
+    let _console = false;
+    return {
+      log: (o) => { if (_console) console.log('[SR]', o); },
+      consoleEnabled: () => _console,
+      setConsoleEnabled: (v) => { _console = !!v; }
+    };
+  })();
+
+  // Track running jobs & allow pause/cancel
+  const SR_BULK = window.SR_BULK || {
+    paused: false,
+    canceled: false,
+    jobs: new Set(),
+    reset() { this.paused = false; this.canceled = false; this.jobs.clear(); },
+    track(jobId) { this.jobs.add(jobId); }
+  };
+
+  function getActiveStudentId() {
+    try {
+      return (typeof studentProfile !== 'undefined' && studentProfile && studentProfile.id) ? studentProfile.id : '';
+    } catch { return ''; }
+  }
+
+  // Build Pause/Resume + Cancel buttons once and wire to SR_BULK/ API.cancelJob
+  function srEnsureProgressControls() {
+    const section = document.getElementById('progressSection');
+    if (!section) return;
+
+    let bar = document.getElementById('bulkControls');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'bulkControls';
+      bar.style.display = 'flex';
+      bar.style.gap = '.5rem';
+      bar.style.justifyContent = 'flex-end';
+      bar.style.marginTop = '.5rem';
+      section.appendChild(bar);
+
+      const pauseBtn = document.createElement('button');
+      pauseBtn.id = 'pauseBtn';
+      pauseBtn.className = 'page-btn';
+      pauseBtn.textContent = 'Pause';
+      bar.appendChild(pauseBtn);
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.id = 'cancelBtn';
+      cancelBtn.className = 'page-btn';
+      cancelBtn.textContent = 'Cancel';
+      bar.appendChild(cancelBtn);
+
+      pauseBtn.onclick = () => {
+        SR_BULK.paused = !SR_BULK.paused;
+        pauseBtn.textContent = SR_BULK.paused ? 'Resume' : 'Pause';
+        toast(SR_BULK.paused ? 'Paused' : 'Resumed', 'info', { ttl: 1200 });
+      };
+
+      cancelBtn.onclick = async () => {
+        if (SR_BULK.canceled) return;
+        SR_BULK.canceled = true;
+        toast('Canceling current jobs…', 'info', { ttl: 1500 });
         try {
-          const { jobId } = await API.submitLetter({
-            studentId: getActiveStudentId(),
-            unitIds: failedIds,
-            file: uploadedFile
-          });
-          await srPollJobWithControls(jobId, (recipients) => {
-            recipients.forEach(r => paintDeliveryRow(r.unitid, r.status, r.message));
-            const combined = new Map();
-            Array.from(document.querySelectorAll('[id^="delivery-"]')).forEach(row => {
-              const uid = row.id.replace('delivery-','');
-              const statusEl = row.querySelector('.delivery-status');
-              const msgEl = row.querySelector('.delivery-msg');
-              let status = 'pending';
-              if (statusEl.classList.contains('success')) status = 'delivered';
-              if (statusEl.classList.contains('error')) status = 'error';
-              combined.set(uid, { status, message: msgEl?.textContent || '' });
-            });
-            updateProgressBar(combined);
-          });
-        } catch (e) {
-          console.error('Retry failed', e);
-          toast('Retry failed. Please try again later.', 'error');
+          if (typeof API?.cancelJob === 'function') {
+            await Promise.all(Array.from(SR_BULK.jobs).map(j => API.cancelJob(j).catch(()=>{})));
+          }
         } finally {
-          btn.disabled = false;
+          document.getElementById('progressText').textContent = 'Canceled';
         }
       };
     }
+  }
+</script>
 
-    /* --- Toast helpers --- */
-    function toast(message, type='info', opts={}) {
-      const wrap = document.getElementById('toastWrap'); if (!wrap) return;
-      const el = document.createElement('div');
-      el.className = `toast ${type}`;
-      const icon = type === 'success' ? '✓' : (type === 'error' ? '!' : 'ℹ︎');
-      el.innerHTML = `
-        <div class="icon" aria-hidden="true">${icon}</div>
-        <div class="msg">${escapeHtml(String(message))}</div>
-        <button class="x" aria-label="Dismiss">✕</button>
-      `;
-      el.querySelector('.x').onclick = () => wrap.removeChild(el);
-      wrap.appendChild(el);
-      const ttl = opts.ttl ?? 3500;
-      if (ttl > 0) setTimeout(() => { if (el.parentNode) wrap.removeChild(el); }, ttl);
    
