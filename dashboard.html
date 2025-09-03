@@ -56,7 +56,7 @@
 
     .section-title { font-size:1.5rem; font-weight:600; color:#333; margin-bottom:1rem; display:flex; align-items:center; gap:.5rem; }
 
-    .university-search { margin-bottom:1rem; display:flex; gap:.5rem; }
+    .university-search { margin-bottom:1rem; display:flex; gap:.5rem; position:relative; }
     .search-input { flex:1; padding:1rem; border:2px solid #e0e0e0; border-radius:12px; font-size:1rem; transition:border-color .2s; }
     .search-input:focus { outline:none; border-color:#1976d2; }
     .apply-btn { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:.8rem 1.2rem; border:none; border-radius:12px; font-weight:600; cursor:pointer; box-shadow:0 4px 14px rgba(25,118,210,.2); }
@@ -162,26 +162,10 @@
       border-radius: 12px;
       box-shadow: 0 12px 32px rgba(0,0,0,.08);
     }
-    .suggest-item {
-      padding: .6rem .8rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      font-size: .95rem;
-    }
-    .suggest-item[aria-selected="true"],
-    .suggest-item:hover {
-      background: #f3f8ff;
-    }
-    .suggest-muted {
-      color: #6b7280;
-      font-size: .85rem;
-    }
-    .suggest-highlight {
-      font-weight: 700;
-    }
-    .university-search { position: relative; }
+    .suggest-item { padding:.6rem .8rem; cursor:pointer; display:flex; align-items:center; gap:.5rem; font-size:.95rem; }
+    .suggest-item[aria-selected="true"], .suggest-item:hover { background:#f3f8ff; }
+    .suggest-muted { color:#6b7280; font-size:.85rem; }
+    .suggest-highlight { font-weight:700; }
   </style>
 </head>
 <body>
@@ -213,7 +197,7 @@
             </div>
           </div>
 
-          <!-- Mock API toggle (Task 1) -->
+          <!-- Mock API toggle -->
           <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
             <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
               <span class="material-icons">build</span>
@@ -232,7 +216,7 @@
 
   <div class="container">
 
-    <!-- Student Context Bar (Hybrid Flow) -->
+    <!-- Student Context Bar -->
     <div class="student-bar" id="studentBar" style="display:flex; align-items:center; gap:.75rem; background:#fff; border:1px solid #eaeaea; border-radius:12px; padding:1rem; margin-bottom:1rem;">
       <span class="material-icons" aria-hidden="true">account_circle</span>
       <div style="flex:1">
@@ -287,7 +271,7 @@
         <button class="apply-btn" id="searchApplyBtn" title="Apply search (Enter)">Apply</button>
       </div>
 
-      <!-- Browse-all dropdown (scroll menu) -->
+      <!-- Browse-all dropdown -->
       <select id="universitySelect" class="filter-select" title="Browse all universities" style="margin-bottom:.5rem;">
         <option value="" selected disabled>Browse all universities (6000+)</option>
       </select>
@@ -337,7 +321,7 @@
         <button class="page-btn" id="bulkImportBtn" title="Bulk import by names">Bulk import</button>
       </div>
 
-      <!-- Empty state (Task 2) -->
+      <!-- Empty state -->
       <div id="emptyState" class="empty-state" aria-live="polite">
         <div style="font-weight:600; margin-bottom:.25rem;">No universities match your filters</div>
         <div style="font-size:.9rem; color:#667;">Try adjusting search or clearing filters.</div>
@@ -391,6 +375,7 @@
       <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
       <div class="progress-text" id="progressText" aria-live="polite">Preparing to send...</div>
       <div class="delivery-list" id="deliveryList"></div>
+      <!-- Buttons (Pause/Resume, Cancel) are injected dynamically -->
     </div>
 
     <!-- Success Section -->
@@ -405,7 +390,7 @@
     </div>
   </div>
 
-  <!-- Confirm Send Modal (Hybrid Flow) -->
+  <!-- Confirm Send Modal -->
   <div id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle"
        style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
     <div style="background:#fff; width:min(720px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
@@ -437,7 +422,7 @@
     </div>
   </div>
 
-  <!-- Bulk Import Modal (Task 7) -->
+  <!-- Bulk Import Modal (placeholder; wired elsewhere if used) -->
   <div id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle"
        style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
     <div style="background:#fff; width:min(680px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
@@ -464,7 +449,7 @@
 
   <script>
 /* -----------------------------------------------------------
-   STELLARREC — CLEANED CORE + AUTOSUGGEST (integrated)
+   STELLARREC — CLEANED CORE + AUTOSUGGEST + PROGRESS HELPERS
    ----------------------------------------------------------- */
 
 /* ---------- Safe shims (so missing globals don’t break UI) ---------- */
@@ -487,16 +472,9 @@ function setupCopyLink() {}
 function setupBulkImport() {}
 function applyShareFromURL() {}
 function buildShareURL() { return location.pathname + location.search + location.hash; }
-function srEnsureProgressControls() {}
-const SR_BULK = {
-  paused:false, canceled:false,
-  reset(){ this.paused=false; this.canceled=false; },
-  track(){},
-};
 
 /* --------------------- Utilities --------------------- */
 const norm = (s) => (s || '').toString().trim().toLowerCase();
-
 function escapeHtml(s){
   return (s ?? '').toString()
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -851,7 +829,7 @@ function initializeWithData(data) {
   if (filterWorker) filterWorker.postMessage({ type:'prime', payload: universities });
 
   setupFileUpload();
-  setupSearch();          // includes autosuggest + Apply handling
+  setupSearch();
   setupClickOutside();
   setupFilterHandlers();
   setupPagingHandlers();
@@ -1035,23 +1013,17 @@ function renderSuggestions(query) {
   const q = norm(query);
   if (!q) { closeSuggest(); return; }
 
-  // Build lightweight match list (prefix > contains)
-  const name = (u)=> u.name || '';
-  const city = (u)=> u.city || '';
-  const state= (u)=> u.state || '';
-
-  // Pre-filter once
-  let candidates = universities;
-  // score: startsWith name (2), includes name (1.5), includes city/state (1)
+  // score candidates: startsWith name (2), includes name (1.5), includes city/state (1)
   const scored = [];
-  for (let i=0; i<candidates.length; i++) {
-    const nm = name(candidates[i]); const nmL = norm(nm);
-    const ctL = norm(city(candidates[i])); const stL = norm(state(candidates[i]));
+  for (let i=0; i<universities.length; i++) {
+    const u = universities[i];
+    const nmL = norm(u.name || '');
+    const ctL = norm(u.city || ''); const stL = norm(u.state || '');
     let score = 0;
     if (nmL.startsWith(q)) score = 2;
     else if (nmL.includes(q)) score = 1.5;
     else if (ctL.includes(q) || stL.includes(q)) score = 1;
-    if (score > 0) scored.push([score, candidates[i]]);
+    if (score > 0) scored.push([score, u]);
     if (scored.length > 600) break; // cap early for speed
   }
   scored.sort((a,b)=> b[0] - a[0] || (a[1].name||'').localeCompare(b[1].name||''));
@@ -1087,7 +1059,6 @@ function renderSuggestions(query) {
 
   suggestWrap.style.display = 'block';
 }
-
 function highlight(text, query){
   const q = norm(query);
   if (!q) return text;
@@ -1109,14 +1080,12 @@ function closeSuggest(){
   activeIndex = -1; currentSuggestions = [];
 }
 function pickSuggestion(u){
-  // Put the name in the search box, apply filter, and scroll to the card
   const input = document.getElementById('universitySearch');
   input.value = u.name || '';
   filters.q = norm(u.name);
   page = 1; flashNextRender = true;
   refreshList(); persistAndSync(); closeSuggest();
 
-  // Jump to and flash that card, also select it for convenience
   const idx = filtered.findIndex(x => String(x.unitid) === String(u.unitid));
   if (idx >= 0) {
     page = Math.floor(idx / pageSize) + 1;
@@ -1354,7 +1323,7 @@ function setupUniversitySelect() {
       requestAnimationFrame(() => {
         const cards = Array.from(document.querySelectorAll('.university-card'));
         const startIdx = (page - 1) * pageSize;
-        const card = cards[idx - startIdx];
+        const card = cards[idx - startIdx);
         if (card) { card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'), 1200); card.scrollIntoView({behavior:'smooth', block:'nearest'}); }
       });
       if (studentUnitIds.has(Number(val))) removedByRecommender.delete(Number(val));
@@ -1426,7 +1395,7 @@ async function loadStudentProfile(studentIdOrEmail) {
 
 /* --------------------- Send workflow (mock/real API split kept) --------------------- */
 let USE_MOCK = getUseMock();
-const getAuthToken = () => (SR_AUTH.getAccessToken() || localStorage.getItem('token') || null);
+const getToken = () => (SR_AUTH.getAccessToken() || localStorage.getItem('token') || null);
 const API_BASE =
   (window.ENV && window.ENV.API_URL) ||
   (typeof API_URL !== "undefined" ? API_URL : "https://api.stellarrec.com");
@@ -1508,7 +1477,7 @@ const API_MOCK = {
 };
 const API = USE_MOCK ? API_MOCK : API_REAL;
 
-/* Progress + modal */
+/* --------------------- Modal + Send --------------------- */
 let lastFocusedEl = null;
 function getFocusable(container) {
   return Array.from(container.querySelectorAll('a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])'))
@@ -1564,9 +1533,8 @@ function sendLetters() {
 
   const studentName = studentProfile ? studentProfile.name : 'this student';
   document.getElementById('modalSummary').innerHTML =
-    `You’re about to send to <b>${included.length}</b> universities for <b>${escapeHtml(studentName)}</b>. Review differences
+    `You’re about to send to <b>${included.length}</b> universities for <b>${escapeHtml(studentName)}</b>. Review differences from the student’s list below.`;
 
-<script>
   const modal = document.getElementById('confirmModal');
   toast('Review recipients, then press Enter to send.', 'info', { ttl: 2500 });
   openModal(modal);
@@ -1578,364 +1546,296 @@ function sendLetters() {
     close();
     await proceedSend(effective);
   };
+}
 
-  /** Start API job(s), poll, and paint progress */
-  async function proceedSend(effectiveSet) {
-    document.getElementById('progressSection').style.display = 'block';
-    document.querySelector('.upload-section').style.display = 'none';
-    document.querySelector('.university-section').style.display = 'none';
-    document.querySelector('.selected-section').style.display = 'none';
+/* --------------------- Progress helpers + polling + send --------------------- */
+const SR_BULK = {
+  paused:false, canceled:false, jobs:new Set(),
+  reset(){ this.paused=false; this.canceled=false; this.jobs.clear(); },
+  track(jobId){ this.jobs.add(jobId); },
+};
 
-    // Add Pause/Resume and Cancel buttons (circuit-breaker)
-    srEnsureProgressControls();
+function srEnsureProgressControls() {
+  const section = document.getElementById('progressSection');
+  if (!section) return;
 
-    const ids = Array.from(effectiveSet);
-    renderInitialDeliveryRows(ids);
+  let bar = document.getElementById('bulkControls');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'bulkControls';
+    bar.style.display = 'flex';
+    bar.style.gap = '.5rem';
+    bar.style.justifyContent = 'flex-end';
+    bar.style.marginTop = '.5rem';
+    section.appendChild(bar);
 
-    const CHUNK_SIZE = 100;
-    const chunks = [];
-    for (let i = 0; i < ids.length; i += CHUNK_SIZE) chunks.push(ids.slice(i, i + CHUNK_SIZE));
+    const pauseBtn = document.createElement('button');
+    pauseBtn.id = 'pauseBtn';
+    pauseBtn.className = 'page-btn';
+    pauseBtn.textContent = 'Pause';
+    bar.appendChild(pauseBtn);
 
-    const combined = new Map(); // unitid -> { status, message? }
-    ids.forEach(id => combined.set(id, { status: 'pending' }));
+    const cancelBtn = document.createElement('button');
+    cancelBtn.id = 'cancelBtn';
+    cancelBtn.className = 'page-btn';
+    cancelBtn.textContent = 'Cancel';
+    bar.appendChild(cancelBtn);
 
-    SR_LOG.log({ type: "send_start", campaignId: "ui", total: ids.length });
+    pauseBtn.onclick = () => {
+      SR_BULK.paused = !SR_BULK.paused;
+      pauseBtn.textContent = SR_BULK.paused ? 'Resume' : 'Pause';
+      toast(SR_BULK.paused ? 'Paused' : 'Resumed', 'info', { ttl: 1200 });
+    };
 
-    SR_BULK.reset();
-
-    for (let batchIndex = 0; batchIndex < chunks.length; batchIndex++) {
-      if (SR_BULK.canceled) break;
-      const batch = chunks[batchIndex];
+    cancelBtn.onclick = async () => {
+      if (SR_BULK.canceled) return;
+      SR_BULK.canceled = true;
+      toast('Canceling current jobs…', 'info', { ttl: 1500 });
       try {
-        const { jobId } = await API.submitLetter({
-          studentId: getActiveStudentId(),
-          unitIds: batch,
-          file: uploadedFile
-        });
+        if (typeof API?.cancelJob === 'function') {
+          await Promise.all(Array.from(SR_BULK.jobs).map(j => API.cancelJob(j).catch(()=>{})));
+        }
+      } finally {
+        document.getElementById('progressText').textContent = 'Canceled';
+      }
+    };
+  }
+}
 
-        SR_BULK.track(jobId);
+async function srPollJobWithControls(jobId, onUpdate) {
+  let attempt = 0;
+  const BASE = 500, CAP = 10_000;
+  while (true) {
+    while (SR_BULK.paused && !SR_BULK.canceled) { await sleep(200); }
+    if (SR_BULK.canceled) return;
 
-        await srPollJobWithControls(jobId, (recipients) => {
-          recipients.forEach(r => {
-            combined.set(r.unitid, { status: r.status, message: r.message });
-            paintDeliveryRow(r.unitid, r.status, r.message);
-          });
-          updateProgressBar(combined);
-        });
+    try {
+      const snapshot = await API.getJob(jobId);
+      onUpdate?.(snapshot.recipients || []);
+      if (snapshot.done) return;
+      attempt++;
+      const next = Math.min(CAP, Math.floor(BASE * Math.pow(2, attempt-1) * (0.9 + Math.random()*0.2)));
+      SR_LOG.log({ type: "retry", op: "poll", attempt, waitMs: next });
+      await sleep(next);
+    } catch (e) {
+      attempt++;
+      const next = Math.min(CAP, 800 * attempt);
+      SR_LOG.log({ type: "error", op: "poll", message: String(e?.message||e), code: 0 });
+      await sleep(next);
+      if (attempt > 6) throw e;
+    }
+  }
+}
 
-      } catch (err) {
-        console.error('Batch failed', err);
-        batch.forEach(id => {
-          combined.set(id, { status: 'error', message: String(err.message || err) });
-          paintDeliveryRow(id, 'error', String(err.message || err));
+async function proceedSend(effectiveSet) {
+  document.getElementById('progressSection').style.display = 'block';
+  document.querySelector('.upload-section').style.display = 'none';
+  document.querySelector('.university-section').style.display = 'none';
+  document.querySelector('.selected-section').style.display = 'none';
+
+  srEnsureProgressControls();
+
+  const ids = Array.from(effectiveSet);
+  renderInitialDeliveryRows(ids);
+
+  const CHUNK_SIZE = 100;
+  const chunks = [];
+  for (let i = 0; i < ids.length; i += CHUNK_SIZE) chunks.push(ids.slice(i, i + CHUNK_SIZE));
+
+  const combined = new Map(); // unitid -> { status, message? }
+  ids.forEach(id => combined.set(id, { status: 'pending' }));
+
+  SR_LOG.log({ type: "send_start", campaignId: "ui", total: ids.length });
+
+  SR_BULK.reset();
+
+  for (let batchIndex = 0; batchIndex < chunks.length; batchIndex++) {
+    if (SR_BULK.canceled) break;
+    const batch = chunks[batchIndex];
+    try {
+      const { jobId } = await API.submitLetter({
+        studentId: getActiveStudentId(),
+        unitIds: batch,
+        file: uploadedFile
+      });
+
+      SR_BULK.track(jobId);
+
+      await srPollJobWithControls(jobId, (recipients) => {
+        recipients.forEach(r => {
+          combined.set(r.unitid, { status: r.status, message: r.message });
+          paintDeliveryRow(r.unitid, r.status, r.message);
         });
         updateProgressBar(combined);
-      }
-    }
+      });
 
-    if (SR_BULK.canceled) {
-      document.getElementById('progressText').textContent = 'Canceled';
-      toast('Canceled. No further work will be performed.', 'info');
-      return;
-    }
-
-    finalizeProgress(combined);
-    offerRetryFailed(combined);
-  }
-
-  /** Poll loop with exponential backoff */
-  async function pollJob(jobId, onUpdate) {
-    let attempt = 0;
-    const MAX_WAIT = 45_000;
-    const started = Date.now();
-
-    while (true) {
-      if (Date.now() - started > MAX_WAIT) throw new Error('Timed out while sending. Please try again.');
-      try {
-        const snapshot = await API.getJob(jobId);
-        if (typeof onUpdate === 'function') onUpdate(snapshot.recipients || []);
-        if (snapshot.done) return;
-        attempt++;
-        const wait = Math.min(4000, 600 * Math.pow(1.4, attempt));
-        await sleep(wait);
-      } catch (err) {
-        attempt++;
-        if (attempt >= 6) throw err;
-        await sleep(800 * attempt);
-      }
+    } catch (err) {
+      console.error('Batch failed', err);
+      batch.forEach(id => {
+        combined.set(id, { status: 'error', message: String(err.message || err) });
+        paintDeliveryRow(id, 'error', String(err.message || err));
+      });
+      updateProgressBar(combined);
     }
   }
 
-  /* Controlled poll with pause/backoff cap */
-  async function srPollJobWithControls(jobId, onUpdate) {
-    let attempt = 0;
-    const BASE = 500, CAP = 10_000;
-    while (true) {
-      // honor pause
-      while (SR_BULK.paused && !SR_BULK.canceled) { await sleep(200); }
-      if (SR_BULK.canceled) return;
-
-      try {
-        const snapshot = await API.getJob(jobId);
-        onUpdate?.(snapshot.recipients || []);
-        if (snapshot.done) return;
-        attempt++;
-        const next = Math.min(CAP, Math.floor(BASE * Math.pow(2, attempt-1) * (0.9 + Math.random()*0.2)));
-        SR_LOG.log({ type: "retry", op: "poll", attempt, waitMs: next });
-        await sleep(next);
-      } catch (e) {
-        attempt++;
-        const next = Math.min(CAP, 800 * attempt);
-        SR_LOG.log({ type: "error", op: "poll", message: String(e?.message||e), code: 0 });
-        await sleep(next);
-        if (attempt > 6) throw e;
-      }
-    }
+  if (SR_BULK.canceled) {
+    document.getElementById('progressText').textContent = 'Canceled';
+    toast('Canceled. No further work will be performed.', 'info');
+    return;
   }
 
-  /* Progress UI helpers */
-  function renderInitialDeliveryRows(unitIds) {
-    const deliveryList = document.getElementById('deliveryList');
-    deliveryList.innerHTML = '';
-    unitIds.forEach(uid => {
-      const uni = universities.find(u => String(u.unitid) === String(uid));
-      const name = uni ? uni.name : `#${uid}`;
-      const row = document.createElement('div');
-      row.className = 'delivery-item';
-      row.id = `delivery-${uid}`;
-      row.innerHTML = `
-        <div class="delivery-status pending">⏳</div>
-        <div>${escapeHtml(name)}</div>
-        <div class="delivery-msg" style="margin-left:auto;color:#ff9800;">Sending...</div>
-      `;
-      deliveryList.appendChild(row);
-    });
-    updateProgressBarFromPending(unitIds.length);
-  }
+  finalizeProgress(combined);
+  offerRetryFailed(combined);
+}
 
-  function paintDeliveryRow(unitid, status, message) {
-    const row = document.getElementById(`delivery-${unitid}`);
-    if (!row) return;
-    const statusEl = row.querySelector('.delivery-status');
-    const msgEl = row.querySelector('.delivery-msg');
-
-    if (status === 'delivered' || status === 'success') {
-      statusEl.className = 'delivery-status success';
-      statusEl.textContent = '✓';
-      msgEl.style.color = '#4caf50';
-      msgEl.textContent = 'Delivered';
-    } else if (status === 'error' || status === 'failed') {
-      statusEl.className = 'delivery-status error';
-      statusEl.textContent = '!';
-      msgEl.style.color = '#f44336';
-      msgEl.textContent = message ? truncate(message, 80) : 'Failed';
-    } else {
-      statusEl.className = 'delivery-status pending';
-      statusEl.textContent = '⏳';
-      msgEl.style.color = '#ff9800';
-      msgEl.textContent = 'Sending...';
-    }
-  }
-
-  function updateProgressBar(combinedMap) {
-    const total = combinedMap.size;
-    let done = 0;
-    combinedMap.forEach(v => { if (v.status === 'delivered' || v.status === 'success' || v.status === 'error' || v.status === 'failed') done++; });
-    const pct = Math.round((done / total) * 100);
-    document.getElementById('progressFill').style.width = `${pct}%`;
-    const progressText = document.getElementById('progressText');
-    const delivered = [...combinedMap.values()].filter(v => v.status === 'delivered' || v.status === 'success').length;
-    const failed = [...combinedMap.values()].filter(v => v.status === 'error' || v.status === 'failed').length;
-    progressText.textContent = `Completed ${done}/${total} • Delivered ${delivered} • Failed ${failed}`;
-  }
-
-  function updateProgressBarFromPending(total) {
-    document.getElementById('progressFill').style.width = '0%';
-    const progressText = document.getElementById('progressText');
-    progressText.textContent = `Sending to ${total} universities...`;
-  }
-
-  function finalizeProgress(combinedMap) {
-    const total = combinedMap.size;
-    const delivered = [...combinedMap.values()].filter(v => v.status === 'delivered' || v.status === 'success').length;
-    const failed = [...combinedMap.values()].filter(v => v.status === 'error' || v.status === 'failed').length;
-
-    document.getElementById('progressFill').style.width = '100%';
-    const progressText = document.getElementById('progressText');
-    if (failed === 0) {
-      progressText.textContent = 'All letters sent successfully!';
-      toast('All letters sent successfully!', 'success', { ttl: 4500 });
-      setTimeout(() => {
-        document.getElementById('progressSection').style.display = 'none';
-        document.getElementById('successSection').style.display = 'block';
-      }, 800);
-    } else {
-      progressText.textContent = `Finished with ${failed} failed out of ${total}. You can retry failed ones.`;
-      toast('Some deliveries failed. You can retry the failed ones.', 'error', { ttl: 5000 });
-    }
-  }
-
-  function offerRetryFailed(combinedMap) {
-    const failedIds = [];
-    combinedMap.forEach((v, k) => { if (v.status === 'error' || v.status === 'failed') failedIds.push(k); });
-    if (failedIds.length === 0) return;
-
-    let btn = document.getElementById('retryFailedBtn');
-    if (!btn) {
-      btn = document.createElement('button');
-      btn.id = 'retryFailedBtn';
-      btn.className = 'apply-btn';
-      btn.style.marginTop = '0.75rem';
-      btn.textContent = 'Retry failed';
-      document.getElementById('progressSection').appendChild(btn);
-    }
-    btn.onclick = async () => {
-      toast('Retrying failed deliveries…', 'info');
-      btn.disabled = true;
-      failedIds.forEach(id => paintDeliveryRow(id, 'pending'));
-      try {
-        const { jobId } = await API.submitLetter({
-          studentId: getActiveStudentId(),
-          unitIds: failedIds,
-          file: uploadedFile
-        });
-        await srPollJobWithControls(jobId, (recipients) => {
-          recipients.forEach(r => paintDeliveryRow(r.unitid, r.status, r.message));
-          const combined = new Map();
-          Array.from(document.querySelectorAll('[id^="delivery-"]')).forEach(row => {
-            const uid = row.id.replace('delivery-','');
-            const statusEl = row.querySelector('.delivery-status');
-            const msgEl = row.querySelector('.delivery-msg');
-            let status = 'pending';
-            if (statusEl.classList.contains('success')) status = 'delivered';
-            if (statusEl.classList.contains('error')) status = 'error';
-            combined.set(uid, { status, message: msgEl?.textContent || '' });
-          });
-          updateProgressBar(combined);
-        });
-      } catch (e) {
-        console.error('Retry failed', e);
-        toast('Retry failed. Please try again later.', 'error');
-      } finally {
-        btn.disabled = false;
-      }
-    };
-  }
-
-  /* --- Toast helpers --- */
-  function toast(message, type='info', opts={}) {
-    const wrap = document.getElementById('toastWrap'); if (!wrap) return;
-    const el = document.createElement('div');
-    el.className = `toast ${type}`;
-    const icon = type === 'success' ? '✓' : (type === 'error' ? '!' : 'ℹ︎');
-    el.innerHTML = `
-      <div class="icon" aria-hidden="true">${icon}</div>
-      <div class="msg">${escapeHtml(String(message))}</div>
-      <button class="x" aria-label="Dismiss">✕</button>
+/* ----- Progress UI helpers ----- */
+function renderInitialDeliveryRows(unitIds) {
+  const deliveryList = document.getElementById('deliveryList');
+  deliveryList.innerHTML = '';
+  unitIds.forEach(uid => {
+    const uni = universities.find(u => String(u.unitid) === String(uid));
+    const name = uni ? uni.name : `#${uid}`;
+    const row = document.createElement('div');
+    row.className = 'delivery-item';
+    row.id = `delivery-${uid}`;
+    row.innerHTML = `
+      <div class="delivery-status pending">⏳</div>
+      <div>${escapeHtml(name)}</div>
+      <div class="delivery-msg" style="margin-left:auto;color:#ff9800;">Sending...</div>
     `;
-    el.querySelector('.x').onclick = () => wrap.removeChild(el);
-    wrap.appendChild(el);
-    const ttl = opts.ttl ?? 3500;
-    if (ttl > 0) {
-      setTimeout(() => { if (el.parentNode) wrap.removeChild(el); }, ttl);
-    }
-    return el;
+    deliveryList.appendChild(row);
+  });
+  updateProgressBarFromPending(unitIds.length);
+}
+
+function paintDeliveryRow(unitid, status, message) {
+  const row = document.getElementById(`delivery-${unitid}`);
+  if (!row) return;
+  const statusEl = row.querySelector('.delivery-status');
+  const msgEl = row.querySelector('.delivery-msg');
+
+  if (status === 'delivered' || status === 'success') {
+    statusEl.className = 'delivery-status success';
+    statusEl.textContent = '✓';
+    msgEl.style.color = '#4caf50';
+    msgEl.textContent = 'Delivered';
+  } else if (status === 'error' || status === 'failed') {
+    statusEl.className = 'delivery-status error';
+    statusEl.textContent = '!';
+    msgEl.style.color = '#f44336';
+    msgEl.textContent = message ? truncate(message, 80) : 'Failed';
+  } else {
+    statusEl.className = 'delivery-status pending';
+    statusEl.textContent = '⏳';
+    msgEl.style.color = '#ff9800';
+    msgEl.textContent = 'Sending...';
   }
+}
 
-  /* --- Small utilities referenced above (safe fallbacks) --- */
+function updateProgressBar(combinedMap) {
+  const total = combinedMap.size;
+  let done = 0;
+  combinedMap.forEach(v => { if (v.status === 'delivered' || v.status === 'success' || v.status === 'error' || v.status === 'failed') done++; });
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('progressFill').style.width = `${pct}%`;
+  const progressText = document.getElementById('progressText');
+  const delivered = [...combinedMap.values()].filter(v => v.status === 'delivered' || v.status === 'success').length;
+  const failed = [...combinedMap.values()].filter(v => v.status === 'error' || v.status === 'failed').length;
+  progressText.textContent = `Completed ${done}/${total} • Delivered ${delivered} • Failed ${failed}`;
+}
 
-  // Basic HTML escaper for safety in toast/delivery rows
-  function escapeHtml(s='') {
-    return String(s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+function updateProgressBarFromPending(total) {
+  document.getElementById('progressFill').style.width = '0%';
+  const progressText = document.getElementById('progressText');
+  progressText.textContent = `Sending to ${total} universities...`;
+}
+
+function finalizeProgress(combinedMap) {
+  const total = combinedMap.size;
+  const delivered = [...combinedMap.values()].filter(v => v.status === 'delivered' || v.status === 'success').length;
+  const failed = [...combinedMap.values()].filter(v => v.status === 'error' || v.status === 'failed').length;
+
+  document.getElementById('progressFill').style.width = '100%';
+  const progressText = document.getElementById('progressText');
+  if (failed === 0) {
+    progressText.textContent = 'All letters sent successfully!';
+    toast('All letters sent successfully!', 'success', { ttl: 4500 });
+    setTimeout(() => {
+      document.getElementById('progressSection').style.display = 'none';
+      document.getElementById('successSection').style.display = 'block';
+    }, 800);
+  } else {
+    progressText.textContent = `Finished with ${failed} failed out of ${total}. You can retry failed ones.`;
+    toast('Some deliveries failed. You can retry the failed ones.', 'error', { ttl: 5000 });
   }
+}
 
-  function truncate(s='', n=80) {
-    const str = String(s);
-    return str.length > n ? str.slice(0, n - 1) + '…' : str;
+function offerRetryFailed(combinedMap) {
+  const failedIds = [];
+  combinedMap.forEach((v, k) => { if (v.status === 'error' || v.status === 'failed') failedIds.push(k); });
+  if (failedIds.length === 0) return;
+
+  let btn = document.getElementById('retryFailedBtn');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'retryFailedBtn';
+    btn.className = 'apply-btn';
+    btn.style.marginTop = '0.75rem';
+    btn.textContent = 'Retry failed';
+    document.getElementById('progressSection').appendChild(btn);
   }
-
-  // Sleep (guard in case it's not defined elsewhere)
-  if (typeof window.sleep !== 'function') {
-    window.sleep = (ms) => new Promise(r => setTimeout(r, ms));
-  }
-
-  // Minimal logger (no-op console toggle)
-  const SR_LOG = window.SR_LOG || (() => {
-    let _console = false;
-    return {
-      log: (o) => { if (_console) console.log('[SR]', o); },
-      consoleEnabled: () => _console,
-      setConsoleEnabled: (v) => { _console = !!v; }
-    };
-  })();
-
-  // Track running jobs & allow pause/cancel
-  const SR_BULK = window.SR_BULK || {
-    paused: false,
-    canceled: false,
-    jobs: new Set(),
-    reset() { this.paused = false; this.canceled = false; this.jobs.clear(); },
-    track(jobId) { this.jobs.add(jobId); }
-  };
-
-  function getActiveStudentId() {
+  btn.onclick = async () => {
+    toast('Retrying failed deliveries…', 'info');
+    btn.disabled = true;
+    failedIds.forEach(id => paintDeliveryRow(id, 'pending'));
     try {
-      return (typeof studentProfile !== 'undefined' && studentProfile && studentProfile.id) ? studentProfile.id : '';
-    } catch { return ''; }
-  }
-
-  // Build Pause/Resume + Cancel buttons once and wire to SR_BULK/ API.cancelJob
-  function srEnsureProgressControls() {
-    const section = document.getElementById('progressSection');
-    if (!section) return;
-
-    let bar = document.getElementById('bulkControls');
-    if (!bar) {
-      bar = document.createElement('div');
-      bar.id = 'bulkControls';
-      bar.style.display = 'flex';
-      bar.style.gap = '.5rem';
-      bar.style.justifyContent = 'flex-end';
-      bar.style.marginTop = '.5rem';
-      section.appendChild(bar);
-
-      const pauseBtn = document.createElement('button');
-      pauseBtn.id = 'pauseBtn';
-      pauseBtn.className = 'page-btn';
-      pauseBtn.textContent = 'Pause';
-      bar.appendChild(pauseBtn);
-
-      const cancelBtn = document.createElement('button');
-      cancelBtn.id = 'cancelBtn';
-      cancelBtn.className = 'page-btn';
-      cancelBtn.textContent = 'Cancel';
-      bar.appendChild(cancelBtn);
-
-      pauseBtn.onclick = () => {
-        SR_BULK.paused = !SR_BULK.paused;
-        pauseBtn.textContent = SR_BULK.paused ? 'Resume' : 'Pause';
-        toast(SR_BULK.paused ? 'Paused' : 'Resumed', 'info', { ttl: 1200 });
-      };
-
-      cancelBtn.onclick = async () => {
-        if (SR_BULK.canceled) return;
-        SR_BULK.canceled = true;
-        toast('Canceling current jobs…', 'info', { ttl: 1500 });
-        try {
-          if (typeof API?.cancelJob === 'function') {
-            await Promise.all(Array.from(SR_BULK.jobs).map(j => API.cancelJob(j).catch(()=>{})));
-          }
-        } finally {
-          document.getElementById('progressText').textContent = 'Canceled';
-        }
-      };
+      const { jobId } = await API.submitLetter({
+        studentId: getActiveStudentId(),
+        unitIds: failedIds,
+        file: uploadedFile
+      });
+      await srPollJobWithControls(jobId, (recipients) => {
+        recipients.forEach(r => paintDeliveryRow(r.unitid, r.status, r.message));
+        const combined = new Map();
+        Array.from(document.querySelectorAll('[id^="delivery-"]')).forEach(row => {
+          const uid = row.id.replace('delivery-','');
+          const statusEl = row.querySelector('.delivery-status');
+          const msgEl = row.querySelector('.delivery-msg');
+          let status = 'pending';
+          if (statusEl.classList.contains('success')) status = 'delivered';
+          if (statusEl.classList.contains('error')) status = 'error';
+          combined.set(uid, { status, message: msgEl?.textContent || '' });
+        });
+        updateProgressBar(combined);
+      });
+    } catch (e) {
+      console.error('Retry failed', e);
+      toast('Retry failed. Please try again later.', 'error');
+    } finally {
+      btn.disabled = false;
     }
-  }
-</script>
+  };
+}
 
-   
+/* --- Toast helpers --- */
+function toast(message, type='info', opts={}) {
+  const wrap = document.getElementById('toastWrap'); if (!wrap) return;
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const icon = type === 'success' ? '✓' : (type === 'error' ? '!' : 'ℹ︎');
+  el.innerHTML = `
+    <div class="icon" aria-hidden="true">${icon}</div>
+    <div class="msg">${escapeHtml(String(message))}</div>
+    <button class="x" aria-label="Dismiss">✕</button>
+  `;
+  el.querySelector('.x').onclick = () => wrap.removeChild(el);
+  wrap.appendChild(el);
+  const ttl = opts.ttl ?? 3500;
+  if (ttl > 0) setTimeout(() => { if (el.parentNode) wrap.removeChild(el); }, ttl);
+  return el;
+}
+  </script>
+</body>
+</html>
+  
