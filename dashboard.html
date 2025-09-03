@@ -1868,4 +1868,1995 @@ function toast(message, type='info', opts={}) {
 </body>
 </html>
 
+
+
+
+
+You said:
+okay next: I need a writing box near the upload letter tab so that recommenders can even write on the website and save draft if they so choose. 
+
+
+ChatGPT said:
+
+Thought for 29s
+Awesome—here’s an integrated version that adds a slick “Write Letter” box right next to the existing upload UI. It supports autosave to localStorage (per student), manual save, restore, clear, word/character counts, copy, download as .txt, and even a one-click “Attach draft” that pipes your draft into the existing sending workflow (as a .txt file). The upload validator is adjusted so only your “Attach draft” action can attach a non-PDF; normal file uploads still require a PDF.
+
+Drop this whole file in:
+
+html
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StellarRec - One Upload, Multiple Universities</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Roboto',sans-serif; background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%); color:#333; min-height:100vh; }
+
+    .header { background:linear-gradient(135deg,#1976d2 0%,#7c4dff 100%); color:#fff; padding:1.5rem 2rem; box-shadow:0 4px 20px rgba(25,118,210,0.3); }
+    .header-content { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; }
+    .logo { display:flex; align-items:center; gap:.5rem; font-size:1.8rem; font-weight:700; text-decoration:none; color:#fff; transition:.3s; }
+    .logo:hover { opacity:.85; transform:translateY(-1px); }
+    .user-info { position:relative; display:flex; align-items:center; gap:1rem; }
+    .user-avatar { width:45px; height:45px; background:rgba(255,255,255,.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; cursor:pointer; transition:.3s; }
+    .user-avatar:hover { background:rgba(255,255,255,.3); transform:scale(1.05); }
+    .user-dropdown { position:absolute; top:100%; right:0; margin-top:.5rem; background:#fff; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.15); min-width:240px; opacity:0; visibility:hidden; transform:translateY(-10px); transition:.3s; z-index:1000; }
+    .user-dropdown.show { opacity:1; visibility:visible; transform:translateY(0); }
+    .dropdown-header { padding:1rem; border-bottom:1px solid #f0f0f0; color:#333; font-weight:600; font-size:.9rem; }
+    .dropdown-item { display:flex; align-items:center; gap:.75rem; padding:.75rem 1rem; color:#333; cursor:pointer; transition:.2s; }
+    .dropdown-item:hover { background:#f8f9fa; }
+    .dropdown-item.active { background:#e3f2fd; color:#1976d2; }
+    .dropdown-item .material-icons { font-size:1.2rem; color:#666; }
+    .dropdown-item.active .material-icons { color:#1976d2; }
+    .view-label { display:flex; flex-direction:column; }
+    .view-name { font-weight:600; font-size:.9rem; }
+    .view-description { font-size:.8rem; color:#666; margin-top:.1rem; }
+
+    .container { max-width:1200px; margin:0 auto; padding:2rem; }
+    .hero-section { text-align:center; margin-bottom:3rem; }
+    .hero-title { font-size:2.5rem; font-weight:700; color:#1976d2; margin-bottom:1rem; }
+    .hero-subtitle { font-size:1.2rem; color:#666; margin-bottom:2rem; }
+
+    /* New: two-column layout for upload + writer */
+    .compose-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:2rem; }
+    @media (max-width: 980px) { .compose-grid { grid-template-columns:1fr; } }
+
+    .upload-section, .writer-section, .university-section, .selected-section, .progress-section {
+      background:#fff; border-radius:16px; padding:2rem; box-shadow:0 8px 32px rgba(0,0,0,.1); margin-bottom:0;
+    }
+    .upload-section { border:2px dashed #e0e0e0; transition:.3s; }
+    .upload-section.dragover { border-color:#1976d2; background:#f3f8ff; }
+
+    .upload-area { text-align:center; padding:2rem; }
+    .upload-icon { font-size:4rem; color:#1976d2; margin-bottom:1rem; }
+    .upload-title { font-size:1.5rem; font-weight:600; margin-bottom:.5rem; color:#333; }
+    .upload-subtitle { color:#666; margin-bottom:2rem; }
+    .file-input { display:none; }
+    .upload-btn { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:1rem 2rem; border:none; border-radius:12px; font-size:1.1rem; font-weight:600; cursor:pointer; transition:.3s; display:inline-flex; align-items:center; gap:.5rem; }
+    .upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
+    .uploaded-file { display:none; background:#e8f5e8; border:2px solid #4caf50; border-radius:12px; padding:1.5rem; margin-top:1rem; }
+    .file-info { display:flex; align-items:center; gap:1rem; }
+    .file-icon { font-size:2rem; color:#4caf50; }
+    .file-details h3 { color:#2e7d32; margin-bottom:.25rem; }
+    .file-details p { color:#4caf50; font-size:.9rem; }
+    .remove-file { margin-left:auto; background:none; border:none; color:#666; cursor:pointer; padding:.5rem; border-radius:50%; transition:.2s; }
+    .remove-file:hover { background:rgba(244,67,54,.1); color:#f44336; }
+
+    .section-title { font-size:1.5rem; font-weight:600; color:#333; margin-bottom:1rem; display:flex; align-items:center; gap:.5rem; }
+
+    /* Writer box styles */
+    .writer-toolbar { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.75rem; align-items:center; }
+    .writer-toolbar .btn { background:#fff; border:2px solid #e5e7eb; border-radius:10px; padding:.45rem .75rem; cursor:pointer; font-weight:600; }
+    .writer-toolbar .btn:hover { background:#f8f9fa; }
+    .writer-toolbar .meta { margin-left:auto; font-size:.9rem; color:#667; display:flex; gap:.75rem; align-items:center; }
+    .writer-title { width:100%; padding:.7rem .9rem; border:2px solid #e0e0e0; border-radius:12px; font-size:1rem; margin-bottom:.6rem; }
+    .writer-box { border:2px solid #e0e0e0; border-radius:12px; min-height:280px; padding:1rem; line-height:1.55; }
+    .writer-box:focus { outline:none; border-color:#1976d2; }
+    .writer-actions { display:flex; gap:.5rem; margin-top:.75rem; flex-wrap:wrap; }
+    .btn-primary { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none; }
+    .btn-success { background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; border:none; }
+    .btn-danger  { background:linear-gradient(135deg,#e53935,#ef5350); color:#fff; border:none; }
+    .btn-muted   { background:#fff; color:#333; }
+
+    .filter-meta { font-size:.9rem; color:#666; margin:.25rem 0 .5rem; }
+
+    .filter-bar { display:grid; grid-template-columns: repeat(8, minmax(140px, 1fr)); gap:.5rem; margin-bottom:.75rem; align-items:center; }
+    .filter-select { width:100%; padding:.7rem .9rem; border:2px solid #e0e0e0; border-radius:12px; background:#fff; font-size:.95rem; }
+
+    .university-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:1rem; max-height:480px; overflow-y:auto; padding:1rem; border:1px solid #f0f0f0; border-radius:12px; }
+    .university-card { background:#f8f9fa; border:2px solid transparent; border-radius:12px; padding:1rem; cursor:pointer; transition:.2s; }
+    .university-card:hover { border-color:#1976d2; background:#f3f8ff; }
+    .university-card.selected { border-color:#1976d2; background:#e3f2fd; }
+    .university-header { display:flex; align-items:center; gap:1rem; margin-bottom:.5rem; }
+    .university-logo { width:40px; height:40px; background:#1976d2; color:#fff; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:600; }
+    .university-name { font-weight:600; color:#333; }
+    .university-location { color:#666; font-size:.9rem; }
+    .university-pill { margin-top:.25rem; display:inline-block; font-size:.75rem; color:#555; background:#eef3ff; border:1px solid #dbe7ff; padding:.15rem .5rem; border-radius:999px; }
+
+    .pagination { display:flex; justify-content:space-between; align-items:center; margin-top:.75rem; }
+    .pager { display:flex; gap:.5rem; }
+    .page-btn { background:#fff; border:2px solid #e0e0e0; border-radius:10px; padding:.5rem .9rem; cursor:pointer; font-weight:600; }
+    .page-btn[disabled] { opacity:.5; cursor:not-allowed; }
+    .page-size { margin-left:auto; display:flex; align-items:center; gap:.5rem; }
+
+    .selected-count { color:#1976d2; font-weight:600; margin-bottom:1rem; }
+    .selected-list { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:2rem; }
+    .selected-tag { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:.5rem 1rem; border-radius:20px; font-size:.9rem; display:flex; align-items:center; gap:.5rem; }
+    .remove-tag { cursor:pointer; background:rgba(255,255,255,.2); border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
+    .remove-tag:hover { background:rgba(255,255,255,.3); }
+
+    .send-section { text-align:center; }
+    .send-btn { background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; padding:1.2rem 3rem; border:none; border-radius:12px; font-size:1.2rem; font-weight:600; cursor:pointer; transition:.2s; display:inline-flex; align-items:center; gap:.5rem; }
+    .send-btn:disabled { background:#ccc; cursor:not-allowed; }
+    .send-btn:not(:disabled):hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(76,175,80,.3); }
+
+    .progress-section { display:none; }
+    .progress-title { font-size:1.3rem; font-weight:600; color:#333; margin-bottom:1rem; text-align:center; }
+    .progress-bar { width:100%; height:12px; background:#e0e0e0; border-radius:6px; overflow:hidden; margin-bottom:1rem; }
+    .progress-fill { height:100%; background:linear-gradient(135deg,#4caf50,#66bb6a); border-radius:6px; transition:width .5s ease; width:0%; }
+    .progress-text { text-align:center; color:#666; font-size:.9rem; }
+    .delivery-list { margin-top:1rem; }
+    .delivery-item { display:flex; align-items:center; gap:1rem; padding:.75rem; border-radius:8px; margin-bottom:.5rem; background:#f8f9fa; }
+    .delivery-status { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
+    .delivery-status.pending { background:#fff3e0; color:#ff9800; }
+    .delivery-status.success { background:#e8f5e8; color:#4caf50; }
+    .delivery-status.error { background:#ffebee; color:#f44336; }
+
+    .success-section { display:none; background:linear-gradient(135deg,#e8f5e8,#f1f8e9); border:2px solid #4caf50; border-radius:16px; padding:2rem; text-align:center; box-shadow:0 8px 32px rgba(76,175,80,.2); }
+    .success-icon { font-size:4rem; color:#4caf50; margin-bottom:1rem; }
+    .success-title { font-size:1.8rem; font-weight:600; color:#2e7d32; margin-bottom:1rem; }
+    .success-subtitle { color:#4caf50; margin-bottom:2rem; }
+    .new-upload-btn { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:1rem 2rem; border:none; border-radius:12px; font-size:1rem; font-weight:600; cursor:pointer; transition:.2s; }
+    .new-upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
+
+    @keyframes flash { 0%{box-shadow:0 0 0 rgba(25,118,210,0);} 25%{box-shadow:0 0 0 6px rgba(25,118,210,.25);} 100%{box-shadow:0 0 0 rgba(25,118,210,0);} }
+    .flash { animation: flash 1.2s ease; }
+
+    .badge { display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; font-size:.75rem; border-radius:999px; border:1px solid; }
+    .badge-student { background:#f1f8ff; color:#0d47a1; border-color:#bbdefb; }
+    .badge-added   { background:#e8f5e9; color:#1b5e20; border-color:#c8e6c9; }
+    .badge-removed { background:#ffebee; color:#b71c1c; border-color:#ffcdd2; }
+
+    .toast-wrap { position: fixed; right: 16px; bottom: 16px; z-index: 99999; display: grid; gap: 8px; }
+    .toast {
+      min-width: 240px; max-width: 420px; padding: .75rem .9rem; border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.15); color:#0f172a; background:#fff; border:1px solid #e5e7eb;
+      display:flex; align-items:flex-start; gap:.6rem; animation: toast-in .18s ease;
+    }
+    .toast.success { border-color:#c8e6c9; background:#f1f8f3; }
+    .toast.error   { border-color:#ffcdd2; background:#fff2f2; }
+    .toast.info    { border-color:#bbdefb; background:#f3f8ff; }
+    .toast .icon { font-size: 1.1rem; line-height:1; margin-top:.1rem; }
+    .toast .msg  { flex:1; font-size:.95rem; }
+    .toast .x    { border:none; background:transparent; cursor:pointer; font-size:1rem; opacity:.6; }
+    .toast .x:hover { opacity:.9; }
+    @keyframes toast-in { from { transform: translateY(6px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+
+    .empty-state { display:none; background:#fff; border:1px dashed #d0d7de; border-radius:12px; padding:1.25rem; color:#445; text-align:center; }
+    .empty-state .actions { margin-top:.75rem; display:flex; gap:.5rem; justify-content:center; }
+
+    @media (max-width:768px) {
+      .container { padding:1rem; }
+      .hero-title { font-size:2rem; }
+      .university-grid { grid-template-columns:1fr; }
+      .header-content { flex-direction:column; gap:1rem; }
+      .filter-bar { grid-template-columns:1fr 1fr; }
+    }
+
+    .suggest-popover {
+      position: absolute; z-index: 2000; width: 100%;
+      max-height: 280px; overflow-y: auto; margin-top: .25rem;
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,.08);
+    }
+    .suggest-item { padding:.6rem .8rem; cursor:pointer; display:flex; align-items:center; gap:.5rem; font-size:.95rem; }
+    .suggest-item[aria-selected="true"], .suggest-item:hover { background:#f3f8ff; }
+    .suggest-muted { color:#6b7280; font-size:.85rem; }
+    .suggest-highlight { font-weight:700; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <a href="index.html" class="logo">
+        <span class="material-icons">star</span>
+        stellarrec
+      </a>
+      <div class="user-info">
+        <div class="user-avatar" onclick="toggleUserDropdown()">
+          <span class="material-icons">person</span>
+        </div>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="dropdown-header">Switch View</div>
+          <div class="dropdown-item active" onclick="switchView('recommender', event)">
+            <span class="material-icons">edit</span>
+            <div class="view-label">
+              <div class="view-name">Recommender</div>
+              <div class="view-description">Write & send letters</div>
+            </div>
+          </div>
+          <div class="dropdown-item" onclick="switchView('student', event)">
+            <span class="material-icons">school</span>
+            <div class="view-label">
+              <div class="view-name">Student</div>
+              <div class="view-description">Track applications</div>
+            </div>
+          </div>
+
+          <!-- Mock API toggle -->
+          <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
+            <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
+              <span class="material-icons">build</span>
+              <div class="view-label">
+                <div class="view-name">Use mock API</div>
+                <div class="view-description">Toggle mock vs real backend</div>
+              </div>
+              <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
+            </label>
+          </div>
+          <!-- /Mock API toggle -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- Student Context Bar -->
+    <div class="student-bar" id="studentBar" style="display:flex; align-items:center; gap:.75rem; background:#fff; border:1px solid #eaeaea; border-radius:12px; padding:1rem; margin-bottom:1rem;">
+      <span class="material-icons" aria-hidden="true">account_circle</span>
+      <div style="flex:1">
+        <div id="studentTitle" style="font-weight:700;">No student loaded</div>
+        <div id="studentMeta" style="color:#666; font-size:.9rem;">Load a student to see their preselected universities.</div>
+      </div>
+      <input id="studentIdInput" class="filter-select" placeholder="Student ID or email" style="max-width:220px;" aria-label="Student identifier"/>
+      <button class="apply-btn" id="loadStudentBtn">Load student</button>
+      <label style="display:flex; align-items:center; gap:.4rem; margin-left:.5rem; font-size:.9rem;">
+        <input type="checkbox" id="allowEditsToggle"/>
+        Allow recommender edits
+      </label>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <h1 class="hero-title">One Upload. Multiple Universities.</h1>
+      <p class="hero-subtitle">Upload your recommendation letter once and send it to multiple US universities instantly.</p>
+    </div>
+
+    <!-- Upload + Writer side-by-side -->
+    <div class="compose-grid">
+
+      <!-- Upload Section -->
+      <div class="upload-section" id="uploadSection">
+        <div class="upload-area">
+          <div class="upload-icon"><span class="material-icons">cloud_upload</span></div>
+          <h2 class="upload-title">Upload Recommendation Letter</h2>
+          <p class="upload-subtitle">Drag and drop your PDF file here, or click to browse</p>
+          <input type="file" id="fileInput" class="file-input" accept=".pdf" />
+          <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+            <span class="material-icons">upload_file</span>
+            Choose File
+          </button>
+        </div>
+        <div class="uploaded-file" id="uploadedFile">
+          <div class="file-info">
+            <div class="file-icon"><span class="material-icons">description</span></div>
+            <div class="file-details">
+              <h3 id="fileName">recommendation-letter.pdf</h3>
+              <p id="fileSize">2.4 MB • Uploaded successfully</p>
+            </div>
+            <button class="remove-file" onclick="removeFile()"><span class="material-icons">close</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Writer Section (NEW) -->
+      <div class="writer-section" id="writerSection">
+        <h2 class="section-title"><span class="material-icons">edit</span> Write Letter</h2>
+
+        <input id="writerTitle" class="writer-title" placeholder="Letter title (optional, e.g., 'Recommendation for Jane Doe')" />
+
+        <div class="writer-toolbar">
+          <button class="btn btn-muted" onclick="writerCmd('bold')" title="Bold (Ctrl/Cmd+B)"><b>B</b></button>
+          <button class="btn btn-muted" onclick="writerCmd('italic')" title="Italic (Ctrl/Cmd+I)"><i>I</i></button>
+          <button class="btn btn-muted" onclick="writerCmd('underline')" title="Underline (Ctrl/Cmd+U)"><u>U</u></button>
+          <button class="btn btn-muted" onclick="insertDate()" title="Insert today’s date">📅 Date</button>
+          <button class="btn btn-muted" onclick="insertSignature()" title="Insert signature block">✍️ Signature</button>
+          <div class="meta">
+            <span id="writerCount">0 words • 0 chars</span>
+            <span id="writerSaved">Not saved</span>
+          </div>
+        </div>
+
+        <div id="writerBox" class="writer-box" contenteditable="true" aria-label="Letter editor"
+             placeholder="Write your recommendation letter here..."></div>
+
+        <div class="writer-actions">
+          <button class="btn btn-primary" onclick="saveDraft()">Save draft</button>
+          <button class="btn btn-muted" onclick="restoreDraft()">Restore</button>
+          <button class="btn btn-danger" onclick="clearDraft()">Clear</button>
+          <button class="btn btn-muted" onclick="copyDraft()">Copy</button>
+          <button class="btn btn-muted" onclick="downloadDraft()">Download .txt</button>
+          <button class="btn btn-success" onclick="attachDraft()">Attach draft</button>
+          <label style="display:flex; align-items:center; gap:.4rem; margin-left:auto;">
+            <input type="checkbox" id="writerAutosaveToggle" checked />
+            Autosave
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- University Selection -->
+    <div class="university-section">
+      <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
+
+      <!-- Search + Apply -->
+      <div class="university-search">
+        <input type="text" class="search-input" placeholder="Search universities..." id="universitySearch" />
+        <button class="apply-btn" id="searchApplyBtn" title="Apply search (Enter)">Apply</button>
+      </div>
+
+      <!-- Browse-all dropdown -->
+      <select id="universitySelect" class="filter-select" title="Browse all universities" style="margin-bottom:.5rem;">
+        <option value="" selected disabled>Browse all universities (6000+)</option>
+      </select>
+
+      <!-- Filters -->
+      <div class="filter-meta" id="resultMeta" aria-live="polite">Showing 0 of 0</div>
+      <div class="filter-bar">
+        <select id="stateFilter" class="filter-select" aria-label="Filter by state">
+          <option value="">All states</option>
+          <option value="AL">Alabama</option><option value="AK">Alaska</option><option value="AZ">Arizona</option><option value="AR">Arkansas</option>
+          <option value="CA">California</option><option value="CO">Colorado</option><option value="CT">Connecticut</option><option value="DE">Delaware</option>
+          <option value="FL">Florida</option><option value="GA">Georgia</option><option value="HI">Hawaii</option><option value="ID">Idaho</option>
+          <option value="IL">Illinois</option><option value="IN">Indiana</option><option value="IA">Iowa</option><option value="KS">Kansas</option>
+          <option value="KY">Kentucky</option><option value="LA">Louisiana</option><option value="ME">Maine</option><option value="MD">Maryland</option>
+          <option value="MA">Massachusetts</option><option value="MI">Michigan</option><option value="MN">Minnesota</option><option value="MS">Mississippi</option>
+          <option value="MO">Missouri</option><option value="MT">Montana</option><option value="NE">Nebraska</option><option value="NV">Nevada</option>
+          <option value="NH">New Hampshire</option><option value="NJ">New Jersey</option><option value="NM">New Mexico</option><option value="NY">New York</option>
+          <option value="NC">North Carolina</option><option value="ND">North Dakota</option><option value="OH">Ohio</option><option value="OK">Oklahoma</option>
+          <option value="OR">Oregon</option><option value="PA">Pennsylvania</option><option value="RI">Rhode Island</option><option value="SC">South Carolina</option>
+          <option value="SD">South Dakota</option><option value="TN">Tennessee</option><option value="TX">Texas</option><option value="UT">Utah</option>
+          <option value="VT">Vermont</option><option value="VA">Virginia</option><option value="WA">Washington</option><option value="WV">West Virginia</option>
+          <option value="WI">Wisconsin</option><option value="WY">Wyoming</option>
+        </select>
+
+        <select id="typeFilter" class="filter-select" aria-label="Filter by institution type">
+          <option value="">All types</option>
+          <option value="Public">Public</option>
+          <option value="Private nonprofit">Private nonprofit</option>
+          <option value="Private for-profit">Private for-profit</option>
+        </select>
+
+        <select id="levelFilter" class="filter-select" aria-label="Filter by level">
+          <option value="">All levels</option>
+          <option value="4-year">4-year</option>
+          <option value="2-year">2-year</option>
+          <option value="Less-than-2-year">Less-than-2-year</option>
+        </select>
+
+        <select id="sortBy" class="filter-select" aria-label="Sort results">
+          <option value="name_asc">Sort: Name (A–Z)</option>
+          <option value="state_asc">Sort: State (A–Z)</option>
+        </select>
+
+        <button class="apply-btn" id="filterApplyBtn" title="Apply filters and sort">Apply filters</button>
+        <button class="apply-btn" id="resetBtn" title="Reset search and filters">Reset</button>
+        <button class="apply-btn" id="selectPageBtn" title="Select all universities on this page">Select page</button>
+        <button class="page-btn" id="bulkImportBtn" title="Bulk import by names">Bulk import</button>
+      </div>
+
+      <!-- Empty state -->
+      <div id="emptyState" class="empty-state" aria-live="polite">
+        <div style="font-weight:600; margin-bottom:.25rem;">No universities match your filters</div>
+        <div style="font-size:.9rem; color:#667;">Try adjusting search or clearing filters.</div>
+        <div class="actions">
+          <button class="apply-btn" id="clearFiltersBtn" type="button">Clear filters</button>
+          <button class="page-btn" id="retryLoadBtn" style="display:none;" type="button">Retry loading</button>
+        </div>
+      </div>
+
+      <!-- Results grid -->
+      <div class="university-grid" id="universityGrid" role="list" aria-label="Universities list"></div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <div class="pager">
+          <button class="page-btn" id="prevPage">Prev</button>
+          <span id="pageInfo" style="font-weight:600;">Page 1 of 1</span>
+          <button class="page-btn" id="nextPage">Next</button>
+        </div>
+        <div class="page-size">
+          <label for="pageSize">Per page:</label>
+          <select id="pageSize" class="filter-select" style="width:auto;display:inline-block;">
+            <option value="20">20</option>
+            <option value="40" selected>40</option>
+            <option value="80">80</option>
+            <option value="120">120</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selected Universities -->
+    <div class="selected-section">
+      <h2 class="section-title" style="display:flex;align-items:center;gap:.5rem;">
+        <span class="material-icons">check_circle</span> Selected Universities
+        <button id="copyLinkBtn" class="page-btn" title="Copy shareable link" style="margin-left:auto;">Copy link</button>
+      </h2>
+      <div class="selected-count" id="selectedCount">0 universities selected</div>
+      <div class="selected-list" id="selectedList"></div>
+      <div class="send-section">
+        <button class="send-btn" id="sendBtn" disabled onclick="sendLetters()">
+          <span class="material-icons">send</span>
+          Send to Selected Universities
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress Section -->
+    <div class="progress-section" id="progressSection">
+      <h2 class="progress-title">Sending Letters...</h2>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText" aria-live="polite">Preparing to send...</div>
+      <div class="delivery-list" id="deliveryList"></div>
+      <!-- Buttons (Pause/Resume, Cancel) are injected dynamically -->
+    </div>
+
+    <!-- Success Section -->
+    <div class="success-section" id="successSection">
+      <div class="success-icon"><span class="material-icons">check_circle</span></div>
+      <h2 class="success-title">Letters Sent Successfully!</h2>
+      <p class="success-subtitle">Your recommendation letter has been delivered to all selected universities.</p>
+      <button class="new-upload-btn" onclick="startNewUpload()">
+        <span class="material-icons">add</span>
+        Send Another Letter
+      </button>
+    </div>
+  </div>
+
+  <!-- Confirm Send Modal -->
+  <div id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle"
+       style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
+    <div style="background:#fff; width:min(720px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
+      <div style="padding:1.2rem 1.4rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+        <div id="confirmModalTitle" style="font-weight:700;">Confirm recipients</div>
+        <button aria-label="Close" id="modalCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+      </div>
+      <div style="padding:1rem 1.4rem; max-height:60vh; overflow:auto; line-height:1.45;">
+        <div id="modalSummary" style="margin-bottom:1rem;"></div>
+        <div id="modalLists" style="display:grid; gap:1rem;">
+          <div>
+            <div style="font-weight:600;">Included (<span id="modalIncludedCount">0</span>)</div>
+            <div id="modalIncluded"></div>
+          </div>
+          <div>
+            <div style="font-weight:600;">Removed vs student’s list (<span id="modalRemovedCount">0</span>)</div>
+            <div id="modalRemoved" style="color:#b00020;"></div>
+          </div>
+          <div>
+            <div style="font-weight:600;">Added by you (<span id="modalAddedCount">0</span>)</div>
+            <div id="modalAdded" style="color:#1b5e20;"></div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:1rem 1.4rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
+        <button class="page-btn" id="modalCancelBtn">Cancel</button>
+        <button class="apply-btn" id="modalConfirmBtn">Send now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Import Modal -->
+  <div id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle"
+       style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
+    <div style="background:#fff; width:min(680px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
+      <div style="padding:1rem 1.2rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+        <div id="importTitle" style="font-weight:700;">Bulk import universities</div>
+        <button aria-label="Close" id="importCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+      </div>
+      <div style="padding:1rem 1.2rem; display:grid; gap:.75rem;">
+        <div style="font-size:.92rem; color:#556;">
+          Paste one <b>name per line</b>. We’ll fuzzy-match against the master list.
+        </div>
+        <textarea id="importTextarea" rows="10" style="width:100%; padding:.8rem; border:1px solid #e5e7eb; border-radius:10px; font-family:inherit;"></textarea>
+        <div id="importPreview" style="font-size:.9rem; color:#667;"></div>
+      </div>
+      <div style="padding:1rem 1.2rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
+        <button class="page-btn" id="importCancelBtn">Cancel</button>
+        <button class="apply-btn" id="importConfirmBtn">Add matches</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+/* -----------------------------------------------------------
+   STELLARREC — CORE + AUTOSUGGEST + WRITER + PROGRESS HELPERS
+   ----------------------------------------------------------- */
+
+/* ---------- Safe shims ---------- */
+const SR_LOG = (typeof window.SR_LOG === 'object') ? window.SR_LOG : {
+  consoleEnabled: () => false, setConsoleEnabled: () => {}, log: () => {}
+};
+const SR_AUTH = (typeof window.SR_AUTH === 'object') ? window.SR_AUTH : {
+  getAccessToken: () => null, refreshTokens: async () => false,
+  startGentleSignInFlow: () => {}, waitForLogin: async () => {},
+  resolvePostLoginWaiters: () => {}, setTokens: () => {}
+};
+function srRefreshAuthRow() {}
+function srRenderAuditBanner() {}
+function setupCopyLink() {}
+function setupBulkImport() {}
+function applyShareFromURL() {}
+function buildShareURL() { return location.pathname + location.search + location.hash; }
+
+/* --------------------- Utilities --------------------- */
+const norm = (s) => (s || '').toString().trim().toLowerCase();
+function escapeHtml(s){
+  return (s ?? '').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function stripHtml(html){
+  const tmp=document.createElement('div'); tmp.innerHTML = html || ''; return tmp.textContent || tmp.innerText || '';
+}
+function truncate(s, n=80){
+  const t = (s ?? '').toString(); return t.length > n ? (t.slice(0, n-1) + '…') : t;
+}
+function getActiveStudentId() { return (window.studentProfile && (studentProfile.id || studentProfile.email)) || 'default'; }
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+function startNewUpload(){ location.reload(); }
+
+/* --------------------- State --------------------- */
+let universities = [];
+let filtered = [];
+let uploadedFile = null;
+let currentView = 'recommender';
+
+const filters = { q: '', state: '', type: '', level: '', sort: 'name_asc' };
+let page = 1;
+let pageSize = 40;
+let flashNextRender = false;
+
+const CACHE_KEY = 'sr_us_institutions_v1';
+
+/* --- Persistence keys --- */
+const PERSIST = {
+  student:  'sr_student_profile_v1',
+  hybrid:   'sr_hybrid_sets_v1',
+  filters:  'sr_filter_state_v1',
+  view:     'sr_view_v1',
+  draft:    'sr_draft_' // + studentId
+};
+
+function persistAll() {
+  try {
+    if (studentProfile) localStorage.setItem(PERSIST.student, JSON.stringify(studentProfile));
+    localStorage.setItem(PERSIST.hybrid, JSON.stringify({
+      studentUnitIds: Array.from(studentUnitIds),
+      added: Array.from(addedByRecommender),
+      removed: Array.from(removedByRecommender),
+    }));
+    localStorage.setItem(PERSIST.filters, JSON.stringify({ ...filters, page, pageSize }));
+    localStorage.setItem(PERSIST.view, currentView);
+  } catch {}
+}
+function hydrateAll() {
+  try {
+    const v = localStorage.getItem(PERSIST.view);
+    if (v) currentView = v;
+
+    const f = localStorage.getItem(PERSIST.filters);
+    if (f) {
+      const o = JSON.parse(f);
+      Object.assign(filters, {
+        q: o.q || '', state: o.state || '', type: o.type || '',
+        level: o.level || '', sort: o.sort || 'name_asc'
+      });
+      page = o.page || 1;
+      pageSize = o.pageSize || 40;
+
+      const ids = {
+        universitySearch: 'q', stateFilter: 'state', typeFilter:'type',
+        levelFilter:'level', sortBy:'sort', pageSize:'pageSize'
+      };
+      Object.entries(ids).forEach(([elId, key]) => {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        if (key === 'q') el.value = filters.q;
+        else if (key === 'pageSize') el.value = String(pageSize);
+        else el.value = filters[key];
+      });
+    }
+
+    const s   = localStorage.getItem(PERSIST.student);
+    const hyb = localStorage.getItem(PERSIST.hybrid);
+    if (s) {
+      studentProfile = JSON.parse(s);
+      document.getElementById('studentTitle').textContent = studentProfile.name || 'Student';
+      document.getElementById('allowEditsToggle').checked = !!studentProfile.allowRecommenderEdits;
+    }
+    if (hyb) {
+      const H = JSON.parse(hyb);
+      studentUnitIds = new Set((H && H.studentUnitIds) || []);
+      addedByRecommender.clear(); removedByRecommender.clear();
+      (H && H.added || []).forEach(id => addedByRecommender.add(id));
+      (H && H.removed || []).forEach(id => removedByRecommender.add(id));
+    }
+  } catch {}
+}
+function persistAndSync() {
+  persistAll();
+  try { history.replaceState(null,'', buildShareURL()); } catch {}
+}
+
+/* --- Hybrid selection model --- */
+let studentProfile = null;
+let studentUnitIds = new Set();
+let addedByRecommender = new Set();
+let removedByRecommender = new Set();
+
+function getEffectiveSelection() {
+  const base = new Set(studentUnitIds);
+  removedByRecommender.forEach(id => base.delete(id));
+  addedByRecommender.forEach(id => base.add(id));
+  return base;
+}
+
+/* --- Mock/Real API toggle --- */
+function getUseMock() {
+  const v = localStorage.getItem('sr_use_mock');
+  return v === null ? true : v !== '0';
+}
+function setUseMock(on) {
+  localStorage.setItem('sr_use_mock', on ? '1' : '0');
+  location.reload();
+}
+(function syncMockFromURL(){
+  const p = new URLSearchParams(location.search);
+  if (p.has('mock')) {
+    const val = p.get('mock') === '1';
+    localStorage.setItem('sr_use_mock', val ? '1' : '0');
+  }
+})();
+
+/* --------------------- Web worker for filtering (optional) --------------------- */
+let filterWorker = null;
+let filteringInFlight = 0;
+
+function initFilterWorker(){
+  if (filterWorker) return;
+  const code = `
+    let universities = [];
+    const norm = s => (s||'').toLowerCase();
+    onmessage = (e) => {
+      const { type, payload } = e.data || {};
+      if (type === 'prime') { universities = payload || []; postMessage({ type:'primed', count: universities.length }); return; }
+      if (type === 'filter') {
+        const { filters, page, pageSize } = payload;
+        const q = norm(filters.q||'');
+        let arr = universities.filter(u=>{
+          const qOk = !q || (u.name && norm(u.name).includes(q)) || (u.city && norm(u.city).includes(q)) || (u.state && norm(u.state).includes(q));
+          const stOk = !filters.state || u.state === filters.state;
+          const tyOk = !filters.type || u.control === filters.type;
+          const lvOk = !filters.level || u.level === filters.level;
+          return qOk && stOk && tyOk && lvOk;
+        });
+        if (filters.sort === 'name_asc') arr.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+        else if (filters.sort === 'state_asc') arr.sort((a,b)=> (a.state||'').localeCompare(b.state||'') || (a.name||'').localeCompare(b.name||''));
+        const total = arr.length; const start = Math.max(0, (page-1)*pageSize); const slice = arr.slice(start, start+pageSize);
+        postMessage({ type:'result', slice, total });
+      }
+    };
+  `;
+  const blob = new Blob([code], { type:'application/javascript' });
+  filterWorker = new Worker(URL.createObjectURL(blob));
+}
+
+function computeFiltered() {
+  filtered = universities.filter(u => {
+    const q = norm(filters.q);
+    const qOk = !q || (u.name && norm(u.name).includes(q)) || (u.city && norm(u.city).includes(q)) || (u.state && norm(u.state).includes(q));
+    const stOk = !filters.state || u.state === filters.state;
+    const tyOk = !filters.type  || u.control === filters.type;
+    const lvOk = !filters.level || u.level   === filters.level;
+    return qOk && stOk && tyOk && lvOk;
+  });
+
+  if (filters.sort === 'name_asc') filtered.sort((a,b) => (a.name||'').localeCompare(b.name||''));
+  else if (filters.sort === 'state_asc') filtered.sort((a,b) => (a.state||'').localeCompare(b.state||'') || (a.name||'').localeCompare(b.name||''));
+
+  populateUniversitySelectOptions(filtered.length ? filtered : universities);
+}
+function computeFilteredAsync() {
+  if (!filterWorker) { computeFiltered(); renderPage(); updateMeta(); return; }
+  computeFiltered();
+  const ticket = ++filteringInFlight;
+  filterWorker.onmessage = (ev) => {
+    if (ticket !== filteringInFlight) return;
+    const { type, slice, total } = ev.data || {};
+    if (type === 'result') {
+      const grid = document.getElementById('universityGrid');
+      grid.innerHTML = '';
+      renderUniversities(slice);
+
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+      document.getElementById('pageInfo').textContent = `Page ${Math.min(page, totalPages)} of ${totalPages}`;
+      document.getElementById('prevPage').disabled = (page <= 1);
+      document.getElementById('nextPage').disabled = (page >= totalPages);
+      document.getElementById('resultMeta').textContent = `Showing ${slice.length ? ((page-1)*pageSize+1) : 0}-${Math.min(total, page*pageSize)} of ${total} (from ${universities.length} total)`;
+
+      const empty = document.getElementById('emptyState');
+      if (total === 0) { grid.style.display='none'; if (empty) empty.style.display='block'; }
+      else { grid.style.display='grid'; if (empty) empty.style.display='none'; }
+    }
+  };
+  filterWorker.postMessage({ type:'filter', payload: { filters, page, pageSize }});
+}
+function refreshList() { if (filterWorker) computeFilteredAsync(); else { computeFiltered(); renderPage(); updateMeta(); } }
+
+/* --------------------- DOM Ready --------------------- */
+document.addEventListener('DOMContentLoaded', async function () {
+  // Insert menu extras
+  (function srInsertMenuItems(){
+    const dd = document.getElementById('userDropdown'); if (!dd) return;
+    const li = document.createElement('div');
+    li.className = 'dropdown-item';
+    li.innerHTML = `
+      <span class="material-icons">bug_report</span>
+      <div class="view-label">
+        <div class="view-name">Console logs</div>
+        <div class="view-description">Toggle in-browser event logs</div>
+      </div>
+      <input id="logToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
+    `;
+    dd.appendChild(li);
+    const authRow = document.createElement('div'); authRow.id = 'authRow'; authRow.className = 'dropdown-item'; dd.appendChild(authRow);
+  })();
+
+  const mockEl = document.getElementById('mockToggle');
+  if (mockEl) { mockEl.checked = getUseMock(); mockEl.addEventListener('change', (e) => setUseMock(e.target.checked)); }
+
+  const logEl = document.getElementById('logToggle');
+  if (logEl) { logEl.checked = SR_LOG.consoleEnabled(); logEl.addEventListener('change', (e)=> SR_LOG.setConsoleEnabled(!!e.target.checked)); }
+  srRefreshAuthRow();
+
+  (function applyTokenFromURL(){
+    const p = new URLSearchParams(location.search);
+    const tok = p.get('token');
+    if (tok) {
+      SR_AUTH.setTokens({ accessToken: tok, refreshToken: p.get('rt') || 'demo-refresh', expiresAt: Date.now() + 55*60*1000 });
+      toast('Signed in.', 'success'); srRefreshAuthRow(); history.replaceState(null, '', location.pathname + location.hash); SR_AUTH.resolvePostLoginWaiters();
+    }
+  })();
+
+  /* Load dataset (with fallbacks) */
+  try {
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try { const cachedData = JSON.parse(cached);
+        if (Array.isArray(cachedData) || (cachedData && typeof cachedData === 'object')) {
+          initializeWithData(cachedData); return;
+        }
+      } catch {}
+    }
+
+    let data = null, used = null;
+    const candidates = [
+      './assets/videos/us_institutions_by_state_2023.json',
+      './assets/videos/us_institutions_by_state_2023.min.json',
+      '/assets/videos/us_institutions_by_state_2023.json',
+      '/assets/videos/us_institutions_by_state_2023.min.json',
+      'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/videos/us_institutions_by_state_2023.json',
+      'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/videos/us_institutions_by_state_2023.min.json',
+      'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/videos/us_institutions_by_state_2023.json',
+      'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/videos/us_institutions_by_state_2023.min.json'
+    ];
+    for (const url of candidates) {
+      try {
+        const bust = url.startsWith('http') ? '' : (url.includes('?') ? '' : `?v=${Date.now()}`);
+        const resp = await fetch(url + bust, { credentials: 'omit' });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        let txt = await resp.text();
+        txt = txt.replace(/\b-?Infinity\b/g, 'null').replace(/\bNaN\b/g, 'null').replace(/,\s*([}\]])/g, '$1');
+        data = JSON.parse(txt); used = url; break;
+      } catch (e) { console.warn('[SR] dataset fallback →', url, e); }
+    }
+    if (!data) throw new Error('No dataset source could be loaded.');
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    initializeWithData(data);
+  } catch (err) {
+    console.error("Failed to load university dataset", err);
+    const meta = document.getElementById('resultMeta'); if (meta) meta.textContent = 'Failed to load universities.';
+    toast(`Failed to load dataset: ${err.message || err}`, 'error');
+    const empty = document.getElementById('emptyState');
+    if (empty) {
+      empty.style.display = 'block';
+      document.getElementById('universityGrid').style.display = 'none';
+      const retryBtn = document.getElementById('retryLoadBtn');
+      if (retryBtn) { retryBtn.style.display = 'inline-block'; retryBtn.onclick = () => location.reload(); }
+      const clearBtn = document.getElementById('clearFiltersBtn'); if (clearBtn) clearBtn.onclick = () => resetAllFilters();
+    }
+  }
+});
+
+/* --------------------- Initialize with data --------------------- */
+function initializeWithData(data) {
+  universities = Array.isArray(data) ? data : (data && typeof data === 'object' ? Object.values(data).flat() : []);
+  universities = universities.map(u => ({
+    unitid:  u.unitid ?? u.UNITID ?? u.id,
+    name:    u.name   ?? u.INSTNM ?? 'Unknown',
+    city:    u.city   ?? u.CITY   ?? '',
+    state:   u.state  ?? u.STABBR ?? '',
+    control: u.control?? u.CONTROL?? '',
+    level:   u.level  ?? u.ICLEVEL?? '',
+    sector:  u.sector ?? u.SECTOR ?? '',
+    website: u.website?? u.WEBADDR?? ''
+  }));
+  initFilterWorker();
+  if (filterWorker) filterWorker.postMessage({ type:'prime', payload: universities });
+
+  setupFileUpload();
+  setupSearch();
+  setupClickOutside();
+  setupFilterHandlers();
+  setupPagingHandlers();
+  setupUniversitySelect();
+  setupWriter(); // NEW
+
+  document.getElementById('loadStudentBtn').addEventListener('click', () => {
+    const id = document.getElementById('studentIdInput').value.trim();
+    if (!id) { toast('Enter a student ID or email.', 'error', { ttl: 2000 }); return; }
+    loadStudentProfile(id);
+  });
+  document.getElementById('allowEditsToggle').addEventListener('change', (e) => {
+    if (studentProfile) studentProfile.allowRecommenderEdits = e.target.checked;
+    renderPage(); updateSelectedList(); persistAndSync();
+    SR_LOG.log({ type: "filter_apply", filters: { allowRecommenderEdits: !!e.target.checked } });
+    srRenderAuditBanner();
+  });
+
+  document.getElementById('clearFiltersBtn')?.addEventListener('click', resetAllFilters);
+
+  hydrateAll();
+  applyShareFromURL();
+  setupCopyLink();
+  setupBulkImport();
+
+  refreshList();
+  updateSelectedList();
+  srRenderAuditBanner();
+
+  const sel = document.getElementById('universitySelect');
+  if (sel && sel.options.length > 0) {
+    sel.options[0].textContent = `Browse all universities (${universities.length.toLocaleString()})`;
+  }
+
+  const params = new URLSearchParams(location.search);
+  const sid = params.get('student');
+  if (sid) loadStudentProfile(sid);
+
+  persistAndSync();
+}
+
+/* --------------------- UI: dropdown & view --------------------- */
+function toggleUserDropdown() { document.getElementById('userDropdown').classList.toggle('show'); }
+function switchView(view, ev) {
+  currentView = view;
+  document.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
+  if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
+  updateDashboardForView(view);
+  document.getElementById('userDropdown').classList.remove('show');
+  persistAndSync();
+  SR_LOG.log({ type: "search", query: `switch_view:${view}` });
+}
+function updateDashboardForView(view) {
+  const heroTitle = document.querySelector('.hero-title');
+  const heroSubtitle = document.querySelector('.hero-subtitle');
+  const uploadTitle = document.querySelector('.upload-title');
+  if (view === 'student') {
+    heroTitle.textContent = 'Track Your Applications';
+    heroSubtitle.textContent = 'Monitor the status of your recommendation letters and university applications.';
+    uploadTitle.textContent = 'Request Recommendation Letter';
+  } else {
+    heroTitle.textContent = 'One Upload. Multiple Universities.';
+    heroSubtitle.textContent = 'Upload your recommendation letter once and send it to multiple US universities instantly.';
+    uploadTitle.textContent = 'Upload Recommendation Letter';
+  }
+}
+function setupClickOutside() {
+  document.addEventListener('click', function (event) {
+    const userInfo = document.querySelector('.user-info');
+    const dropdown = document.getElementById('userDropdown');
+    if (userInfo && dropdown && !userInfo.contains(event.target)) dropdown.classList.remove('show');
+  });
+}
+
+/* --------------------- Upload --------------------- */
+function setupFileUpload() {
+  const fileInput = document.getElementById('fileInput');
+  const uploadSection = document.getElementById('uploadSection');
+  fileInput.addEventListener('change', handleFileUpload);
+  uploadSection.addEventListener('dragover', (e) => { e.preventDefault(); uploadSection.classList.add('dragover'); });
+  uploadSection.addEventListener('dragleave', () => uploadSection.classList.remove('dragover'));
+  uploadSection.addEventListener('drop', (e) => {
+    e.preventDefault(); uploadSection.classList.remove('dragover');
+    if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+  });
+}
+function handleFileUpload(e) { if (e.target.files[0]) handleFile(e.target.files[0]); }
+/* allowAny = true is used ONLY by "Attach draft" to attach a .txt */
+function handleFile(file, allowAny=false) {
+  if (!allowAny && file.type !== 'application/pdf') { toast('Please upload a PDF file.', 'error'); return; }
+  uploadedFile = file;
+  document.getElementById('uploadedFile').style.display = 'block';
+  document.getElementById('fileName').textContent = file.name;
+  const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+  document.getElementById('fileSize').textContent = `${sizeMB} MB • ${allowAny ? 'Draft attached' : 'Uploaded successfully'}`;
+  toast(allowAny ? 'Draft attached to send queue.' : 'PDF attached. Ready to send.', 'success');
+  updateSendButton(); persistAndSync();
+  SR_LOG.log({ type: "dataset_load", datasetId: allowAny ? "draft_txt" : "uploaded_pdf", ms: file.size || 0 });
+}
+function removeFile() {
+  uploadedFile = null;
+  document.getElementById('uploadedFile').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  updateSendButton(); persistAndSync();
+}
+
+/* --------------------- WRITER (NEW) --------------------- */
+let writerAutosaveTimer = null;
+function setupWriter() {
+  const box = document.getElementById('writerBox');
+  const title = document.getElementById('writerTitle');
+  const autosaveToggle = document.getElementById('writerAutosaveToggle');
+
+  // Load any existing draft for the active student
+  restoreDraft(/*silent*/true);
+  updateWriterCounts();
+
+  box.addEventListener('input', () => {
+    updateWriterCounts();
+    scheduleAutosave();
+  });
+  title.addEventListener('input', () => {
+    scheduleAutosave();
+  });
+  autosaveToggle.addEventListener('change', () => {
+    if (autosaveToggle.checked) scheduleAutosave(true);
+    else if (writerAutosaveTimer) { clearTimeout(writerAutosaveTimer); writerAutosaveTimer = null; }
+  });
+
+  // Save on blur for safety
+  box.addEventListener('blur', () => { if (document.getElementById('writerAutosaveToggle').checked) saveDraft(/*quiet*/true); });
+  title.addEventListener('blur', () => { if (document.getElementById('writerAutosaveToggle').checked) saveDraft(/*quiet*/true); });
+}
+function writerCmd(cmd) { document.execCommand(cmd, false, null); }
+function insertDate() {
+  const d = new Date().toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
+  document.execCommand('insertText', false, d);
+}
+function insertSignature() {
+  const name = (studentProfile && studentProfile.name) ? studentProfile.name : 'Student Name';
+  const block = `\n\nSincerely,\n\n[Your Name]\n[Title / Department]\n[Institution]\n[Email] • [Phone]\nRef: ${name}`;
+  document.execCommand('insertText', false, block);
+}
+function draftKey() { return PERSIST.draft + getActiveStudentId(); }
+function saveDraft(quiet=false) {
+  const bodyHtml = document.getElementById('writerBox').innerHTML || '';
+  const title = document.getElementById('writerTitle').value || '';
+  const payload = { title, bodyHtml, savedAt: Date.now() };
+  try {
+    localStorage.setItem(draftKey(), JSON.stringify(payload));
+    updateSavedIndicator(payload.savedAt);
+    if (!quiet) toast('Draft saved.', 'success', { ttl: 1800 });
+  } catch (e) { if (!quiet) toast('Could not save draft.', 'error'); }
+}
+function restoreDraft(silent=false) {
+  try {
+    const raw = localStorage.getItem(draftKey());
+    if (!raw) { if (!silent) toast('No saved draft found.', 'info'); updateSavedIndicator(null); return; }
+    const payload = JSON.parse(raw);
+    document.getElementById('writerTitle').value = payload.title || '';
+    document.getElementById('writerBox').innerHTML = payload.bodyHtml || '';
+    updateWriterCounts();
+    updateSavedIndicator(payload.savedAt || null);
+    if (!silent) toast('Draft restored.', 'success', { ttl: 1500 });
+  } catch (e) { if (!silent) toast('Could not restore draft.', 'error'); }
+}
+function clearDraft() {
+  document.getElementById('writerTitle').value = '';
+  document.getElementById('writerBox').innerHTML = '';
+  updateWriterCounts();
+  updateSavedIndicator(null);
+  toast('Editor cleared. (Draft is not deleted until you save.)', 'info');
+}
+function copyDraft() {
+  const title = document.getElementById('writerTitle').value || '';
+  const text = title ? (title + '\n\n' + stripHtml(document.getElementById('writerBox').innerHTML)) : stripHtml(document.getElementById('writerBox').innerHTML);
+  navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard.', 'success', { ttl: 1200 }))
+    .catch(()=>toast('Copy failed.', 'error'));
+}
+function downloadDraft() {
+  const title = (document.getElementById('writerTitle').value || 'recommendation-letter').replace(/[^\w\d-_ ]+/g,'').trim() || 'letter';
+  const text = stripHtml(document.getElementById('writerBox').innerHTML);
+  const blob = new Blob([text], { type:'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.download = `${title}.txt`;
+  a.href = URL.createObjectURL(blob);
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function attachDraft() {
+  const title = (document.getElementById('writerTitle').value || 'recommendation-letter').replace(/[^\w\d-_ ]+/g,'').trim() || 'letter';
+  const text = stripHtml(document.getElementById('writerBox').innerHTML).trim();
+  if (!text) { toast('Draft is empty.', 'error'); return; }
+  const blob = new Blob([text], { type:'text/plain;charset=utf-8' });
+  const file = new File([blob], `${title}.txt`, { type:'text/plain' });
+  handleFile(file, /*allowAny*/true);
+}
+function updateWriterCounts() {
+  const text = stripHtml(document.getElementById('writerBox').innerHTML);
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const chars = text.length;
+  document.getElementById('writerCount').textContent = `${words} words • ${chars} chars`;
+}
+function updateSavedIndicator(ts) {
+  const el = document.getElementById('writerSaved');
+  if (!ts) { el.textContent = 'Not saved'; return; }
+  const when = new Date(ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  el.textContent = `Saved ${when}`;
+}
+function scheduleAutosave(immediate=false) {
+  if (!document.getElementById('writerAutosaveToggle').checked) return;
+  if (writerAutosaveTimer) clearTimeout(writerAutosaveTimer);
+  writerAutosaveTimer = setTimeout(()=>saveDraft(/*quiet*/true), immediate ? 50 : 600);
+}
+
+/* --------------------- Search + Autosuggest --------------------- */
+function debounce(fn, wait=300) { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); }; }
+
+let suggestWrap, activeIndex = -1, currentSuggestions = [];
+function setupSearch() {
+  const searchInput = document.getElementById('universitySearch');
+  const searchApplyBtn = document.getElementById('searchApplyBtn');
+
+  suggestWrap = document.createElement('div');
+  suggestWrap.className = 'suggest-popover';
+  suggestWrap.id = 'suggestPopover';
+  suggestWrap.setAttribute('role', 'listbox');
+  suggestWrap.style.display = 'none';
+  searchInput.parentNode.appendChild(suggestWrap);
+
+  const run = (fromApply=false) => {
+    filters.q = searchInput.value.trim().toLowerCase();
+    page = 1; flashNextRender = true;
+    refreshList();
+    persistAndSync();
+    if (fromApply) closeSuggest();
+    SR_LOG.log({ type: "search", query: filters.q });
+  };
+  const runDebounced = debounce(() => { run(false); renderSuggestions(searchInput.value); }, 150);
+
+  searchApplyBtn.addEventListener('click', () => run(true));
+  searchInput.addEventListener('input', runDebounced);
+
+  searchInput.addEventListener('keydown', (e) => {
+    const hasOpen = suggestWrap && suggestWrap.style.display !== 'none';
+    if (e.key === 'Enter') {
+      if (hasOpen && activeIndex >= 0 && currentSuggestions[activeIndex]) { pickSuggestion(currentSuggestions[activeIndex]); e.preventDefault(); return; }
+      e.preventDefault(); run(true); return;
+    }
+    if (e.key === 'Escape') { e.preventDefault(); if (hasOpen) { closeSuggest(); return; } searchInput.value = ''; run(true); }
+    if (hasOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+      e.preventDefault();
+      const max = currentSuggestions.length - 1;
+      if (e.key === 'ArrowDown') activeIndex = (activeIndex + 1 > max) ? 0 : activeIndex + 1;
+      if (e.key === 'ArrowUp')   activeIndex = (activeIndex - 1 < 0)   ? max : activeIndex - 1;
+      updateActiveSuggestion();
+    }
+  });
+
+  document.addEventListener('click', (ev) => {
+    if (!suggestWrap) return;
+    if (ev.target === suggestWrap || suggestWrap.contains(ev.target)) return;
+    if (ev.target === searchInput) return;
+    closeSuggest();
+  });
+}
+function renderSuggestions(query) {
+  if (!suggestWrap) return;
+  const q = norm(query);
+  if (!q) { closeSuggest(); return; }
+
+  const scored = [];
+  for (let i=0; i<universities.length; i++) {
+    const u = universities[i];
+    const nmL = norm(u.name || '');
+    const ctL = norm(u.city || ''); const stL = norm(u.state || '');
+    let score = 0;
+    if (nmL.startsWith(q)) score = 2;
+    else if (nmL.includes(q)) score = 1.5;
+    else if (ctL.includes(q) || stL.includes(q)) score = 1;
+    if (score > 0) scored.push([score, u]);
+    if (scored.length > 600) break;
+  }
+  scored.sort((a,b)=> b[0] - a[0] || (a[1].name||'').localeCompare(b[1].name||''));
+  const list = scored.slice(0, 10).map(x=>x[1]);
+  currentSuggestions = list;
+  activeIndex = list.length ? 0 : -1;
+
+  if (!list.length) { closeSuggest(); return; }
+
+  suggestWrap.innerHTML = '';
+  list.forEach((u, idx) => {
+    const item = document.createElement('div');
+    item.className = 'suggest-item';
+    item.setAttribute('role','option');
+    item.setAttribute('aria-selected', idx === activeIndex ? 'true' : 'false');
+
+    const nm = escapeHtml(u.name || 'Unknown');
+    const loc = escapeHtml([u.city, u.state].filter(Boolean).join(', '));
+    const marked = highlight(nm, query);
+
+    item.innerHTML = `
+      <span class="material-icons" aria-hidden="true" style="font-size:1rem;">school</span>
+      <div>
+        <div>${marked}</div>
+        ${loc ? `<div class="suggest-muted">${loc}</div>` : ''}
+      </div>
+    `;
+    item.addEventListener('mouseenter', ()=> { activeIndex = idx; updateActiveSuggestion(); });
+    item.addEventListener('click', () => pickSuggestion(u));
+    suggestWrap.appendChild(item);
+  });
+
+  suggestWrap.style.display = 'block';
+}
+function highlight(text, query){
+  const q = norm(query);
+  if (!q) return text;
+  const i = norm(text).indexOf(q);
+  if (i < 0) return text;
+  return escapeHtml(text.slice(0, i)) + `<span class="suggest-highlight">${escapeHtml(text.slice(i, i+q.length))}</span>` + escapeHtml(text.slice(i+q.length));
+}
+function updateActiveSuggestion(){ if (!suggestWrap) return; Array.from(suggestWrap.children).forEach((el, i) => { el.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false'); }); }
+function closeSuggest(){ if (!suggestWrap) return; suggestWrap.style.display = 'none'; activeIndex = -1; currentSuggestions = []; }
+function pickSuggestion(u){
+  const input = document.getElementById('universitySearch');
+  input.value = u.name || '';
+  filters.q = norm(u.name);
+  page = 1; flashNextRender = true;
+  refreshList(); persistAndSync(); closeSuggest();
+
+  const idx = filtered.findIndex(x => String(x.unitid) === String(u.unitid));
+  if (idx >= 0) {
+    page = Math.floor(idx / pageSize) + 1;
+    refreshList();
+    requestAnimationFrame(() => {
+      const cards = Array.from(document.querySelectorAll('.university-card'));
+      const startIdx = (page - 1) * pageSize;
+      const card = cards[idx - startIdx];
+      if (card) { card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'), 1000); card.scrollIntoView({behavior:'smooth', block:'nearest'}); }
+    });
+  }
+}
+
+/* --------------------- Filters / pagination --------------------- */
+function setupFilterHandlers() {
+  const stateFilter = document.getElementById('stateFilter');
+  const typeFilter  = document.getElementById('typeFilter');
+  const levelFilter = document.getElementById('levelFilter');
+  const sortBy      = document.getElementById('sortBy');
+  const applyBtn    = document.getElementById('filterApplyBtn');
+
+  applyBtn.addEventListener('click', () => {
+    filters.state = stateFilter.value;
+    filters.type  = typeFilter.value;
+    filters.level = levelFilter.value;
+    filters.sort  = sortBy.value;
+    page = 1; flashNextRender = true;
+    refreshList(); persistAndSync();
+    SR_LOG.log({ type: "filter_apply", filters: { ...filters } });
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    resetAllFilters();
+    toast('Filters reset.', 'info', { ttl: 2000 });
+  });
+
+  document.getElementById('selectPageBtn').addEventListener('click', () => {
+    const start = (page - 1) * pageSize;
+    const end = Math.min(filtered.length, start + pageSize);
+    const effective = getEffectiveSelection();
+    filtered.slice(start, end).forEach(u => effective.add(u.unitid));
+    filtered.slice(start, end).forEach(u => {
+      if (studentUnitIds.has(u.unitid)) { removedByRecommender.delete(u.unitid); }
+      else { addedByRecommender.add(u.unitid); }
+    });
+    renderPage(); updateSelectedList(); updateSendButton();
+    persistAndSync();
+    toast('Selected all on current page.', 'success', { ttl: 1500 });
+  });
+}
+function resetAllFilters() {
+  document.getElementById('universitySearch').value = '';
+  document.getElementById('stateFilter').value = '';
+  document.getElementById('typeFilter').value  = '';
+  document.getElementById('levelFilter').value = '';
+  document.getElementById('sortBy').value      = 'name_asc';
+  filters.q = filters.state = filters.type = filters.level = '';
+  filters.sort = 'name_asc';
+  page = 1; flashNextRender = true;
+  refreshList();
+  persistAndSync();
+}
+
+/* --------------------- Filters / pagination --------------------- */
+function setupFilterHandlers() {
+  const stateFilter = document.getElementById('stateFilter');
+  const typeFilter  = document.getElementById('typeFilter');
+  const levelFilter = document.getElementById('levelFilter');
+  const sortBy      = document.getElementById('sortBy');
+  const applyBtn    = document.getElementById('filterApplyBtn');
+
+  applyBtn.addEventListener('click', () => {
+    filters.state = stateFilter.value;
+    filters.type  = typeFilter.value;
+    filters.level = levelFilter.value;
+    filters.sort  = sortBy.value;
+    page = 1; flashNextRender = true;
+    refreshList(); persistAndSync();
+    SR_LOG.log({ type: "filter_apply", filters: { ...filters } });
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    resetAllFilters();
+    toast('Filters reset.', 'info', { ttl: 2000 });
+  });
+
+  document.getElementById('selectPageBtn').addEventListener('click', () => {
+    const start = (page - 1) * pageSize;
+    const end = Math.min(filtered.length, start + pageSize);
+    const effective = getEffectiveSelection();
+    filtered.slice(start, end).forEach(u => effective.add(u.unitid));
+    filtered.slice(start, end).forEach(u => {
+      if (studentUnitIds.has(u.unitid)) {
+        removedByRecommender.delete(u.unitid);
+      } else {
+        addedByRecommender.add(u.unitid);
+      }
+    });
+    renderPage(); updateSelectedList(); updateSendButton();
+    persistAndSync();
+    toast('Selected all on current page.', 'success', { ttl: 1500 });
+  });
+}
+function resetAllFilters() {
+  document.getElementById('universitySearch').value = '';
+  document.getElementById('stateFilter').value = '';
+  document.getElementById('typeFilter').value  = '';
+  document.getElementById('levelFilter').value = '';
+  document.getElementById('sortBy').value      = 'name_asc';
+  filters.q = filters.state = filters.type = filters.level = '';
+  filters.sort = 'name_asc';
+  page = 1; flashNextRender = true;
+  refreshList();
+  persistAndSync();
+}
+
+/* Pagination */
+function setupPagingHandlers() {
+  document.getElementById('prevPage').addEventListener('click', () => {
+    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+    if (page > 1) { page--; }
+    if (page < 1) page = 1;
+    refreshList(); persistAndSync();
+  });
+  document.getElementById('nextPage').addEventListener('click', () => {
+    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+    if (page < totalPages) { page++; }
+    refreshList(); persistAndSync();
+  });
+  document.getElementById('pageSize').addEventListener('change', (e) => {
+    pageSize = parseInt(e.target.value, 10) || 40;
+    page = 1; refreshList(); persistAndSync();
+  });
+}
+
+function renderPage() {
+  const start = (page - 1) * pageSize;
+  const end   = start + pageSize;
+  const slice = filtered.slice(start, end);
+  renderUniversities(slice);
+  updatePager();
+
+  const grid = document.getElementById('universityGrid');
+  const empty = document.getElementById('emptyState');
+  if (filtered.length === 0) {
+    if (grid) grid.style.display = 'none';
+    if (empty) {
+      empty.style.display = 'block';
+      const retryBtn = document.getElementById('retryLoadBtn');
+      if (retryBtn) retryBtn.style.display = 'none';
+    }
+  } else {
+    if (empty) empty.style.display = 'none';
+    if (grid) grid.style.display = 'grid';
+  }
+}
+function updatePager() {
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  document.getElementById('pageInfo').textContent = `Page ${Math.min(page, totalPages)} of ${totalPages}`;
+  document.getElementById('prevPage').disabled = (page <= 1);
+  document.getElementById('nextPage').disabled = (page >= totalPages);
+  updateMeta();
+}
+function updateMeta() {
+  const start = filtered.length ? ((page - 1) * pageSize + 1) : 0;
+  const end   = Math.min(filtered.length, page * pageSize);
+  document.getElementById('resultMeta').textContent = `Showing ${start}-${end} of ${filtered.length} (from ${universities.length} total)`;
+}
+
+/* --------------------- Render + selection --------------------- */
+function renderUniversities(list) {
+  const grid = document.getElementById('universityGrid');
+  grid.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  const effective = getEffectiveSelection();
+
+  list.forEach(uni => {
+    const card = document.createElement('div');
+    card.className = 'university-card' + (effective.has(uni.unitid) ? ' selected' : '');
+    card.setAttribute('role','listitem');
+    card.title = uni.sector || uni.control || '';
+    card.addEventListener('click', () => toggleUniversity(uni.unitid));
+    card.innerHTML = `
+      <div class="university-header">
+        <div class="university-logo">${escapeHtml((uni.name||'?').charAt(0))}</div>
+        <div>
+          <div class="university-name">${escapeHtml(uni.name || 'Unknown Institution')}</div>
+          <div class="university-location">${escapeHtml(uni.city || '')}${(uni.city && uni.state) ? ', ' : ''}${escapeHtml(uni.state || '')}</div>
+          ${(uni.level || uni.control) ? `<span class="university-pill">${[uni.control, uni.level].filter(Boolean).map(escapeHtml).join(' • ')}</span>` : ''}
+        </div>
+      </div>`;
+    if (flashNextRender) { card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'), 750); }
+    frag.appendChild(card);
+  });
+
+  grid.appendChild(frag);
+  if (flashNextRender) flashNextRender = false;
+}
+
+function toggleUniversity(unitid) {
+  const allowEdits = document.getElementById('allowEditsToggle').checked;
+
+  if (!studentProfile || allowEdits) {
+    if (studentUnitIds.has(unitid)) {
+      if (removedByRecommender.has(unitid)) removedByRecommender.delete(unitid);
+      else removedByRecommender.add(unitid);
+      addedByRecommender.delete(unitid);
+    } else {
+      if (addedByRecommender.has(unitid)) addedByRecommender.delete(unitid);
+      else addedByRecommender.add(unitid);
+    }
+  } else {
+    if (studentUnitIds.has(unitid)) {
+      if (removedByRecommender.has(unitid)) removedByRecommender.delete(unitid);
+      else removedByRecommender.add(unitid);
+    } else {
+      toast('Student has locked the list. You cannot add new universities.', 'error');
+    }
+  }
+
+  renderPage(); updateSelectedList(); updateSendButton();
+  persistAndSync();
+  SR_LOG.log({ type: "status_counts", counts: { selected: getEffectiveSelection().size } });
+  srRenderAuditBanner();
+}
+
+function removeFromEffective(unitid) {
+  if (studentUnitIds.has(unitid)) {
+    removedByRecommender.add(unitid);
+    addedByRecommender.delete(unitid);
+  } else {
+    addedByRecommender.delete(unitid);
+  }
+  renderPage(); updateSelectedList(); updateSendButton();
+  persistAndSync(); srRenderAuditBanner();
+}
+
+function updateSelectedList() {
+  const selectedList = document.getElementById('selectedList');
+  const selectedCount = document.getElementById('selectedCount');
+
+  const effective = getEffectiveSelection();
+  selectedCount.textContent = `${effective.size} universities selected`;
+
+  const chips = [];
+  effective.forEach(unitid => {
+    const uni = filtered.find(u => u.unitid === unitid) || universities.find(u => u.unitid === unitid);
+    const name = uni ? uni.name : 'Unknown';
+    const badges = [];
+    if (studentUnitIds.has(unitid)) badges.push('<span class="badge badge-student">Student</span>');
+    if (addedByRecommender.has(unitid)) badges.push('<span class="badge badge-added">You added</span>');
+    chips.push(`
+      <div class="selected-tag">
+        ${escapeHtml(name)}
+        ${badges.length ? `<span style="margin-left:.35rem; display:inline-flex; gap:.25rem;">${badges.join('')}</span>` : ''}
+        <div class="remove-tag" title="Remove from sending" onclick="removeFromEffective(${JSON.stringify(unitid)})">×</div>
+      </div>
+    `);
+  });
+  selectedList.innerHTML = chips.join('');
+}
+
+function updateSendButton() {
+  const sendBtn = document.getElementById('sendBtn');
+  const effective = getEffectiveSelection();
+  sendBtn.disabled = !(uploadedFile && effective.size > 0);
+}
+
+/* --------------------- Browse-all select (FIXED) --------------------- */
+function setupUniversitySelect() {
+  populateUniversitySelectOptions(universities);
+  const sel = document.getElementById('universitySelect');
+  sel.addEventListener('change', (e) => {
+    const val = e.target.value; if (!val) return;
+
+    // Clear filters and show list with the chosen item visible
+    filters.q = filters.state = filters.type = filters.level = '';
+    document.getElementById('universitySearch').value = '';
+    document.getElementById('stateFilter').value = '';
+    document.getElementById('typeFilter').value  = '';
+    document.getElementById('levelFilter').value = '';
+    refreshList();
+
+    const idx = filtered.findIndex(u => String(u.unitid) === String(val));
+    if (idx >= 0) {
+      page = Math.floor(idx / pageSize) + 1;
+      refreshList();
+      requestAnimationFrame(() => {
+        const cards = Array.from(document.querySelectorAll('.university-card'));
+        const startIdx = (page - 1) * pageSize;
+        const card = cards[idx - startIdx];
+        if (card) {
+          card.classList.add('flash');
+          setTimeout(()=>card.classList.remove('flash'), 1200);
+          card.scrollIntoView({behavior:'smooth', block:'nearest'});
+        }
+      });
+    }
+
+    // Toggle selection: add to effective selection on pick
+    const uidNum = Number(val);
+    const uid = Number.isNaN(uidNum) ? val : uidNum;
+    if (studentUnitIds.has(uid)) {
+      // If already in student's base list, ensure it's not "removed"
+      removedByRecommender.delete(uid);
+    } else {
+      // Otherwise mark as added by recommender
+      addedByRecommender.add(uid);
+    }
+    updateSelectedList(); updateSendButton(); persistAndSync();
+
+    // Reset the dropdown back to placeholder
+    sel.selectedIndex = 0;
+  });
+}
+function populateUniversitySelectOptions(list) {
+  const sel = document.getElementById('universitySelect'); if (!sel) return;
+  sel.length = 1;
+  const sorted = [...list].sort((a,b) => (a.name||'').localeCompare(b.name||''));
+  const frag = document.createDocumentFragment();
+  sorted.forEach(u => {
+    const opt = document.createElement('option');
+    opt.value = u.unitid;
+    const loc = [u.city,u.state].filter(Boolean).join(', ');
+    opt.textContent = `${u.name || 'Unknown Institution'}${loc ? ' — ' + loc : ''}`;
+    frag.appendChild(opt);
+  });
+  sel.appendChild(frag);
+}
+
+/* --------------------- Student profile (mock) --------------------- */
+async function fetchStudentProfile(studentIdOrEmail) {
+  const key = `sr_student_${studentIdOrEmail}`;
+  const ls = localStorage.getItem(key);
+  if (ls) return JSON.parse(ls);
+
+  const picks = [];
+  const pool = [...universities].slice(0, 400);
+  while (picks.length < 10 && pool.length) {
+    const idx = Math.floor(Math.random() * pool.length);
+    picks.push(pool[idx].unitid);
+    pool.splice(idx, 1);
+  }
+  return { id: studentIdOrEmail, name: `Student ${studentIdOrEmail}`, allowRecommenderEdits: true, selectedUnitIds: picks };
+}
+async function loadStudentProfile(studentIdOrEmail) {
+  try {
+    const prof = await fetchStudentProfile(studentIdOrEmail);
+    studentProfile = prof;
+    studentUnitIds = new Set(prof.selectedUnitIds || []);
+    addedByRecommender.clear();
+    removedByRecommender.clear();
+
+    document.getElementById('studentTitle').textContent = `${prof.name}`;
+    document.getElementById('studentMeta').textContent =
+      `Preselected: ${studentUnitIds.size} universities • Edits ${prof.allowRecommenderEdits ? 'allowed' : 'locked'}`;
+    document.getElementById('allowEditsToggle').checked = !!prof.allowRecommenderEdits;
+
+    refreshList();
+    if (studentUnitIds.size) {
+      const first = Array.from(studentUnitIds)[0];
+      const idx = filtered.findIndex(u => u.unitid === first);
+      if (idx >= 0) page = Math.floor(idx / pageSize) + 1;
+    }
+    refreshList(); updateSelectedList();
+    toast(`Loaded ${prof.name} with ${studentUnitIds.size} preselected universities.`, 'success');
+    persistAndSync();
+    SR_LOG.log({ type: "dataset_load", datasetId: "student_profile", ms: 0 });
+    srRenderAuditBanner();
+  } catch (e) {
+    console.error(e);
+    toast('Could not load student profile.', 'error');
+  }
+}
+
+/* --------------------- Send workflow (mock/real API split kept) --------------------- */
+let USE_MOCK = getUseMock();
+const API_BASE =
+  (window.ENV && window.ENV.API_URL) ||
+  (typeof API_URL !== "undefined" ? API_URL : "https://api.stellarrec.com");
+
+async function fetchWithAuth(input, init={}, _retrying=false) {
+  const headers = new Headers(init.headers || {});
+  const tok = SR_AUTH.getAccessToken();
+  if (tok) headers.set('Authorization', `Bearer ${tok}`);
+  const res = await fetch(input, { ...init, headers });
+  if (res.status !== 401) return res;
+
+  const url = typeof input === 'string' ? input : (input && input.url) || '';
+  if (_retrying || url.includes('/auth/refresh')) return res;
+
+  const ok = await SR_AUTH.refreshTokens();
+  if (ok) return fetchWithAuth(input, init, true);
+
+  SR_AUTH.startGentleSignInFlow();
+  await SR_AUTH.waitForLogin();
+  return fetchWithAuth(input, init, true);
+}
+
+async function httpError(resp) {
+  let msg = `HTTP ${resp.status}`;
+  try {
+    const data = await resp.json();
+    if (data && (data.error || data.message)) msg += `: ${data.error || data.message}`;
+  } catch {}
+  if (resp.status === 403) msg = 'You don’t have permission to perform this action (403).';
+  if (resp.status === 409) msg = 'This item was changed elsewhere. Please refresh and try again (409).';
+  return new Error(msg);
+}
+
+const API_REAL = {
+  async submitLetter({ studentId, unitIds, file }) {
+    const fd = new FormData();
+    fd.append("studentId", String(studentId || ""));
+    unitIds.forEach(id => fd.append("universityIds[]", String(id)));
+    fd.append("file", file);
+    const resp = await fetchWithAuth(`${API_BASE}/letters`, { method: "POST", body: fd });
+    if (!resp.ok) throw await httpError(resp);
+    return resp.json();
+  },
+  async getJob(jobId) {
+    const resp = await fetchWithAuth(`${API_BASE}/letters/${encodeURIComponent(jobId)}`);
+    if (!resp.ok) throw await httpError(resp);
+    return resp.json();
+  },
+  async cancelJob(jobId) {
+    try { await fetchWithAuth(`${API_BASE}/letters/${encodeURIComponent(jobId)}`, { method: "DELETE" }); } catch {}
+  },
+};
+const API_MOCK = {
+  async submitLetter({ unitIds }) {
+    const jobId = `mock-${Date.now()}`;
+    const recipients = unitIds.map(uid => ({ unitid: uid, status: "pending" }));
+    window.__MOCK_JOBS__ = window.__MOCK_JOBS__ || {};
+    window.__MOCK_JOBS__[jobId] = { jobId, recipients, cursor: 0, done: false };
+    return { jobId, recipients };
+  },
+  async getJob(jobId) {
+    await sleep(500 + Math.random() * 500);
+    const store = window.__MOCK_JOBS__ && window.__MOCK_JOBS__[jobId];
+    if (!store) throw new Error("Mock job not found");
+    const step = 3 + Math.floor(Math.random() * 3);
+    const end = Math.min(store.cursor + step, store.recipients.length);
+    for (let i = store.cursor; i < end; i++) {
+      const r = store.recipients[i];
+      const roll = Math.random();
+      if (roll < 0.85) r.status = "delivered";
+      else if (roll < 0.95) { r.status = "error"; r.message = "Temporary failure"; }
+      else { r.status = "error"; r.message = "Permanent failure"; }
+    }
+    store.cursor = end;
+    store.done = end >= store.recipients.length;
+    return { jobId: store.jobId, recipients: store.recipients, done: store.done };
+  },
+  async cancelJob(jobId) { if (window.__MOCK_JOBS__) delete window.__MOCK_JOBS__[jobId]; },
+};
+const API = USE_MOCK ? API_MOCK : API_REAL;
+
+/* --------------------- Modal + Send --------------------- */
+let lastFocusedEl = null;
+function getFocusable(container) {
+  return Array.from(container.querySelectorAll('a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])'))
+    .filter(el => el.offsetParent !== null);
+}
+function openModal(modal) {
+  lastFocusedEl = document.activeElement;
+  modal.style.display = 'flex';
+  const focusables = getFocusable(modal);
+  (focusables[0] || modal).focus();
+
+  function trap(e) {
+    if (e.key === 'Tab') {
+      const items = getFocusable(modal);
+      if (!items.length) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    } else if (e.key === 'Escape') {
+      e.preventDefault(); closeModal(modal);
+    }
+  }
+  modal.__trapHandler__ = trap;
+  document.addEventListener('keydown', trap);
+}
+function closeModal(modal) {
+  modal.style.display = 'none';
+  document.removeEventListener('keydown', modal.__trapHandler__ || (()=>{}));
+  modal.__trapHandler__ = null;
+  if (lastFocusedEl && typeof lastFocusedEl.focus === 'function') lastFocusedEl.focus();
+}
+
+function sendLetters() {
+  const effective = getEffectiveSelection();
+  if (!uploadedFile || effective.size === 0) return;
+
+  const included = Array.from(effective);
+  const removed  = Array.from(studentUnitIds).filter(id => !effective.has(id));
+  const added    = Array.from(effective).filter(id => !studentUnitIds.has(id));
+
+  const renderList = (ids) => ids.map(id => {
+    const uni = universities.find(u => u.unitid === id);
+    return `<div>- ${escapeHtml(uni ? uni.name : String(id))}</div>`;
+  }).join('');
+
+  document.getElementById('modalIncluded').innerHTML = renderList(included);
+  document.getElementById('modalRemoved').innerHTML  = removed.length ? renderList(removed) : '<div>None</div>';
+  document.getElementById('modalAdded').innerHTML    = added.length ? renderList(added) : '<div>None</div>';
+
+  document.getElementById('modalIncludedCount').textContent = included.length;
+  document.getElementById('modalRemovedCount').textContent  = removed.length;
+  document.getElementById('modalAddedCount').textContent    = added.length;
+
+  const studentName = studentProfile ? studentProfile.name : 'this student';
+  document.getElementById('modalSummary').innerHTML =
+    `You’re about to send to <b>${included.length}</b> universities for <b>${escapeHtml(studentName)}</b>. Review differences from the student’s list below.`;
+
+  const modal = document.getElementById('confirmModal');
+  toast('Review recipients, then press Enter to send.', 'info', { ttl: 2500 });
+  openModal(modal);
+
+  const close = () => closeModal(modal);
+  document.getElementById('modalCloseBtn').onclick = close;
+  document.getElementById('modalCancelBtn').onclick = close;
+  document.getElementById('modalConfirmBtn').onclick = async () => {
+    close();
+    await proceedSend(effective);
+  };
+}
+
+/* --------------------- Progress helpers + polling + send --------------------- */
+const SR_BULK = {
+  paused:false, canceled:false, jobs:new Set(),
+  reset(){ this.paused=false; this.canceled=false; this.jobs.clear(); },
+  track(jobId){ this.jobs.add(jobId); },
+};
+
+/* FIXED: ensure the controls container is appended and wired */
+function srEnsureProgressControls() {
+  const section = document.getElementById('progressSection');
+  if (!section) return;
+
+  let bar = document.getElementById('bulkControls');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'bulkControls';
+    bar.style.display = 'flex';
+    bar.style.gap = '.5rem';
+    bar.style.justifyContent = 'flex-end';
+    bar.style.marginTop = '.5rem';
+
+    const pauseBtn = document.createElement('button');
+    pauseBtn.id = 'pauseBtn';
+    pauseBtn.className = 'page-btn';
+    pauseBtn.textContent = 'Pause';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.id = 'cancelBtn';
+    cancelBtn.className = 'page-btn';
+    cancelBtn.textContent = 'Cancel';
+
+    bar.appendChild(pauseBtn);
+    bar.appendChild(cancelBtn);
+    section.appendChild(bar);
+
+    pauseBtn.onclick = () => {
+      SR_BULK.paused = !SR_BULK.paused;
+      pauseBtn.textContent = SR_BULK.paused ? 'Resume' : 'Pause';
+      toast(SR_BULK.paused ? 'Paused' : 'Resumed', 'info', { ttl: 1200 });
+    };
+
+    cancelBtn.onclick = async () => {
+      if (SR_BULK.canceled) return;
+      SR_BULK.canceled = true;
+      toast('Canceling current jobs…', 'info', { ttl: 1500 });
+      try {
+        if (typeof API?.cancelJob === 'function') {
+          await Promise.all(Array.from(SR_BULK.jobs).map(j => API.cancelJob(j).catch(()=>{})));
+        }
+      } finally {
+        document.getElementById('progressText').textContent = 'Canceled';
+      }
+    };
+  }
+}
+
+async function srPollJobWithControls(jobId, onUpdate) {
+  let attempt = 0;
+  const BASE = 500, CAP = 10_000;
+  while (true) {
+    while (SR_BULK.paused && !SR_BULK.canceled) { await sleep(200); }
+    if (SR_BULK.canceled) return;
+
+    try {
+      const snapshot = await API.getJob(jobId);
+      onUpdate?.(snapshot.recipients || []);
+      if (snapshot.done) return;
+      attempt++;
+      const next = Math.min(CAP, Math.floor(BASE * Math.pow(2, attempt-1) * (0.9 + Math.random()*0.2)));
+      SR_LOG.log({ type: "retry", op: "poll", attempt, waitMs: next });
+      await sleep(next);
+    } catch (e) {
+      attempt++;
+      const next = Math.min(CAP, 800 * attempt);
+      SR_LOG.log({ type: "error", op: "poll", message: String(e?.message||e), code: 0 });
+      await sleep(next);
+      if (attempt > 6) throw e;
+    }
+  }
+}
+
+async function proceedSend(effectiveSet) {
+  document.getElementById('progressSection').style.display = 'block';
+  document.querySelector('.upload-section').style.display = 'none';
+  document.querySelector('.university-section').style.display = 'none';
+  document.querySelector('.selected-section').style.display = 'none';
+
+  srEnsureProgressControls();
+
+  const ids = Array.from(effectiveSet);
+  renderInitialDeliveryRows(ids);
+
+  const CHUNK_SIZE = 100;
+  const chunks = [];
+  for (let i = 0; i < ids.length; i += CHUNK_SIZE) chunks.push(ids.slice(i, i + CHUNK_SIZE));
+
+  const combined = new Map(); // unitid -> { status, message? }
+  ids.forEach(id => combined.set(id, { status: 'pending' }));
+
+  SR_LOG.log({ type: "send_start", campaignId: "ui", total: ids.length });
+
+  SR_BULK.reset();
+
+  for (let batchIndex = 0; batchIndex < chunks.length; batchIndex++) {
+    if (SR_BULK.canceled) break;
+    const batch = chunks[batchIndex];
+    try {
+      const { jobId } = await API.submitLetter({
+        studentId: getActiveStudentId(),
+        unitIds: batch,
+        file: uploadedFile
+      });
+
+      SR_BULK.track(jobId);
+
+      await srPollJobWithControls(jobId, (recipients) => {
+        recipients.forEach(r => {
+          combined.set(r.unitid, { status: r.status, message: r.message });
+          paintDeliveryRow(r.unitid, r.status, r.message);
+        });
+        updateProgressBar(combined);
+      });
+
+    } catch (err) {
+      console.error('Batch failed', err);
+      batch.forEach(id => {
+        combined.set(id, { status: 'error', message: String(err.message || err) });
+        paintDeliveryRow(id, 'error', String(err.message || err));
+      });
+      updateProgressBar(combined);
+    }
+  }
+
+  if (SR_BULK.canceled) {
+    document.getElementById('progressText').textContent = 'Canceled';
+    toast('Canceled. No further work will be performed.', 'info');
+    return;
+  }
+
+  finalizeProgress(combined);
+  offerRetryFailed(combined);
+}
+
+/* ----- Progress UI helpers ----- */
+function renderInitialDeliveryRows(unitIds) {
+  const deliveryList = document.getElementById('deliveryList');
+  deliveryList.innerHTML = '';
+  unitIds.forEach(uid => {
+    const uni = universities.find(u => String(u.unitid) === String(uid));
+    const name = uni ? uni.name : `#${uid}`;
+    const row = document.createElement('div');
+    row.className = 'delivery-item';
+    row.id = `delivery-${uid}`;
+    row.innerHTML = `
+      <div class="delivery-status pending">⏳</div>
+      <div>${escapeHtml(name)}</div>
+      <div class="delivery-msg" style="margin-left:auto;color:#ff9800;">Sending...</div>
+    `;
+    deliveryList.appendChild(row);
+  });
+  updateProgressBarFromPending(unitIds.length);
+}
+
+function paintDeliveryRow(unitid, status, message) {
+  const row = document.getElementById(`delivery-${unitid}`);
+  if (!row) return;
+  const statusEl = row.querySelector('.delivery-status');
+  const msgEl = row.querySelector('.delivery-msg');
+
+  if (status === 'delivered' || status === 'success') {
+    statusEl.className = 'delivery-status success';
+    statusEl.textContent = '✓';
+    msgEl.style.color = '#4caf50';
+    msgEl.textContent = 'Delivered';
+  } else if (status === 'error' || status === 'failed') {
+    statusEl.className = 'delivery-status error';
+    statusEl.textContent = '!';
+    msgEl.style.color = '#f44336';
+    msgEl.textContent = message ? truncate(message, 80) : 'Failed';
+  } else {
+    statusEl.className = 'delivery-status pending';
+    statusEl.textContent = '⏳';
+    msgEl.style.color = '#ff9800';
+    msgEl.textContent = 'Sending...';
+  }
+}
+
+function updateProgressBar(combinedMap) {
+  const total = combinedMap.size;
+  let done = 0;
+  combinedMap.forEach(v => { if (v.status === 'delivered' || v.status === 'success' || v.status === 'error' || v.status === 'failed') done++; });
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('progressFill').style.width = `${pct}%`;
+  const progressText = document.getElementById('progressText');
+  const delivered = [...combinedMap.values()].filter(v => v.status === 'delivered' || v.status === 'success').length;
+  const failed = [...combinedMap.values()].filter(v => v.status === 'error' || v.status === 'failed').length;
+  progressText.textContent = `Completed ${done}/${total} • Delivered ${delivered} • Failed ${failed}`;
+}
+
+function updateProgressBarFromPending(total) {
+  document.getElementById('progressFill').style.width = '0%';
+  const progressText = document.getElementById('progressText');
+  progressText.textContent = `Sending to ${total} universities...`;
+}
+
+function finalizeProgress(combinedMap) {
+  const total = combinedMap.size;
+  const delivered = [...combinedMap.values()].filter(v => v.status === 'delivered' || v.status === 'success').length;
+  const failed = [...combinedMap.values()].filter(v => v.status === 'error' || v.status === 'failed').length;
+
+  document.getElementById('progressFill').style.width = '100%';
+  const progressText = document.getElementById('progressText');
+  if (failed === 0) {
+    progressText.textContent = 'All letters sent successfully!';
+    toast('All letters sent successfully!', 'success', { ttl: 4500 });
+    setTimeout(() => {
+      document.getElementById('progressSection').style.display = 'none';
+      document.getElementById('successSection').style.display = 'block';
+    }, 800);
+  } else {
+    progressText.textContent = `Finished with ${failed} failed out of ${total}. You can retry failed ones.`;
+    toast('Some deliveries failed. You can retry the failed ones.', 'error', { ttl: 5000 });
+  }
+}
+
+function offerRetryFailed(combinedMap) {
+  const failedIds = [];
+  combinedMap.forEach((v, k) => { if (v.status === 'error' || v.status === 'failed') failedIds.push(k); });
+  if (failedIds.length === 0) return;
+
+  let btn = document.getElementById('retryFailedBtn');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'retryFailedBtn';
+    btn.className = 'apply-btn';
+    btn.style.marginTop = '0.75rem';
+    btn.textContent = 'Retry failed';
+    document.getElementById('progressSection').appendChild(btn);
+  }
+  btn.onclick = async () => {
+    toast('Retrying failed deliveries…', 'info');
+    btn.disabled = true;
+    failedIds.forEach(id => paintDeliveryRow(id, 'pending'));
+    try {
+      const { jobId } = await API.submitLetter({
+        studentId: getActiveStudentId(),
+        unitIds: failedIds,
+        file: uploadedFile
+      });
+      await srPollJobWithControls(jobId, (recipients) => {
+        recipients.forEach(r => paintDeliveryRow(r.unitid, r.status, r.message));
+        const combined = new Map();
+        Array.from(document.querySelectorAll('[id^="delivery-"]')).forEach(row => {
+          const uid = row.id.replace('delivery-','');
+          const statusEl = row.querySelector('.delivery-status');
+          const msgEl = row.querySelector('.delivery-msg');
+          let status = 'pending';
+          if (statusEl.classList.contains('success')) status = 'delivered';
+          if (statusEl.classList.contains('error')) status = 'error';
+          combined.set(uid, { status, message: msgEl?.textContent || '' });
+        });
+        updateProgressBar(combined);
+      });
+    } catch (e) {
+      console.error('Retry failed', e);
+      toast('Retry failed. Please try again later.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  };
+}
+
+/* --- Toast helpers --- */
+function toast(message, type='info', opts={}) {
+  const wrap = document.getElementById('toastWrap'); if (!wrap) return;
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const icon = type === 'success' ? '✓' : (type === 'error' ? '!' : 'ℹ︎');
+  el.innerHTML = `
+    <div class="icon" aria-hidden="true">${icon}</div>
+    <div class="msg">${escapeHtml(String(message))}</div>
+    <button class="x" aria-label="Dismiss">✕</button>
+  `;
+  el.querySelector('.x').onclick = () => wrap.removeChild(el);
+  wrap.appendChild(el);
+  const ttl = opts.ttl ?? 3500;
+  if (ttl > 0) setTimeout(() => { if (el.parentNode) wrap.removeChild(el); }, ttl);
+  return el;
+}
+  </script>
+</body>
+</html>
+
   
