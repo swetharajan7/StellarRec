@@ -187,6 +187,285 @@
     .search-input { width:100%; padding:.7rem .9rem; border:2px solid #e0e0e0; border-radius:12px; background:#fff; font-size:.95rem; margin-bottom:.5rem; }
   </style>
 </head>
+  <script>
+/* -------------------------------
+   STELLARREC HOTFIX PACK (drop-in)
+   Purpose: restore tabs, upload, writer toolbar, and
+            "Browse all universities" population.
+   Safe to include alongside your existing scripts.
+---------------------------------*/
+
+(function(){
+  // 1) Ensure the tagline is correct
+  const heroTitleEl = document.querySelector('.hero-title');
+  if (heroTitleEl) heroTitleEl.textContent = 'One upload. Unlimited reach.';
+  const heroSubEl = document.querySelector('.hero-subtitle');
+  if (heroSubEl) heroSubEl.textContent = 'Upload your recommendation letter once and send it to multiple US universities instantly.';
+
+  // 2) Wire header tabs (Recommender / Student)
+  function uiSwitchView(view){
+    // update internal state if your app uses it
+    try { window.currentView = view; } catch {}
+    // header tab aria-selected
+    const tabRec = document.getElementById('tab-recommender');
+    const tabStu = document.getElementById('tab-student');
+    if (tabRec && tabStu) {
+      tabRec.setAttribute('aria-selected', view === 'recommender' ? 'true' : 'false');
+      tabStu.setAttribute('aria-selected', view === 'student' ? 'true' : 'false');
+    }
+    // update hero texts
+    const heroTitle = document.querySelector('.hero-title');
+    const heroSubtitle = document.querySelector('.hero-subtitle');
+    const uploadTitle = document.querySelector('.upload-title');
+    if (view === 'student') {
+      if (heroTitle) heroTitle.textContent = 'Track Your Applications';
+      if (heroSubtitle) heroSubtitle.textContent = 'Monitor the status of your recommendation letters and university applications.';
+      if (uploadTitle) uploadTitle.textContent = 'Request Recommendation Letter';
+    } else {
+      if (heroTitle) heroTitle.textContent = 'One upload. Unlimited reach.';
+      if (heroSubtitle) heroSubtitle.textContent = 'Upload your recommendation letter once and send it to multiple US universities instantly.';
+      if (uploadTitle) uploadTitle.textContent = 'Upload Recommendation Letter';
+    }
+    // persist if your app expects it
+    try {
+      localStorage.setItem('sr_view_v1', view);
+      if (typeof persistAndSync === 'function') persistAndSync();
+    } catch {}
+  }
+
+  // attach header tab events
+  const tabRec = document.getElementById('tab-recommender');
+  const tabStu = document.getElementById('tab-student');
+  if (tabRec) tabRec.addEventListener('click', () => uiSwitchView('recommender'));
+  if (tabStu) tabStu.addEventListener('click', () => uiSwitchView('student'));
+
+  // make avatar icon open/close dropdown
+  const avatar = document.querySelector('.user-avatar');
+  const dd = document.getElementById('userDropdown');
+  if (avatar && dd) {
+    avatar.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dd.classList.toggle('show');
+    });
+    document.addEventListener('click', (evt) => {
+      if (!dd.contains(evt.target) && !avatar.contains(evt.target)) dd.classList.remove('show');
+    });
+  }
+
+  // 3) Upload (ensure clicking the button opens the file picker; drag/drop works)
+  (function ensureUploadWired(){
+    const fileInput = document.getElementById('fileInput');
+    const uploadSection = document.getElementById('uploadSection');
+    if (!fileInput || !uploadSection) return;
+
+    const chooseBtn = uploadSection.querySelector('.upload-btn');
+    if (chooseBtn && !chooseBtn.__sr_wired__) {
+      chooseBtn.__sr_wired__ = true;
+      chooseBtn.addEventListener('click', () => fileInput.click());
+    }
+
+    if (!fileInput.__sr_wired__) {
+      fileInput.__sr_wired__ = true;
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          if (typeof handleFile === 'function') handleFile(e.target.files[0]);
+          else { // minimal fallback
+            const f = e.target.files[0];
+            const up = document.getElementById('uploadedFile');
+            if (up) up.style.display = 'block';
+            const name = document.getElementById('fileName');
+            const size = document.getElementById('fileSize');
+            if (name) name.textContent = f.name;
+            if (size) size.textContent = `${(f.size/1024/1024).toFixed(1)} MB • Uploaded successfully`;
+          }
+        }
+      });
+    }
+
+    if (!uploadSection.__sr_drag__) {
+      uploadSection.__sr_drag__ = true;
+      uploadSection.addEventListener('dragover', (e)=>{ e.preventDefault(); uploadSection.classList.add('dragover'); });
+      uploadSection.addEventListener('dragleave', ()=> uploadSection.classList.remove('dragover'));
+      uploadSection.addEventListener('drop', (e)=>{
+        e.preventDefault(); uploadSection.classList.remove('dragover');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          if (typeof handleFile === 'function') handleFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
+  })();
+
+  // 4) Writer toolbar (bold/italic/underline, date, signature)
+  (function ensureWriterWired(){
+    if (typeof writerCmd !== 'function') {
+      window.writerCmd = function(cmd){ document.execCommand(cmd, false, null); };
+    }
+    if (typeof insertDate !== 'function') {
+      window.insertDate = function(){
+        const d = new Date().toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
+        document.execCommand('insertText', false, d);
+      };
+    }
+    if (typeof insertSignature !== 'function') {
+      window.insertSignature = function(){
+        const name = (window.studentProfile && studentProfile.name) ? studentProfile.name : 'Student Name';
+        const block = `\n\nSincerely,\n\n[Your Name]\n[Title / Department]\n[Institution]\n[Email] • [Phone]\nRef: ${name}`;
+        document.execCommand('insertText', false, block);
+      };
+    }
+  })();
+
+  // 5) DATASET loader (updated path) + populate “Browse all 6000+”
+  // If your app already loaded data, we respect it.
+  const HAS_DATA = Array.isArray(window.universities) && window.universities.length > 0;
+  const candidates = [
+    './assets/us_institutions_by_state_2023.json',
+    './assets/us_institutions_by_state_2023.min.json',
+    '/assets/us_institutions_by_state_2023.json',
+    '/assets/us_institutions_by_state_2023.min.json',
+    'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/us_institutions_by_state_2023.json',
+    'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/us_institutions_by_state_2023.min.json',
+    'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/us_institutions_by_state_2023.json',
+    'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/us_institutions_by_state_2023.min.json'
+  ];
+
+  async function tryLoadJson(){
+    for (const url of candidates) {
+      try {
+        const bust = url.startsWith('http') ? '' : (url.includes('?') ? '' : `?v=${Date.now()}`);
+        const res = await fetch(url + bust, { credentials: 'omit' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        let txt = await res.text();
+        // clean invalid JSON tokens if any
+        txt = txt.replace(/\b-?Infinity\b/g, 'null')
+                 .replace(/\bNaN\b/g, 'null')
+                 .replace(/,\s*([}\]])/g, '$1');
+        const data = JSON.parse(txt);
+        return Array.isArray(data) ? data : (data && typeof data === 'object' ? Object.values(data).flat() : []);
+      } catch(e) {
+        // keep trying next
+      }
+    }
+    throw new Error('No dataset could be loaded from any candidate path.');
+  }
+
+  function normalizeUniversities(arr){
+    return arr.map(u => ({
+      unitid:  u.unitid ?? u.UNITID ?? u.id,
+      name:    u.name   ?? u.INSTNM ?? 'Unknown',
+      city:    u.city   ?? u.CITY   ?? '',
+      state:   u.state  ?? u.STABBR ?? '',
+      control: u.control?? u.CONTROL?? '',
+      level:   u.level  ?? u.ICLEVEL?? '',
+      sector:  u.sector ?? u.SECTOR ?? '',
+      website: u.website?? u.WEBADDR?? ''
+    }));
+  }
+
+  function populateUniversitySelectOptions(list){
+    const sel = document.getElementById('universitySelect'); if (!sel) return;
+    sel.length = 1; // keep placeholder
+    const sorted = [...list].sort((a,b) => (a.name||'').localeCompare(b.name||''));
+    const frag = document.createDocumentFragment();
+    sorted.forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u.unitid;
+      const loc = [u.city,u.state].filter(Boolean).join(', ');
+      opt.textContent = `${u.name || 'Unknown Institution'}${loc ? ' — ' + loc : ''}`;
+      frag.appendChild(opt);
+    });
+    sel.appendChild(frag);
+    // update placeholder count
+    if (sel.options && sel.options[0]) {
+      sel.options[0].textContent = `Browse all universities (${list.length.toLocaleString()})`;
+    }
+  }
+
+  function ensureSelectChangeHandler(){
+    const sel = document.getElementById('universitySelect');
+    if (!sel || sel.__sr_wired__) return;
+    sel.__sr_wired__ = true;
+    sel.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (!val) return;
+
+      // Clear filters in the UI if your app expects that
+      const qEl = document.getElementById('universitySearch');
+      if (qEl) qEl.value = '';
+      const stateEl = document.getElementById('stateFilter');
+      const typeEl  = document.getElementById('typeFilter');
+      const levelEl = document.getElementById('levelFilter');
+      const sortEl  = document.getElementById('sortBy');
+      if (stateEl) stateEl.value = '';
+      if (typeEl)  typeEl.value  = '';
+      if (levelEl) levelEl.value = '';
+      if (sortEl)  sortEl.value  = 'name_asc';
+
+      // If your app exposes helpers, use them
+      try {
+        if (window.filters) {
+          window.filters.q = window.filters.state = window.filters.type = window.filters.level = '';
+          window.filters.sort = 'name_asc';
+        }
+        if (typeof refreshList === 'function') refreshList();
+      } catch {}
+
+      // Attempt to add the picked uni into the effective selection,
+      // leveraging your existing selection model when available.
+      try {
+        const uidNum = Number(val);
+        const uid = Number.isNaN(uidNum) ? val : uidNum;
+        if (typeof addedByRecommender !== 'undefined' && typeof removedByRecommender !== 'undefined' && typeof studentUnitIds !== 'undefined') {
+          if (studentUnitIds.has(uid)) removedByRecommender.delete(uid);
+          else addedByRecommender.add(uid);
+          if (typeof updateSelectedList === 'function') updateSelectedList();
+          if (typeof updateSendButton === 'function') updateSendButton();
+          if (typeof persistAndSync === 'function') persistAndSync();
+        }
+      } catch {}
+
+      // reset to placeholder
+      e.target.selectedIndex = 0;
+    });
+  }
+
+  async function ensureDataAndPopulate(){
+    try {
+      if (!HAS_DATA) {
+        const raw = await tryLoadJson();
+        window.universities = normalizeUniversities(raw);
+      }
+      // Either we just loaded, or it was already there — populate dropdown
+      populateUniversitySelectOptions(window.universities || []);
+      ensureSelectChangeHandler();
+
+      // If your list/grid uses a render function, call it once
+      try {
+        if (typeof computeFiltered === 'function') computeFiltered();
+        if (typeof renderPage === 'function') renderPage();
+        if (typeof updateMeta === 'function') updateMeta();
+      } catch {}
+    } catch (e) {
+      console.error('[SR hotfix] dataset load failed:', e);
+      const meta = document.getElementById('resultMeta');
+      if (meta) meta.textContent = 'Failed to load universities.';
+      const empty = document.getElementById('emptyState');
+      const grid = document.getElementById('universityGrid');
+      if (empty) empty.style.display = 'block';
+      if (grid) grid.style.display = 'none';
+    }
+  }
+
+  // Run after DOM is ready
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    ensureDataAndPopulate();
+  } else {
+    document.addEventListener('DOMContentLoaded', ensureDataAndPopulate);
+  }
+
+})();
+</script>
+
 <body>
   <!-- Header -->
   <div class="header">
