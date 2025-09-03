@@ -847,17 +847,18 @@ document.addEventListener('DOMContentLoaded', async function () {
       } catch {}
     }
 
-    let data = null, used = null;
-    const candidates = [
-      './assets/videos/us_institutions_by_state_2023.json',
-      './assets/videos/us_institutions_by_state_2023.min.json',
-      '/assets/videos/us_institutions_by_state_2023.json',
-      '/assets/videos/us_institutions_by_state_2023.min.json',
-      'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/videos/us_institutions_by_state_2023.json',
-      'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/videos/us_institutions_by_state_2023.min.json',
-      'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/videos/us_institutions_by_state_2023.json',
-      'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/videos/us_institutions_by_state_2023.min.json'
-    ];
+ let data = null, used = null;
+const candidates = [
+  './assets/us_institutions_by_state_2023.json',
+  './assets/us_institutions_by_state_2023.min.json',
+  '/assets/us_institutions_by_state_2023.json',
+  '/assets/us_institutions_by_state_2023.min.json',
+  'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/us_institutions_by_state_2023.json',
+  'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/us_institutions_by_state_2023.min.json',
+  'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/us_institutions_by_state_2023.json',
+  'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/us_institutions_by_state_2023.min.json'
+];
+
     for (const url of candidates) {
       try {
         const bust = url.startsWith('http') ? '' : (url.includes('?') ? '' : `?v=${Date.now()}`);
@@ -1093,17 +1094,29 @@ let selected = [];
 let page = 1;
 let pageSize = 40;
 
-async function loadUniversities() {
-  // in real app, fetch JSON dataset
-  // here, just demo
-  universities = [
-    {id:1, name:'Harvard University', state:'MA', type:'Private nonprofit', level:'4-year'},
-    {id:2, name:'Stanford University', state:'CA', type:'Private nonprofit', level:'4-year'},
-    {id:3, name:'University of California, Berkeley', state:'CA', type:'Public', level:'4-year'},
-    // … many more
-  ];
-  refreshList();
+  async function loadUniversities() {
+  try {
+    const res = await fetch('assets/us_institutions_by_state_2023.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    universities = await res.json();
+
+    // Normalize if necessary: make sure each object has id, name, state, type, level
+    universities = universities.map((u, idx) => ({
+      id: u.id || idx + 1,
+      name: u.name || u.institution || 'Unknown',
+      state: u.state || u.state_abbr || '',
+      type: u.type || u.control || '',
+      level: u.level || u.level_of_institution || ''
+    }));
+
+    refreshList();
+  } catch (err) {
+    console.error('Failed to load universities JSON', err);
+    toast('Could not load universities dataset', 'error');
+    universities = [];
+  }
 }
+
 
 function refreshList() {
   const grid = document.getElementById('universityGrid');
