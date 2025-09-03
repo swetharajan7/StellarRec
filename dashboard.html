@@ -1314,36 +1314,50 @@ function updateSendButton() {
   sendBtn.disabled = !(uploadedFile && effective.size > 0);
 }
 
-/* --------------------- Browse-all select --------------------- */
+/* --------------------- Browse-all select (FIXED) --------------------- */
 function setupUniversitySelect() {
   populateUniversitySelectOptions(universities);
   const sel = document.getElementById('universitySelect');
   sel.addEventListener('change', (e) => {
     const val = e.target.value; if (!val) return;
+
+    // Clear filters and show list with the chosen item visible
     filters.q = filters.state = filters.type = filters.level = '';
     document.getElementById('universitySearch').value = '';
     document.getElementById('stateFilter').value = '';
     document.getElementById('typeFilter').value  = '';
     document.getElementById('levelFilter').value = '';
     refreshList();
+
     const idx = filtered.findIndex(u => String(u.unitid) === String(val));
     if (idx >= 0) {
       page = Math.floor(idx / pageSize) + 1;
       refreshList();
       requestAnimationFrame(() => {
         const cards = Array.from(document.querySelectorAll('.university-card'));
-const startIdx = (page - 1) * pageSize;
-const card = cards[idx - startIdx];
-if (card) {
-  card.classList.add('flash');
-  setTimeout(()=>card.classList.remove('flash'), 1200);
-  card.scrollIntoView({behavior:'smooth', block:'nearest'});
-}
-
-      if (studentUnitIds.has(Number(val))) removedByRecommender.delete(Number(val));
-      else addedByRecommender.add(Number(val));
-      updateSelectedList(); updateSendButton(); persistAndSync();
+        const startIdx = (page - 1) * pageSize;
+        const card = cards[idx - startIdx];
+        if (card) {
+          card.classList.add('flash');
+          setTimeout(()=>card.classList.remove('flash'), 1200);
+          card.scrollIntoView({behavior:'smooth', block:'nearest'});
+        }
+      });
     }
+
+    // Toggle selection: add to effective selection on pick
+    const uidNum = Number(val);
+    const uid = Number.isNaN(uidNum) ? val : uidNum;
+    if (studentUnitIds.has(uid)) {
+      // If already in student's base list, ensure it's not "removed"
+      removedByRecommender.delete(uid);
+    } else {
+      // Otherwise mark as added by recommender
+      addedByRecommender.add(uid);
+    }
+    updateSelectedList(); updateSendButton(); persistAndSync();
+
+    // Reset the dropdown back to placeholder
     sel.selectedIndex = 0;
   });
 }
@@ -1568,6 +1582,7 @@ const SR_BULK = {
   track(jobId){ this.jobs.add(jobId); },
 };
 
+/* FIXED: ensure the controls container is appended and wired */
 function srEnsureProgressControls() {
   const section = document.getElementById('progressSection');
   if (!section) return;
@@ -1580,20 +1595,20 @@ function srEnsureProgressControls() {
     bar.style.gap = '.5rem';
     bar.style.justifyContent = 'flex-end';
     bar.style.marginTop = '.5rem';
-    section.append
-
 
     const pauseBtn = document.createElement('button');
     pauseBtn.id = 'pauseBtn';
     pauseBtn.className = 'page-btn';
     pauseBtn.textContent = 'Pause';
-    bar.appendChild(pauseBtn);
 
     const cancelBtn = document.createElement('button');
     cancelBtn.id = 'cancelBtn';
     cancelBtn.className = 'page-btn';
     cancelBtn.textContent = 'Cancel';
+
+    bar.appendChild(pauseBtn);
     bar.appendChild(cancelBtn);
+    section.appendChild(bar);
 
     pauseBtn.onclick = () => {
       SR_BULK.paused = !SR_BULK.paused;
@@ -1852,4 +1867,5 @@ function toast(message, type='info', opts={}) {
   </script>
 </body>
 </html>
+
   
