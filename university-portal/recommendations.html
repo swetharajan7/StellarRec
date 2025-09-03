@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendations - Experimental University</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1976d2;
+            text-decoration: none;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            color: #333;
+        }
+
+        .workflow-tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            padding: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            background: #1976d2;
+            color: white;
+        }
+
+        .tab:not(.active):hover {
+            background: #f5f5f5;
+        }
+
+        .workflow-content {
+            display: none;
+        }
+
+        .workflow-content.active {
+            display: block;
+        }
+
+        .recommendation-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .recommendation-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .rec-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .student-recommender {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .person-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .person-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .student-avatar {
+            background: linear-gradient(135deg, #1976d2, #7c4dff);
+        }
+
+        .recommender-avatar {
+            background: linear-gradient(135deg, #4caf50, #8bc34a);
+        }
+
+        .person-details h4 {
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+
+        .person-details p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .status-timeline {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .timeline-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: #e0e0e0;
+        }
+
+        .timeline-step.completed::after {
+            background: #4caf50;
+        }
+
+        .step-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .step-completed {
+            background: #4caf50;
+            color: white;
+        }
+
+        .step-current {
+            background: #1976d2;
+            color: white;
+        }
+
+        .step-pending {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .step-label {
+            font-size: 0.8rem;
+            color: #666;
+            text-align: center;
+        }
+
+        .rec-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: #1976d2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1565c0;
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+        }
+
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #f57c00;
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .priority-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .priority-high {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .priority-medium {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .priority-low {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .deadline-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .overdue {
+            color: #d32f2f;
+        }
+
+        .stellarrec-integration {
+            background: linear-gradient(135deg, #1976d2, #7c4dff);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .student-recommender {
+                grid-template-columns: 1fr;
+            }
+
+            .workflow-tabs {
+                flex-direction: column;
+            }
+
+            .status-timeline {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .timeline-step::after {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <span class="material-icons">school</span>
+                Experimental University
+            </a>
+            <div class="breadcrumb">
+                <span class="material-icons">home</span>
+                <span>Dashboard</span>
+                <span class="material-icons">chevron_right</span>
+                <span>Recommendations</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Recommendation Management</h1>
+        </div>
+
+        <div class="stellarrec-integration">
+            <span class="material-icons">integration_instructions</span>
+            <div>
+                <h3>StellarRec Integration Active</h3>
+                <p>Automatically managing recommendation requests and tracking through the StellarRec platform</p>
+            </div>
+        </div>
+
+        <div class="workflow-tabs">
+            <div class="tab active" data-tab="pending">
+                <span class="material-icons">schedule</span>
+                Pending Requests (8)
+            </div>
+            <div class="tab" data-tab="in-progress">
+                <span class="material-icons">edit</span>
+                In Progress (5)
+            </div>
+            <div class="tab" data-tab="completed">
+                <span class="material-icons">check_circle</span>
+                Completed (12)
+            </div>
+            <div class="tab" data-tab="overdue">
+                <span class="material-icons">warning</span>
+                Overdue (2)
+            </div>
+        </div>
+
+        <div class="workflow-content active" id="pending">
+            <div class="recommendation-grid" id="pendingGrid">
+                <!-- Pending recommendations will be populated here -->
+            </div>
+        </div>
+
+        <div class="workflow-content" id="in-progress">
+            <div class="recommendation-grid" id="progressGrid">
+                <!-- In-progress recommendations will be populated here -->
+            </div>
+        </div>
+
+        <div class="workflow-content" id="completed">
+            <div class="recommendation-grid" id="completedGrid">
+                <!-- Completed recommendations will be populated here -->
+            </div>
+        </div>
+
+        <div class="workflow-content" id="overdue">
+            <div class="recommendation-grid" id="overdueGrid">
+                <!-- Overdue recommendations will be populated here -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Sample recommendation data
+        const recommendations = {
+            pending: [
+                {
+                    id: 1,
+                    student: { name: "Sarah Johnson", email: "sarah.j@email.com", major: "Computer Science" },
+                    recommender: { name: "Dr. Smith", email: "dr.smith@university.edu", title: "Professor" },
+                    requestDate: "2025-01-10",
+                    deadline: "2025-02-15",
+                    priority: "high",
+                    status: "requested"
+                },
+                {
+                    id: 2,
+                    student: { name: "Michael Chen", email: "m.chen@email.com", major: "Engineering" },
+                    recommender: { name: "Prof. Davis", email: "prof.davis@college.edu", title: "Associate Professor" },
+                    requestDate: "2025-01-12",
+                    deadline: "2025-02-20",
+                    priority: "medium",
+                    status: "reminded"
+                }
+            ],
+            inProgress: [
+                {
+                    id: 3,
+                    student: { name: "Emma Rodriguez", email: "emma.r@email.com", major: "Biology" },
+                    recommender: { name: "Dr. Martinez", email: "dr.martinez@lab.edu", title: "Research Director" },
+                    requestDate: "2025-01-08",
+                    deadline: "2025-02-10",
+                    priority: "high",
+                    status: "draft"
+                }
+            ],
+            completed: [
+                {
+                    id: 4,
+                    student: { name: "James Wilson", email: "j.wilson@email.com", major: "Physics" },
+                    recommender: { name: "Prof. Taylor", email: "prof.taylor@physics.edu", title: "Department Head" },
+                    requestDate: "2025-01-05",
+                    deadline: "2025-02-05",
+                    priority: "medium",
+                    status: "submitted",
+                    completedDate: "2025-01-20"
+                }
+            ],
+            overdue: [
+                {
+                    id: 5,
+                    student: { name: "Lisa Park", email: "lisa.p@email.com", major: "Chemistry" },
+                    recommender: { name: "Dr. Brown", email: "dr.brown@chem.edu", title: "Professor" },
+                    requestDate: "2024-12-15",
+                    deadline: "2025-01-15",
+                    priority: "high",
+                    status: "overdue"
+                }
+            ]
+        };
+
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('');
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString();
+        }
+
+        function getDaysUntilDeadline(deadline) {
+            const today = new Date();
+            const deadlineDate = new Date(deadline);
+            const diffTime = deadlineDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        }
+
+        function getTimelineSteps(status) {
+            const steps = [
+                { label: "Requested", icon: "send" },
+                { label: "Acknowledged", icon: "visibility" },
+                { label: "In Progress", icon: "edit" },
+                { label: "Submitted", icon: "check" }
+            ];
+
+            const statusMap = {
+                'requested': 0,
+                'reminded': 0,
+                'acknowledged': 1,
+                'draft': 2,
+                'submitted': 3,
+                'overdue': 0
+            };
+
+            const currentStep = statusMap[status] || 0;
+
+            return steps.map((step, index) => ({
+                ...step,
+                status: index < currentStep ? 'completed' : 
+                       index === currentStep ? 'current' : 'pending'
+            }));
+        }
+
+        function renderRecommendation(rec) {
+            const daysLeft = getDaysUntilDeadline(rec.deadline);
+            const isOverdue = daysLeft < 0;
+            const timelineSteps = getTimelineSteps(rec.status);
+
+            return `
+                <div class="recommendation-card">
+                    <div class="rec-header">
+                        <span class="priority-badge priority-${rec.priority}">
+                            ${rec.priority.toUpperCase()} PRIORITY
+                        </span>
+                    </div>
+
+                    <div class="student-recommender">
+                        <div class="person-info">
+                            <div class="person-avatar student-avatar">
+                                ${getInitials(rec.student.name)}
+                            </div>
+                            <div class="person-details">
+                                <h4>${rec.student.name}</h4>
+                                <p>${rec.student.major}</p>
+                                <p>${rec.student.email}</p>
+                            </div>
+                        </div>
+
+                        <div class="person-info">
+                            <div class="person-avatar recommender-avatar">
+                                ${getInitials(rec.recommender.name)}
+                            </div>
+                            <div class="person-details">
+                                <h4>${rec.recommender.name}</h4>
+                                <p>${rec.recommender.title}</p>
+                                <p>${rec.recommender.email}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="status-timeline">
+                        ${timelineSteps.map(step => `
+                            <div class="timeline-step ${step.status === 'completed' ? 'completed' : ''}">
+                                <div class="step-icon step-${step.status}">
+                                    <span class="material-icons" style="font-size: 16px;">${step.icon}</span>
+                                </div>
+                                <div class="step-label">${step.label}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="deadline-info ${isOverdue ? 'overdue' : ''}">
+                        <span class="material-icons">schedule</span>
+                        <span>
+                            Deadline: ${formatDate(rec.deadline)} 
+                            ${isOverdue ? `(${Math.abs(daysLeft)} days overdue)` : `(${daysLeft} days left)`}
+                        </span>
+                    </div>
+
+                    <div class="rec-actions">
+                        ${rec.status === 'requested' || rec.status === 'reminded' ? `
+                            <button class="btn btn-warning">
+                                <span class="material-icons">notification_important</span>
+                                Send Reminder
+                            </button>
+                        ` : ''}
+                        ${rec.status === 'draft' ? `
+                            <button class="btn btn-primary">
+                                <span class="material-icons">visibility</span>
+                                Review Draft
+                            </button>
+                        ` : ''}
+                        ${rec.status === 'submitted' ? `
+                            <button class="btn btn-success">
+                                <span class="material-icons">download</span>
+                                Download Letter
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-secondary">
+                            <span class="material-icons">message</span>
+                            Contact
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderRecommendations(category) {
+            const grid = document.getElementById(`${category}Grid`);
+            const recs = recommendations[category] || [];
+            
+            if (recs.length === 0) {
+                grid.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #666;">
+                        <span class="material-icons" style="font-size: 3rem; margin-bottom: 1rem;">inbox</span>
+                        <p>No recommendations in this category</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = recs.map(renderRecommendation).join('');
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and content
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.workflow-content').forEach(c => c.classList.remove('active'));
+
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                const tabName = tab.dataset.tab;
+                document.getElementById(tabName).classList.add('active');
+
+                // Render recommendations for the active tab
+                renderRecommendations(tabName.replace('-', ''));
+            });
+        });
+
+        // Initialize with pending recommendations
+        renderRecommendations('pending');
+
+        // Add click handlers for action buttons
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.btn')) {
+                const btn = e.target.closest('.btn');
+                const action = btn.textContent.trim();
+                
+                if (action.includes('Send Reminder')) {
+                    alert('Reminder sent to recommender via StellarRec platform');
+                } else if (action.includes('Review Draft')) {
+                    alert('Opening draft recommendation for review...');
+                } else if (action.includes('Download Letter')) {
+                    alert('Downloading completed recommendation letter...');
+                } else if (action.includes('Contact')) {
+                    alert('Opening communication interface...');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
