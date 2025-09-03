@@ -115,13 +115,11 @@
     @keyframes flash { 0%{box-shadow:0 0 0 rgba(25,118,210,0);} 25%{box-shadow:0 0 0 6px rgba(25,118,210,.25);} 100%{box-shadow:0 0 0 rgba(25,118,210,0);} }
     .flash { animation: flash 1.2s ease; }
 
-    /* Badges for hybrid flow */
     .badge { display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; font-size:.75rem; border-radius:999px; border:1px solid; }
     .badge-student { background:#f1f8ff; color:#0d47a1; border-color:#bbdefb; }
     .badge-added   { background:#e8f5e9; color:#1b5e20; border-color:#c8e6c9; }
     .badge-removed { background:#ffebee; color:#b71c1c; border-color:#ffcdd2; }
 
-    /* --- Toasts --- */
     .toast-wrap { position: fixed; right: 16px; bottom: 16px; z-index: 99999; display: grid; gap: 8px; }
     .toast {
       min-width: 240px; max-width: 420px; padding: .75rem .9rem; border-radius: 12px;
@@ -137,7 +135,6 @@
     .toast .x:hover { opacity:.9; }
     @keyframes toast-in { from { transform: translateY(6px); opacity:0; } to { transform: translateY(0); opacity:1; } }
 
-    /* Empty state */
     .empty-state { display:none; background:#fff; border:1px dashed #d0d7de; border-radius:12px; padding:1.25rem; color:#445; text-align:center; }
     .empty-state .actions { margin-top:.75rem; display:flex; gap:.5rem; justify-content:center; }
 
@@ -149,7 +146,6 @@
       .filter-bar { grid-template-columns:1fr 1fr; }
     }
 
-    /* --- Autosuggest popover --- */
     .suggest-popover {
       position: absolute;
       z-index: 2000;
@@ -422,7 +418,7 @@
     </div>
   </div>
 
-  <!-- Bulk Import Modal (placeholder; wired elsewhere if used) -->
+  <!-- Bulk Import Modal -->
   <div id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle"
        style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
     <div style="background:#fff; width:min(680px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
@@ -754,41 +750,57 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
   })();
 
-  /* Load dataset (cache → fallbacks) */
+  /* Load dataset (robust fallbacks) */
   try {
     const cached = sessionStorage.getItem(CACHE_KEY);
     if (cached) {
       try {
         const cachedData = JSON.parse(cached);
         if (Array.isArray(cachedData) || (cachedData && typeof cachedData === 'object')) {
+          console.info('[SR] Using cached dataset');
           initializeWithData(cachedData);
           return;
         }
       } catch {}
     }
 
-    let data;
+    let data = null, used = null;
     const candidates = [
-      "/assets/videos/us_institutions_by_state_2023.json",
-      "/assets/videos/us_institutions_by_state_2023.min.json",
-      "https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/videos/us_institutions_by_state_2023.json"
+      // relative to the current page (works under /dashboard)
+      './assets/videos/us_institutions_by_state_2023.json',
+      './assets/videos/us_institutions_by_state_2023.min.json',
+
+      // absolute from site root
+      '/assets/videos/us_institutions_by_state_2023.json',
+      '/assets/videos/us_institutions_by_state_2023.min.json',
+
+      // GitHub raw
+      'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/videos/us_institutions_by_state_2023.json',
+      'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/videos/us_institutions_by_state_2023.min.json',
+
+      // jsDelivr CDN mirror
+      'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/videos/us_institutions_by_state_2023.json',
+      'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/videos/us_institutions_by_state_2023.min.json'
     ];
     for (const url of candidates) {
       try {
-        const resp = await fetch(url + (url.startsWith('http') ? '' : `?v=${Date.now()}`));
+        const bust = url.startsWith('http') ? '' : (url.includes('?') ? '' : `?v=${Date.now()}`);
+        const resp = await fetch(url + bust, { credentials: 'omit' });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const txt = await resp.text();
-        const fixed = txt
-          .replace(/\b-?Infinity\b/g, "null")
-          .replace(/\bNaN\b/g, "null")
-          .replace(/,\s*([}\]])/g, "$1");
-        data = JSON.parse(fixed);
+        let txt = await resp.text();
+        txt = txt.replace(/\b-?Infinity\b/g, 'null')
+                 .replace(/\bNaN\b/g, 'null')
+                 .replace(/,\s*([}\]])/g, '$1');
+        data = JSON.parse(txt);
+        used = url;
         break;
       } catch (e) {
-        console.warn('Fallback to next candidate for', url, e);
+        console.warn('[SR] dataset fallback →', url, e);
       }
     }
+
     if (!data) throw new Error('No dataset source could be loaded.');
+    console.info('[SR] dataset loaded from:', used);
     sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
     initializeWithData(data);
   } catch (err) {
@@ -857,6 +869,12 @@ function initializeWithData(data) {
   refreshList();
   updateSelectedList();
   srRenderAuditBanner();
+
+  // Reflect real count in the dropdown placeholder
+  const sel = document.getElementById('universitySelect');
+  if (sel && sel.options.length > 0) {
+    sel.options[0].textContent = `Browse all universities (${universities.length.toLocaleString()})`;
+  }
 
   const params = new URLSearchParams(location.search);
   const sid = params.get('student');
@@ -959,16 +977,11 @@ function setupSearch() {
   };
 
   const runDebounced = debounce(() => {
-    // live filter while typing
     run(false);
-    // update suggestions as user types
     renderSuggestions(searchInput.value);
   }, 150);
 
-  // Apply with button
   searchApplyBtn.addEventListener('click', () => run(true));
-
-  // Debounced live search + autosuggest
   searchInput.addEventListener('input', runDebounced);
 
   // Keyboard affordances
@@ -976,7 +989,6 @@ function setupSearch() {
     const hasOpen = suggestWrap && suggestWrap.style.display !== 'none';
     if (e.key === 'Enter') {
       if (hasOpen && activeIndex >= 0 && currentSuggestions[activeIndex]) {
-        // choose highlighted suggestion
         pickSuggestion(currentSuggestions[activeIndex]);
         e.preventDefault();
         return;
@@ -1013,7 +1025,6 @@ function renderSuggestions(query) {
   const q = norm(query);
   if (!q) { closeSuggest(); return; }
 
-  // score candidates: startsWith name (2), includes name (1.5), includes city/state (1)
   const scored = [];
   for (let i=0; i<universities.length; i++) {
     const u = universities[i];
@@ -1033,7 +1044,6 @@ function renderSuggestions(query) {
 
   if (!list.length) { closeSuggest(); return; }
 
-  // Render items
   suggestWrap.innerHTML = '';
   list.forEach((u, idx) => {
     const item = document.createElement('div');
@@ -1323,7 +1333,7 @@ function setupUniversitySelect() {
       requestAnimationFrame(() => {
         const cards = Array.from(document.querySelectorAll('.university-card'));
         const startIdx = (page - 1) * pageSize;
-        const card = cards[idx - startIdx);
+        const card = cards[idx - startIdx];
         if (card) { card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'), 1200); card.scrollIntoView({behavior:'smooth', block:'nearest'}); }
       });
       if (studentUnitIds.has(Number(val))) removedByRecommender.delete(Number(val));
@@ -1395,7 +1405,6 @@ async function loadStudentProfile(studentIdOrEmail) {
 
 /* --------------------- Send workflow (mock/real API split kept) --------------------- */
 let USE_MOCK = getUseMock();
-const getToken = () => (SR_AUTH.getAccessToken() || localStorage.getItem('token') || null);
 const API_BASE =
   (window.ENV && window.ENV.API_URL) ||
   (typeof API_URL !== "undefined" ? API_URL : "https://api.stellarrec.com");
@@ -1567,7 +1576,8 @@ function srEnsureProgressControls() {
     bar.style.gap = '.5rem';
     bar.style.justifyContent = 'flex-end';
     bar.style.marginTop = '.5rem';
-    section.appendChild(bar);
+    section.append
+
 
     const pauseBtn = document.createElement('button');
     pauseBtn.id = 'pauseBtn';
