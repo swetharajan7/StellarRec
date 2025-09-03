@@ -1332,10 +1332,14 @@ function setupUniversitySelect() {
       refreshList();
       requestAnimationFrame(() => {
         const cards = Array.from(document.querySelectorAll('.university-card'));
-        const startIdx = (page - 1) * pageSize;
-        const card = cards[idx - startIdx];
-        if (card) { card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'), 1200); card.scrollIntoView({behavior:'smooth', block:'nearest'}); }
-      });
+const startIdx = (page - 1) * pageSize;
+const card = cards[idx - startIdx];
+if (card) {
+  card.classList.add('flash');
+  setTimeout(()=>card.classList.remove('flash'), 1200);
+  card.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
       if (studentUnitIds.has(Number(val))) removedByRecommender.delete(Number(val));
       else addedByRecommender.add(Number(val));
       updateSelectedList(); updateSendButton(); persistAndSync();
