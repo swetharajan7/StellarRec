@@ -789,12 +789,18 @@
     <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
 
    <!-- Scripts -->
-<!-- Vendor (self-hosted) -->
+<!-- === Vendor libraries (must load before any code that uses them) === -->
 <script src="/assets/js/vendor/fuse.min.js"></script>
 <script src="/assets/js/vendor/localforage.min.js"></script>
 
-<!-- App code -->
-<script src="/assets/js/dashboard.js"></script>
+<!-- (Optional) Small sanity check — safe & CSP-friendly: -->
+<script>
+  (function(){
+    if (typeof Fuse !== 'function') console.warn('[SR] Fuse.js not loaded');
+    if (typeof localforage === 'undefined') console.warn('[SR] localForage not loaded');
+    else localforage.config({ name: 'StellarRec' });
+  })();
+</script>
 
 
 </body>
