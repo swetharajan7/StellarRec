@@ -219,6 +219,25 @@
     text-align: center;
   }
   .site-footer p { margin: 0; font-size: .95rem; }
+    /* right-side nav */
+.header-nav {
+  display: flex;
+  gap: 1.5rem;           /* space between links */
+  align-items: center;
+}
+
+.header-nav .nav-link {
+  color: #fff;           /* white text */
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity .2s, transform .2s;
+}
+
+.header-nav .nav-link:hover {
+  opacity: .85;
+  transform: translateY(-1px);
+}
+
 </style>
 
 </head>
@@ -234,11 +253,11 @@
     </a>
 
     <!-- keep or rebuild your right-side nav here, e.g.: -->
-    <!-- <nav>
-      <a href="/#features" class="page-btn" style="color:#fff; text-decoration:none; margin-left:1rem;">Features</a>
-      <a href="/#how-it-works" class="page-btn" style="color:#fff; text-decoration:none; margin-left:1rem;">How it works</a>
-      <a href="/#contact" class="page-btn" style="color:#fff; text-decoration:none; margin-left:1rem;">Contact</a>
-    </nav> -->
+       <nav class="header-nav">
+      <a href="/dashboard" class="nav-link">Dashboard</a>
+      <a href="/demo" class="nav-link">Demo</a>
+    </nav>
+
   </div>
 </div>
 
