@@ -316,9 +316,83 @@
       </div>
 
       <!-- User / settings -->
-      <div class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false">
-  <span class="material-icons">person</span>
+     <!-- User / settings -->
+<div class="user-info">   <!-- 👈 new wrapper gives us position:relative -->
+  <div class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false">
+    <span class="material-icons">person</span>
+  </div>
+
+  <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
+    <div class="dropdown-header">Quick actions</div>
+
+    <!-- How it works (goes to university-portal) -->
+    <div class="dropdown-item" id="howItWorksItem" role="menuitem" tabindex="0">
+      <span class="material-icons" aria-hidden="true">help</span>
+      <div class="view-label">
+        <div class="view-name">How it works</div>
+        <div class="view-description">University portal</div>
+      </div>
+    </div>
+
+    <div class="dropdown-item" id="contactAdminItem">
+      <span class="material-icons">support_agent</span>
+      <div class="view-label">
+        <div class="view-name">Contact admin</div>
+        <div class="view-description">Send a message</div>
+      </div>
+    </div>
+
+    <div class="dropdown-item" id="themeToggleItem">
+      <span class="material-icons">dark_mode</span>
+      <div class="view-label">
+        <div class="view-name">Theme</div>
+        <div class="view-description">Light / Dark</div>
+      </div>
+      <label style="margin-left:auto;display:flex;align-items:center;gap:.4rem;">
+        <input id="themeToggle" type="checkbox" />
+        <span style="font-size:.85rem;">Dark</span>
+      </label>
+    </div>
+
+    <div class="dropdown-item active" data-sr-view="recommender">
+      <span class="material-icons">edit</span>
+      <div class="view-label">
+        <div class="view-name">Recommender</div>
+        <div class="view-description">Write & send letters</div>
+      </div>
+    </div>
+
+    <div class="dropdown-item" data-sr-view="student">
+      <span class="material-icons">school</span>
+      <div class="view-label">
+        <div class="view-name">Student</div>
+        <div class="view-description">Track applications</div>
+      </div>
+    </div>
+
+    <div class="dropdown-item">
+      <span class="material-icons">help_outline</span>
+      <div class="view-label">
+        <a href="/university-portal/" class="view-name" style="text-decoration:none; color:inherit;">
+          How it works
+        </a>
+        <div class="view-description">See the process explained</div>
+      </div>
+    </div>
+
+    <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
+      <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
+        <span class="material-icons">build</span>
+        <div class="view-label">
+          <div class="view-name">Use mock API</div>
+          <div class="view-description">Toggle mock vs real backend</div>
+        </div>
+        <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
+      </label>
+    </div>
+  </div>
 </div>
+
 
        <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
           <div class="dropdown-header">Quick actions</div>
