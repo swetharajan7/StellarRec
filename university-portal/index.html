@@ -7,6 +7,112 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+  /* ==== Shared header (matches dashboard/index) ==== */
+  .header {
+    background: linear-gradient(135deg, #1976d2 0%, #7c4dff 100%);
+    color: #fff;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 4px 20px rgba(25,118,210,0.3);
+  }
+  /* 3-column grid so the name can sit perfectly centered */
+  .header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;  /* left | center | right */
+    align-items: center;
+    gap: 1rem;
+  }
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    color: #fff;
+    transition: .3s;
+    justify-self: start;  /* top-left */
+  }
+  .logo:hover { opacity: .85; transform: translateY(-1px); }
+
+  /* Center name in header */
+  .portal-name {
+    justify-self: center;     /* dead center */
+    font-weight: 700;
+    letter-spacing: .2px;
+    text-align: center;
+    line-height: 1.2;
+  }
+  .portal-name .u-name { font-size: 1.25rem; }
+  .portal-name .u-sub  { font-size: .9rem; opacity: .9; }
+
+  /* Right-side nav (Dashboard) */
+  .header-nav {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    justify-self: end;       /* top-right */
+  }
+  .header-nav .nav-link {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity .2s, transform .2s;
+  }
+  .header-nav .nav-link:hover {
+    opacity: .85;
+    transform: translateY(-1px);
+  }
+
+  /* ==== Hero (Application Portal & Sign in) ==== */
+  .portal-hero {
+    background: linear-gradient(135deg, #eef5ff 0%, #f3e9ff 100%);
+    padding: clamp(3rem, 6vw, 6rem) 2rem;
+    text-align: center;
+  }
+  .portal-hero .title {
+    color: #1976d2;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: .2px;
+  }
+  .portal-hero .tagline {
+    color: #475569;
+    margin-top: .5rem;
+    font-size: 1.05rem;
+  }
+  .portal-hero .cta {
+    margin-top: 1.25rem;
+    display: inline-block;
+    padding: .9rem 1.4rem;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    background: linear-gradient(135deg, #1976d2, #7c4dff);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(124,77,255,.25);
+    transition: transform .15s ease;
+  }
+  .portal-hero .cta:hover { transform: translateY(-2px); }
+
+  /* ==== Shared footer (matches dashboard/index) ==== */
+  .site-footer {
+    background: linear-gradient(135deg, #1976d2 0%, #7c4dff 100%);
+    color: #fff;
+    padding: 1.5rem 0;
+    text-align: center;
+  }
+  .site-footer .container {
+    max-width: 1200px; margin: 0 auto; padding: 0 20px;
+  }
+  .site-footer p { margin: 0; font-size: .95rem; }
+
+  /* Material Icons size tweak (optional) */
+  .material-icons { vertical-align: middle; }
+</style>
+
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -310,5 +416,45 @@
             });
         });
     </script>
+    <!-- Header (identical look to index/dashboard) -->
+<div class="header">
+  <div class="header-content">
+    <!-- Left: stellarrec (go home) -->
+    <a href="/" class="logo" target="_self" aria-label="Go to homepage">
+      <span class="material-icons" aria-hidden="true">star</span>
+      stellarrec
+    </a>
+
+    <!-- Center: Example University -->
+    <div class="portal-name" aria-label="Portal name">
+      <div class="u-name">Example University</div>
+      <div class="u-sub">Application Portal</div>
+    </div>
+
+    <!-- Right: Dashboard -->
+    <nav class="header-nav" aria-label="Top navigation">
+      <a href="/dashboard" class="nav-link" target="_self">Dashboard</a>
+    </nav>
+  </div>
+</div>
+
+<!-- Hero -->
+<section class="portal-hero">
+  <h1 class="title">Application Portal</h1>
+  <p class="tagline">Sign in to submit and track your application materials.</p>
+  <!-- Link this to your sign-in route/anchor -->
+  <a class="cta" href="#sign-in" target="_self">Sign in</a>
+</section>
+
+<!-- (Your page’s main content goes here — forms, steps, etc.) -->
+
+<!-- Footer (shared) -->
+<footer class="site-footer">
+  <div class="container">
+    <p>&copy; 2025 <span style="color: #ffeb3b; font-weight: 600;">StellarRec™</span>. All rights reserved. |
+      Making recommendations stellar since 2025 🚀</p>
+  </div>
+</footer>
+
 </body>
 </html>
