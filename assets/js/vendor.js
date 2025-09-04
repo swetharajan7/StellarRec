@@ -1,3 +1,0 @@
-assets/js/vendor/fuse.min.js
-assets/js/vendor/localforage.min.js
-
