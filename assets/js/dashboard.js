@@ -50,3 +50,94 @@ const getEffectiveSelection = ()=>{
     tgl.onchange = e=>{ const mode=e.target.checked?'dark':'light'; localStorage.setItem(KEY,mode); apply(mode); toast(`Theme: ${mode}`,'info',{ttl:1200}); };
   }
 })();
+
+/* ===================== INIT ===================== */
+document.addEventListener('DOMContentLoaded', () => {
+  // If you have these functions defined above, this wires them up:
+  if (typeof setupWriter === 'function') setupWriter();
+  if (typeof setupUpload === 'function') setupUpload();
+  if (typeof setupUniversitySearch === 'function') setupUniversitySearch();
+  if (typeof setupFilterHandlers === 'function') setupFilterHandlers();
+  if (typeof setupPagination === 'function') setupPagination();
+  if (typeof setupUniversitySelect === 'function') setupUniversitySelect();
+  if (typeof setupBulkImport === 'function') setupBulkImport();
+  if (typeof setupStudentLoader === 'function') setupStudentLoader();
+  if (typeof setupSendHandler === 'function') setupSendHandler();
+  if (typeof loadDataset === 'function') loadDataset();
+
+  // Tagline hotfix (optional)
+  const h1 = document.querySelector('.hero-title');
+  if (h1) h1.textContent = 'One upload. Unlimited reach.';
+});
+/* === Avatar Dropdown — Robust Wire-Up === */
+(function () {
+  const avatar   = document.getElementById('userAvatarBtn');
+  const dropdown = document.getElementById('userDropdown');
+
+  if (!avatar || !dropdown) {
+    console.warn('[SR] Dropdown wiring: missing #userAvatarBtn or #userDropdown');
+    return;
+  }
+
+  // Ensure the dropdown anchors correctly
+  const userInfo = avatar.closest('.user-info') || avatar.parentElement;
+  if (userInfo && getComputedStyle(userInfo).position === 'static') {
+    userInfo.style.position = 'relative';
+  }
+
+  function openDropdown() {
+    dropdown.classList.add('show');
+    dropdown.setAttribute('aria-hidden', 'false');
+    avatar.setAttribute('aria-expanded', 'true');
+  }
+  function closeDropdown() {
+    dropdown.classList.remove('show');
+    dropdown.setAttribute('aria-hidden', 'true');
+    avatar.setAttribute('aria-expanded', 'false');
+  }
+  function isOpen() {
+    return dropdown.classList.contains('show');
+  }
+  function toggleDropdown(e) {
+    if (e) e.stopPropagation();
+    isOpen() ? closeDropdown() : openDropdown();
+  }
+
+  // If old HTML ever called toggleUserDropdown(), keep a global
+  window.toggleUserDropdown = toggleDropdown;
+
+  // Rebind clean listeners
+  const freshAvatar = avatar; // (no need to clone unless you had duplicates)
+  freshAvatar.addEventListener('click', toggleDropdown);
+  freshAvatar.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDropdown(e); }
+  });
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    const inside = dropdown.contains(e.target) || freshAvatar.contains(e.target);
+    if (!inside && isOpen()) closeDropdown();
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen()) closeDropdown();
+  });
+
+  // “How it works” → /university-portal/
+  const howItWorksItem = document.getElementById('howItWorksItem');
+  if (howItWorksItem) {
+    const go = () => { window.location.href = '/university-portal/'; };
+    howItWorksItem.addEventListener('click', (e) => { e.preventDefault(); go(); });
+    howItWorksItem.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+    });
+  }
+
+  // Accessibility defaults
+  dropdown.setAttribute('role', dropdown.getAttribute('role') || 'menu');
+  dropdown.setAttribute('aria-hidden', 'true');
+
+  console.log('[SR] Dropdown wired. Click the person icon to toggle.');
+})();
+
