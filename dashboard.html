@@ -181,6 +181,51 @@
     .sr-tab[aria-selected="true"] { background:#fff; color:#1976d2; }
     .sr-tab:focus-visible { box-shadow:0 0 0 3px rgba(255,255,255,.5); }
     @media (max-width:768px){ .sr-tabs{ align-self:flex-start; } }
+    /* Avatar gentle bob animation */
+@keyframes sr-bob {
+  0%   { transform: translateY(0) }
+  50%  { transform: translateY(-2px) }
+  100% { transform: translateY(0) }
+}
+.user-avatar .material-icons {
+  animation: sr-bob 3.2s ease-in-out infinite;
+  will-change: transform;
+}
+.user-avatar:hover .material-icons {
+  animation-duration: 1.2s;
+}
+
+/* Contact Admin modal */
+#sr-contact-overlay {
+  position: fixed; inset: 0; display:none;
+  background: rgba(3, 7, 18, 0.55); z-index: 10000;
+  align-items: center; justify-content: center;
+}
+#sr-contact-sheet {
+  width: min(560px, 92vw); background:#fff; border-radius:16px;
+  box-shadow: 0 16px 60px rgba(0,0,0,.25); overflow:hidden;
+  transform: translateY(12px); opacity: 0; transition: .18s ease;
+}
+#sr-contact-overlay.show #sr-contact-sheet {
+  transform: translateY(0); opacity: 1;
+}
+.sr-contact-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 1rem 1.25rem; border-bottom:1px solid #eee; font-weight:700;
+}
+.sr-contact-body { padding: 1rem 1.25rem; display:grid; gap:.75rem; }
+.sr-field { display:grid; gap:.35rem; }
+.sr-field label { font-size:.9rem; color:#374151; font-weight:600; }
+.sr-input, .sr-textarea {
+  width:100%; padding:.7rem .9rem; border:2px solid #e5e7eb; border-radius:10px; font: 400 15px/1.3 'Roboto', sans-serif;
+}
+.sr-input:focus, .sr-textarea:focus { outline:none; border-color:#1976d2; box-shadow: 0 0 0 3px rgba(25,118,210,.12); }
+.sr-textarea { min-height:140px; resize:vertical; }
+.sr-contact-foot {
+  display:flex; gap:.5rem; justify-content:flex-end; padding: 1rem 1.25rem;
+  border-top:1px solid #eee;
+}
+
   </style>
 </head>
 <body>
@@ -235,7 +280,16 @@
     </div>
   </div>
 
-  <div class="container">
+    <!-- Contact admin -->
+<div class="dropdown-item" id="srContactOpen">
+  <span class="material-icons">mail</span>
+  <div class="view-label">
+    <div class="view-name">Contact admin</div>
+    <div class="view-description">Get help or report an issue</div>
+  </div>
+</div>
+<!-- /Contact admin -->
+<div class="container">
 
     <!-- Student Context Bar -->
     <div class="student-bar" id="studentBar" style="display:flex; align-items:center; gap:.75rem; background:#fff; border:1px solid #eaeaea; border-radius:12px; padding:1rem; margin-bottom:1rem;">
@@ -1018,6 +1072,141 @@
   })();
   </script>
   <!-- ======= /STELLARREC HOTFIX PACK ======= -->
+  <!-- Contact Admin Overlay -->
+<div id="sr-contact-overlay" role="dialog" aria-modal="true" aria-labelledby="sr-contact-title">
+  <div id="sr-contact-sheet">
+    <div class="sr-contact-head">
+      <div id="sr-contact-title">Contact admin</div>
+      <button id="sr-contact-close" aria-label="Close" style="background:none;border:none;font-size:1.2rem;cursor:pointer;">✕</button>
+    </div>
+    <form id="sr-contact-form" class="sr-contact-body" novalidate>
+      <div class="sr-field">
+        <label for="sr-first-name">First name</label>
+        <input id="sr-first-name" class="sr-input" name="firstName" autocomplete="given-name" required />
+      </div>
+      <div class="sr-field">
+        <label for="sr-email">Email address</label>
+        <input id="sr-email" class="sr-input" type="email" name="email" autocomplete="email" required />
+      </div>
+      <div class="sr-field">
+        <label for="sr-query">Your query</label>
+        <textarea id="sr-query" class="sr-textarea" name="query" required placeholder="How can we help?"></textarea>
+      </div>
+      <div class="sr-contact-foot">
+        <button type="button" class="page-btn" id="sr-contact-cancel">Cancel</button>
+        <button type="submit" class="apply-btn" id="sr-contact-send">
+          <span class="material-icons" aria-hidden="true" style="font-size:1rem;">send</span> Send
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- /Contact Admin Overlay -->
+  <script>
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const overlay = $('sr-contact-overlay');
+  const sheet   = $('sr-contact-sheet');
+  const openBtn = $('srContactOpen');
+  const closeBtn= $('sr-contact-close');
+  const cancelBtn = $('sr-contact-cancel');
+  const form    = $('sr-contact-form');
+  const first   = $('sr-first-name');
+  const email   = $('sr-email');
+  const query   = $('sr-query');
+
+  // Build admin email in JS (obfuscated; not displayed)
+  function adminEmail(){
+    const p1 = 'swetha';
+    const p2 = 'rajan103';
+    const dom = 'gmail';
+    const tld = 'com';
+    return `${p1}.${p2}@${dom}.${tld}`;
+  }
+
+  function openOverlay(){
+    overlay.style.display = 'flex';
+    // small delay to allow CSS transition
+    requestAnimationFrame(()=> overlay.classList.add('show'));
+    setTimeout(()=> first && first.focus(), 100);
+  }
+  function closeOverlay(){
+    overlay.classList.remove('show');
+    setTimeout(()=> { overlay.style.display='none'; }, 160);
+  }
+
+  // Wire open/close
+  if (openBtn && !openBtn.__sr_wired){
+    openBtn.__sr_wired = true;
+    openBtn.addEventListener('click', (e)=> { e.preventDefault(); openOverlay(); });
+  }
+  if (closeBtn)  closeBtn.addEventListener('click', closeOverlay);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeOverlay);
+  overlay.addEventListener('click', (e)=> { if (e.target === overlay) closeOverlay(); });
+  document.addEventListener('keydown', (e)=> {
+    if (overlay.style.display === 'flex' && e.key === 'Escape') closeOverlay();
+  });
+
+  // Validation helper
+  function showToast(msg, type='info'){
+    let wrap = document.getElementById('toastWrap');
+    if (!wrap) { wrap = document.createElement('div'); wrap.id='toastWrap'; wrap.className='toast-wrap'; document.body.appendChild(wrap); }
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.innerHTML = `<div class="icon">🔔</div><div class="msg">${msg}</div><button class="x" aria-label="Close">✕</button>`;
+    t.querySelector('.x').onclick = ()=> t.remove();
+    wrap.appendChild(t);
+    setTimeout(()=> t.remove(), 3500);
+  }
+
+  function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+  // Submit handler (mailto composed; no email shown on page)
+  if (form && !form.__sr_wired){
+    form.__sr_wired = true;
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const fn = (first.value||'').trim();
+      const em = (email.value||'').trim();
+      const q  = (query.value||'').trim();
+
+      if (!fn){ first.focus(); showToast('Please enter your first name.','error'); return; }
+      if (!validEmail(em)){ email.focus(); showToast('Please enter a valid email.','error'); return; }
+      if (!q){ query.focus(); showToast('Please enter your query.','error'); return; }
+
+      // Compose email without revealing the address in the UI
+      const to = adminEmail();
+      const subject = encodeURIComponent(`Support request from ${fn}`);
+      const body = encodeURIComponent(
+`First name: ${fn}
+Email: ${em}
+
+Query:
+${q}
+
+— Sent from StellarRec Dashboard`
+      );
+
+      // Prefer opening a new mail draft; fallback: location href
+      const mailto = `mailto:${to}?subject=${subject}&body=${body}`;
+      const a = document.createElement('a');
+      a.href = mailto;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=> a.remove(), 0);
+
+      showToast('Opening your email app…','success');
+      closeOverlay();
+
+      // Optional: lightweight analytics event (no-op if not present)
+      try { window.gtag && gtag('event','contact_admin_submitted'); } catch(e){}
+    });
+  }
+})();
+</script>
+
+
 </body>
 </html>
 
