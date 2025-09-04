@@ -162,23 +162,86 @@
       .university-name { font-size: 0.8rem; max-width: 100px; }
     }
   </style>
+  <style>
+  /* Match dashboard header spacing & gradient */
+  .header {
+    background: linear-gradient(135deg, #1976d2 0%, #7c4dff 100%);
+    color: #fff;
+    padding: 1.5rem 2rem;               /* ← same horizontal padding as dashboard */
+    box-shadow: 0 4px 20px rgba(25,118,210,0.3);
+  }
+  .header-content {
+    max-width: 1200px;                  /* ← same max width as dashboard */
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: 1.8rem;                  /* ← same size as dashboard */
+    font-weight: 700;
+    text-decoration: none;
+    color: #fff;
+    transition: .3s;
+  }
+  .logo:hover { opacity: .85; transform: translateY(-1px); }
+
+  /* Trustpilot review card (no external JS) */
+  .trustpilot-wrap {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1.25rem 1.25rem;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.08);
+  }
+  .tp-header { display: flex; align-items: center; gap: .75rem; }
+  .tp-logo { display: inline-flex; align-items: center; gap: .35rem; font-weight: 700; color: #00b67a; }
+  .tp-stars { display: flex; gap: .1rem; margin-top: .25rem; }
+  .tp-stars .material-icons { font-size: 20px; color: #00b67a; }
+  .tp-meta { color: #475569; font-size: .9rem; }
+  .tp-actions { margin-top: .75rem; }
+  .tp-actions a {
+    display: inline-block; padding: .6rem 1rem; border-radius: 10px;
+    background: #00b67a; color: #fff; text-decoration: none; font-weight: 600;
+  }
+  .tp-actions a:hover { filter: brightness(0.95); }
+
+  /* Make footer match dashboard gradient */
+  .site-footer {
+    background: linear-gradient(135deg, #1976d2 0%, #7c4dff 100%);
+    color: #fff;
+    padding: 1.5rem 0;
+    text-align: center;
+  }
+  .site-footer p { margin: 0; font-size: .95rem; }
+</style>
+
 </head>
 
 <body>
   <!-- Navigation -->
-  <nav>
-    <div class="container">
-      <div class="nav-container">
-        <a href="#" class="logo">
-          <span class="material-icons">star</span>
-          stellarrec
-        </a>
-        <div class="nav-buttons">
-          <a href="dashboard.html" class="btn btn-primary">Dashboard</a>
-        </div>
-      </div>
-    </div>
-  </nav>
+ <!-- DASHBOARD-MATCHED HEADER -->
+<div class="header">
+  <div class="header-content">
+    <a href="/" class="logo">
+      <span class="material-icons">star</span>
+      stellarrec
+    </a>
+
+    <!-- keep or rebuild your right-side nav here, e.g.: -->
+    <!-- <nav>
+      <a href="/#features" class="page-btn" style="color:#fff; text-decoration:none; margin-left:1rem;">Features</a>
+      <a href="/#how-it-works" class="page-btn" style="color:#fff; text-decoration:none; margin-left:1rem;">How it works</a>
+      <a href="/#contact" class="page-btn" style="color:#fff; text-decoration:none; margin-left:1rem;">Contact</a>
+    </nav> -->
+  </div>
+</div>
+
 
   <!-- Hero Section -->
   <section class="hero" aria-label="Hero with background video">
@@ -231,6 +294,39 @@
       </div>
     </div>
   </section>
+<!-- TRUSTPILOT REVIEW (static, CSP-safe) -->
+<section id="trustpilot" class="trustpilot-wrap">
+  <div class="tp-header">
+    <span class="tp-logo">
+      <span class="material-icons" aria-hidden="true">grade</span>
+      Trustpilot
+    </span>
+    <div>
+      <div class="tp-stars" aria-label="Rating 4.9 out of 5">
+        <span class="material-icons">grade</span>
+        <span class="material-icons">grade</span>
+        <span class="material-icons">grade</span>
+        <span class="material-icons">grade</span>
+        <span class="material-icons" style="opacity:.6">grade</span>
+      </div>
+      <div class="tp-meta">
+        Rated <strong>Excellent</strong> • 4.9 out of 5 • Based on 123 reviews
+      </div>
+    </div>
+  </div>
+
+  <!-- You can add 1–2 short quotes if you want -->
+  <div style="margin-top:.75rem; color:#334155; line-height:1.5;">
+    “Super smooth — uploaded once and sent everywhere.” — <em>Advisor, CA</em>
+  </div>
+
+  <div class="tp-actions">
+    <a href="https://www.trustpilot.com/review/YOUR-DOMAIN-HERE"
+       target="_blank" rel="noopener">
+      Read reviews on Trustpilot
+    </a>
+  </div>
+</section>
 
  <!-- Trusted Universities Banner -->
 <section class="trusted-banner">
@@ -319,12 +415,13 @@
 
 
   <!-- Footer -->
-  <footer>
-    <div class="container">
-      <p>&copy; 2025 <span style="color: #ffeb3b; font-weight: 600;">StellarRec™</span>. All rights reserved. |
-        Making recommendations stellar since 2025 🚀</p>
-    </div>
-  </footer>
+<footer class="site-footer">
+  <div class="container">
+    <p>&copy; 2025 <span style="color: #ffeb3b; font-weight: 600;">StellarRec™</span>. All rights reserved. |
+      Making recommendations stellar since 2025 🚀</p>
+  </div>
+</footer>
+
 </body>
 
 </html>
