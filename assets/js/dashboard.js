@@ -35,7 +35,6 @@ if (typeof window.updateSendButton !== 'function') {
     const sendBtn = document.getElementById('sendBtn');
     if (!sendBtn) return;
     const hasFile = !!window.uploadedFile;
-    // best-effort: if selected chips exist, count > 0
     const selectedList = document.getElementById('selectedList');
     const selectedCount = selectedList ? selectedList.children.length : 0;
     sendBtn.disabled = !(hasFile && selectedCount > 0);
@@ -175,6 +174,75 @@ function removeFile(){
   toast('Attachment removed.', 'info');
 }
 
+/* ===================== Preselect “Experimental University” ===================== */
+/* This helper marks a university as selected by its name, then refreshes UI. */
+function preselectByName(universityName) {
+  try {
+    if (!window.universities || !universities.length) return;
+
+    const targetName = norm(universityName);
+    // exact match first
+    let match = universities.find(u => norm(u.name) === targetName);
+    // fallback contains
+    if (!match) match = universities.find(u => norm(u.name).includes(targetName));
+    if (!match) {
+      console.warn('[SR] Could not find university named:', universityName);
+      return;
+    }
+
+    const id = match.unitid;
+
+    // ensure Sets exist (they're defined in your other script file)
+    window.studentUnitIds = window.studentUnitIds || new Set();
+    window.addedByRecommender = window.addedByRecommender || new Set();
+    window.removedByRecommender = window.removedByRecommender || new Set();
+
+    if (studentUnitIds.has(id)) {
+      removedByRecommender.delete(id);
+    } else {
+      addedByRecommender.add(id);
+    }
+
+    if (typeof refreshList === 'function') refreshList();
+    if (typeof updateSelectedList === 'function') updateSelectedList();
+    updateSendButton();
+
+    const selSection = document.querySelector('.selected-section');
+    if (selSection) selSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    toast(`Preselected: ${match.name}`, 'success', { ttl: 1500 });
+  } catch (e) {
+    console.warn('[SR] preselectByName error:', e);
+  }
+}
+
+/* Wrap your existing loadDataset() so preselect runs AFTER data loads & first render */
+(function wrapLoadDatasetForPreselect(){
+  if (typeof window.loadDataset !== 'function') {
+    // If loadDataset gets defined later, patch it then.
+    const obs = new MutationObserver(() => {
+      if (typeof window.loadDataset === 'function') {
+        const original = window.loadDataset;
+        window.loadDataset = async function(...args) {
+          const result = await original.apply(this, args);
+          // after your success path (refreshList/updateSelectedList/updateSendButton), do the preselect:
+          preselectByName('Experimental University');
+          return result;
+        };
+        obs.disconnect();
+      }
+    });
+    obs.observe(document.documentElement, {childList:true, subtree:true});
+  } else {
+    const original = window.loadDataset;
+    window.loadDataset = async function(...args) {
+      const result = await original.apply(this, args);
+      preselectByName('Experimental University');
+      return result;
+    };
+  }
+})();
+
 /* ===================== INIT ===================== */
 document.addEventListener('DOMContentLoaded', () => {
   // If you have these elsewhere, they’ll run; if not, no problem.
@@ -188,10 +256,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof setupSendHandler === 'function') setupSendHandler();
   if (typeof loadDataset === 'function') loadDataset();
 
-  // <-- THIS is the key call you were missing -->
+  // Upload must run after the DOM exists
   setupUpload();
 
   // Tagline hotfix (kept from your version)
   const h1=document.querySelector('.hero-title'); 
   if(h1) h1.textContent='One upload. Unlimited reach.';
 });
+
