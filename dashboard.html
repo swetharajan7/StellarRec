@@ -1079,26 +1079,40 @@
       <div id="sr-contact-title">Contact admin</div>
       <button id="sr-contact-close" aria-label="Close" style="background:none;border:none;font-size:1.2rem;cursor:pointer;">✕</button>
     </div>
-    <form id="sr-contact-form" class="sr-contact-body" novalidate>
-      <div class="sr-field">
-        <label for="sr-first-name">First name</label>
-        <input id="sr-first-name" class="sr-input" name="firstName" autocomplete="given-name" required />
-      </div>
-      <div class="sr-field">
-        <label for="sr-email">Email address</label>
-        <input id="sr-email" class="sr-input" type="email" name="email" autocomplete="email" required />
-      </div>
-      <div class="sr-field">
-        <label for="sr-query">Your query</label>
-        <textarea id="sr-query" class="sr-textarea" name="query" required placeholder="How can we help?"></textarea>
-      </div>
-      <div class="sr-contact-foot">
-        <button type="button" class="page-btn" id="sr-contact-cancel">Cancel</button>
-        <button type="submit" class="apply-btn" id="sr-contact-send">
-          <span class="material-icons" aria-hidden="true" style="font-size:1rem;">send</span> Send
-        </button>
-      </div>
-    </form>
+   <form id="sr-contact-form"
+      class="sr-contact-body"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      name="contact-admin"
+      action="/?submitted=1"
+      novalidate>
+  <!-- Required by Netlify (hidden) -->
+  <input type="hidden" name="form-name" value="contact-admin">
+  <div style="display:none;">
+    <label>Don’t fill this out: <input name="bot-field"></label>
+  </div>
+
+  <div class="sr-field">
+    <label for="sr-first-name">First name</label>
+    <input id="sr-first-name" class="sr-input" name="firstName" autocomplete="given-name" required />
+  </div>
+  <div class="sr-field">
+    <label for="sr-email">Email address</label>
+    <input id="sr-email" class="sr-input" type="email" name="email" autocomplete="email" required />
+  </div>
+  <div class="sr-field">
+    <label for="sr-query">Your query</label>
+    <textarea id="sr-query" class="sr-textarea" name="query" required placeholder="How can we help?"></textarea>
+  </div>
+  <div class="sr-contact-foot">
+    <button type="button" class="page-btn" id="sr-contact-cancel">Cancel</button>
+    <button type="submit" class="apply-btn" id="sr-contact-send">
+      <span class="material-icons" aria-hidden="true" style="font-size:1rem;">send</span> Send
+    </button>
+  </div>
+</form>
+
   </div>
 </div>
 <!-- /Contact Admin Overlay -->
