@@ -263,4 +263,188 @@ document.addEventListener('DOMContentLoaded', () => {
   const h1=document.querySelector('.hero-title'); 
   if(h1) h1.textContent='One upload. Unlimited reach.';
 });
+/* ===================== USER DROPDOWN FUNCTIONALITY ===================== */
+function setupUserDropdown() {
+  const avatarBtn = document.getElementById('userAvatarBtn');
+  const dropdown = document.getElementById('userDropdown');
+  const howItWorksItem = document.getElementById('howItWorksItem');
+  const contactAdminItem = document.getElementById('contactAdminItem');
+  
+  if (!avatarBtn || !dropdown) return;
+  
+  let isOpen = false;
+  
+  // Toggle dropdown on avatar click
+  avatarBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleDropdown();
+  });
+  
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (isOpen && !e.target.closest('.user-info')) {
+      closeDropdown();
+    }
+  });
+  
+  // Handle keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen) {
+      closeDropdown();
+    }
+  });
+  
+  // Handle "How It Works" click
+  if (howItWorksItem) {
+    howItWorksItem.addEventListener('click', () => {
+      // Open university portal in new tab
+      window.open('https://stellarrec.netlify.app/university-portal/', '_blank');
+      closeDropdown();
+      toast('Opening university portal...', 'info', { ttl: 1500 });
+    });
+    
+    // Make it keyboard accessible
+    howItWorksItem.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        howItWorksItem.click();
+      }
+    });
+  }
+  
+  // Handle "Contact Admin" click
+  if (contactAdminItem) {
+    contactAdminItem.addEventListener('click', () => {
+      openContactModal();
+      closeDropdown();
+    });
+  }
+  
+  // Handle view switching (Recommender/Student)
+  dropdown.addEventListener('click', (e) => {
+    const viewItem = e.target.closest('[data-sr-view]');
+    if (viewItem) {
+      const view = viewItem.getAttribute('data-sr-view');
+      switchView(view, e);
+      closeDropdown();
+    }
+  });
+  
+  function toggleDropdown() {
+    if (isOpen) {
+      closeDropdown();
+    } else {
+      openDropdown();
+    }
+  }
+  
+  function openDropdown() {
+    dropdown.classList.add('show');
+    avatarBtn.setAttribute('aria-expanded', 'true');
+    dropdown.setAttribute('aria-hidden', 'false');
+    isOpen = true;
+    
+    // Focus first item for accessibility
+    const firstItem = dropdown.querySelector('.dropdown-item[role="menuitem"]');
+    if (firstItem) {
+      setTimeout(() => firstItem.focus(), 100);
+    }
+  }
+  
+  function closeDropdown() {
+    dropdown.classList.remove('show');
+    avatarBtn.setAttribute('aria-expanded', 'false');
+    dropdown.setAttribute('aria-hidden', 'true');
+    isOpen = false;
+  }
+  
+  function openContactModal() {
+    const modal = document.getElementById('contactOverlay') || document.getElementById('contactModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      // Animate in
+      setTimeout(() => {
+        const content = modal.querySelector('div > div');
+        if (content) {
+          content.style.transform = 'translateY(0)';
+          content.style.opacity = '1';
+        }
+      }, 10);
+      
+      // Focus first input
+      const firstInput = modal.querySelector('input, textarea');
+      if (firstInput) {
+        setTimeout(() => firstInput.focus(), 150);
+      }
+    } else {
+      // Fallback if modal doesn't exist
+      toast('Contact admin functionality would open here', 'info');
+    }
+  }
+}
+
+/* ===================== VIEW SWITCHING FUNCTIONALITY ===================== */
+function switchView(view, event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
+  // Update active states in dropdown
+  const dropdownItems = document.querySelectorAll('[data-sr-view]');
+  dropdownItems.forEach(item => {
+    item.classList.toggle('active', item.getAttribute('data-sr-view') === view);
+  });
+  
+  // Update tab states
+  const tabs = document.querySelectorAll('.sr-tab');
+  tabs.forEach(tab => {
+    const isActive = tab.id === `tab-${view}`;
+    tab.setAttribute('aria-selected', isActive.toString());
+  });
+  
+  // Show appropriate content (if you have different panels)
+  const panels = document.querySelectorAll('[id^="panel-"]');
+  panels.forEach(panel => {
+    const panelView = panel.id.replace('panel-', '');
+    panel.style.display = panelView === view ? 'block' : 'none';
+  });
+  
+  // Store current view
+  localStorage.setItem('sr_current_view', view);
+  
+  // Show feedback
+  toast(`Switched to ${view} view`, 'success', { ttl: 1200 });
+}
+
+/* ===================== INITIALIZATION UPDATE ===================== */
+// Update your existing DOMContentLoaded listener to include the dropdown setup
+document.addEventListener('DOMContentLoaded', () => {
+  // Your existing setup calls...
+  if (typeof setupWriter === 'function') setupWriter();
+  if (typeof setupUniversitySearch === 'function') setupUniversitySearch();
+  if (typeof setupFilterHandlers === 'function') setupFilterHandlers();
+  if (typeof setupPagination === 'function') setupPagination();
+  if (typeof setupUniversitySelect === 'function') setupUniversitySelect();
+  if (typeof setupBulkImport === 'function') setupBulkImport();
+  if (typeof setupStudentLoader === 'function') setupStudentLoader();
+  if (typeof setupSendHandler === 'function') setupSendHandler();
+  if (typeof loadDataset === 'function') loadDataset();
+  
+  // Upload setup
+  setupUpload();
+  
+  // NEW: Setup user dropdown
+  setupUserDropdown();
+  
+  // Restore last view
+  const savedView = localStorage.getItem('sr_current_view');
+  if (savedView && (savedView === 'recommender' || savedView === 'student')) {
+    switchView(savedView);
+  }
+  
+  // Tagline hotfix
+  const h1 = document.querySelector('.hero-title');
+  if (h1) h1.textContent = 'One upload. Unlimited reach.';
+});
 
