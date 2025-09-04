@@ -296,7 +296,125 @@
   font-size: 0.95rem;
 }
     .dropdown-item { cursor: pointer; }
+/* Enhanced dropdown animations and interactions */
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  min-width: 260px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px) scale(0.95);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
 
+.user-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+/* Add arrow pointing to user avatar */
+.user-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 16px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: none;
+  border-right: none;
+  transform: rotate(45deg);
+}
+
+/* Improved dropdown item interactions */
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-radius: 0;
+  user-select: none;
+}
+
+.dropdown-item:first-of-type {
+  border-radius: 12px 12px 0 0;
+}
+
+.dropdown-item:last-of-type {
+  border-radius: 0 0 12px 12px;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background: #f8f9fa;
+  outline: none;
+}
+
+.dropdown-item.active {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.dropdown-item.active .material-icons {
+  color: #1976d2;
+}
+
+/* Smooth user avatar interactions */
+.user-avatar {
+  width: 45px;
+  height: 45px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-avatar:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.user-avatar:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+/* Keyboard navigation improvements */
+.dropdown-item:focus-visible {
+  background: #f3f8ff;
+  outline: 2px solid #1976d2;
+  outline-offset: -2px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .user-dropdown {
+    min-width: 240px;
+    right: -10px;
+  }
+  
+  .user-dropdown::before {
+    right: 20px;
+  }
+}
 
   </style>
 </head>
