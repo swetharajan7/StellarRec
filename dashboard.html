@@ -316,11 +316,11 @@
       </div>
 
       <!-- User / settings -->
-      <div class="user-info">
-        <div class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false">
-          <span class="material-icons">person</span>
-        </div>
-        <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
+      <div class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false">
+  <span class="material-icons">person</span>
+</div>
+
+       <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
           <div class="dropdown-header">Quick actions</div>
           <!-- How it works (goes to university-portal) -->
 <div class="dropdown-item" id="howItWorksItem" role="menuitem" tabindex="0">
@@ -1488,6 +1488,77 @@ document.addEventListener('DOMContentLoaded', ()=>{
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
     });
   }
+</script>
+<script>
+/* === Avatar Dropdown — Robust Wire-Up ===
+   Paste this at the very end of dashboard.html, just before </body>.
+   It tolerates older inline onclick handlers and conflicting code. */
+
+(function () {
+  const avatar = document.getElementById('userAvatarBtn');
+  const dropdown = document.getElementById('userDropdown');
+
+  if (!avatar || !dropdown) {
+    console.warn('[SR] Dropdown wiring: missing #userAvatarBtn or #userDropdown');
+    return;
+  }
+
+  // Safety: ensure parent is positioned so absolute dropdown anchors correctly
+  const userInfo = avatar.closest('.user-info');
+  if (userInfo && getComputedStyle(userInfo).position === 'static') {
+    userInfo.style.position = 'relative';
+  }
+
+  // Helper: open/close handlers
+  function openDropdown() {
+    dropdown.classList.add('show');
+    dropdown.setAttribute('aria-hidden', 'false');
+    avatar.setAttribute('aria-expanded', 'true');
+  }
+  function closeDropdown() {
+    dropdown.classList.remove('show');
+    dropdown.setAttribute('aria-hidden', 'true');
+    avatar.setAttribute('aria-expanded', 'false');
+  }
+  function isOpen() {
+    return dropdown.classList.contains('show');
+  }
+  function toggleDropdown(event) {
+    event && event.stopPropagation();
+    isOpen() ? closeDropdown() : openDropdown();
+  }
+
+  // Make it globally available if older HTML uses onclick="toggleUserDropdown()"
+  window.toggleUserDropdown = toggleDropdown;
+
+  // Remove any existing listeners we may have added before (defensive)
+  avatar.replaceWith(avatar.cloneNode(true));
+  const freshAvatar = document.getElementById('userAvatarBtn');
+
+  // Rebind to the fresh node
+  freshAvatar.addEventListener('click', toggleDropdown);
+  freshAvatar.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDropdown(e); }
+  });
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    const clickedInside = dropdown.contains(e.target) || freshAvatar.contains(e.target);
+    if (!clickedInside && isOpen()) closeDropdown();
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen()) closeDropdown();
+  });
+
+  // Accessibility niceties
+  dropdown.setAttribute('role', dropdown.getAttribute('role') || 'menu');
+  dropdown.setAttribute('aria-hidden', 'true');
+
+  // Log to help troubleshoot in DevTools
+  console.log('[SR] Dropdown wired. Click the person icon to toggle.');
+})();
 </script>
 
 
