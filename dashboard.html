@@ -284,6 +284,18 @@
     :root[data-theme="dark"] .university-card:hover { background:#12203a; border-color:#274780; }
     :root[data-theme="dark"] .university-card.selected { background:#13254a; }
     :root[data-theme="dark"] .hero-subtitle, :root[data-theme="dark"] .university-location { color: var(--muted); }
+    /* Make footer same gradient as header */
+.site-footer {
+  background: linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
+  color: #fff;
+  padding: 1.5rem 0;
+  text-align: center;
+}
+.site-footer p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
   </style>
 </head>
 <body>
@@ -1409,13 +1421,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const h1=document.querySelector('.hero-title'); if(h1) h1.textContent='One upload. Unlimited reach.';
 });
 </script>
-<!-- Footer -->
-<footer>
+<footer class="site-footer">
   <div class="container">
     <p>&copy; 2025 <span style="color: #ffeb3b; font-weight: 600;">StellarRec™</span>. All rights reserved. |
       Making recommendations stellar since 2025 🚀</p>
   </div>
 </footer>
+
 
 </body>
 </html>
