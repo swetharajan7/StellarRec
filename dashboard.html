@@ -708,1306 +708,724 @@
     <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
 [Block 7/15]
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
-    <script src="dashboard.js"></script>
-
-    <script>
-    /* --------------------- GLOBAL VARS --------------------- */
-    let universities = [];
-    let fuse = null;
-
-    /* --------------------- DATASET LOADER ------------------ */
-    async function loadUniversities() {
-      const sources = [
-        './assets/us_institutions_by_state_2023.json',
-        './assets/us_institutions_by_state_2023.min.json',
-        '/assets/us_institutions_by_state_2023.json',
-        'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/us_institutions_by_state_2023.json'
-      ];
-      for (const url of sources) {
-        try {
-          const resp = await fetch(url);
-          if (resp.ok) {
-            universities = await resp.json();
-            fuse = new Fuse(universities, { keys:['name','city','state'], threshold:0.3 });
-            console.log("Loaded dataset from", url);
-            return;
-          }
-        } catch(e) { console.warn("Failed to load", url); }
-      }
-      toast("Failed to load universities list","error");
-    }
-
-    /* --------------------- TABS --------------------- */
-    function switchView(view, evt) {
-      document.querySelectorAll('.sr-tab').forEach(btn=>{
-        btn.setAttribute('aria-selected', btn.id === 'tab-'+view ? 'true':'false');
-      });
-      document.querySelectorAll('.dropdown-item').forEach(item=>{
-        if(item.textContent.includes(view.charAt(0).toUpperCase()+view.slice(1))) {
-          item.classList.add('active');
-        } else item.classList.remove('active');
-      });
-      // panels toggle (future use)
-      console.log("Switched to view:",view);
-      if(evt) evt.stopPropagation();
-    }
-
-    /* --------------------- THEME TOGGLE --------------------- */
-    function toggleTheme() {
-      const isDark = document.body.classList.toggle("dark-theme");
-      localStorage.setItem("sr_theme", isDark ? "dark" : "light");
-    }
-    function initTheme() {
-      const saved = localStorage.getItem("sr_theme");
-      if(saved==="dark") document.body.classList.add("dark-theme");
-    }
-
-    /* --------------------- CONTACT OVERLAY ------------------ */
-    const contactOverlay = document.getElementById('contactOverlay');
-    const contactForm = document.getElementById('contactForm');
-    const contactCancelBtn = document.getElementById('contactCancelBtn');
-    const contactCloseBtn = document.getElementById('contactCloseBtn');
-
-    function openContact() {
-      contactOverlay.style.display = "flex";
-      const panel = contactOverlay.querySelector('div');
-      requestAnimationFrame(()=>{
-        panel.style.transform="translateY(0)";
-        panel.style.opacity="1";
-      });
-    }
-    function closeContact() {
-      const panel = contactOverlay.querySelector('div');
-      panel.style.transform="translateY(12px)";
-      panel.style.opacity="0";
-      setTimeout(()=>{ contactOverlay.style.display="none"; },180);
-    }
-    contactCancelBtn.onclick = closeContact;
-    contactCloseBtn.onclick = closeContact;
-
-    contactForm.addEventListener("submit", async (e)=>{
-      e.preventDefault();
-      const data = new FormData(contactForm);
-      try {
-        const res = await fetch("/.netlify/functions/contact", { method:"POST", body:data });
-        if(res.ok) { toast("Message sent!","success"); closeContact(); contactForm.reset(); }
-        else { toast("Send failed.","error"); }
-      } catch(err) { toast("Send failed.","error"); }
-    });
-    </script>
-[Block 8/15]
-
-    /* --------------------- WRITER --------------------- */
-    let writerAutosaveTimer = null;
-
-    function writerCmd(cmd){ document.execCommand(cmd,false,null); }
-
-    function stripHtml(html){
-      const tmp=document.createElement('div');
-      tmp.innerHTML=html||'';
-      return tmp.textContent||tmp.innerText||'';
-    }
-
-    function draftKey(){
-      const sid = (window.studentProfile && (studentProfile.id||studentProfile.email)) || 'default';
-      return 'sr_draft_' + sid;
-    }
-
-    function saveDraft(quiet=false){
-      const bodyHtml = document.getElementById('writerBox').innerHTML || '';
-      const title = document.getElementById('writerTitle').value || '';
-      const payload = { title, bodyHtml, savedAt: Date.now() };
-      try {
-        localStorage.setItem(draftKey(), JSON.stringify(payload));
-        updateSavedIndicator(payload.savedAt);
-        if(!quiet) toast('Draft saved.','success',{ttl:1800});
-      } catch(e){ if(!quiet) toast('Could not save draft.','error'); }
-    }
-
-    function restoreDraft(silent=false){
-      try {
-        const raw = localStorage.getItem(draftKey());
-        if(!raw){
-          if(!silent) toast('No saved draft found.','info');
-          updateSavedIndicator(null);
-          return;
-        }
-        const payload = JSON.parse(raw);
-        document.getElementById('writerTitle').value = payload.title || '';
-        document.getElementById('writerBox').innerHTML = payload.bodyHtml || '';
-        updateWriterCounts(); updateSavedIndicator(payload.savedAt || null);
-        if(!silent) toast('Draft restored.','success',{ttl:1500});
-      } catch(e){ if(!silent) toast('Could not restore draft.','error'); }
-    }
-
-    function clearDraft(){
-      document.getElementById('writerTitle').value='';
-      document.getElementById('writerBox').innerHTML='';
-      updateWriterCounts(); updateSavedIndicator(null);
-      toast('Editor cleared. (Draft is not deleted until you save.)','info');
-    }
-
-    function copyDraft(){
-      const title = document.getElementById('writerTitle').value || '';
-      const textOnly = stripHtml(document.getElementById('writerBox').innerHTML);
-      const text = title ? (title + '\n\n' + textOnly) : textOnly;
-      navigator.clipboard.writeText(text)
-        .then(()=>toast('Copied to clipboard.','success',{ttl:1200}))
-        .catch(()=>toast('Copy failed.','error'));
-    }
-
-    function downloadDraft(){
-      const safeTitle = (document.getElementById('writerTitle').value || 'recommendation-letter')
-        .replace(/[^\w\d-_ ]+/g,'').trim() || 'letter';
-      const text = stripHtml(document.getElementById('writerBox').innerHTML);
-      const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
-      const a=document.createElement('a');
-      a.download = `${safeTitle}.txt`;
-      a.href = URL.createObjectURL(blob);
-      a.click();
-      URL.revokeObjectURL(a.href);
-    }
-
-    function attachDraft(){
-      const safeTitle=(document.getElementById('writerTitle').value||'recommendation-letter')
-        .replace(/[^\w\d-_ ]+/g,'').trim()||'letter';
-      const text = stripHtml(document.getElementById('writerBox').innerHTML).trim();
-      if(!text){ toast('Draft is empty.','error'); return; }
-      const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
-      const file = new File([blob], `${safeTitle}.txt`, {type:'text/plain'});
-      handleFile(file,true); // allowAny=true so .txt attaches
-    }
-
-    function updateWriterCounts(){
-      const text = stripHtml(document.getElementById('writerBox').innerHTML);
-      const words = text.trim()? text.trim().split(/\s+/).length : 0;
-      const chars = text.length;
-      document.getElementById('writerCount').textContent = `${words} words • ${chars} chars`;
-    }
-
-    function updateSavedIndicator(ts){
-      const el = document.getElementById('writerSaved');
-      if(!ts){ el.textContent='Not saved'; return; }
-      const when = new Date(ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-      el.textContent = `Saved ${when}`;
-    }
-
-    function scheduleAutosave(immediate=false){
-      if(!document.getElementById('writerAutosaveToggle').checked) return;
-      if(writerAutosaveTimer) clearTimeout(writerAutosaveTimer);
-      writerAutosaveTimer = setTimeout(()=>saveDraft(true), immediate?50:600);
-    }
-
-    function setupWriter(){
-      const box   = document.getElementById('writerBox');
-      const title = document.getElementById('writerTitle');
-      const autosaveToggle = document.getElementById('writerAutosaveToggle');
-
-      // initial
-      restoreDraft(true);
-      updateWriterCounts();
-
-      // editing
-      box.addEventListener('input', ()=>{ updateWriterCounts(); scheduleAutosave(); });
-      title.addEventListener('input', ()=>{ scheduleAutosave(); });
-
-      // autosave toggle
-      autosaveToggle.addEventListener('change', ()=>{
-        if(autosaveToggle.checked) scheduleAutosave(true);
-        else if(writerAutosaveTimer){ clearTimeout(writerAutosaveTimer); writerAutosaveTimer=null; }
-      });
-
-      // blur safety
-      box.addEventListener('blur', ()=>{ if(document.getElementById('writerAutosaveToggle').checked) saveDraft(true); });
-      title.addEventListener('blur', ()=>{ if(document.getElementById('writerAutosaveToggle').checked) saveDraft(true); });
-    }
-    </script>
-[Block 9/15]
-
-    /* --------------------- Upload --------------------- */
-    function setupFileUpload(){
-      const fileInput = document.getElementById('fileInput');
-      const uploadSection = document.getElementById('uploadSection');
-      if(!fileInput || !uploadSection) return;
-
-      fileInput.addEventListener('change', handleFileUpload);
-      uploadSection.addEventListener('dragover', (e)=>{ e.preventDefault(); uploadSection.classList.add('dragover'); });
-      uploadSection.addEventListener('dragleave', ()=> uploadSection.classList.remove('dragover'));
-      uploadSection.addEventListener('drop', (e)=>{
-        e.preventDefault(); uploadSection.classList.remove('dragover');
-        if(e.dataTransfer.files.length>0) handleFile(e.dataTransfer.files[0]);
-      });
-    }
-
-    function handleFileUpload(e){
-      if(e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
-    }
-
-    // allowAny=true allows .txt (writer attach) besides .pdf
-    function handleFile(file, allowAny=false){
-      if(!allowAny && file.type !== 'application/pdf'){
-        toast('Please upload a PDF file.','error'); return;
-      }
-      window.uploadedFile = file;
-      const uf = document.getElementById('uploadedFile');
-      if(uf) uf.style.display = 'block';
-      const nameEl = document.getElementById('fileName');
-      const sizeEl = document.getElementById('fileSize');
-      if(nameEl) nameEl.textContent = file.name;
-      if(sizeEl){
-        const sizeMB = (file.size/1024/1024).toFixed(1);
-        sizeEl.textContent = `${sizeMB} MB • ${allowAny ? 'Draft attached' : 'Uploaded successfully'}`;
-      }
-      toast(allowAny ? 'Draft attached to send queue.' : 'PDF attached. Ready to send.','success');
-      updateSendButton();
-    }
-
-    function removeFile(){
-      window.uploadedFile = null;
-      const uf = document.getElementById('uploadedFile');
-      if(uf) uf.style.display = 'none';
-      const fi = document.getElementById('fileInput');
-      if(fi) fi.value = '';
-      updateSendButton();
-    }
-
-    /* --------------------- Search + Autosuggest --------------------- */
-    const norm = (s)=> (s||'').toString().trim().toLowerCase();
-    let suggestWrap, activeIndex = -1, currentSuggestions = [];
-
-    function debounce(fn, wait=300){ let t; return (...args)=>{ clearTimeout(t); t = setTimeout(()=>fn(...args), wait); }; }
-
-    function setupSearch(){
-      const searchInput = document.getElementById('universitySearch');
-      const searchApplyBtn = document.getElementById('searchApplyBtn');
-      if(!searchInput || !searchApplyBtn) return;
-
-      suggestWrap = document.createElement('div');
-      suggestWrap.className = 'suggest-popover';
-      suggestWrap.id = 'suggestPopover';
-      suggestWrap.setAttribute('role','listbox');
-      suggestWrap.style.display = 'none';
-      searchInput.parentNode.appendChild(suggestWrap);
-
-      const run = (fromApply=false)=>{
-        filters.q = searchInput.value.trim().toLowerCase();
-        page = 1; flashNextRender = true;
-        refreshList();
-        if(fromApply) closeSuggest();
-      };
-      const runDebounced = debounce(()=>{
-        run(false);
-        renderSuggestions(searchInput.value);
-      }, 150);
-
-      searchApplyBtn.addEventListener('click', ()=> run(true));
-      searchInput.addEventListener('input', runDebounced);
-
-      searchInput.addEventListener('keydown', (e)=>{
-        const hasOpen = suggestWrap && suggestWrap.style.display !== 'none';
-        if(e.key === 'Enter'){
-          if(hasOpen && activeIndex >= 0 && currentSuggestions[activeIndex]){
-            pickSuggestion(currentSuggestions[activeIndex]);
-            e.preventDefault();
-            return;
-          }
-          e.preventDefault(); run(true); return;
-        }
-        if(e.key === 'Escape'){
-          e.preventDefault();
-          if(hasOpen){ closeSuggest(); return; }
-          searchInput.value=''; run(true);
-        }
-        if(hasOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp')){
-          e.preventDefault();
-          const max = currentSuggestions.length - 1;
-          if(e.key === 'ArrowDown') activeIndex = (activeIndex + 1 > max) ? 0 : activeIndex + 1;
-          if(e.key === 'ArrowUp')   activeIndex = (activeIndex - 1 < 0)   ? max : activeIndex - 1;
-          updateActiveSuggestion();
-        }
-      });
-
-      document.addEventListener('click', (ev)=>{
-        if(!suggestWrap) return;
-        if(ev.target === suggestWrap || suggestWrap.contains(ev.target)) return;
-        if(ev.target === searchInput) return;
-        closeSuggest();
-      });
-    }
-
-    function escapeHtml(s){
-      return (s??'').toString()
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-    }
-
-    function highlight(text, query){
-      const q = norm(query);
-      if(!q) return text;
-      const i = norm(text).indexOf(q);
-      if(i < 0) return text;
-      return escapeHtml(text.slice(0,i)) +
-             `<span class="suggest-highlight">${escapeHtml(text.slice(i, i+q.length))}</span>` +
-             escapeHtml(text.slice(i+q.length));
-    }
-
-    function renderSuggestions(query){
-      if(!suggestWrap) return;
-      const q = norm(query);
-      if(!q){ closeSuggest(); return; }
-      const scored = [];
-      for(let i=0;i<universities.length;i++){
-        const u = universities[i];
-        const nm = norm(u.name||'');
-        const ct = norm(u.city||'');
-        const st = norm(u.state||'');
-        let score = 0;
-        if(nm.startsWith(q)) score = 2;
-        else if(nm.includes(q)) score = 1.5;
-        else if(ct.includes(q) || st.includes(q)) score = 1;
-        if(score>0) scored.push([score, u]);
-        if(scored.length > 600) break;
-      }
-      scored.sort((a,b)=> b[0]-a[0] || (a[1].name||'').localeCompare(b[1].name||''));
-      const list = scored.slice(0,10).map(x=>x[1]);
-      currentSuggestions = list;
-      activeIndex = list.length ? 0 : -1;
-
-      if(!list.length){ closeSuggest(); return; }
-
-      suggestWrap.innerHTML = '';
-      list.forEach((u, idx)=>{
-        const item = document.createElement('div');
-        item.className = 'suggest-item';
-        item.setAttribute('role','option');
-        item.setAttribute('aria-selected', idx===activeIndex ? 'true' : 'false');
-        const nm = escapeHtml(u.name || 'Unknown');
-        const loc = escapeHtml([u.city,u.state].filter(Boolean).join(', '));
-        const marked = highlight(nm, query);
-        item.innerHTML = `
-          <span class="material-icons" aria-hidden="true" style="font-size:1rem;">school</span>
-          <div>
-            <div>${marked}</div>
-            ${loc ? `<div class="suggest-muted">${loc}</div>` : ''}
-          </div>`;
-        item.addEventListener('mouseenter', ()=>{ activeIndex=idx; updateActiveSuggestion(); });
-        item.addEventListener('click', ()=> pickSuggestion(u));
-        suggestWrap.appendChild(item);
-      });
-      suggestWrap.style.display = 'block';
-    }
-
-    function updateActiveSuggestion(){
-      if(!suggestWrap) return;
-      Array.from(suggestWrap.children).forEach((el,i)=> el.setAttribute('aria-selected', i===activeIndex ? 'true':'false'));
-    }
-
-    function closeSuggest(){
-      if(!suggestWrap) return;
-      suggestWrap.style.display = 'none';
-      activeIndex = -1; currentSuggestions = [];
-    }
-
-    function pickSuggestion(u){
-      const input = document.getElementById('universitySearch');
-      input.value = u.name || '';
-      filters.q = norm(u.name);
-      page = 1; flashNextRender = true;
-      refreshList(); closeSuggest();
-
-      const idx = filtered.findIndex(x => String(x.unitid) === String(u.unitid));
-      if(idx >= 0){
-        page = Math.floor(idx / pageSize) + 1;
-        refreshList();
-        requestAnimationFrame(()=>{
-          const cards = Array.from(document.querySelectorAll('.university-card'));
-          const startIdx = (page - 1) * pageSize;
-          const card = cards[idx - startIdx];
-          if(card){
-            card.classList.add('flash');
-            setTimeout(()=>card.classList.remove('flash'), 1000);
-            card.scrollIntoView({behavior:'smooth', block:'nearest'});
-          }
-        });
-      }
-    }
-
-    /* --------------------- Filters + Pagination --------------------- */
-    const filters = { q:'', state:'', type:'', level:'', sort:'name_asc' };
-    let page = 1, pageSize = 40, flashNextRender = false;
-    let universities = [], filtered = [];
-    const CACHE_KEY = 'sr_us_institutions_v1';
-
-    function setupFilterHandlers(){
-      const stateFilter = document.getElementById('stateFilter');
-      const typeFilter  = document.getElementById('typeFilter');
-      const levelFilter = document.getElementById('levelFilter');
-      const sortBy      = document.getElementById('sortBy');
-      const applyBtn    = document.getElementById('filterApplyBtn');
-
-      if(applyBtn){
-        applyBtn.addEventListener('click', ()=>{
-          filters.state = stateFilter.value;
-          filters.type  = typeFilter.value;
-          filters.level = levelFilter.value;
-          filters.sort  = sortBy.value;
-          page = 1; flashNextRender = true;
-          refreshList();
-        });
-      }
-
-      const resetBtn = document.getElementById('resetBtn');
-      if(resetBtn){
-        resetBtn.addEventListener('click', ()=>{
-          document.getElementById('universitySearch').value = '';
-          stateFilter.value=''; typeFilter.value=''; levelFilter.value='';
-          sortBy.value='name_asc';
-          filters.q = filters.state = filters.type = filters.level = '';
-          filters.sort = 'name_asc';
-          page = 1; flashNextRender = true;
-          refreshList();
-          toast('Filters reset.','info',{ttl:2000});
-        });
-      }
-
-      const selectPageBtn = document.getElementById('selectPageBtn');
-      if(selectPageBtn){
-        selectPageBtn.addEventListener('click', ()=>{
-          const start = (page - 1) * pageSize;
-          const end   = Math.min(filtered.length, start + pageSize);
-          const effective = getEffectiveSelection();
-          filtered.slice(start,end).forEach(u => effective.add(u.unitid));
-          filtered.slice(start,end).forEach(u=>{
-            if(studentUnitIds.has(u.unitid)){ removedByRecommender.delete(u.unitid); }
-            else { addedByRecommender.add(u.unitid); }
-          });
-          renderPage(); updateSelectedList(); updateSendButton();
-          toast('Selected all on current page.','success',{ttl:1500});
-        });
-      }
-    }
-
-    function setupPagingHandlers(){
-      const prev = document.getElementById('prevPage');
-      const next = document.getElementById('nextPage');
-      const ps   = document.getElementById('pageSize');
-      if(prev){
-        prev.addEventListener('click', ()=>{
-          const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-          if(page > 1) page--;
-          if(page < 1) page = 1;
-          refreshList();
-        });
-      }
-      if(next){
-        next.addEventListener('click', ()=>{
-          const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-          if(page < totalPages) page++;
-          refreshList();
-        });
-      }
-      if(ps){
-        ps.addEventListener('change', (e)=>{
-          pageSize = parseInt(e.target.value,10) || 40;
-          page = 1; refreshList();
-        });
-      }
-    }
-
-    function updateMeta(){
-      const start = filtered.length ? ((page - 1) * pageSize + 1) : 0;
-      const end   = Math.min(filtered.length, page * pageSize);
-      const meta = document.getElementById('resultMeta');
-      if(meta) meta.textContent = `Showing ${start}-${end} of ${filtered.length} (from ${universities.length} total)`;
-    }
-
-    function updatePager(){
-      const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-      const info = document.getElementById('pageInfo');
-      if(info) info.textContent = `Page ${Math.min(page, totalPages)} of ${totalPages}`;
-      const prev = document.getElementById('prevPage');
-      const next = document.getElementById('nextPage');
-      if(prev) prev.disabled = (page <= 1);
-      if(next) next.disabled = (page >= totalPages);
-      updateMeta();
-    }
-
-    function computeFiltered(){
-      filtered = universities.filter(u=>{
-        const q = norm(filters.q);
-        const qOk = !q || (u.name && norm(u.name).includes(q)) ||
-                          (u.city && norm(u.city).includes(q)) ||
-                          (u.state && norm(u.state).includes(q));
-        const stOk = !filters.state || u.state === filters.state;
-        const tyOk = !filters.type  || u.control === filters.type;
-        const lvOk = !filters.level || u.level   === filters.level;
-        return qOk && stOk && tyOk && lvOk;
-      });
-
-      if(filters.sort === 'name_asc'){
-        filtered.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
-      } else if(filters.sort === 'state_asc'){
-        filtered.sort((a,b)=> (a.state||'').localeCompare(b.state||'') || (a.name||'').localeCompare(b.name||''));
-      }
-
-      populateUniversitySelectOptions(filtered.length ? filtered : universities);
-    }
-
-    function refreshList(){
-      computeFiltered();
-      renderPage();
-    }
-
-    function renderPage(){
-      const start = (page - 1) * pageSize;
-      const end   = start + pageSize;
-      const slice = filtered.slice(start, end);
-      renderUniversities(slice);
-      updatePager();
-
-      const grid = document.getElementById('universityGrid');
-      const empty = document.getElementById('emptyState');
-      if(filtered.length === 0){
-        if(grid) grid.style.display='none';
-        if(empty){
-          empty.style.display='block';
-          const retryBtn = document.getElementById('retryLoadBtn');
-          if(retryBtn) retryBtn.style.display='none';
-        }
-      } else {
-        if(empty) empty.style.display='none';
-        if(grid) grid.style.display='grid';
-      }
-    }
-
-    /* --------------------- Render + selection --------------------- */
-    let studentProfile = null;
-    let studentUnitIds = new Set();
-    let addedByRecommender = new Set();
-    let removedByRecommender = new Set();
-
-    function getEffectiveSelection(){
-      const base = new Set(studentUnitIds);
-      removedByRecommender.forEach(id => base.delete(id));
-      addedByRecommender.forEach(id => base.add(id));
-      return base;
-    }
-
-    function renderUniversities(list){
-      const grid = document.getElementById('universityGrid');
-      if(!grid) return;
-      grid.innerHTML = '';
-      const frag = document.createDocumentFragment();
-      const effective = getEffectiveSelection();
-
-      list.forEach(uni=>{
-        const card = document.createElement('div');
-        card.className = 'university-card' + (effective.has(uni.unitid) ? ' selected' : '');
-        card.setAttribute('role','listitem');
-        card.title = uni.sector || uni.control || '';
-        card.addEventListener('click', ()=> toggleUniversity(uni.unitid));
-        card.innerHTML = `
-          <div class="university-header">
-            <div class="university-logo">${escapeHtml((uni.name||'?').charAt(0))}</div>
-            <div>
-              <div class="university-name">${escapeHtml(uni.name || 'Unknown Institution')}</div>
-              <div class="university-location">${escapeHtml(uni.city || '')}${(uni.city && uni.state)?', ':''}${escapeHtml(uni.state || '')}</div>
-              ${(uni.level || uni.control) ? `<span class="university-pill">${[uni.control, uni.level].filter(Boolean).map(escapeHtml).join(' • ')}</span>` : ''}
-            </div>
-          </div>`;
-        if(flashNextRender){
-          card.classList.add('flash');
-          setTimeout(()=>card.classList.remove('flash'), 750);
-        }
-        frag.appendChild(card);
-      });
-
-      grid.appendChild(frag);
-      if(flashNextRender) flashNextRender=false;
-    }
-
-    function toggleUniversity(unitid){
-      const allowEdits = document.getElementById('allowEditsToggle')?.checked;
-
-      if(!studentProfile || allowEdits){
-        if(studentUnitIds.has(unitid)){
-          if(removedByRecommender.has(unitid)) removedByRecommender.delete(unitid);
-          else removedByRecommender.add(unitid);
-          addedByRecommender.delete(unitid);
-        } else {
-          if(addedByRecommender.has(unitid)) addedByRecommender.delete(unitid);
-          else addedByRecommender.add(unitid);
-        }
-      } else {
-        if(studentUnitIds.has(unitid)){
-          if(removedByRecommender.has(unitid)) removedByRecommender.delete(unitid);
-          else removedByRecommender.add(unitid);
-        } else {
-          toast('Student has locked the list. You cannot add new universities.','error');
-        }
-      }
-
-      renderPage(); updateSelectedList(); updateSendButton();
-    }
-
-    function removeFromEffective(unitid){
-      if(studentUnitIds.has(unitid)){
-        removedByRecommender.add(unitid);
-        addedByRecommender.delete(unitid);
-      } else {
-        addedByRecommender.delete(unitid);
-      }
-      renderPage(); updateSelectedList(); updateSendButton();
-    }
-
-    function updateSelectedList(){
-      const container = document.getElementById('selectedList');
-      if(!container) return;
-      const effective = getEffectiveSelection();
-
-      // count label (if you have a counter element)
-      const counter = document.getElementById('selectedCount');
-      if(counter) counter.textContent = `${effective.size} universities selected`;
-
-      const chips = [];
-      effective.forEach(unitid=>{
-        const uni = filtered.find(u=>u.unitid===unitid) || universities.find(u=>u.unitid===unitid);
-        const name = uni ? uni.name : 'Unknown';
-        const badges = [];
-        if(studentUnitIds.has(unitid)) badges.push('<span class="badge badge-student">Student</span>');
-        if(addedByRecommender.has(unitid)) badges.push('<span class="badge badge-added">You added</span>');
-        if(removedByRecommender.has(unitid)) badges.push('<span class="badge badge-removed">Removed</span>');
-        chips.push(`
-          <div class="selected-tag">
-            ${escapeHtml(name)}
-            ${badges.length ? `<span style="margin-left:.35rem; display:inline-flex; gap:.25rem;">${badges.join('')}</span>` : ''}
-            <div class="remove-tag" title="Remove from sending" onclick="removeFromEffective(${JSON.stringify(unitid)})">×</div>
-          </div>
-        `);
-      });
-      container.innerHTML = chips.join('');
-    }
-
-    function updateSendButton(){
-      const btn = document.getElementById('sendBtn');
-      if(!btn) return;
-      const effective = getEffectiveSelection();
-      btn.disabled = !(window.uploadedFile && effective.size > 0);
-    }
-<!-- [11/15] — Student profile, browse-all select, and dataset loader (new JSON path) -->
-/* --------------------- Student profile (mock) --------------------- */
-async function fetchStudentProfile(studentIdOrEmail) {
-  // In production, replace this with a real API call to fetch a student's preselected list
-  // For now, pick ~10 random institutions so the UI is functional.
-  const picks = [];
-  const pool = [...universities].slice(0, 600);
-  while (picks.length < 10 && pool.length) {
-    const idx = Math.floor(Math.random() * pool.length);
-    picks.push(pool[idx].unitid);
-    pool.splice(idx, 1);
-  }
-  return {
-    id: studentIdOrEmail,
-    email: /@/.test(studentIdOrEmail) ? studentIdOrEmail : (studentIdOrEmail + '@example.edu'),
-    name: `Student ${studentIdOrEmail}`,
-    allowRecommenderEdits: true,
-    selectedUnitIds: picks
+   <!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
+
+<script>
+/* ===================== tiny toast ===================== */
+(function(){
+  window.toast = function(msg, type='info', opts={}){
+    const wrap = document.getElementById('toastWrap') || (()=>{ const d=document.createElement('div'); d.id='toastWrap'; d.className='toast-wrap'; document.body.appendChild(d); return d; })();
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `
+      <div class="icon">${type==='success'?'✓':type==='error'?'!':'ℹ︎'}</div>
+      <div class="msg">${msg}</div>
+      <button class="x" aria-label="Close">×</button>`;
+    wrap.appendChild(el);
+    const ttl = opts.ttl || 2500;
+    const close = ()=>{ if(el.parentNode){ el.parentNode.removeChild(el); } };
+    el.querySelector('.x').onclick = close;
+    setTimeout(close, ttl);
   };
-}
+})();
+</script>
 
-async function loadStudentProfile(studentIdOrEmail) {
-  try {
-    const prof = await fetchStudentProfile(studentIdOrEmail);
-    studentProfile = prof;
-    studentUnitIds = new Set(prof.selectedUnitIds || []);
-    addedByRecommender.clear();
-    removedByRecommender.clear();
+<script>
+/* ===================== utilities & state ===================== */
+const norm = s => (s||'').toString().trim().toLowerCase();
+const escapeHtml = s => (s??'').toString()
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const debounce = (fn,wait=300)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),wait); }; };
 
-    document.getElementById('studentTitle').textContent = `${prof.name}`;
-    document.getElementById('studentMeta').textContent =
-      `Preselected: ${studentUnitIds.size} universities • Edits ${prof.allowRecommenderEdits ? 'allowed' : 'locked'}`;
-    const editsToggle = document.getElementById('allowEditsToggle');
-    if (editsToggle) editsToggle.checked = !!prof.allowRecommenderEdits;
+let universities = [];       // full dataset
+let filtered = [];           // filtered working set
+let page = 1, pageSize = 40; // paging
+let flashNextRender = false;
 
-    page = 1;
-    refreshList();
-    updateSelectedList();
-    updateSendButton();
-    toast(`Loaded ${prof.name} with ${studentUnitIds.size} preselected universities.`, 'success');
-    persistAndSync();
-  } catch (err) {
-    console.error(err);
-    toast('Could not load student profile.', 'error');
+let studentProfile = null;
+let studentUnitIds = new Set();     // preselected by student
+let addedByRecommender = new Set(); // extra you added
+let removedByRecommender = new Set();// you removed from student's list
+const getEffectiveSelection = ()=>{
+  const s = new Set(studentUnitIds);
+  removedByRecommender.forEach(id=>s.delete(id));
+  addedByRecommender.forEach(id=>s.add(id));
+  return s;
+};
+
+/* ===================== THEME ===================== */
+(function themeInit(){
+  const KEY='sr_theme';
+  function apply(t){ document.body.classList.toggle('sr-dark', t==='dark'); }
+  apply(localStorage.getItem(KEY)||'light');
+  const tgl = document.getElementById('themeToggle');
+  if (tgl) {
+    tgl.checked = (localStorage.getItem(KEY)==='dark');
+    tgl.onchange = e=>{ const mode=e.target.checked?'dark':'light'; localStorage.setItem(KEY,mode); apply(mode); toast(`Theme: ${mode}`,'info',{ttl:1200}); };
   }
+})();
+</script>
+
+<script>
+/* ===================== CONTACT ADMIN (Netlify Forms) ===================== */
+(function contactAdmin(){
+  const dropdown = document.getElementById('userDropdown');
+  const avatar   = document.getElementById('userAvatarBtn');
+  const overlay  = document.getElementById('contactOverlay');
+  const form     = document.getElementById('contactForm');
+
+  // open/close dropdown
+  function toggleUserDropdown(){
+    const dd = document.getElementById('userDropdown');
+    const show = !dd.classList.contains('show');
+    dd.classList.toggle('show', show);
+    avatar.setAttribute('aria-expanded', show?'true':'false');
+  }
+  window.toggleUserDropdown = toggleUserDropdown;
+  avatar?.addEventListener('click', (e)=>{ e.stopPropagation(); toggleUserDropdown(); });
+  document.addEventListener('click', (e)=>{
+    if (!dropdown.contains(e.target) && e.target!==avatar) dropdown.classList.remove('show');
+  });
+
+  // open overlay from dropdown item
+  const contactItem = document.querySelector('.dropdown-item#contactAdminItem,[data-sr="contact-admin"]') || document.getElementById('contactAdminItem');
+  contactItem?.addEventListener('click', ()=>{
+    dropdown.classList.remove('show');
+    overlay.classList.add('show');
+    document.getElementById('contactFirst')?.focus();
+  });
+
+  // close buttons
+  document.getElementById('contactCancelBtn')?.addEventListener('click', ()=> overlay.classList.remove('show'));
+  document.getElementById('contactCloseBtn')?.addEventListener('click', ()=> overlay.classList.remove('show'));
+  document.getElementById('contactCancel')?.addEventListener('click', ()=> overlay.classList.remove('show'));
+  document.getElementById('contactClose')?.addEventListener('click', ()=> overlay.classList.remove('show'));
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') overlay.classList.remove('show'); });
+
+  // submit → Netlify Forms + fallback
+  form?.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const data = new FormData(form);
+    try {
+      const resp = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/x-www-form-urlencoded' },
+        body: new URLSearchParams([...data, ['form-name','contact-admin']]).toString()
+      });
+      if (resp.ok) {
+        toast('Message sent.','success');
+        form.reset(); overlay.classList.remove('show');
+        return;
+      }
+      throw new Error('Bad response');
+    } catch {
+      // fallback: open mail client (address not shown on page)
+      const to='swetha.rajan103@gmail.com';
+      const subject=encodeURIComponent('StellarRec — Admin Contact');
+      const body=encodeURIComponent(`First name: ${data.get('first')||''}\nEmail: ${data.get('email')||''}\n\nQuery:\n${data.get('query')||data.get('message')||''}`);
+      window.location.href=`mailto:${to}?subject=${subject}&body=${body}`;
+      overlay.classList.remove('show');
+      toast('Opening your email client…','info');
+    }
+  });
+})();
+</script>
+
+<script>
+/* ===================== WRITER ===================== */
+let writerAutosaveTimer=null;
+function writerCmd(cmd){ document.execCommand(cmd,false,null); }
+function stripHtml(html){ const t=document.createElement('div'); t.innerHTML=html||''; return t.textContent||t.innerText||''; }
+function draftKey(){ const sid=(window.studentProfile && (studentProfile.id||studentProfile.email))||'default'; return 'sr_draft_'+sid; }
+function saveDraft(quiet=false){
+  const bodyHtml=document.getElementById('writerBox').innerHTML||'';
+  const title=document.getElementById('writerTitle').value||'';
+  const payload={title, bodyHtml, savedAt:Date.now()};
+  try{ localStorage.setItem(draftKey(), JSON.stringify(payload)); updateSavedIndicator(payload.savedAt); if(!quiet) toast('Draft saved.','success',{ttl:1800}); }catch(e){ if(!quiet) toast('Could not save draft.','error'); }
+}
+function restoreDraft(silent=false){
+  try{
+    const raw=localStorage.getItem(draftKey());
+    if(!raw){ if(!silent) toast('No saved draft found.','info'); updateSavedIndicator(null); return; }
+    const p=JSON.parse(raw);
+    document.getElementById('writerTitle').value=p.title||'';
+    document.getElementById('writerBox').innerHTML=p.bodyHtml||'';
+    updateWriterCounts(); updateSavedIndicator(p.savedAt||null);
+    if(!silent) toast('Draft restored.','success',{ttl:1500});
+  }catch(e){ if(!silent) toast('Could not restore draft.','error'); }
+}
+function clearDraft(){ document.getElementById('writerTitle').value=''; document.getElementById('writerBox').innerHTML=''; updateWriterCounts(); updateSavedIndicator(null); toast('Editor cleared.','info'); }
+function copyDraft(){
+  const t=document.getElementById('writerTitle').value||'';
+  const text=t? (t+'\n\n'+stripHtml(document.getElementById('writerBox').innerHTML)) : stripHtml(document.getElementById('writerBox').innerHTML);
+  navigator.clipboard.writeText(text).then(()=>toast('Copied.','success',{ttl:1200})).catch(()=>toast('Copy failed.','error'));
+}
+function downloadDraft(){
+  const title=(document.getElementById('writerTitle').value||'recommendation-letter').replace(/[^\w\d-_ ]+/g,'').trim()||'letter';
+  const text=stripHtml(document.getElementById('writerBox').innerHTML);
+  const blob=new Blob([text],{type:'text/plain;charset=utf-8'}); const a=document.createElement('a'); a.download=`${title}.txt`; a.href=URL.createObjectURL(blob); a.click(); URL.revokeObjectURL(a.href);
+}
+function attachDraft(){
+  const title=(document.getElementById('writerTitle').value||'recommendation-letter').replace(/[^\w\d-_ ]+/g,'').trim()||'letter';
+  const text=stripHtml(document.getElementById('writerBox').innerHTML).trim(); if(!text){ toast('Draft is empty.','error'); return; }
+  const blob=new Blob([text],{type:'text/plain;charset=utf-8'}); const file=new File([blob], `${title}.txt`, {type:'text/plain'}); handleFile(file,true);
+}
+function updateWriterCounts(){ const text=stripHtml(document.getElementById('writerBox').innerHTML); const words=text.trim()?text.trim().split(/\s+/).length:0; document.getElementById('writerCount').textContent=`${words} words • ${text.length} chars`; }
+function updateSavedIndicator(ts){ const el=document.getElementById('writerSaved'); if(!ts){ el.textContent='Not saved'; return; } el.textContent='Saved '+new Date(ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
+function scheduleAutosave(immediate=false){ const t=document.getElementById('writerAutosaveToggle'); if(!t?.checked) return; if(writerAutosaveTimer) clearTimeout(writerAutosaveTimer); writerAutosaveTimer=setTimeout(()=>saveDraft(true), immediate?50:600); }
+function setupWriter(){
+  const box=document.getElementById('writerBox'); const title=document.getElementById('writerTitle'); const autosave=document.getElementById('writerAutosaveToggle');
+  restoreDraft(true); updateWriterCounts();
+  box.addEventListener('input', ()=>{ updateWriterCounts(); scheduleAutosave(); });
+  title.addEventListener('input', ()=> scheduleAutosave() );
+  autosave?.addEventListener('change', ()=>{ if(autosave.checked) scheduleAutosave(true); else if(writerAutosaveTimer){ clearTimeout(writerAutosaveTimer); writerAutosaveTimer=null; } });
+  box.addEventListener('blur', ()=>{ if(document.getElementById('writerAutosaveToggle').checked) saveDraft(true); });
+  title.addEventListener('blur', ()=>{ if(document.getElementById('writerAutosaveToggle').checked) saveDraft(true); });
+
+  // Toolbar buttons using data-wcmd
+  document.querySelectorAll('.writer-toolbar [data-wcmd]').forEach(btn=>{
+    btn.addEventListener('click', ()=> writerCmd(btn.getAttribute('data-wcmd')));
+  });
+
+  document.getElementById('saveDraftBtn')?.addEventListener('click', ()=>saveDraft(false));
+  document.getElementById('restoreDraftBtn')?.addEventListener('click', ()=>restoreDraft(false));
+  document.getElementById('clearDraftBtn')?.addEventListener('click', clearDraft);
+  document.getElementById('copyDraftBtn')?.addEventListener('click', copyDraft);
+  document.getElementById('downloadDraftBtn')?.addEventListener('click', downloadDraft);
+  document.getElementById('attachDraftBtn')?.addEventListener('click', attachDraft);
+}
+</script>
+
+<script>
+/* ===================== UPLOAD ===================== */
+function setupUpload(){
+  const fileInput = document.getElementById('fileInput');
+  const chooseBtn = document.getElementById('chooseFileBtn');
+  const uploadArea= document.getElementById('uploadArea');
+  const removeBtn = document.getElementById('removeFileBtn');
+
+  chooseBtn?.addEventListener('click', ()=> fileInput?.click());
+  fileInput?.addEventListener('change', e=>{ if(e.target.files?.[0]) handleFile(e.target.files[0]); });
+
+  uploadArea?.addEventListener('dragover', e=>{ e.preventDefault(); document.getElementById('uploadSection').classList.add('dragover'); });
+  uploadArea?.addEventListener('dragleave', ()=> document.getElementById('uploadSection').classList.remove('dragover'));
+  uploadArea?.addEventListener('drop', e=>{
+    e.preventDefault(); document.getElementById('uploadSection').classList.remove('dragover');
+    const f = e.dataTransfer.files?.[0]; if(f) handleFile(f);
+  });
+
+  removeBtn?.addEventListener('click', removeFile);
 }
 
-/* --------------------- Browse-all select --------------------- */
-function setupUniversitySelect() {
-  populateUniversitySelectOptions(universities);
-  const sel = document.getElementById('universitySelect');
-  if (!sel) return;
+function handleFile(file, allowAny=false){
+  if(!allowAny && file.type !== 'application/pdf'){ toast('Please upload a PDF file.','error'); return; }
+  window.uploadedFile = file;
+  document.getElementById('uploadedFile').style.display='block';
+  document.getElementById('fileName').textContent = file.name;
+  const sizeMB=(file.size/1024/1024).toFixed(1);
+  document.getElementById('fileSize').textContent = `${sizeMB} MB • ${allowAny?'Draft attached':'Uploaded successfully'}`;
+  toast(allowAny ? 'Draft attached to send queue.' : 'PDF attached. Ready to send.','success');
+  updateSendButton();
+}
+function removeFile(){
+  window.uploadedFile=null;
+  document.getElementById('uploadedFile').style.display='none';
+  const fi=document.getElementById('fileInput'); if(fi) fi.value='';
+  updateSendButton();
+}
+</script>
 
-  sel.addEventListener('change', (e) => {
-    const val = e.target.value;
-    if (!val) return;
+<script>
+/* ===================== SEARCH, FILTERS, PAGING ===================== */
+const filters = { q:'', state:'', type:'', level:'', sort:'name_asc' };
+let suggestWrap=null, activeIndex=-1, currentSuggestions=[];
 
-    // Clear filters so the selected item is easy to see in the main list
-    filters.q = filters.state = filters.type = filters.level = '';
-    const qInput = document.getElementById('universitySearch');
-    if (qInput) qInput.value = '';
-    document.getElementById('stateFilter').value = '';
-    document.getElementById('typeFilter').value  = '';
-    document.getElementById('levelFilter').value = '';
+function setupUniversitySearch(){
+  const input = document.getElementById('universitySearch');
+  const apply = document.getElementById('searchApplyBtn');
+  if (!input || !apply) return;
+
+  // suggest container sits just under input
+  suggestWrap = document.getElementById('searchSuggest');
+
+  const run = (fromApply=false)=>{
+    filters.q = norm(input.value);
+    page=1; flashNextRender=true;
     refreshList();
+    if(fromApply) closeSuggest();
+  };
+  const runDebounced = debounce(()=>{ run(false); renderSuggestions(input.value); },150);
 
-    // Jump to the page containing the chosen institution
-    const idx = filtered.findIndex(u => String(u.unitid) === String(val));
-    if (idx >= 0) {
-      page = Math.floor(idx / pageSize) + 1;
-      refreshList();
-      requestAnimationFrame(() => {
-        const cards = Array.from(document.querySelectorAll('.university-card'));
-        const startIdx = (page - 1) * pageSize;
-        const card = cards[idx - startIdx];
-        if (card) {
-          card.classList.add('flash');
-          setTimeout(() => card.classList.remove('flash'), 1000);
-          card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      });
+  apply.addEventListener('click', ()=> run(true));
+  input.addEventListener('input', runDebounced);
+
+  input.addEventListener('keydown', (e)=>{
+    const open = suggestWrap && suggestWrap.style.display!=='none';
+    if(e.key==='Enter'){
+      if(open && activeIndex>=0 && currentSuggestions[activeIndex]){
+        pickSuggestion(currentSuggestions[activeIndex]); e.preventDefault(); return;
+      }
+      e.preventDefault(); run(true); return;
     }
-
-    // Add to effective selection immediately
-    const uidNum = Number(val);
-    const uid = Number.isNaN(uidNum) ? val : uidNum;
-    if (studentUnitIds.has(uid)) {
-      removedByRecommender.delete(uid);
-    } else {
-      addedByRecommender.add(uid);
+    if(e.key==='Escape'){ e.preventDefault(); if(open){ closeSuggest(); return; } input.value=''; run(true); }
+    if(open && (e.key==='ArrowDown'||e.key==='ArrowUp')){
+      e.preventDefault();
+      const max=currentSuggestions.length-1;
+      activeIndex = e.key==='ArrowDown' ? (activeIndex+1>max?0:activeIndex+1) : (activeIndex-1<0?max:activeIndex-1);
+      updateActiveSuggestion();
     }
-    updateSelectedList();
-    updateSendButton();
-    persistAndSync();
+  });
 
-    // Reset dropdown to placeholder
-    sel.selectedIndex = 0;
+  document.addEventListener('click',(ev)=>{
+    if(!suggestWrap) return;
+    if(ev.target===suggestWrap || suggestWrap.contains(ev.target)) return;
+    if(ev.target===input) return;
+    closeSuggest();
   });
 }
 
-function populateUniversitySelectOptions(list) {
-  const sel = document.getElementById('universitySelect');
-  if (!sel) return;
-  // Keep the placeholder option
-  const placeholder = sel.options[0];
-  sel.innerHTML = '';
-  sel.appendChild(placeholder);
+function renderSuggestions(query){
+  if(!suggestWrap) return;
+  const q=norm(query); if(!q){ closeSuggest(); return; }
+  const scored=[];
+  for(const u of universities){
+    const nm=norm(u.name||''), ct=norm(u.city||''), st=norm(u.state||'');
+    let score=0; if(nm.startsWith(q)) score=2; else if(nm.includes(q)) score=1.5; else if(ct.includes(q)||st.includes(q)) score=1;
+    if(score>0) scored.push([score,u]); if(scored.length>600) break;
+  }
+  scored.sort((a,b)=> b[0]-a[0] || (a[1].name||'').localeCompare(b[1].name||'')); 
+  const list=scored.slice(0,10).map(x=>x[1]);
+  currentSuggestions=list; activeIndex=list.length?0:-1;
+  if(!list.length){ closeSuggest(); return; }
 
-  const sorted = [...list].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-  const frag = document.createDocumentFragment();
-  sorted.forEach(u => {
-    const opt = document.createElement('option');
-    opt.value = u.unitid;
-    const loc = [u.city, u.state].filter(Boolean).join(', ');
-    opt.textContent = `${u.name || 'Unknown Institution'}${loc ? ' — ' + loc : ''}`;
-    frag.appendChild(opt);
+  suggestWrap.innerHTML='';
+  list.forEach((u,idx)=>{
+    const item=document.createElement('div'); item.className='suggest-item'; item.setAttribute('role','option'); item.setAttribute('aria-selected', idx===activeIndex?'true':'false');
+    const loc=[u.city,u.state].filter(Boolean).join(', ');
+    item.innerHTML = `
+      <span class="material-icons" aria-hidden="true" style="font-size:1rem;">school</span>
+      <div>
+        <div>${highlight(u.name, query)}</div>
+        ${loc?`<div class="suggest-muted">${escapeHtml(loc)}</div>`:''}
+      </div>`;
+    item.addEventListener('mouseenter', ()=>{ activeIndex=idx; updateActiveSuggestion(); });
+    item.addEventListener('click', ()=> pickSuggestion(u) );
+    suggestWrap.appendChild(item);
+  });
+  suggestWrap.style.display='block';
+}
+function highlight(text, query){
+  const q=norm(query); if(!q) return escapeHtml(text);
+  const i=norm(text).indexOf(q);
+  if(i<0) return escapeHtml(text);
+  return escapeHtml(text.slice(0,i)) + `<span class="suggest-highlight">${escapeHtml(text.slice(i,i+q.length))}</span>` + escapeHtml(text.slice(i+q.length));
+}
+function updateActiveSuggestion(){
+  if(!suggestWrap) return;
+  [...suggestWrap.children].forEach((el,i)=> el.setAttribute('aria-selected', i===activeIndex?'true':'false'));
+}
+function closeSuggest(){ if(!suggestWrap) return; suggestWrap.style.display='none'; activeIndex=-1; currentSuggestions=[]; }
+function pickSuggestion(u){
+  const input=document.getElementById('universitySearch'); input.value=u.name||'';
+  filters.q = norm(u.name); page=1; flashNextRender=true; refreshList(); closeSuggest();
+  const idx=filtered.findIndex(x=>String(x.unitid)===String(u.unitid));
+  if(idx>=0){
+    page=Math.floor(idx/pageSize)+1; refreshList();
+    requestAnimationFrame(()=>{
+      const cards=[...document.querySelectorAll('.university-card')];
+      const startIdx=(page-1)*pageSize;
+      const card=cards[idx-startIdx];
+      if(card){ card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'),1000); card.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+    });
+  }
+}
+
+function setupFilterHandlers(){
+  const stateFilter=document.getElementById('stateFilter');
+  const typeFilter =document.getElementById('typeFilter');
+  const levelFilter=document.getElementById('levelFilter');
+  const sortBy     =document.getElementById('sortBy');
+  const applyBtn   =document.getElementById('filterApplyBtn');
+  const resetBtn   =document.getElementById('resetBtn');
+  const selectPageBtn=document.getElementById('selectPageBtn');
+
+  applyBtn?.addEventListener('click', ()=>{
+    filters.state=stateFilter.value; filters.type=typeFilter.value; filters.level=levelFilter.value; filters.sort=sortBy.value;
+    page=1; flashNextRender=true; refreshList();
+  });
+
+  resetBtn?.addEventListener('click', ()=>{
+    document.getElementById('universitySearch').value=''; stateFilter.value=''; typeFilter.value=''; levelFilter.value=''; sortBy.value='name_asc';
+    filters.q=filters.state=filters.type=filters.level=''; filters.sort='name_asc'; page=1; flashNextRender=true; refreshList();
+    toast('Filters reset.','info',{ttl:1500});
+  });
+
+  selectPageBtn?.addEventListener('click', ()=>{
+    const start=(page-1)*pageSize, end=Math.min(filtered.length, start+pageSize);
+    const eff=getEffectiveSelection();
+    filtered.slice(start,end).forEach(u=> eff.add(u.unitid));
+    filtered.slice(start,end).forEach(u=>{
+      if(studentUnitIds.has(u.unitid)) removedByRecommender.delete(u.unitid);
+      else addedByRecommender.add(u.unitid);
+    });
+    renderPage(); updateSelectedList(); updateSendButton();
+    toast('Selected all on current page.','success',{ttl:1200});
+  });
+}
+
+function setupPagination(){
+  const prev=document.getElementById('prevPage');
+  const next=document.getElementById('nextPage');
+  const ps  =document.getElementById('pageSize');
+  prev?.addEventListener('click', ()=>{ if(page>1) page--; refreshList(); });
+  next?.addEventListener('click', ()=>{ const totalPages=Math.max(1,Math.ceil(filtered.length/pageSize)); if(page<totalPages) page++; refreshList(); });
+  ps?.addEventListener('change', e=>{ pageSize=parseInt(e.target.value,10)||40; page=1; refreshList(); });
+}
+
+function computeFiltered(){
+  filtered = universities.filter(u=>{
+    const q=filters.q;
+    const qOk=!q || (u.name && norm(u.name).includes(q)) || (u.city && norm(u.city).includes(q)) || (u.state && norm(u.state).includes(q));
+    const stOk=!filters.state || u.state===filters.state;
+    const tyOk=!filters.type  || u.control===filters.type;
+    const lvOk=!filters.level || u.level===filters.level;
+    return qOk && stOk && tyOk && lvOk;
+  });
+  if(filters.sort==='name_asc') filtered.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  if(filters.sort==='state_asc') filtered.sort((a,b)=>(a.state||'').localeCompare(b.state||'') || (a.name||'').localeCompare(b.name||''));
+  populateUniversitySelectOptions(filtered.length?filtered:universities);
+}
+
+function updateMeta(){
+  const start=filtered.length? ((page-1)*pageSize+1):0;
+  const end=Math.min(filtered.length, page*pageSize);
+  const meta=document.getElementById('resultMeta');
+  if(meta) meta.textContent = `Showing ${start}-${end} of ${filtered.length} (from ${universities.length} total)`;
+}
+function updatePager(){
+  const totalPages=Math.max(1,Math.ceil(filtered.length/pageSize));
+  document.getElementById('pageInfo').textContent = `Page ${Math.min(page,totalPages)} of ${totalPages}`;
+  document.getElementById('prevPage').disabled = (page<=1);
+  document.getElementById('nextPage').disabled = (page>=totalPages);
+  updateMeta();
+}
+
+function renderUniversities(list){
+  const grid=document.getElementById('universityGrid'); grid.innerHTML='';
+  const eff=getEffectiveSelection();
+  const frag=document.createDocumentFragment();
+  list.forEach(uni=>{
+    const card=document.createElement('div');
+    card.className='university-card'+(eff.has(uni.unitid)?' selected':'');
+    card.setAttribute('role','listitem');
+    card.title=uni.sector||uni.control||'';
+    card.addEventListener('click', ()=> toggleUniversity(uni.unitid) );
+    card.innerHTML=`
+      <div class="university-header">
+        <div class="university-logo">${escapeHtml((uni.name||'?').charAt(0))}</div>
+        <div>
+          <div class="university-name">${escapeHtml(uni.name||'Unknown Institution')}</div>
+          <div class="university-location">${escapeHtml([uni.city, uni.state].filter(Boolean).join(', '))}</div>
+          ${(uni.level||uni.control)?`<span class="university-pill">${[uni.control,uni.level].filter(Boolean).map(escapeHtml).join(' • ')}</span>`:''}
+        </div>
+      </div>`;
+    if(flashNextRender){ card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'), 750); }
+    frag.appendChild(card);
+  });
+  grid.appendChild(frag);
+}
+
+function renderPage(){
+  const start=(page-1)*pageSize, end=start+pageSize;
+  const slice=filtered.slice(start,end);
+  renderUniversities(slice);
+  updatePager();
+  const grid=document.getElementById('universityGrid');
+  const empty=document.getElementById('emptyState');
+  if(filtered.length===0){ grid.style.display='none'; empty.style.display='block'; }
+  else{ empty.style.display='none'; grid.style.display='grid'; }
+  if(flashNextRender) flashNextRender=false;
+}
+
+function toggleUniversity(unitid){
+  const allowEdits=document.getElementById('allowEditsToggle')?.checked;
+  if(!studentProfile || allowEdits){
+    if(studentUnitIds.has(unitid)){ // base had it
+      if(removedByRecommender.has(unitid)) removedByRecommender.delete(unitid);
+      else removedByRecommender.add(unitid);
+      addedByRecommender.delete(unitid);
+    } else {
+      if(addedByRecommender.has(unitid)) addedByRecommender.delete(unitid);
+      else addedByRecommender.add(unitid);
+    }
+  } else {
+    if(studentUnitIds.has(unitid)){
+      if(removedByRecommender.has(unitid)) removedByRecommender.delete(unitid);
+      else removedByRecommender.add(unitid);
+    } else {
+      toast('Student has locked the list. You cannot add new universities.','error');
+    }
+  }
+  renderPage(); updateSelectedList(); updateSendButton();
+}
+
+function removeFromEffective(unitid){
+  if(studentUnitIds.has(unitid)){ removedByRecommender.add(unitid); addedByRecommender.delete(unitid); }
+  else { addedByRecommender.delete(unitid); }
+  renderPage(); updateSelectedList(); updateSendButton();
+}
+window.removeFromEffective = removeFromEffective;
+
+function updateSelectedList(){
+  const container=document.getElementById('selectedList');
+  const counter=document.getElementById('selectedCount');
+  const eff=getEffectiveSelection();
+  counter.textContent = `${eff.size} universities selected`;
+  const chips=[];
+  eff.forEach(unitid=>{
+    const uni = filtered.find(u=>u.unitid===unitid) || universities.find(u=>u.unitid===unitid);
+    const name = uni? uni.name : 'Unknown';
+    const badges=[];
+    if(studentUnitIds.has(unitid)) badges.push('<span class="badge badge-student">Student</span>');
+    if(addedByRecommender.has(unitid)) badges.push('<span class="badge badge-added">You added</span>');
+    if(removedByRecommender.has(unitid)) badges.push('<span class="badge badge-removed">Removed</span>');
+    chips.push(`
+      <div class="selected-tag">
+        ${escapeHtml(name)}
+        ${badges.length?`<span style="margin-left:.35rem; display:inline-flex; gap:.25rem;">${badges.join('')}</span>`:''}
+        <div class="remove-tag" title="Remove" onclick="removeFromEffective(${JSON.stringify(unitid)})">×</div>
+      </div>`);
+  });
+  container.innerHTML=chips.join('');
+}
+
+function updateSendButton(){
+  const btn=document.getElementById('sendBtn');
+  btn.disabled = !(window.uploadedFile && getEffectiveSelection().size>0);
+}
+</script>
+
+<script>
+/* ===================== BROWSE-ALL DROPDOWN ===================== */
+function setupUniversitySelect(){
+  populateUniversitySelectOptions(universities);
+  const sel=document.getElementById('universitySelect');
+  if(!sel) return;
+  sel.addEventListener('change', e=>{
+    const val=e.target.value; if(!val) return;
+    // clear filters for visibility
+    document.getElementById('universitySearch').value='';
+    document.getElementById('stateFilter').value='';
+    document.getElementById('typeFilter').value='';
+    document.getElementById('levelFilter').value='';
+    filters.q=filters.state=filters.type=filters.level=''; filters.sort='name_asc';
+    refreshList();
+
+    const idx=filtered.findIndex(u=>String(u.unitid)===String(val));
+    if(idx>=0){
+      page=Math.floor(idx/pageSize)+1; refreshList();
+      requestAnimationFrame(()=>{
+        const cards=[...document.querySelectorAll('.university-card')];
+        const startIdx=(page-1)*pageSize;
+        const card=cards[idx-startIdx];
+        if(card){ card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'),1000); card.scrollIntoView({behavior:'smooth', block:'nearest'}); }
+      });
+    }
+
+    const uid=Number.isNaN(Number(val))? val : Number(val);
+    if(studentUnitIds.has(uid)) removedByRecommender.delete(uid); else addedByRecommender.add(uid);
+    updateSelectedList(); updateSendButton(); persistAndSync?.();
+    sel.selectedIndex=0;
+  });
+}
+function populateUniversitySelectOptions(list){
+  const sel=document.getElementById('universitySelect'); if(!sel) return;
+  const placeholder=sel.options[0]; sel.innerHTML=''; sel.appendChild(placeholder);
+  const frag=document.createDocumentFragment();
+  [...list].sort((a,b)=>(a.name||'').localeCompare(b.name||'')).forEach(u=>{
+    const opt=document.createElement('option'); opt.value=u.unitid;
+    const loc=[u.city,u.state].filter(Boolean).join(', ');
+    opt.textContent = `${u.name||'Unknown Institution'}${loc?' — '+loc:''}`; frag.appendChild(opt);
   });
   sel.appendChild(frag);
 }
+</script>
 
-/* --------------------- Dataset loader (UPDATED PATH) --------------------- */
-const CACHE_KEY = 'sr_us_institutions_v1';
-async function loadDataset() {
-  try {
-    const cached = sessionStorage.getItem(CACHE_KEY);
-    if (cached) {
-      try {
-        const cachedData = JSON.parse(cached);
-        if (Array.isArray(cachedData) || (cachedData && typeof cachedData === 'object')) {
-          initializeWithData(cachedData);
-          return;
-        }
-      } catch {}
-    }
+<script>
+/* ===================== BULK IMPORT (optional simple match) ===================== */
+function setupBulkImport(){
+  const btn=document.getElementById('bulkImportBtn'); const modal=document.getElementById('importModal');
+  const close=document.getElementById('importCloseBtn'); const cancel=document.getElementById('importCancelBtn');
+  const confirm=document.getElementById('importConfirmBtn'); const ta=document.getElementById('importTextarea');
+  const prev=document.getElementById('importPreview');
 
-    let data = null;
-    // Primary path updated per your request; plus a few safe fallbacks.
-    const candidates = [
-      'assets/us_institutions_by_state_2023.json',
-      './assets/us_institutions_by_state_2023.json',
-      '/assets/us_institutions_by_state_2023.json',
-      // repo/CDN fallbacks (optional)
-      'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/us_institutions_by_state_2023.json',
-      'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/us_institutions_by_state_2023.json'
-    ];
+  btn?.addEventListener('click', ()=>{ modal.style.display='flex'; ta.value=''; prev.textContent=''; });
+  close?.addEventListener('click', ()=> modal.style.display='none');
+  cancel?.addEventListener('click', ()=> modal.style.display='none');
 
-    for (const url of candidates) {
-      try {
-        const bust = url.startsWith('http') ? '' : (url.includes('?') ? '' : `?v=${Date.now()}`);
-        const resp = await fetch(url + bust, { credentials: 'omit' });
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        let txt = await resp.text();
-        // sanitize any accidental NaN/Infinity & trailing commas
-        txt = txt
-          .replace(/\b-?Infinity\b/g, 'null')
-          .replace(/\bNaN\b/g, 'null')
-          .replace(/,\s*([}\]])/g, '$1');
-        data = JSON.parse(txt);
-        break;
-      } catch (e) { /* try next candidate */ }
-    }
+  confirm?.addEventListener('click', ()=>{
+    const lines=(ta.value||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+    if(!lines.length){ toast('Nothing to import.','error'); return; }
+    const qset=new Set(lines.map(norm));
+    const matches=universities.filter(u=> qset.has(norm(u.name)) );
+    if(!matches.length){ toast('No exact matches. Try pasting official names.','error'); return; }
 
-    if (!data) throw new Error('No dataset source could be loaded.');
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
-    initializeWithData(data);
-  } catch (err) {
-    console.error('Failed to load university dataset', err);
-    const meta = document.getElementById('resultMeta');
-    if (meta) meta.textContent = 'Failed to load universities.';
-    (window.toast || function(m){alert(m)})(`Failed to load dataset: ${err.message || err}`, 'error');
-    const empty = document.getElementById('emptyState');
-    if (empty) {
-      empty.style.display = 'block';
-      const grid = document.getElementById('universityGrid');
-      if (grid) grid.style.display = 'none';
-      const retryBtn = document.getElementById('retryLoadBtn');
-      if (retryBtn) {
-        retryBtn.style.display = 'inline-block';
-        retryBtn.onclick = () => location.reload();
-      }
-      const clearBtn = document.getElementById('clearFiltersBtn');
-      if (clearBtn) clearBtn.onclick = () => resetAllFilters();
-    }
-  }
-}
-
-function initializeWithData(data) {
-  universities = Array.isArray(data)
-    ? data
-    : (data && typeof data === 'object' ? Object.values(data).flat() : []);
-
-  universities = universities.map(u => ({
-    unitid:  u.unitid ?? u.UNITID ?? u.id,
-    name:    u.name   ?? u.INSTNM ?? 'Unknown',
-    city:    u.city   ?? u.CITY   ?? '',
-    state:   u.state  ?? u.STABBR ?? '',
-    control: u.control?? u.CONTROL?? '',
-    level:   u.level  ?? u.ICLEVEL?? '',
-    sector:  u.sector ?? u.SECTOR ?? '',
-    website: u.website?? u.WEBADDR?? ''
-  }));
-
-  computeFiltered();
-  renderPage();
-  updateSelectedList();
-
-  // hydrate browse-all label
-  const sel = document.getElementById('universitySelect');
-  if (sel && sel.options.length > 0) {
-    sel.options[0].textContent = `Browse all universities (${universities.length.toLocaleString()})`;
-  }
-}
-<!-- [12/15] — Send recommendation flow -->
-/* --------------------- Send recommendation --------------------- */
-function setupSendHandler() {
-  const sendBtn = document.getElementById('sendBtn');
-  if (!sendBtn) return;
-  sendBtn.addEventListener('click', () => {
-    const effective = getEffectiveSelection();
-    if (!window.uploadedFile) {
-      toast('Please upload a file before sending.', 'error');
-      return;
-    }
-    if (effective.size === 0) {
-      toast('Please select at least one university.', 'error');
-      return;
-    }
-    beginSend(effective);
+    const eff=getEffectiveSelection();
+    matches.forEach(u=>{
+      if(studentUnitIds.has(u.unitid)) removedByRecommender.delete(u.unitid); else addedByRecommender.add(u.unitid);
+      eff.add(u.unitid);
+    });
+    updateSelectedList(); updateSendButton(); toast(`Added ${matches.length} matches.`,'success'); modal.style.display='none';
   });
 }
+</script>
 
-function beginSend(effective) {
-  const container = document.getElementById('progressList');
-  if (container) container.innerHTML = '';
+<script>
+/* ===================== STUDENT LOADER (mock) ===================== */
+function setupStudentLoader(){
+  const btn=document.getElementById('loadStudentBtn'); const input=document.getElementById('studentIdInput');
+  btn?.addEventListener('click', async ()=>{
+    const id=(input.value||'').trim(); if(!id){ toast('Enter a student id/email.','error'); return; }
+    await loadStudentProfile(id);
+  });
+}
+async function fetchStudentProfile(studentIdOrEmail){
+  const picks=[]; const pool=[...universities].slice(0,600);
+  while(picks.length<10 && pool.length){ const i=Math.floor(Math.random()*pool.length); picks.push(pool[i].unitid); pool.splice(i,1); }
+  return { id:studentIdOrEmail, email:/@/.test(studentIdOrEmail)?studentIdOrEmail:(studentIdOrEmail+'@example.edu'), name:`Student ${studentIdOrEmail}`, allowRecommenderEdits:true, selectedUnitIds:picks };
+}
+async function loadStudentProfile(id){
+  try{
+    const prof=await fetchStudentProfile(id);
+    studentProfile=prof; studentUnitIds=new Set(prof.selectedUnitIds||[]); addedByRecommender.clear(); removedByRecommender.clear();
+    document.getElementById('studentTitle').textContent=prof.name;
+    document.getElementById('studentMeta').textContent=`Preselected: ${studentUnitIds.size} universities • Edits ${prof.allowRecommenderEdits?'allowed':'locked'}`;
+    document.getElementById('allowEditsToggle').checked=!!prof.allowRecommenderEdits;
+    page=1; refreshList(); updateSelectedList(); updateSendButton(); toast(`Loaded ${prof.name}.`,'success');
+    persistAndSync?.();
+  }catch(e){ console.error(e); toast('Could not load student profile.','error'); }
+}
+</script>
 
-  // Show progress section
-  const sendSection = document.querySelector('.send-section');
-  if (sendSection) sendSection.style.display = 'block';
-
-  const unis = [...effective].map(uid =>
-    filtered.find(u => u.unitid === uid) || universities.find(u => u.unitid === uid)
-  ).filter(Boolean);
-
-  let completed = 0;
-  unis.forEach((uni, i) => {
-    const div = document.createElement('div');
-    div.className = 'delivery-item';
-    div.innerHTML = `
+<script>
+/* ===================== SEND FLOW (simulated) ===================== */
+function setupSendHandler(){
+  document.getElementById('sendBtn')?.addEventListener('click', ()=>{
+    const eff=getEffectiveSelection();
+    if(!window.uploadedFile){ toast('Please upload a file first.','error'); return; }
+    if(eff.size===0){ toast('Select at least one university.','error'); return; }
+    beginSend(eff);
+  });
+}
+function beginSend(effective){
+  const container=document.getElementById('progressList'); container.innerHTML='';
+  document.querySelector('.send-section').style.display='block';
+  const unis=[...effective].map(uid=> filtered.find(u=>u.unitid===uid)||universities.find(u=>u.unitid===uid)).filter(Boolean);
+  let completed=0;
+  unis.forEach((uni,i)=>{
+    const div=document.createElement('div'); div.className='delivery-item';
+    div.innerHTML=`
       <div class="delivery-status pending">…</div>
       <div>
-        <div style="font-weight:600">${escapeHtml(uni.name || 'Unknown')}</div>
+        <div style="font-weight:600">${escapeHtml(uni.name||'Unknown')}</div>
         <div style="font-size:.85rem; color:#666">Sending…</div>
       </div>`;
     container.appendChild(div);
-
-    // simulate async delivery
-    setTimeout(() => {
+    setTimeout(()=>{
       completed++;
-      const ok = Math.random() > 0.1; // 90% success
-      const statusEl = div.querySelector('.delivery-status');
-      const msgEl = div.querySelector('div div:last-child');
-      if (ok) {
-        statusEl.className = 'delivery-status success';
-        statusEl.textContent = '✓';
-        msgEl.textContent = 'Delivered successfully';
-      } else {
-        statusEl.className = 'delivery-status error';
-        statusEl.textContent = '!';
-        msgEl.textContent = 'Failed to deliver';
-      }
-
+      const ok=Math.random()>0.08;
+      const s=div.querySelector('.delivery-status'); const m=div.querySelector('div div:last-child');
+      if(ok){ s.className='delivery-status success'; s.textContent='✓'; m.textContent='Delivered successfully'; }
+      else  { s.className='delivery-status error';   s.textContent='!'; m.textContent='Failed to deliver'; }
       updateProgress(completed, unis.length);
-
-      if (completed === unis.length) {
-        toast('Send complete.', 'success');
-        showSuccess();
-      }
-    }, 1200 + i * 600);
+      if(completed===unis.length){ toast('Send complete.','success'); showSuccess(); }
+    }, 1000 + i*450);
   });
 }
-
-function updateProgress(done, total) {
-  const fill = document.querySelector('.progress-fill');
-  const txt = document.querySelector('.progress-text');
-  if (!fill || !txt) return;
-  const pct = Math.round((done / total) * 100);
-  fill.style.width = pct + '%';
-  txt.textContent = `Sent ${done} of ${total} (${pct}%)`;
+function updateProgress(done,total){
+  const fill=document.getElementById('progressFill'); const txt=document.getElementById('progressText');
+  const pct=Math.round((done/total)*100); fill.style.width=pct+'%'; txt.textContent=`Sent ${done} of ${total} (${pct}%)`;
 }
-
-function showSuccess() {
-  const succ = document.querySelector('.success-section');
-  if (succ) succ.style.display = 'block';
-}
-<!-- [13/15] — Header actions: animated avatar, contact admin, theme toggle -->
-/* --------------------- Header avatar, settings, contact admin --------------------- */
-(function headerEnhancements(){
-  const avatar = document.querySelector('.user-avatar');
-  const dropdown = document.getElementById('userDropdown');
-  if (!avatar || !dropdown) return;
-
-  // Add a gentle pulse/tilt animation to the avatar on hover/focus
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes srPulse { 0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)} }
-    .user-avatar.animate { animation: srPulse .8s ease-in-out; }
-    .user-dropdown .row-split { margin:.25rem .75rem; border-top:1px solid #f0f0f0; }
-    .dropdown-item .right-slot { margin-left:auto; display:flex; align-items:center; gap:.5rem; }
-    .theme-toggle { appearance:none; width:40px; height:22px; border-radius:999px; background:#e5e7eb; position:relative; outline: none; border:1px solid #d1d5db; cursor:pointer; }
-    .theme-toggle::after { content:''; width:18px; height:18px; border-radius:50%; background:#fff; position:absolute; top:1px; left:1px; transition:.2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
-    .theme-toggle:checked { background:#111827; }
-    .theme-toggle:checked::after { left:19px; }
-    /* Dark theme quick variables */
-    :root { --bg:#f8f9fa; --panel:#fff; --text:#333; --muted:#666; }
-    body.sr-dark { --bg:#0b1220; --panel:#0f172a; --text:#e5e7eb; --muted:#94a3b8; }
-    body.sr-dark { background:linear-gradient(135deg,#0b1220 0%, #0a0f1a 100%) !important; color:var(--text) !important; }
-    body.sr-dark .header { background:linear-gradient(135deg,#0b316d 0%, #3c2e94 100%) !important; }
-    body.sr-dark .upload-section,
-    body.sr-dark .writer-section,
-    body.sr-dark .university-section,
-    body.sr-dark .selected-section,
-    body.sr-dark .progress-section,
-    body.sr-dark .empty-state,
-    body.sr-dark .student-bar { background:var(--panel) !important; color:var(--text) !important; border-color:#243145 !important; }
-    body.sr-dark .filter-select,
-    body.sr-dark .writer-title,
-    body.sr-dark .writer-box,
-    body.sr-dark .page-btn,
-    body.sr-dark .apply-btn { background:#0b1220 !important; color:var(--text) !important; border-color:#243145 !important; }
-    body.sr-dark .university-card { background:#0b1220 !important; }
-    body.sr-dark .university-card.selected { background:#0c223e !important; border-color:#2463eb !important; }
-    body.sr-dark .university-pill { background:#0c223e !important; border-color:#1e3a8a !important; color:#9fb5ff !important; }
-    body.sr-dark .toast { background:#0f172a !important; color:#e5e7eb !important; border-color:#1f2a44 !important; }
-    body.sr-dark .suggest-popover { background:#0f172a !important; border-color:#1f2a44 !important; }
-    body.sr-dark .suggest-item[aria-selected="true"], body.sr-dark .suggest-item:hover { background:#0c223e !important; }
-  `;
-  document.head.appendChild(style);
-
-  // Add "Settings" and "Contact admin" rows if they don't exist yet
-  if (!dropdown.querySelector('[data-sr="settings"]')) {
-    const settings = document.createElement('div');
-    settings.className = 'dropdown-item';
-    settings.setAttribute('data-sr','settings');
-    settings.innerHTML = `
-      <span class="material-icons">settings</span>
-      <div class="view-label">
-        <div class="view-name">Settings</div>
-        <div class="view-description">Theme and preferences</div>
-      </div>
-      <div class="right-slot">
-        <span class="view-description" style="font-size:.8rem;">Dark</span>
-        <input id="themeToggle" type="checkbox" class="theme-toggle" aria-label="Toggle dark theme"/>
-      </div>
-    `;
-    dropdown.appendChild(settings);
-  }
-  if (!dropdown.querySelector('[data-sr="contact-admin"]')) {
-    const div = document.createElement('div');
-    div.className = 'dropdown-item';
-    div.setAttribute('data-sr','contact-admin');
-    div.innerHTML = `
-      <span class="material-icons">support_agent</span>
-      <div class="view-label">
-        <div class="view-name">Contact admin</div>
-        <div class="view-description">Get help or report an issue</div>
-      </div>
-    `;
-    dropdown.appendChild(div);
-  }
-
-  // Animate avatar briefly when dropdown opens
-  avatar.addEventListener('click', () => {
-    avatar.classList.add('animate');
-    setTimeout(()=>avatar.classList.remove('animate'), 650);
-  });
-
-  // Theme load/persist
-  const THEME_KEY = 'sr_theme';
-  function applyTheme(theme){
-    const isDark = theme === 'dark';
-    document.body.classList.toggle('sr-dark', isDark);
-    const tgl = document.getElementById('themeToggle');
-    if (tgl) tgl.checked = isDark;
-  }
-  function loadTheme(){
-    const saved = localStorage.getItem(THEME_KEY) || 'light';
-    applyTheme(saved);
-  }
-  loadTheme();
-
-  dropdown.addEventListener('change', (e) => {
-    if (e.target && e.target.id === 'themeToggle') {
-      const next = e.target.checked ? 'dark' : 'light';
-      localStorage.setItem(THEME_KEY, next);
-      applyTheme(next);
-      toast(`Theme: ${next}`, 'info', { ttl: 1200 });
-    }
-  });
-
-  // Contact admin open/close handlers
-  dropdown.querySelector('[data-sr="contact-admin"]').addEventListener('click', () => {
-    document.getElementById('contactOverlay')?.classList.add('show');
-    document.getElementById('userDropdown')?.classList.remove('show');
-    setTimeout(()=> document.getElementById('contactFirst')?.focus(), 60);
-  });
-  document.getElementById('contactClose')?.addEventListener('click', closeContact);
-  function closeContact(){ document.getElementById('contactOverlay')?.classList.remove('show'); }
-
-  // Trap ESC to close overlay
-  document.addEventListener('keydown', (ev)=>{
-    if (ev.key === 'Escape' && document.getElementById('contactOverlay')?.classList.contains('show')) {
-      ev.preventDefault(); closeContact();
-    }
-  });
-
-  // Contact form submit — Netlify Forms + mailto fallback
-  const form = document.getElementById('contactForm');
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById('contactSend');
-      if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
-
-      const data = new FormData(form);
-
-      // If Netlify is present, allow it to capture the form post
-      try {
-        const resp = await fetch('/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams([...data, ['form-name', 'contact-admin']]).toString()
-        });
-        if (resp.ok) {
-          toast('Message sent. We’ll be in touch!', 'success');
-          form.reset(); closeContact();
-          if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
-          return;
-        }
-      } catch {}
-
-      // Fallback: open default mail client (email not displayed in UI)
-      const to = 'swetha.rajan103@gmail.com';
-      const subject = encodeURIComponent('StellarRec — Admin Contact');
-      const body = encodeURIComponent(
-        `First name: ${data.get('first') || ''}\nEmail: ${data.get('email') || ''}\n\nQuery:\n${data.get('query') || ''}`
-      );
-      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
-      toast('Opening your email client…', 'info', { ttl: 1800 });
-      if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
-      closeContact();
-    });
-  }
-})();
-
-/* --------------------- Contact Admin overlay styles (inject) --------------------- */
-(function injectContactStyles(){
-  const css = document.createElement('style');
-  css.textContent = `
-    .sr-overlay {
-      position: fixed; inset: 0; display: none; place-items: center; background: rgba(0,0,0,.45);
-      z-index: 99999; padding: 1rem;
-    }
-    .sr-overlay.show { display: grid; }
-    .sr-card {
-      width: min(540px, 94vw); border-radius: 16px; background: #fff; color: #0f172a;
-      box-shadow: 0 24px 60px rgba(0,0,0,.22); overflow: hidden;
-    }
-    body.sr-dark .sr-card { background: #0f172a; color: #e5e7eb; }
-    .sr-card-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid #e5e7eb; }
-    body.sr-dark .sr-card-header { border-color: #1f2a44; }
-    .sr-card-title { font-weight: 700; }
-    .sr-card-body { padding: 1rem 1.25rem; display: grid; gap: .75rem; }
-    .sr-row { display: grid; gap:.5rem; }
-    .sr-label { font-size:.9rem; color:#475569; }
-    body.sr-dark .sr-label { color:#9fb5ff; }
-    .sr-input, .sr-textarea {
-      width: 100%; padding: .65rem .8rem; border-radius: 10px; border: 2px solid #e5e7eb; background: #fff; color: #0f172a;
-      font: inherit;
-    }
-    .sr-textarea { min-height: 120px; }
-    body.sr-dark .sr-input, body.sr-dark .sr-textarea { background:#0b1220; color:#e5e7eb; border-color:#243145; }
-    .sr-actions { display: flex; gap: .5rem; justify-content: flex-end; padding: .75rem 1.25rem 1.25rem; }
-    .sr-btn {
-      background: #fff; color:#111827; border: 2px solid #e5e7eb; border-radius: 10px; padding: .6rem 1rem; font-weight: 700; cursor: pointer;
-    }
-    .sr-btn.primary { background: linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none; }
-    .sr-btn[disabled] { opacity:.6; cursor:not-allowed; }
-    .sr-close { background: transparent; border:none; font-size: 1.15rem; cursor: pointer; }
-  `;
-  document.head.appendChild(css);
-})();
-<!-- [13/15] — Contact Admin Overlay HTML -->
-<div id="contactOverlay" class="sr-overlay" aria-modal="true" role="dialog" aria-labelledby="contactTitle">
-  <div class="sr-card" role="document">
-    <div class="sr-card-header">
-      <div id="contactTitle" class="sr-card-title">Contact admin</div>
-      <button id="contactClose" class="sr-close" aria-label="Close">✕</button>
-    </div>
-    <form id="contactForm" name="contact-admin" method="post" data-netlify="true">
-      <!-- Netlify forms honeypot -->
-      <input type="hidden" name="form-name" value="contact-admin" />
-      <p style="display:none">
-        <label>Don’t fill this out if you’re human: <input name="bot-field" /></label>
-      </p>
-      <div class="sr-card-body">
-        <div class="sr-row">
-          <label for="contactFirst" class="sr-label">First name</label>
-          <input id="contactFirst" name="first" class="sr-input" placeholder="Your first name" required />
-        </div>
-        <div class="sr-row">
-          <label for="contactEmail" class="sr-label">Email address</label>
-          <input id="contactEmail" type="email" name="email" class="sr-input" placeholder="you@example.com" required />
-        </div>
-        <div class="sr-row">
-          <label for="contactQuery" class="sr-label">Query</label>
-          <textarea id="contactQuery" name="query" class="sr-textarea" placeholder="How can we help?" required></textarea>
-        </div>
-      </div>
-      <div class="sr-actions">
-        <button type="button" class="sr-btn" id="contactCancel" onclick="document.getElementById('contactOverlay').classList.remove('show')">Cancel</button>
-        <button type="submit" class="sr-btn primary" id="contactSend">Send</button>
-      </div>
-    </form>
-  </div>
-</div>
-<!-- [14/15] — Footer (matching index.html style) -->
-<script>
-/* --------------------- Footer styles (inject) --------------------- */
-(function injectFooterStyles(){
-  const css = document.createElement('style');
-  css.textContent = `
-    .sr-footer {
-      background: linear-gradient(135deg,#0b316d 0%, #3c2e94 100%);
-      color:#fff; margin-top: 48px;
-    }
-    .sr-footer .wrap {
-      max-width: 1200px; margin: 0 auto; padding: 28px 20px;
-      display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center;
-    }
-    .sr-footer .brand {
-      display:flex; align-items:center; gap:.55rem; font-weight:800; letter-spacing:.2px;
-    }
-    .sr-footer .brand .material-icons { font-size: 20px; }
-    .sr-footer a { color:#e5e7eb; text-decoration: none; font-weight:600; }
-    .sr-footer a:hover { text-decoration: underline; }
-    .sr-footer .links { display:flex; gap: 16px; align-items:center; flex-wrap: wrap; }
-    .sr-footer small { opacity:.85; }
-    .sr-footer .sep { opacity:.35; }
-    @media (max-width:768px){
-      .sr-footer .wrap{ grid-template-columns: 1fr; text-align: center; }
-      .sr-footer .links{ justify-content:center; }
-      .sr-footer .brand{ justify-content:center; }
-    }
-  `;
-  document.head.appendChild(css);
-})();
-
-/* --------------------- Footer HTML (append) --------------------- */
-(function appendFooter(){
-  const footer = document.createElement('footer');
-  footer.className = 'sr-footer';
-  footer.innerHTML = `
-    <div class="wrap">
-      <div class="brand">
-        <span class="material-icons" aria-hidden="true">star</span>
-        <span>stellarrec</span>
-      </div>
-      <div class="links">
-        <a href="/" aria-label="Home">Home</a>
-        <span class="sep">•</span>
-        <a href="/#features" aria-label="Features">Features</a>
-        <span class="sep">•</span>
-        <a href="/#contact" aria-label="Contact">Contact</a>
-      </div>
-      <div style="grid-column:1 / -1;">
-        <small>© <span id="sr-year"></span> StellarRec. All rights reserved.</small>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(footer);
-  const y = document.getElementById('sr-year'); if (y) y.textContent = new Date().getFullYear();
-})();
+function showSuccess(){ document.getElementById('successSection').style.display='block'; }
 </script>
-<!-- [15/15] — Init + close -->
+
 <script>
-/* --------------------- Initialization --------------------- */
-document.addEventListener('DOMContentLoaded', () => {
+/* ===================== DATASET LOADER (single source of truth) ===================== */
+async function loadDataset(){
+  try{
+    const candidates=[
+      'assets/us_institutions_by_state_2023.json',
+      '/assets/us_institutions_by_state_2023.json',
+      'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/us_institutions_by_state_2023.json',
+      'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/us_institutions_by_state_2023.json'
+    ];
+    let data=null;
+    for(const url of candidates){
+      try{
+        const resp=await fetch(url+(url.startsWith('http')?'':`?v=${Date.now()}`), {credentials:'omit', cache:'no-store'});
+        if(!resp.ok) throw new Error(resp.status);
+        let txt=await resp.text();
+        txt=txt.replace(/\b-?Infinity\b/g,'null').replace(/\bNaN\b/g,'null').replace(/,\s*([}\]])/g,'$1');
+        data=JSON.parse(txt); break;
+      }catch(e){ console.warn('[dataset] fallback ->', url, e); }
+    }
+    if(!data) throw new Error('No dataset loaded');
+    universities = Array.isArray(data) ? data : (data && typeof data==='object' ? Object.values(data).flat() : []);
+    universities = universities.map(u=>({
+      unitid:u.unitid??u.UNITID??u.id,
+      name:u.name??u.INSTNM??'Unknown',
+      city:u.city??u.CITY??'',
+      state:u.state??u.STABBR??'',
+      control:u.control??u.CONTROL??'',
+      level:u.level??u.ICLEVEL??'',
+      sector:u.sector??u.SECTOR??''
+    })).filter(u=>u.unitid && u.name);
+
+    // hydrate browse-all placeholder
+    const sel=document.getElementById('universitySelect');
+    if(sel && sel.options[0]) sel.options[0].textContent=`Browse all universities (${universities.length.toLocaleString()})`;
+
+    refreshList(); updateSelectedList(); updateSendButton();
+  }catch(err){
+    console.error(err); toast('Failed to load universities list.','error');
+    document.getElementById('resultMeta').textContent='Failed to load universities.';
+    document.getElementById('emptyState').style.display='block';
+    document.getElementById('universityGrid').style.display='none';
+    const rb=document.getElementById('retryLoadBtn'); if(rb){ rb.style.display='inline-block'; rb.onclick=()=>location.reload(); }
+  }
+}
+function refreshList(){ computeFiltered(); renderPage(); }
+</script>
+
+<script>
+/* ===================== INIT ===================== */
+document.addEventListener('DOMContentLoaded', ()=>{
   // Writer
   setupWriter();
   // Upload
   setupUpload();
-  // University search & filters
+  // Search/filter/paging
   setupUniversitySearch();
   setupFilterHandlers();
-  // University select dropdown
-  setupUniversitySelect();
-  // Pagination + bulk
   setupPagination();
+  // Browse-all dropdown
+  setupUniversitySelect();
+  // Bulk import
   setupBulkImport();
-  // Student profile load
+  // Student loader (mock)
   setupStudentLoader();
-  // Send handler
+  // Send
   setupSendHandler();
-  // Load dataset
+  // Dataset
   loadDataset();
-  // Update tagline hotfix
-  const h1 = document.querySelector('.hero-title');
-  if (h1) h1.textContent = 'One upload. Unlimited reach.';
+
+  // Tagline hotfix
+  const h1=document.querySelector('.hero-title'); if(h1) h1.textContent='One upload. Unlimited reach.';
 });
 </script>
 
 </body>
 </html>
-
