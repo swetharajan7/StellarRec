@@ -19,7 +19,7 @@
     .user-info { position:relative; display:flex; align-items:center; gap:1rem; }
     .user-avatar { width:45px; height:45px; background:rgba(255,255,255,.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; cursor:pointer; transition:.3s; }
     .user-avatar:hover { background:rgba(255,255,255,.3); transform:scale(1.05); }
-    .user-dropdown { position:absolute; top:100%; right:0; margin-top:.5rem; background:#fff; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.15); min-width:260px; opacity:0; visibility:hidden; transform:translateY(-10px); transition:.3s; z-index:1000; }
+    .user-dropdown { position:absolute; top:100%; right:0; margin-top:.5rem; background:#fff; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.15); min-width:240px; opacity:0; visibility:hidden; transform:translateY(-10px); transition:.3s; z-index:1000; }
     .user-dropdown.show { opacity:1; visibility:visible; transform:translateY(0); }
     .dropdown-header { padding:1rem; border-bottom:1px solid #f0f0f0; color:#333; font-weight:600; font-size:.9rem; }
     .dropdown-item { display:flex; align-items:center; gap:.75rem; padding:.75rem 1rem; color:#333; cursor:pointer; transition:.2s; }
@@ -36,6 +36,7 @@
     .hero-title { font-size:2.5rem; font-weight:700; color:#1976d2; margin-bottom:1rem; }
     .hero-subtitle { font-size:1.2rem; color:#666; margin-bottom:2rem; }
 
+    /* New: two-column layout for upload + writer */
     .compose-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:2rem; }
     @media (max-width: 980px) { .compose-grid { grid-template-columns:1fr; } }
 
@@ -171,7 +172,7 @@
     .suggest-muted { color:#6b7280; font-size:.85rem; }
     .suggest-highlight { font-weight:700; }
 
-    /* --- SR tabs (header tabs) --- */
+    /* --- SR tabs (added) --- */
     .sr-tabs { display:flex; gap:.5rem; }
     .sr-tab {
       background:#ffffff22; color:#fff; border:1px solid #ffffff44; border-radius:999px;
@@ -180,292 +181,8 @@
     .sr-tab[aria-selected="true"] { background:#fff; color:#1976d2; }
     .sr-tab:focus-visible { box-shadow:0 0 0 3px rgba(255,255,255,.5); }
     @media (max-width:768px){ .sr-tabs{ align-self:flex-start; } }
-
-    /* Basic utility buttons/inputs missing from your snippet */
-    .apply-btn { background:#1976d2; color:#fff; border:none; border-radius:10px; padding:.55rem .9rem; cursor:pointer; font-weight:600; }
-    .apply-btn:hover { filter:brightness(.95); }
-    .search-input { width:100%; padding:.7rem .9rem; border:2px solid #e0e0e0; border-radius:12px; background:#fff; font-size:.95rem; margin-bottom:.5rem; }
   </style>
 </head>
-  <script>
-/* -------------------------------
-   STELLARREC HOTFIX PACK (drop-in)
-   Purpose: restore tabs, upload, writer toolbar, and
-            "Browse all universities" population.
-   Safe to include alongside your existing scripts.
----------------------------------*/
-
-(function(){
-  // 1) Ensure the tagline is correct
-  const heroTitleEl = document.querySelector('.hero-title');
-  if (heroTitleEl) heroTitleEl.textContent = 'One upload. Unlimited reach.';
-  const heroSubEl = document.querySelector('.hero-subtitle');
-  if (heroSubEl) heroSubEl.textContent = 'Upload your recommendation letter once and send it to multiple US universities instantly.';
-
-  // 2) Wire header tabs (Recommender / Student)
-  function uiSwitchView(view){
-    // update internal state if your app uses it
-    try { window.currentView = view; } catch {}
-    // header tab aria-selected
-    const tabRec = document.getElementById('tab-recommender');
-    const tabStu = document.getElementById('tab-student');
-    if (tabRec && tabStu) {
-      tabRec.setAttribute('aria-selected', view === 'recommender' ? 'true' : 'false');
-      tabStu.setAttribute('aria-selected', view === 'student' ? 'true' : 'false');
-    }
-    // update hero texts
-    const heroTitle = document.querySelector('.hero-title');
-    const heroSubtitle = document.querySelector('.hero-subtitle');
-    const uploadTitle = document.querySelector('.upload-title');
-    if (view === 'student') {
-      if (heroTitle) heroTitle.textContent = 'Track Your Applications';
-      if (heroSubtitle) heroSubtitle.textContent = 'Monitor the status of your recommendation letters and university applications.';
-      if (uploadTitle) uploadTitle.textContent = 'Request Recommendation Letter';
-    } else {
-      if (heroTitle) heroTitle.textContent = 'One upload. Unlimited reach.';
-      if (heroSubtitle) heroSubtitle.textContent = 'Upload your recommendation letter once and send it to multiple US universities instantly.';
-      if (uploadTitle) uploadTitle.textContent = 'Upload Recommendation Letter';
-    }
-    // persist if your app expects it
-    try {
-      localStorage.setItem('sr_view_v1', view);
-      if (typeof persistAndSync === 'function') persistAndSync();
-    } catch {}
-  }
-
-  // attach header tab events
-  const tabRec = document.getElementById('tab-recommender');
-  const tabStu = document.getElementById('tab-student');
-  if (tabRec) tabRec.addEventListener('click', () => uiSwitchView('recommender'));
-  if (tabStu) tabStu.addEventListener('click', () => uiSwitchView('student'));
-
-  // make avatar icon open/close dropdown
-  const avatar = document.querySelector('.user-avatar');
-  const dd = document.getElementById('userDropdown');
-  if (avatar && dd) {
-    avatar.addEventListener('click', (e) => {
-      e.stopPropagation();
-      dd.classList.toggle('show');
-    });
-    document.addEventListener('click', (evt) => {
-      if (!dd.contains(evt.target) && !avatar.contains(evt.target)) dd.classList.remove('show');
-    });
-  }
-
-  // 3) Upload (ensure clicking the button opens the file picker; drag/drop works)
-  (function ensureUploadWired(){
-    const fileInput = document.getElementById('fileInput');
-    const uploadSection = document.getElementById('uploadSection');
-    if (!fileInput || !uploadSection) return;
-
-    const chooseBtn = uploadSection.querySelector('.upload-btn');
-    if (chooseBtn && !chooseBtn.__sr_wired__) {
-      chooseBtn.__sr_wired__ = true;
-      chooseBtn.addEventListener('click', () => fileInput.click());
-    }
-
-    if (!fileInput.__sr_wired__) {
-      fileInput.__sr_wired__ = true;
-      fileInput.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files[0]) {
-          if (typeof handleFile === 'function') handleFile(e.target.files[0]);
-          else { // minimal fallback
-            const f = e.target.files[0];
-            const up = document.getElementById('uploadedFile');
-            if (up) up.style.display = 'block';
-            const name = document.getElementById('fileName');
-            const size = document.getElementById('fileSize');
-            if (name) name.textContent = f.name;
-            if (size) size.textContent = `${(f.size/1024/1024).toFixed(1)} MB • Uploaded successfully`;
-          }
-        }
-      });
-    }
-
-    if (!uploadSection.__sr_drag__) {
-      uploadSection.__sr_drag__ = true;
-      uploadSection.addEventListener('dragover', (e)=>{ e.preventDefault(); uploadSection.classList.add('dragover'); });
-      uploadSection.addEventListener('dragleave', ()=> uploadSection.classList.remove('dragover'));
-      uploadSection.addEventListener('drop', (e)=>{
-        e.preventDefault(); uploadSection.classList.remove('dragover');
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-          if (typeof handleFile === 'function') handleFile(e.dataTransfer.files[0]);
-        }
-      });
-    }
-  })();
-
-  // 4) Writer toolbar (bold/italic/underline, date, signature)
-  (function ensureWriterWired(){
-    if (typeof writerCmd !== 'function') {
-      window.writerCmd = function(cmd){ document.execCommand(cmd, false, null); };
-    }
-    if (typeof insertDate !== 'function') {
-      window.insertDate = function(){
-        const d = new Date().toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
-        document.execCommand('insertText', false, d);
-      };
-    }
-    if (typeof insertSignature !== 'function') {
-      window.insertSignature = function(){
-        const name = (window.studentProfile && studentProfile.name) ? studentProfile.name : 'Student Name';
-        const block = `\n\nSincerely,\n\n[Your Name]\n[Title / Department]\n[Institution]\n[Email] • [Phone]\nRef: ${name}`;
-        document.execCommand('insertText', false, block);
-      };
-    }
-  })();
-
-  // 5) DATASET loader (updated path) + populate “Browse all 6000+”
-  // If your app already loaded data, we respect it.
-  const HAS_DATA = Array.isArray(window.universities) && window.universities.length > 0;
-  const candidates = [
-    './assets/us_institutions_by_state_2023.json',
-    './assets/us_institutions_by_state_2023.min.json',
-    '/assets/us_institutions_by_state_2023.json',
-    '/assets/us_institutions_by_state_2023.min.json',
-    'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/us_institutions_by_state_2023.json',
-    'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/us_institutions_by_state_2023.min.json',
-    'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/us_institutions_by_state_2023.json',
-    'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/us_institutions_by_state_2023.min.json'
-  ];
-
-  async function tryLoadJson(){
-    for (const url of candidates) {
-      try {
-        const bust = url.startsWith('http') ? '' : (url.includes('?') ? '' : `?v=${Date.now()}`);
-        const res = await fetch(url + bust, { credentials: 'omit' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        let txt = await res.text();
-        // clean invalid JSON tokens if any
-        txt = txt.replace(/\b-?Infinity\b/g, 'null')
-                 .replace(/\bNaN\b/g, 'null')
-                 .replace(/,\s*([}\]])/g, '$1');
-        const data = JSON.parse(txt);
-        return Array.isArray(data) ? data : (data && typeof data === 'object' ? Object.values(data).flat() : []);
-      } catch(e) {
-        // keep trying next
-      }
-    }
-    throw new Error('No dataset could be loaded from any candidate path.');
-  }
-
-  function normalizeUniversities(arr){
-    return arr.map(u => ({
-      unitid:  u.unitid ?? u.UNITID ?? u.id,
-      name:    u.name   ?? u.INSTNM ?? 'Unknown',
-      city:    u.city   ?? u.CITY   ?? '',
-      state:   u.state  ?? u.STABBR ?? '',
-      control: u.control?? u.CONTROL?? '',
-      level:   u.level  ?? u.ICLEVEL?? '',
-      sector:  u.sector ?? u.SECTOR ?? '',
-      website: u.website?? u.WEBADDR?? ''
-    }));
-  }
-
-  function populateUniversitySelectOptions(list){
-    const sel = document.getElementById('universitySelect'); if (!sel) return;
-    sel.length = 1; // keep placeholder
-    const sorted = [...list].sort((a,b) => (a.name||'').localeCompare(b.name||''));
-    const frag = document.createDocumentFragment();
-    sorted.forEach(u => {
-      const opt = document.createElement('option');
-      opt.value = u.unitid;
-      const loc = [u.city,u.state].filter(Boolean).join(', ');
-      opt.textContent = `${u.name || 'Unknown Institution'}${loc ? ' — ' + loc : ''}`;
-      frag.appendChild(opt);
-    });
-    sel.appendChild(frag);
-    // update placeholder count
-    if (sel.options && sel.options[0]) {
-      sel.options[0].textContent = `Browse all universities (${list.length.toLocaleString()})`;
-    }
-  }
-
-  function ensureSelectChangeHandler(){
-    const sel = document.getElementById('universitySelect');
-    if (!sel || sel.__sr_wired__) return;
-    sel.__sr_wired__ = true;
-    sel.addEventListener('change', (e) => {
-      const val = e.target.value;
-      if (!val) return;
-
-      // Clear filters in the UI if your app expects that
-      const qEl = document.getElementById('universitySearch');
-      if (qEl) qEl.value = '';
-      const stateEl = document.getElementById('stateFilter');
-      const typeEl  = document.getElementById('typeFilter');
-      const levelEl = document.getElementById('levelFilter');
-      const sortEl  = document.getElementById('sortBy');
-      if (stateEl) stateEl.value = '';
-      if (typeEl)  typeEl.value  = '';
-      if (levelEl) levelEl.value = '';
-      if (sortEl)  sortEl.value  = 'name_asc';
-
-      // If your app exposes helpers, use them
-      try {
-        if (window.filters) {
-          window.filters.q = window.filters.state = window.filters.type = window.filters.level = '';
-          window.filters.sort = 'name_asc';
-        }
-        if (typeof refreshList === 'function') refreshList();
-      } catch {}
-
-      // Attempt to add the picked uni into the effective selection,
-      // leveraging your existing selection model when available.
-      try {
-        const uidNum = Number(val);
-        const uid = Number.isNaN(uidNum) ? val : uidNum;
-        if (typeof addedByRecommender !== 'undefined' && typeof removedByRecommender !== 'undefined' && typeof studentUnitIds !== 'undefined') {
-          if (studentUnitIds.has(uid)) removedByRecommender.delete(uid);
-          else addedByRecommender.add(uid);
-          if (typeof updateSelectedList === 'function') updateSelectedList();
-          if (typeof updateSendButton === 'function') updateSendButton();
-          if (typeof persistAndSync === 'function') persistAndSync();
-        }
-      } catch {}
-
-      // reset to placeholder
-      e.target.selectedIndex = 0;
-    });
-  }
-
-  async function ensureDataAndPopulate(){
-    try {
-      if (!HAS_DATA) {
-        const raw = await tryLoadJson();
-        window.universities = normalizeUniversities(raw);
-      }
-      // Either we just loaded, or it was already there — populate dropdown
-      populateUniversitySelectOptions(window.universities || []);
-      ensureSelectChangeHandler();
-
-      // If your list/grid uses a render function, call it once
-      try {
-        if (typeof computeFiltered === 'function') computeFiltered();
-        if (typeof renderPage === 'function') renderPage();
-        if (typeof updateMeta === 'function') updateMeta();
-      } catch {}
-    } catch (e) {
-      console.error('[SR hotfix] dataset load failed:', e);
-      const meta = document.getElementById('resultMeta');
-      if (meta) meta.textContent = 'Failed to load universities.';
-      const empty = document.getElementById('emptyState');
-      const grid = document.getElementById('universityGrid');
-      if (empty) empty.style.display = 'block';
-      if (grid) grid.style.display = 'none';
-    }
-  }
-
-  // Run after DOM is ready
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    ensureDataAndPopulate();
-  } else {
-    document.addEventListener('DOMContentLoaded', ensureDataAndPopulate);
-  }
-
-})();
-</script>
-
 <body>
   <!-- Header -->
   <div class="header">
@@ -475,12 +192,11 @@
         stellarrec
       </a>
 
-      <!-- View Tabs -->
+      <!-- View Tabs (added) -->
       <div id="sr-tabs" role="tablist" aria-label="Switch View" class="sr-tabs">
         <button id="tab-recommender" role="tab" aria-selected="true" aria-controls="panel-recommender" class="sr-tab">Recommender</button>
         <button id="tab-student" role="tab" aria-selected="false" aria-controls="panel-student" class="sr-tab">Student</button>
       </div>
-
       <div class="user-info">
         <div class="user-avatar" onclick="toggleUserDropdown()">
           <span class="material-icons">person</span>
@@ -519,7 +235,7 @@
     </div>
   </div>
 
-  <div class="container" id="panel-recommender" role="tabpanel" aria-labelledby="tab-recommender">
+  <div class="container">
 
     <!-- Student Context Bar -->
     <div class="student-bar" id="studentBar" style="display:flex; align-items:center; gap:.75rem; background:#fff; border:1px solid #eaeaea; border-radius:12px; padding:1rem; margin-bottom:1rem;">
@@ -539,11 +255,11 @@
     <!-- Hero Section -->
     <div class="hero-section">
       <h1 class="hero-title">One upload. Unlimited reach.</h1>
-      <p class="hero-subtitle">Upload your recommendation letter once and send it anywhere in seconds.</p>
+      <p class="hero-subtitle">Upload your recommendation letter once and send it broadly and securely.</p>
     </div>
-
     <!-- Upload + Writer side-by-side -->
     <div class="compose-grid">
+
       <!-- Upload Section -->
       <div class="upload-section" id="uploadSection">
         <div class="upload-area">
@@ -608,7 +324,7 @@
       <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
 
       <!-- Search + Apply -->
-      <div class="university-search">
+      <div class="university-search" style="position:relative;">
         <input type="text" class="search-input" placeholder="Search universities..." id="universitySearch" />
         <button class="apply-btn" id="searchApplyBtn" title="Apply search (Enter)">Apply</button>
       </div>
@@ -729,23 +445,7 @@
         Send Another Letter
       </button>
     </div>
-  </div> <!-- end .container (recommender panel) -->
-
-  <!-- Student panel (simple placeholder you can extend) -->
-  <div class="container" id="panel-student" role="tabpanel" aria-labelledby="tab-student" hidden>
-    <div class="hero-section">
-      <h1 class="hero-title">Track your recommendations</h1>
-      <p class="hero-subtitle">See where your letters were sent and their delivery status.</p>
-    </div>
-    <div class="progress-section" style="display:block;">
-      <h2 class="progress-title">Recent Deliveries</h2>
-      <div class="empty-state" style="display:block;">
-        <div style="font-weight:600; margin-bottom:.25rem;">No recent deliveries</div>
-        <div style="font-size:.9rem; color:#667;">Ask your recommender to send your letter.</div>
-      </div>
-    </div>
-  </div>
-
+  </div> <!-- /.container -->
   <!-- Confirm Send Modal -->
   <div id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle"
        style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
@@ -778,7 +478,7 @@
     </div>
   </div>
 
-  <!-- Bulk Import Modal -->
+  <!-- Bulk Import Modal (native; hotfix also creates one if missing) -->
   <div id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle"
        style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
     <div style="background:#fff; width:min(680px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
@@ -802,719 +502,525 @@
 
   <!-- Toast container -->
   <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
-  <!-- Scripts -->
-  <script>
-/* -----------------------------------------------------------
-   STELLARREC — CORE + AUTOSUGGEST + WRITER + PROGRESS HELPERS
-   ----------------------------------------------------------- */
-
-/* ---------- Safe shims ---------- */
-const SR_LOG = (typeof window.SR_LOG === 'object') ? window.SR_LOG : {
-  consoleEnabled: () => false, setConsoleEnabled: () => {}, log: () => {}
-};
-const SR_AUTH = (typeof window.SR_AUTH === 'object') ? window.SR_AUTH : {
-  getAccessToken: () => null, refreshTokens: async () => false,
-  startGentleSignInFlow: () => {}, waitForLogin: async () => {},
-  resolvePostLoginWaiters: () => {}, setTokens: () => {}
-};
-function srRefreshAuthRow() {}
-function srRenderAuditBanner() {}
-function setupCopyLink() {}
-function setupBulkImport() {}
-function applyShareFromURL() {}
-function buildShareURL() { return location.pathname + location.search + location.hash; }
-
-/* --------------------- Utilities --------------------- */
-const norm = (s) => (s || '').toString().trim().toLowerCase();
-function escapeHtml(s){
-  return (s ?? '').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-function stripHtml(html){
-  const tmp=document.createElement('div'); tmp.innerHTML = html || ''; return tmp.textContent || tmp.innerText || '';
-}
-function truncate(s, n=80){
-  const t = (s ?? '').toString(); return t.length > n ? (t.slice(0, n-1) + '…') : t;
-}
-function getActiveStudentId() { return (window.studentProfile && (studentProfile.id || studentProfile.email)) || 'default'; }
-function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
-function startNewUpload(){ location.reload(); }
-
-/* --------------------- State --------------------- */
-let universities = [];
-let filtered = [];
-let uploadedFile = null;
-let currentView = 'recommender';
-
-const filters = { q: '', state: '', type: '', level: '', sort: 'name_asc' };
-let page = 1;
-let pageSize = 40;
-let flashNextRender = false;
-
-const CACHE_KEY = 'sr_us_institutions_v1';
-
-/* --- Persistence keys --- */
-const PERSIST = {
-  student:  'sr_student_profile_v1',
-  hybrid:   'sr_hybrid_sets_v1',
-  filters:  'sr_filter_state_v1',
-  view:     'sr_view_v1',
-  draft:    'sr_draft_' // + studentId
-};
-
-function persistAll() {
-  try {
-    if (studentProfile) localStorage.setItem(PERSIST.student, JSON.stringify(studentProfile));
-    localStorage.setItem(PERSIST.hybrid, JSON.stringify({
-      studentUnitIds: Array.from(studentUnitIds),
-      added: Array.from(addedByRecommender),
-      removed: Array.from(removedByRecommender),
-    }));
-    localStorage.setItem(PERSIST.filters, JSON.stringify({ ...filters, page, pageSize }));
-    localStorage.setItem(PERSIST.view, currentView);
-  } catch {}
-}
-function hydrateAll() {
-  try {
-    const v = localStorage.getItem(PERSIST.view);
-    if (v) currentView = v;
-
-    const f = localStorage.getItem(PERSIST.filters);
-    if (f) {
-      const o = JSON.parse(f);
-      Object.assign(filters, {
-        q: o.q || '', state: o.state || '', type: o.type || '',
-        level: o.level || '', sort: o.sort || 'name_asc'
-      });
-      page = o.page || 1;
-      pageSize = o.pageSize || 40;
-
-      const ids = {
-        universitySearch: 'q', stateFilter: 'state', typeFilter:'type',
-        levelFilter:'level', sortBy:'sort', pageSize:'pageSize'
-      };
-      Object.entries(ids).forEach(([elId, key]) => {
-        const el = document.getElementById(elId);
-        if (!el) return;
-        if (key === 'q') el.value = filters.q;
-        else if (key === 'pageSize') el.value = String(pageSize);
-        else el.value = filters[key];
-      });
-    }
-
-    const s   = localStorage.getItem(PERSIST.student);
-    const hyb = localStorage.getItem(PERSIST.hybrid);
-    if (s) {
-      studentProfile = JSON.parse(s);
-      document.getElementById('studentTitle').textContent = studentProfile.name || 'Student';
-      document.getElementById('allowEditsToggle').checked = !!studentProfile.allowRecommenderEdits;
-    }
-    if (hyb) {
-      const H = JSON.parse(hyb);
-      studentUnitIds = new Set((H && H.studentUnitIds) || []);
-      addedByRecommender.clear(); removedByRecommender.clear();
-      (H && H.added || []).forEach(id => addedByRecommender.add(id));
-      (H && H.removed || []).forEach(id => removedByRecommender.add(id));
-    }
-  } catch {}
-}
-function persistAndSync() {
-  persistAll();
-  try { history.replaceState(null,'', buildShareURL()); } catch {}
-}
-
-/* --- Hybrid selection model --- */
-let studentProfile = null;
-let studentUnitIds = new Set();
-let addedByRecommender = new Set();
-let removedByRecommender = new Set();
-
-function getEffectiveSelection() {
-  const base = new Set(studentUnitIds);
-  removedByRecommender.forEach(id => base.delete(id));
-  addedByRecommender.forEach(id => base.add(id));
-  return base;
-}
-
-/* --- Mock/Real API toggle --- */
-function getUseMock() {
-  const v = localStorage.getItem('sr_use_mock');
-  return v === null ? true : v !== '0';
-}
-function setUseMock(on) {
-  localStorage.setItem('sr_use_mock', on ? '1' : '0');
-  location.reload();
-}
-(function syncMockFromURL(){
-  const p = new URLSearchParams(location.search);
-  if (p.has('mock')) {
-    const val = p.get('mock') === '1';
-    localStorage.setItem('sr_use_mock', val ? '1' : '0');
-  }
-})();
-
-/* --------------------- Tabs + dropdown wiring --------------------- */
-function toggleUserDropdown() {
-  const dd = document.getElementById('userDropdown');
-  dd.classList.toggle('show');
-}
-document.addEventListener('click', function (event) {
-  const userInfo = document.querySelector('.user-info');
-  const dropdown = document.getElementById('userDropdown');
-  if (userInfo && dropdown && !userInfo.contains(event.target)) dropdown.classList.remove('show');
-});
-function setTabs(view) {
-  const rec = document.getElementById('tab-recommender');
-  const stu = document.getElementById('tab-student');
-  rec?.setAttribute('aria-selected', view === 'recommender');
-  stu?.setAttribute('aria-selected', view === 'student');
-
-  const recPanel = document.getElementById('panel-recommender');
-  const stuPanel = document.getElementById('panel-student');
-  if (view === 'student') {
-    recPanel.hidden = true;
-    stuPanel.hidden = false;
-  } else {
-    recPanel.hidden = false;
-    stuPanel.hidden = true;
-  }
-}
-function switchView(view, ev) {
-  currentView = view;
-  document.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
-  if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
-  updateDashboardForView(view);
-  document.getElementById('userDropdown').classList.remove('show');
-  setTabs(view);
-  persistAndSync();
-  SR_LOG.log({ type: "search", query: `switch_view:${view}` });
-}
-document.addEventListener('DOMContentLoaded', ()=> {
-  document.getElementById('tab-recommender')?.addEventListener('click', ()=> switchView('recommender'));
-  document.getElementById('tab-student')?.addEventListener('click', ()=> switchView('student'));
-});
-function updateDashboardForView(view) {
-  const heroTitle = document.querySelector('#panel-recommender .hero-title');
-  const heroSubtitle = document.querySelector('#panel-recommender .hero-subtitle');
-  const uploadTitle = document.querySelector('.upload-title');
-  if (view === 'student') {
-    // Panels are swapped by setTabs(); student content is in #panel-student
-  } else {
-    if (heroTitle) heroTitle.textContent = 'One upload. Unlimited reach.';
-    if (heroSubtitle) heroSubtitle.textContent = 'Upload your recommendation letter once and send it anywhere in seconds.';
-    if (uploadTitle) uploadTitle.textContent = 'Upload Recommendation Letter';
-  }
-}
-/* --------------------- Web worker for filtering (optional) --------------------- */
-let filterWorker = null;
-let filteringInFlight = 0;
-
-function initFilterWorker(){
-  if (filterWorker) return;
-  const code = `
-    let universities = [];
-    const norm = s => (s||'').toLowerCase();
-    onmessage = (e) => {
-      const { type, payload } = e.data || {};
-      if (type === 'prime') { universities = payload || []; postMessage({ type:'primed', count: universities.length }); return; }
-      if (type === 'filter') {
-        const { filters, page, pageSize } = payload;
-        const q = norm(filters.q||'');
-        let arr = universities.filter(u=>{
-          const qOk = !q || (u.name && norm(u.name).includes(q)) || (u.city && norm(u.city).includes(q)) || (u.state && norm(u.state).includes(q));
-          const stOk = !filters.state || u.state === filters.state;
-          const tyOk = !filters.type || u.control === filters.type;
-          const lvOk = !filters.level || u.level === filters.level;
-          return qOk && stOk && tyOk && lvOk;
-        });
-        if (filters.sort === 'name_asc') arr.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
-        else if (filters.sort === 'state_asc') arr.sort((a,b)=> (a.state||'').localeCompare(b.state||'') || (a.name||'').localeCompare(b.name||''));
-        const total = arr.length; const start = Math.max(0, (page-1)*pageSize); const slice = arr.slice(start, start+pageSize);
-        postMessage({ type:'result', slice, total });
-      }
-    };
-  `;
-  const blob = new Blob([code], { type:'application/javascript' });
-  filterWorker = new Worker(URL.createObjectURL(blob));
-}
-
-function computeFiltered() {
-  filtered = universities.filter(u => {
-    const q = norm(filters.q);
-    const qOk = !q || (u.name && norm(u.name).includes(q)) || (u.city && norm(u.city).includes(q)) || (u.state && norm(u.state).includes(q));
-    const stOk = !filters.state || u.state === filters.state;
-    const tyOk = !filters.type  || u.control === filters.type;
-    const lvOk = !filters.level || u.level   === filters.level;
-    return qOk && stOk && tyOk && lvOk;
-  });
-
-  if (filters.sort === 'name_asc') filtered.sort((a,b) => (a.name||'').localeCompare(b.name||''));
-  else if (filters.sort === 'state_asc') filtered.sort((a,b) => (a.state||'').localeCompare(b.state||'') || (a.name||'').localeCompare(b.name||''));
-
-  populateUniversitySelectOptions(filtered.length ? filtered : universities);
-}
-function computeFilteredAsync() {
-  if (!filterWorker) { computeFiltered(); renderPage(); updateMeta(); return; }
-  computeFiltered();
-  const ticket = ++filteringInFlight;
-  filterWorker.onmessage = (ev) => {
-    if (ticket !== filteringInFlight) return;
-    const { type, slice, total } = ev.data || {};
-    if (type === 'result') {
-      const grid = document.getElementById('universityGrid');
-      grid.innerHTML = '';
-      renderUniversities(slice);
-
-      const totalPages = Math.max(1, Math.ceil(total / pageSize));
-      document.getElementById('pageInfo').textContent = `Page ${Math.min(page, totalPages)} of ${totalPages}`;
-      document.getElementById('prevPage').disabled = (page <= 1);
-      document.getElementById('nextPage').disabled = (page >= totalPages);
-      document.getElementById('resultMeta').textContent = `Showing ${slice.length ? ((page-1)*pageSize+1) : 0}-${Math.min(total, page*pageSize)} of ${total} (from ${universities.length} total)`;
-
-      const empty = document.getElementById('emptyState');
-      if (total === 0) { grid.style.display='none'; if (empty) empty.style.display='block'; }
-      else { grid.style.display='grid'; if (empty) empty.style.display='none'; }
-    }
-  };
-  filterWorker.postMessage({ type:'filter', payload: { filters, page, pageSize }});
-}
-function refreshList() { if (filterWorker) computeFilteredAsync(); else { computeFiltered(); renderPage(); updateMeta(); } }
-
-/* --------------------- DOM Ready --------------------- */
-document.addEventListener('DOMContentLoaded', async function () {
-  // Insert menu extras
-  (function srInsertMenuItems(){
-    const dd = document.getElementById('userDropdown'); if (!dd) return;
-    const li = document.createElement('div');
-    li.className = 'dropdown-item';
-    li.innerHTML = `
-      <span class="material-icons">bug_report</span>
-      <div class="view-label">
-        <div class="view-name">Console logs</div>
-        <div class="view-description">Toggle in-browser event logs</div>
+  <!-- Footer (Replace with exact footer markup from index.html for pixel parity) -->
+  <footer style="margin-top:40px; background:#0b1b33; color:#cbd5e1;">
+    <div style="max-width:1200px;margin:0 auto;padding:24px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:8px;font-weight:700;">
+        <span class="material-icons" aria-hidden="true">star</span> stellarrec
       </div>
-      <input id="logToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
-    `;
-    dd.appendChild(li);
-    const authRow = document.createElement('div'); authRow.id = 'authRow'; authRow.className = 'dropdown-item'; dd.appendChild(authRow);
-  })();
+      <div style="font-size:.9rem;">© <span id="yearSpan"></span> StellarRec. All rights reserved.</div>
+    </div>
+  </footer>
+  <script>document.getElementById('yearSpan').textContent = new Date().getFullYear();</script>
+  <!-- External libs you were using -->
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
+  <!-- Your main script (keep it) -->
+  <script src="dashboard.js"></script>
 
-  const mockEl = document.getElementById('mockToggle');
-  if (mockEl) { mockEl.checked = getUseMock(); mockEl.addEventListener('change', (e) => setUseMock(e.target.checked)); }
-
-  const logEl = document.getElementById('logToggle');
-  if (logEl) { logEl.checked = SR_LOG.consoleEnabled(); logEl.addEventListener('change', (e)=> SR_LOG.setConsoleEnabled(!!e.target.checked)); }
-  srRefreshAuthRow();
-
-  (function applyTokenFromURL(){
-    const p = new URLSearchParams(location.search);
-    const tok = p.get('token');
-    if (tok) {
-      SR_AUTH.setTokens({ accessToken: tok, refreshToken: p.get('rt') || 'demo-refresh', expiresAt: Date.now() + 55*60*1000 });
-      toast('Signed in.', 'success'); srRefreshAuthRow(); history.replaceState(null, '', location.pathname + location.hash); SR_AUTH.resolvePostLoginWaiters();
-    }
-  })();
-
-  /* Load dataset (with fallbacks) */
-  try {
-    const cached = sessionStorage.getItem(CACHE_KEY);
-    if (cached) {
-      try { const cachedData = JSON.parse(cached);
-        if (Array.isArray(cachedData) || (cachedData && typeof cachedData === 'object')) {
-          initializeWithData(cachedData); return;
-        }
-      } catch {}
-    }
-
- let data = null, used = null;
-const candidates = [
-  './assets/us_institutions_by_state_2023.json',
-  './assets/us_institutions_by_state_2023.min.json',
-  '/assets/us_institutions_by_state_2023.json',
-  '/assets/us_institutions_by_state_2023.min.json',
-  'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/us_institutions_by_state_2023.json',
-  'https://raw.githubusercontent.com/swetharajan7/StellarRec/main/assets/us_institutions_by_state_2023.min.json',
-  'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/us_institutions_by_state_2023.json',
-  'https://cdn.jsdelivr.net/gh/swetharajan7/StellarRec@main/assets/us_institutions_by_state_2023.min.json'
-];
-
-    for (const url of candidates) {
-      try {
-        const bust = url.startsWith('http') ? '' : (url.includes('?') ? '' : `?v=${Date.now()}`);
-        const resp = await fetch(url + bust, { credentials: 'omit' });
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        let txt = await resp.text();
-        txt = txt.replace(/\b-?Infinity\b/g, 'null').replace(/\bNaN\b/g, 'null').replace(/,\s*([}\]])/g, '$1');
-        data = JSON.parse(txt); used = url; break;
-      } catch (e) { console.warn('[SR] dataset fallback →', url, e); }
-    }
-    if (!data) throw new Error('No dataset source could be loaded.');
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
-    initializeWithData(data);
-  } catch (err) {
-    console.error("Failed to load university dataset", err);
-    const meta = document.getElementById('resultMeta'); if (meta) meta.textContent = 'Failed to load universities.';
-    toast(`Failed to load dataset: ${err.message || err}`, 'error');
-    const empty = document.getElementById('emptyState');
-    if (empty) {
-      empty.style.display = 'block';
-      document.getElementById('universityGrid').style.display = 'none';
-      const retryBtn = document.getElementById('retryLoadBtn');
-      if (retryBtn) { retryBtn.style.display = 'inline-block'; retryBtn.onclick = () => location.reload(); }
-      const clearBtn = document.getElementById('clearFiltersBtn'); if (clearBtn) clearBtn.onclick = () => resetAllFilters();
-    }
-  }
-});
-
-/* --------------------- Initialize with data --------------------- */
-function initializeWithData(data) {
-  universities = Array.isArray(data) ? data : (data && typeof data === 'object' ? Object.values(data).flat() : []);
-  universities = universities.map(u => ({
-    unitid:  u.unitid ?? u.UNITID ?? u.id,
-    name:    u.name   ?? u.INSTNM ?? 'Unknown',
-    city:    u.city   ?? u.CITY   ?? '',
-    state:   u.state  ?? u.STABBR ?? '',
-    control: u.control?? u.CONTROL?? '',
-    level:   u.level  ?? u.ICLEVEL?? '',
-    sector:  u.sector ?? u.SECTOR ?? '',
-    website: u.website?? u.WEBADDR?? ''
-  }));
-  initFilterWorker();
-  if (filterWorker) filterWorker.postMessage({ type:'prime', payload: universities });
-
-  setupFileUpload();
-  setupSearch();
-  setupClickOutside();
-  setupFilterHandlers();
-  setupPagingHandlers();
-  setupUniversitySelect();
-  setupWriter();
-
-  document.getElementById('loadStudentBtn').addEventListener('click', () => {
-    const id = document.getElementById('studentIdInput').value.trim();
-    if (!id) { toast('Enter a student ID or email.', 'error', { ttl: 2000 }); return; }
-    loadStudentProfile(id);
-  });
-  document.getElementById('allowEditsToggle').addEventListener('change', (e) => {
-    if (studentProfile) studentProfile.allowRecommenderEdits = e.target.checked;
-    renderPage(); updateSelectedList(); persistAndSync();
-    SR_LOG.log({ type: "filter_apply", filters: { allowRecommenderEdits: !!e.target.checked } });
-    srRenderAuditBanner();
-  });
-
-  document.getElementById('clearFiltersBtn')?.addEventListener('click', resetAllFilters);
-
-  hydrateAll();
-  applyShareFromURL();
-  setupCopyLink();
-  setupBulkImport();
-
-  refreshList();
-  updateSelectedList();
-  srRenderAuditBanner();
-
-  const sel = document.getElementById('universitySelect');
-  if (sel && sel.options.length > 0) {
-    sel.options[0].textContent = `Browse all universities (${universities.length.toLocaleString()})`;
-  }
-
-  const params = new URLSearchParams(location.search);
-  const sid = params.get('student');
-  if (sid) loadStudentProfile(sid);
-
-  setTabs(currentView || 'recommender'); // ensure correct panel visible on load
-  persistAndSync();
-}
-
-/* --------------------- Upload --------------------- */
-function setupFileUpload() {
-  const fileInput = document.getElementById('fileInput');
-  const uploadSection = document.getElementById('uploadSection');
-  fileInput.addEventListener('change', handleFileUpload);
-  uploadSection.addEventListener('dragover', (e) => { e.preventDefault(); uploadSection.classList.add('dragover'); });
-  uploadSection.addEventListener('dragleave', () => uploadSection.classList.remove('dragover'));
-  uploadSection.addEventListener('drop', (e) => {
-    e.preventDefault(); uploadSection.classList.remove('dragover');
-    if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
-  });
-}
-function handleFileUpload(e) { if (e.target.files[0]) handleFile(e.target.files[0]); }
-/* allowAny = true is used ONLY by "Attach draft" to attach a .txt */
-function handleFile(file, allowAny=false) {
-  if (!allowAny && file.type !== 'application/pdf') { toast('Please upload a PDF file.', 'error'); return; }
-  uploadedFile = file;
-  document.getElementById('uploadedFile').style.display = 'block';
-  document.getElementById('fileName').textContent = file.name;
-  const sizeMB = (file.size / 1024 / 1024).toFixed(1);
-  document.getElementById('fileSize').textContent = `${sizeMB} MB • ${allowAny ? 'Draft attached' : 'Uploaded successfully'}`;
-  toast(allowAny ? 'Draft attached to send queue.' : 'PDF attached. Ready to send.', 'success');
-  updateSendButton(); persistAndSync();
-  SR_LOG.log({ type: "dataset_load", datasetId: allowAny ? "draft_txt" : "uploaded_pdf", ms: file.size || 0 });
-}
-function removeFile() {
-  uploadedFile = null;
-  document.getElementById('uploadedFile').style.display = 'none';
-  document.getElementById('fileInput').value = '';
-  updateSendButton(); persistAndSync();
-}
-
-/* --------------------- WRITER --------------------- */
-let writerAutosaveTimer = null;
-function setupWriter() {
-  const box = document.getElementById('writerBox');
-  const title = document.getElementById('writerTitle');
-  const autosaveToggle = document.getElementById('writerAutosaveToggle');
-
-  restoreDraft(true);
-  updateWriterCounts();
-
-  box.addEventListener('input', () => { updateWriterCounts(); scheduleAutosave(); });
-  title.addEventListener('input', () => { scheduleAutosave(); });
-  autosaveToggle.addEventListener('change', () => {
-    if (autosaveToggle.checked) scheduleAutosave(true);
-    else if (writerAutosaveTimer) { clearTimeout(writerAutosaveTimer); writerAutosaveTimer = null; }
-  });
-
-  box.addEventListener('blur', () => { if (document.getElementById('writerAutosaveToggle').checked) saveDraft(true); });
-  title.addEventListener('blur', () => { if (document.getElementBy
-  title.addEventListener('blur', () => { 
-    if (document.getElementById('writerAutosaveToggle').checked) saveDraft(true); 
-  });
-}
-
-function writerCmd(cmd) {
-  document.execCommand(cmd, false, null);
-  updateWriterCounts();
-  scheduleAutosave();
-}
-
-function insertDate() {
-  const date = new Date().toLocaleDateString();
-  document.execCommand('insertText', false, date);
-  scheduleAutosave();
-}
-
-function insertSignature() {
-  const signature = "\n\nSincerely,\n[Your Name]\n[Your Position]";
-  document.execCommand('insertText', false, signature);
-  scheduleAutosave();
-}
-
-function updateWriterCounts() {
-  const box = document.getElementById('writerBox');
-  const text = box.innerText || '';
-  const words = text.trim().split(/\s+/).filter(Boolean).length;
-  const chars = text.length;
-  document.getElementById('writerCount').textContent = `${words} words • ${chars} chars`;
-}
-
-function scheduleAutosave(immediate=false) {
-  if (writerAutosaveTimer) clearTimeout(writerAutosaveTimer);
-  if (immediate) return saveDraft(true);
-  writerAutosaveTimer = setTimeout(() => saveDraft(true), 2000);
-}
-
-function saveDraft(silent=false) {
-  const title = document.getElementById('writerTitle').value;
-  const content = document.getElementById('writerBox').innerHTML;
-  try {
-    localStorage.setItem('sr_draft_title', title);
-    localStorage.setItem('sr_draft_content', content);
-    if (!silent) toast('Draft saved', 'success');
-    document.getElementById('writerSaved').textContent = 'Saved';
-  } catch(e) {
-    console.error('Save failed', e);
-  }
-}
-
-function restoreDraft(silent=false) {
-  const title = localStorage.getItem('sr_draft_title') || '';
-  const content = localStorage.getItem('sr_draft_content') || '';
-  if (title || content) {
-    document.getElementById('writerTitle').value = title;
-    document.getElementById('writerBox').innerHTML = content;
-    if (!silent) toast('Draft restored', 'info');
-  }
-}
-
-function clearDraft() {
-  document.getElementById('writerTitle').value = '';
-  document.getElementById('writerBox').innerHTML = '';
-  localStorage.removeItem('sr_draft_title');
-  localStorage.removeItem('sr_draft_content');
-  toast('Draft cleared', 'info');
-}
-
-function copyDraft() {
-  const text = document.getElementById('writerBox').innerText;
-  navigator.clipboard.writeText(text).then(() => {
-    toast('Copied to clipboard', 'success');
-  });
-}
-
-function downloadDraft() {
-  const title = document.getElementById('writerTitle').value || 'recommendation';
-  const text = document.getElementById('writerBox').innerText;
-  const blob = new Blob([text], {type:'text/plain'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = title + '.txt';
-  a.click();
-}
-
-function attachDraft() {
-  toast('Draft attached to upload', 'info');
-}
-
-/* ------------------ UNIVERSITIES ------------------ */
-
-let universities = [];
-let selected = [];
-let page = 1;
-let pageSize = 40;
-
-  async function loadUniversities() {
-  try {
-    const res = await fetch('assets/us_institutions_by_state_2023.json');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    universities = await res.json();
-
-    // Normalize if necessary: make sure each object has id, name, state, type, level
-    universities = universities.map((u, idx) => ({
-      id: u.id || idx + 1,
-      name: u.name || u.institution || 'Unknown',
-      state: u.state || u.state_abbr || '',
-      type: u.type || u.control || '',
-      level: u.level || u.level_of_institution || ''
-    }));
-
-    refreshList();
-  } catch (err) {
-    console.error('Failed to load universities JSON', err);
-    toast('Could not load universities dataset', 'error');
-    universities = [];
-  }
-}
-
-
-function refreshList() {
-  const grid = document.getElementById('universityGrid');
-  grid.innerHTML = '';
-  const start = (page-1)*pageSize;
-  const items = universities.slice(start,start+pageSize);
-  items.forEach(u => {
-    const card = document.createElement('div');
-    card.className = 'university-card';
-    card.innerHTML = `
-      <div class="university-header">
-        <div class="university-logo">${u.name[0]}</div>
-        <div>
-          <div class="university-name">${u.name}</div>
-          <div class="university-location">${u.state}</div>
-          <div class="university-pill">${u.type}</div>
-        </div>
-      </div>`;
-    card.onclick = () => toggleUniversity(u);
-    if (selected.find(s => s.id===u.id)) card.classList.add('selected');
-    grid.appendChild(card);
-  });
-  updateMeta();
-  updatePager();
-}
-
-function updateMeta() {
-  document.getElementById('resultMeta').textContent = `Showing ${universities.length} universities`;
-}
-
-function updatePager() {
-  document.getElementById('pageInfo').textContent = `Page ${page} of ${Math.ceil(universities.length/pageSize)}`;
-}
-
-function toggleUniversity(u) {
-  if (selected.find(s => s.id===u.id)) {
-    selected = selected.filter(s => s.id!==u.id);
-  } else {
-    selected.push(u);
-  }
-  refreshList();
-  updateSelectedList();
-  updateSendButton();
-}
-
-function updateSelectedList() {
-  const list = document.getElementById('selectedList');
-  list.innerHTML = '';
-  selected.forEach(u => {
-    const tag = document.createElement('div');
-    tag.className = 'selected-tag';
-    tag.innerHTML = `${u.name}<span class="remove-tag">x</span>`;
-    tag.querySelector('.remove-tag').onclick = () => toggleUniversity(u);
-    list.appendChild(tag);
-  });
-}
-
-function updateSendButton() {
-  document.getElementById('sendBtn').disabled = selected.length===0;
-}
-
-/* -------------------- SENDING -------------------- */
-
-function sendLetters() {
-  if (!uploadedFile) { toast('Upload a file first', 'error'); return; }
-  if (selected.length===0) { toast('Select universities first', 'error'); return; }
-
-  document.querySelector('.send-section').style.display='block';
-  document.getElementById('progressList').innerHTML='';
-  let i=0;
-  selected.forEach(u => {
-    const row = document.createElement('div');
-    row.className = 'delivery-item';
-    row.innerHTML = `<div class="delivery-status pending">…</div>
-      <div>${u.name}</div>`;
-    document.getElementById('progressList').appendChild(row);
-
-    setTimeout(() => {
-      row.querySelector('.delivery-status').className='delivery-status success';
-      row.querySelector('.delivery-status').textContent='✓';
-      i++;
-      document.querySelector('.progress-text').textContent=`${i}/${selected.length} sent`;
-      document.querySelector('.progress-fill').style.width=`${i/selected.length*100}%`;
-      if (i===selected.length) {
-        document.querySelector('.success-section').style.display='block';
+  <!-- Tab wiring + dataset redirect shim -->
+  <script>
+    // Wire header tabs to your existing switchView()
+    (function(){
+      const tabRec = document.getElementById('tab-recommender');
+      const tabStu = document.getElementById('tab-student');
+      function setTab(view){
+        if (!tabRec || !tabStu) return;
+        const isRec = view === 'recommender';
+        tabRec.setAttribute('aria-selected', isRec ? 'true' : 'false');
+        tabStu.setAttribute('aria-selected', isRec ? 'false' : 'true');
       }
-    }, 1000+Math.random()*2000);
-  });
-}
+      if (tabRec) tabRec.addEventListener('click', function(){
+        try { window.switchView && window.switchView('recommender'); } catch(e){}
+        setTab('recommender');
+      });
+      if (tabStu) tabStu.addEventListener('click', function(){
+        try { window.switchView && window.switchView('student'); } catch(e){}
+        setTab('student');
+      });
+    })();
 
-/* --------------------- TOAST --------------------- */
-function toast(msg, type='info') {
-  const wrap = document.querySelector('.toast-wrap');
-  if (!wrap) return;
-  const div = document.createElement('div');
-  div.className = `toast ${type}`;
-  div.innerHTML = `<span class="icon material-icons">info</span>
-    <div class="msg">${msg}</div>
-    <button class="x" onclick="this.parentElement.remove()">×</button>`;
-  wrap.appendChild(div);
-  setTimeout(()=>div.remove(), 4000);
-}
+    // Ensure hero title uses your new tagline even if main script re-renders
+    (function(){
+      const t = document.querySelector('.hero-title');
+      if (t) t.textContent = 'One upload. Unlimited reach.';
+    })();
 
-/* ------------------ BOOTSTRAP ------------------- */
+    // Redirect dataset fetches from /assets/videos/... to /assets/
+    (function(){
+      const origFetch = window.fetch;
+      if (!origFetch) return;
+      window.fetch = function(input, init){
+        try {
+          let url = (typeof input === 'string') ? input : (input && input.url) || '';
+          if (typeof url === 'string'){
+            url = url.replace('/assets/videos/us_institutions_by_state_2023.min.json','/assets/us_institutions_by_state_2023.json')
+                     .replace('/assets/videos/us_institutions_by_state_2023.json','/assets/us_institutions_by_state_2023.json');
+            if (typeof input === 'string') input = url; else input = new Request(url, input);
+          }
+        } catch(e){}
+        return origFetch(input, init);
+      };
+    })();
+  </script>
+  <!-- ======= STELLARREC SELECT-UNIVERSITIES HOTFIX PACK ======= -->
+  <script>
+  (function(){
+    if (window.__SR_SELECT_UNI_PATCH__) return;
+    window.__SR_SELECT_UNI_PATCH__ = true;
 
-document.addEventListener('DOMContentLoaded', () => {
-  setupFileUpload();
-  setupWriter();
-  loadUniversities();
-  updateSelectedList();
-  updateSendButton();
-});
-</script>
+    const $ = (id) => document.getElementById(id);
+    const norm = (s) => (s||'').toString().trim().toLowerCase();
+    const escapeHtml = (s) => (s??'').toString()
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
-<!-- Toast container -->
-<div class="toast-wrap"></div>
+    let universities      = window.universities      || [];
+    let filtered          = window.filtered          || [];
+    let page              = typeof window.page === 'number' ? window.page : 1;
+    let pageSize          = typeof window.pageSize === 'number' ? window.pageSize : 40;
+    let filters           = window.filters || { q:'', state:'', type:'', level:'', sort:'name_asc' };
+    let studentUnitIds    = window.studentUnitIds || new Set();
+    let addedByRecommender= window.addedByRecommender || new Set();
+    let removedByRecommender = window.removedByRecommender || new Set();
 
+    function toast(message){ try {
+      const wrap = $('toastWrap') || (function(){ const t=document.createElement('div'); t.id='toastWrap'; t.style.position='fixed'; t.style.right='16px'; t.style.bottom='16px'; t.style.zIndex='99999'; document.body.appendChild(t); return t;})();
+      const el = document.createElement('div');
+      el.style.cssText = 'background:#111;color:#fff;padding:.6rem .75rem;border-radius:.6rem;margin-top:.4rem;box-shadow:0 8px 24px rgba(0,0,0,.25);font:500 14px/1.2 Roboto,system-ui';
+      el.textContent = message;
+      wrap.appendChild(el);
+      setTimeout(()=>{el.remove();}, 2200);
+    } catch(e){} }
+
+    const getEffectiveSelection = window.getEffectiveSelection || function(){
+      const base = new Set(studentUnitIds);
+      removedByRecommender.forEach(id => base.delete(id));
+      addedByRecommender.forEach(id => base.add(id));
+      return base;
+    };
+
+    function computeFiltered(){
+      filtered = universities.filter(u => {
+        const q = norm(filters.q);
+        const qOk = !q || norm(u.name||'').includes(q) || norm(u.city||'').includes(q) || norm(u.state||'').includes(q);
+        const stOk = !filters.state || u.state === filters.state;
+        const tyOk = !filters.type  || u.control === filters.type;
+        const lvOk = !filters.level || u.level === filters.level;
+        return qOk && stOk && tyOk && lvOk;
+      });
+      if (filters.sort === 'name_asc') filtered.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+      else if (filters.sort === 'state_asc') filtered.sort((a,b)=> (a.state||'').localeCompare(b.state||'') || (a.name||'').localeCompare(b.name||''));
+    }
+
+    function renderUniversities(list){
+      const grid = $('universityGrid'); if (!grid) return;
+      grid.innerHTML = '';
+      const eff = getEffectiveSelection();
+      const frag = document.createDocumentFragment();
+      (list||[]).forEach(uni=>{
+        const card = document.createElement('div');
+        card.className = 'university-card' + (eff.has(uni.unitid) ? ' selected' : '');
+        card.setAttribute('role','listitem');
+        card.innerHTML = `
+          <div class="university-header">
+            <div class="university-logo">${escapeHtml((uni.name||'?').charAt(0))}</div>
+            <div>
+              <div class="university-name">${escapeHtml(uni.name||'Unknown')}</div>
+              <div class="university-location">${escapeHtml([uni.city,uni.state].filter(Boolean).join(', '))}</div>
+              ${(uni.level || uni.control) ? `<span class="university-pill">${[uni.control, uni.level].filter(Boolean).map(escapeHtml).join(' • ')}</span>` : ''}
+            </div>
+          </div>`;
+        card.addEventListener('click', ()=> toggleUniversity(uni.unitid));
+        frag.appendChild(card);
+      });
+      grid.appendChild(frag);
+    }
+
+    function updatePager(){
+      const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+      const pi = $('pageInfo'); if (pi) pi.textContent = `Page ${Math.min(page,totalPages)} of ${totalPages}`;
+      const prev = $('prevPage'); if (prev) prev.disabled = page <= 1;
+      const next = $('nextPage'); if (next) next.disabled = page >= totalPages;
+
+      const meta = $('resultMeta');
+      if (meta){
+        const start = filtered.length ? ((page-1)*pageSize + 1) : 0;
+        const end   = Math.min(filtered.length, page*pageSize);
+        meta.textContent = `Showing ${start}-${end} of ${filtered.length} (from ${universities.length} total)`;
+      }
+
+      const grid = $('universityGrid'), empty = $('emptyState');
+      if (grid && empty){
+        if (filtered.length === 0){ grid.style.display='none'; empty.style.display='block'; }
+        else { grid.style.display='grid'; empty.style.display='none'; }
+      }
+    }
+
+    function renderPage(){
+      if (!filtered.length) { computeFiltered(); }
+      const start = (page-1) * pageSize;
+      const end   = start + pageSize;
+      renderUniversities(filtered.slice(start,end));
+      updatePager();
+    }
+
+    function toggleUniversity(unitid){
+      if (typeof window.toggleUniversity === 'function' && window.toggleUniversity !== toggleUniversity){
+        return window.toggleUniversity(unitid);
+      }
+      if (studentUnitIds.has(unitid)){
+        if (removedByRecommender.has(unitid)) removedByRecommender.delete(unitid);
+        else removedByRecommender.add(unitid);
+        addedByRecommender.delete(unitid);
+      } else {
+        if (addedByRecommender.has(unitid)) addedByRecommender.delete(unitid);
+        else addedByRecommender.add(unitid);
+      }
+      renderPage(); updateSelectedList(); updateSendButton();
+    }
+
+    function updateSelectedList(){
+      const list = $('selectedList'); if (!list) return;
+      const count = $('selectedCount');
+      const eff = getEffectiveSelection();
+      if (count) count.textContent = `${eff.size} universities selected`;
+      list.innerHTML = '';
+      const frag = document.createDocumentFragment();
+      eff.forEach(uid=>{
+        const uni = filtered.find(u=>u.unitid===uid) || universities.find(u=>u.unitid===uid);
+        const chip = document.createElement('div');
+        chip.className = 'selected-tag';
+        chip.innerHTML = `${escapeHtml(uni? uni.name : String(uid))} <div class="remove-tag" title="Remove" role="button" aria-label="Remove">×</div>`;
+        chip.querySelector('.remove-tag').addEventListener('click', (e)=>{ e.stopPropagation(); removeFromEffective(uid); });
+        frag.appendChild(chip);
+      });
+      list.appendChild(frag);
+    }
+
+    function removeFromEffective(uid){
+      if (studentUnitIds.has(uid)){ removedByRecommender.add(uid); addedByRecommender.delete(uid); }
+      else { addedByRecommender.delete(uid); }
+      renderPage(); updateSelectedList(); updateSendButton();
+    }
+
+    function updateSendButton(){
+      const btn = $('sendBtn'); if (!btn) return;
+      const effCount = getEffectiveSelection().size;
+      const hasFile = !!(window.uploadedFile);
+      btn.disabled = !(hasFile && effCount > 0);
+    }
+
+    // AUTOSUGGEST
+    function initAutosuggest(){
+      const input = $('universitySearch'); if (!input) return;
+      let pop = $('suggestPopover');
+      if (!pop){
+        pop = document.createElement('div');
+        pop.id = 'suggestPopover';
+        pop.className = 'suggest-popover';
+        pop.setAttribute('role','listbox');
+        pop.style.display = 'none';
+        input.parentNode.appendChild(pop);
+      }
+
+      let items = [];
+      let activeIndex = -1;
+      const close = ()=>{ pop.style.display='none'; items=[]; activeIndex=-1; pop.innerHTML=''; };
+      const setActive = (i)=>{
+        activeIndex = i;
+        Array.from(pop.children).forEach((el,idx)=> el.setAttribute('aria-selected', String(idx===activeIndex)));
+      };
+
+      function scoreAndList(qRaw){
+        const q = norm(qRaw);
+        if (!q) { close(); return; }
+        const scored = [];
+        for (let i=0;i<universities.length;i++){
+          const u = universities[i];
+          const nm = norm(u.name||''); const ct = norm(u.city||''); const st = norm(u.state||'');
+          let s=0;
+          if (nm.startsWith(q)) s=2;
+          else if (nm.includes(q)) s=1.5;
+          else if (ct.includes(q)||st.includes(q)) s=1;
+          if (s>0) scored.push([s,u]);
+          if (scored.length>600) break;
+        }
+        scored.sort((a,b)=> b[0]-a[0] || (a[1].name||'').localeCompare(b[1].name||''));
+        items = scored.slice(0,10).map(x=>x[1]);
+        if (!items.length){ close(); return; }
+
+        pop.innerHTML='';
+        items.forEach((u,idx)=>{
+          const row = document.createElement('div');
+          row.className = 'suggest-item';
+          row.setAttribute('role','option');
+          row.setAttribute('aria-selected', idx===0 ? 'true' : 'false');
+          row.innerHTML = `
+            <span class="material-icons" aria-hidden="true" style="font-size:1rem;">school</span>
+            <div>
+              <div>${highlight(u.name, qRaw)}</div>
+              <div class="suggest-muted">${escapeHtml([u.city,u.state].filter(Boolean).join(', '))}</div>
+            </div>`;
+          row.addEventListener('mouseenter', ()=> setActive(idx));
+          row.addEventListener('click', ()=> pick(u));
+          pop.appendChild(row);
+        });
+        activeIndex = 0;
+        pop.style.display='block';
+      }
+
+      function highlight(text, query){
+        const t = text||''; const q = norm(query); if (!q) return escapeHtml(t);
+        const i = norm(t).indexOf(q); if (i<0) return escapeHtml(t);
+        return escapeHtml(t.slice(0,i)) + '<span class="suggest-highlight">' + escapeHtml(t.slice(i,i+q.length)) + '</span>' + escapeHtml(t.slice(i+q.length));
+      }
+
+      function pick(u){
+        input.value = u.name || '';
+        filters.q = norm(u.name);
+        page = 1;
+        computeFiltered(); renderPage();
+        close();
+        const idx = filtered.findIndex(x => String(x.unitid) === String(u.unitid));
+        if (idx >= 0){
+          page = Math.floor(idx / pageSize) + 1; renderPage();
+          requestAnimationFrame(()=> {
+            const cards = Array.from(document.querySelectorAll('.university-card'));
+            const startIdx = (page-1)*pageSize;
+            const card = cards[idx - startIdx];
+            if (card) card.scrollIntoView({behavior:'smooth', block:'nearest'});
+          });
+        }
+      }
+
+      input.addEventListener('input', (e)=> {
+        filters.q = input.value.trim().toLowerCase();
+        page = 1; computeFiltered(); renderPage(); scoreAndList(input.value);
+      });
+
+      input.addEventListener('keydown', (e)=>{
+        const open = pop.style.display !== 'none';
+        if (e.key === 'Enter'){
+          if (open && activeIndex>=0 && items[activeIndex]){ e.preventDefault(); pick(items[activeIndex]); return; }
+          e.preventDefault(); filters.q = input.value.trim().toLowerCase(); page=1; computeFiltered(); renderPage(); close(); return;
+        }
+        if (!open) return;
+        if (e.key === 'Escape'){ e.preventDefault(); close(); return; }
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+          e.preventDefault();
+          const max = items.length-1;
+          if (max < 0) return;
+          if (e.key === 'ArrowDown') setActive(activeIndex + 1 > max ? 0 : activeIndex+1);
+          else setActive(activeIndex - 1 < 0 ? max : activeIndex-1);
+        }
+      });
+
+      document.addEventListener('click', (ev)=>{
+        if (ev.target === input || ev.target === pop || pop.contains(ev.target)) return;
+        close();
+      });
+    }
+
+    function wireButtons(){
+      const apply = $('searchApplyBtn');
+      if (apply && !apply.__sr_wired){
+        apply.__sr_wired = true;
+        apply.addEventListener('click', ()=>{
+          const q = $('universitySearch')?.value || '';
+          filters.q = q.trim().toLowerCase();
+          page = 1; computeFiltered(); renderPage();
+        });
+      }
+
+      const filt = $('filterApplyBtn');
+      if (filt && !filt.__sr_wired){
+        filt.__sr_wired = true;
+        filt.addEventListener('click', ()=>{
+          const state = $('stateFilter')?.value || '';
+          const type  = $('typeFilter')?.value || '';
+          const level = $('levelFilter')?.value || '';
+          const sort  = $('sortBy')?.value || 'name_asc';
+          filters.state = state; filters.type = type; filters.level = level; filters.sort = sort;
+          page = 1; computeFiltered(); renderPage(); toast('Filters applied');
+        });
+      }
+
+      const reset = $('resetBtn');
+      if (reset && !reset.__sr_wired){
+        reset.__sr_wired = true;
+        reset.addEventListener('click', ()=>{
+          const q = $('universitySearch'); if (q) q.value = '';
+          ['stateFilter','typeFilter','levelFilter','sortBy'].forEach(id=>{ const el=$(id); if (el) el.value = id==='sortBy' ? 'name_asc' : ''; });
+          filters = { q:'', state:'', type:'', level:'', sort:'name_asc' };
+          page=1; computeFiltered(); renderPage(); toast('Filters reset');
+        });
+      }
+
+      const selectPage = $('selectPageBtn');
+      if (selectPage && !selectPage.__sr_wired){
+        selectPage.__sr_wired = true;
+        selectPage.addEventListener('click', ()=>{
+          const start = (page-1)*pageSize, end = Math.min(filtered.length, start+pageSize);
+          const eff = getEffectiveSelection();
+          filtered.slice(start,end).forEach(u=>{
+            eff.add(u.unitid);
+            if (studentUnitIds.has(u.unitid)) removedByRecommender.delete(u.unitid);
+            else addedByRecommender.add(u.unitid);
+          });
+          renderPage(); updateSelectedList(); updateSendButton(); toast('Selected all on current page');
+        });
+      }
+
+      const bulkBtn = $('bulkImportBtn');
+      if (bulkBtn && !bulkBtn.__sr_wired){
+        bulkBtn.__sr_wired = true;
+        bulkBtn.addEventListener('click', ()=> openImportModal());
+      }
+
+      const prev = $('prevPage');
+      if (prev && !prev.__sr_wired){
+        prev.__sr_wired = true;
+        prev.addEventListener('click', ()=>{
+          const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+          if (page > 1) page--;
+          if (page < 1) page=1;
+          renderPage();
+        });
+      }
+      const next = $('nextPage');
+      if (next && !next.__sr_wired){
+        next.__sr_wired = true;
+        next.addEventListener('click', ()=>{
+          const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+          if (page < totalPages) page++;
+          renderPage();
+        });
+      }
+      const per = $('pageSize');
+      if (per && !per.__sr_wired){
+        per.__sr_wired = true;
+        per.addEventListener('change', (e)=>{
+          pageSize = parseInt(e.target.value,10) || 40;
+          page = 1; renderPage();
+        });
+      }
+
+      const all = $('universitySelect');
+      if (all && !all.__sr_wired){
+        all.__sr_wired = true;
+        all.addEventListener('change', (e)=>{
+          const val = e.target.value; if (!val) return;
+          filters = { q:'', state:'', type:'', level:'', sort:'name_asc' };
+          const q = $('universitySearch'); if (q) q.value='';
+          ['stateFilter','typeFilter','levelFilter','sortBy'].forEach(id=>{ const el=$(id); if (el) el.value = id==='sortBy' ? 'name_asc' : ''; });
+          computeFiltered();
+          const idx = filtered.findIndex(u => String(u.unitid) === String(val));
+          if (idx >= 0){ page = Math.floor(idx / pageSize) + 1; renderPage(); }
+          const uidNum = Number(val);
+          const uid = Number.isNaN(uidNum) ? val : uidNum;
+          if (studentUnitIds.has(uid)) removedByRecommender.delete(uid); else addedByRecommender.add(uid);
+          updateSelectedList(); updateSendButton();
+          all.selectedIndex = 0;
+        });
+      }
+    }
+
+    function ensureImportModal(){
+      if ($('importModal')) return;
+      const shell = document.createElement('div');
+      shell.id = 'importModal';
+      shell.setAttribute('role','dialog');
+      shell.setAttribute('aria-modal','true');
+      shell.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:9999;';
+      shell.innerHTML = `
+        <div style="background:#fff; width:min(680px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
+          <div style="padding:1rem 1.2rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-weight:700;">Bulk import universities</div>
+            <button id="importCloseBtn" style="background:none;border:none;font-size:1.2rem;cursor:pointer;">✕</button>
+          </div>
+          <div style="padding:1rem 1.2rem; display:grid; gap:.75rem;">
+            <div style="font-size:.92rem; color:#556;">Paste one <b>name per line</b>. We’ll fuzzy-match against the master list.</div>
+            <textarea id="importTextarea" rows="10" style="width:100%; padding:.8rem; border:1px solid #e5e7eb; border-radius:10px; font-family:inherit;"></textarea>
+            <div id="importPreview" style="font-size:.9rem; color:#667;"></div>
+          </div>
+          <div style="padding:1rem 1.2rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
+            <button class="page-btn" id="importCancelBtn">Cancel</button>
+            <button class="apply-btn" id="importConfirmBtn">Add matches</button>
+          </div>
+        </div>`;
+      document.body.appendChild(shell);
+      $('importCloseBtn').onclick = closeImportModal;
+      $('importCancelBtn').onclick = closeImportModal;
+      $('importConfirmBtn').onclick = confirmImport;
+    }
+    function openImportModal(){ ensureImportModal(); $('importModal').style.display='flex'; }
+    function closeImportModal(){ const m=$('importModal'); if (m) m.style.display='none'; }
+    function confirmImport(){
+      const txt = $('importTextarea')?.value || '';
+      const lines = txt.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+      if (!lines.length){ toast('Nothing to import'); return; }
+      const names = new Set(lines.map(norm));
+      const matches = universities.filter(u => names.has(norm(u.name||'')) || names.has(norm((u.name||'').replace(/[,]/g,''))));
+      if (!matches.length){ toast('No matches found'); return; }
+      const eff = getEffectiveSelection();
+      matches.forEach(u=>{
+        eff.add(u.unitid);
+        if (studentUnitIds.has(u.unitid)) removedByRecommender.delete(u.unitid);
+        else addedByRecommender.add(u.unitid);
+      });
+      renderPage(); updateSelectedList(); updateSendButton(); closeImportModal();
+      toast(`Added ${matches.length} matches`);
+    }
+
+    function populateBrowseAll(){
+      const sel = $('universitySelect'); if (!sel) return;
+      const keep = sel.options.length ? sel.options[0] : null;
+      sel.innerHTML = ''; if (keep) sel.appendChild(keep);
+      const sorted = [...universities].sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+      const frag = document.createDocumentFragment();
+      sorted.forEach(u=>{
+        const opt = document.createElement('option');
+        opt.value = u.unitid;
+        const loc = [u.city,u.state].filter(Boolean).join(', ');
+        opt.textContent = `${u.name || 'Unknown Institution'}${loc ? ' — ' + loc : ''}`;
+        frag.appendChild(opt);
+      });
+      sel.appendChild(frag);
+      if (keep) keep.textContent = `Browse all universities (${universities.length.toLocaleString()})`;
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      universities = window.universities || universities || [];
+      setTimeout(()=> {
+        if ((window.universities||[]).length && universities.length !== window.universities.length){
+          universities = window.universities;
+          computeFiltered(); renderPage(); populateBrowseAll();
+        }
+      }, 800);
+
+      if (!filtered.length && universities.length){ computeFiltered(); }
+
+      populateBrowseAll();
+      renderPage();
+      initAutosuggest();
+      wireButtons();
+
+      // Wire native bulk import modal buttons if present
+      const im = document.getElementById('importModal');
+      if (im){
+        const c1 = $('importCloseBtn'), c2 = $('importCancelBtn'), ok = $('importConfirmBtn');
+        if (c1) c1.onclick = closeImportModal;
+        if (c2) c2.onclick = closeImportModal;
+        if (ok) ok.onclick = confirmImport;
+      }
+    });
+  })();
+  </script>
+  <!-- ======= /STELLARREC HOTFIX PACK ======= -->
 </body>
 </html>
+
 
 
 
