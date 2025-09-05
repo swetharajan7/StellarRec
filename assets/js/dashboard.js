@@ -1,30 +1,37 @@
 /* ===================== tiny toast ===================== */
-(function(){
-  window.toast = function(msg, type='info', opts={}){
-    const wrap = document.getElementById('toastWrap') || (()=>{ 
-      const d=document.createElement('div'); 
-      d.id='toastWrap'; 
-      d.className='toast-wrap'; 
-      document.body.appendChild(d); 
-      return d; 
-    })();
+(function () {
+  window.toast = function (msg, type = 'info', opts = {}) {
+    const wrap =
+      document.getElementById('toastWrap') ||
+      (() => {
+        const d = document.createElement('div');
+        d.id = 'toastWrap';
+        d.className = 'toast-wrap';
+        document.body.appendChild(d);
+        return d;
+      })();
     const el = document.createElement('div');
     el.className = `toast ${type}`;
     el.innerHTML = `
-      <div class="icon">${type==='success'?'✓':type==='error'?'!':'ℹ︎'}</div>
+      <div class="icon">${type === 'success' ? '✓' : type === 'error' ? '!' : 'ℹ︎'}</div>
       <div class="msg">${msg}</div>
       <button class="x" aria-label="Close">×</button>`;
     wrap.appendChild(el);
     const ttl = opts.ttl || 2500;
-    const close = ()=>{ if(el.parentNode){ el.parentNode.removeChild(el); } };
+    const close = () => {
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
+    };
     el.querySelector('.x').onclick = close;
     setTimeout(close, ttl);
   };
 })();
 
 /* ===================== utilities & state ===================== */
-const norm = s => (s||'').toString().trim().toLowerCase();
+const norm = (s) => (s || '').toString().trim().toLowerCase();
 
+/* Keep Send button state sensible even if other code isn't loaded yet */
 if (typeof window.updateSendButton !== 'function') {
   window.updateSendButton = function () {
     const sendBtn = document.getElementById('sendBtn');
@@ -36,17 +43,17 @@ if (typeof window.updateSendButton !== 'function') {
   };
 }
 
-/* ===================== THEME BUTTON (center) ===================== */
-function themeButtonInit(){
+/* ===================== THEME BUTTON ===================== */
+function themeButtonInit() {
   const KEY = 'sr_theme';
   const root = document.documentElement;
-  const btn  = document.getElementById('headerThemeBtn');
+  const btn = document.getElementById('headerThemeBtn');
 
   const saved = localStorage.getItem(KEY) || 'light';
-  root.dataset.theme = (saved === 'dark') ? 'dark' : 'light';
+  root.dataset.theme = saved === 'dark' ? 'dark' : 'light';
   if (btn) btn.setAttribute('aria-pressed', saved === 'dark' ? 'true' : 'false');
 
-  function toggleTheme(){
+  function toggleTheme() {
     const current = root.dataset.theme === 'dark' ? 'dark' : 'light';
     const next = current === 'dark' ? 'light' : 'dark';
     root.dataset.theme = next;
@@ -62,20 +69,31 @@ function themeButtonInit(){
 const MAX_WARN_MB = 10;
 const HARD_LIMIT_MB = null; // set a number to hard-reject files
 
-function setupUpload(){
-  const fileInput  = document.getElementById('fileInput');
-  const chooseBtn  = document.getElementById('chooseFileBtn');
+function setupUpload() {
+  const fileInput = document.getElementById('fileInput');
+  const chooseBtn = document.getElementById('chooseFileBtn');
   const uploadArea = document.getElementById('uploadArea');
-  const removeBtn  = document.getElementById('removeFileBtn');
+  const removeBtn = document.getElementById('removeFileBtn');
 
-  chooseBtn?.addEventListener('click', (e)=>{ e.preventDefault(); fileInput?.click(); });
-  fileInput?.addEventListener('change', (e)=>{ const f = e.target.files && e.target.files[0]; if (f) handleFile(f); });
+  chooseBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    fileInput?.click();
+  });
+  fileInput?.addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (f) handleFile(f);
+  });
 
   // drag-n-drop
-  if (uploadArea){
-    uploadArea.addEventListener('dragover', (e)=>{ e.preventDefault(); document.getElementById('uploadSection')?.classList.add('dragover'); });
-    uploadArea.addEventListener('dragleave', ()=> document.getElementById('uploadSection')?.classList.remove('dragover'));
-    uploadArea.addEventListener('drop', (e)=>{
+  if (uploadArea) {
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      document.getElementById('uploadSection')?.classList.add('dragover');
+    });
+    uploadArea.addEventListener('dragleave', () =>
+      document.getElementById('uploadSection')?.classList.remove('dragover')
+    );
+    uploadArea.addEventListener('drop', (e) => {
       e.preventDefault();
       document.getElementById('uploadSection')?.classList.remove('dragover');
       const f = e.dataTransfer.files && e.dataTransfer.files[0];
@@ -86,19 +104,29 @@ function setupUpload(){
   removeBtn?.addEventListener('click', removeFile);
 }
 
-function isPdf(file){
+function isPdf(file) {
   return file && (file.type === 'application/pdf' || /\.pdf$/i.test(file.name || ''));
 }
 
-function handleFile(file){
-  if (!isPdf(file)) { toast('Please upload a PDF file.', 'error'); return; }
+function handleFile(file) {
+  if (!isPdf(file)) {
+    toast('Please upload a PDF file.', 'error');
+    return;
+  }
   const sizeMB = file.size / 1024 / 1024;
-  if (HARD_LIMIT_MB && sizeMB > HARD_LIMIT_MB) { toast(`File is ${sizeMB.toFixed(1)} MB — limit ${HARD_LIMIT_MB} MB.`, 'error', {ttl:4000}); return; }
-  if (sizeMB > MAX_WARN_MB) toast(`Heads up: ${sizeMB.toFixed(1)} MB is large. Recommended ≤ ${MAX_WARN_MB} MB.`, 'info', {ttl:3500});
+  if (HARD_LIMIT_MB && sizeMB > HARD_LIMIT_MB) {
+    toast(`File is ${sizeMB.toFixed(1)} MB — limit ${HARD_LIMIT_MB} MB.`, 'error', { ttl: 4000 });
+    return;
+  }
+  if (sizeMB > MAX_WARN_MB)
+    toast(`Heads up: ${sizeMB.toFixed(1)} MB is large. Recommended ≤ ${MAX_WARN_MB} MB.`, 'info', {
+      ttl: 3500,
+    });
 
   window.uploadedFile = file;
 
-  document.getElementById('uploadedFile')?.style && (document.getElementById('uploadedFile').style.display = 'block');
+  const uploadedBox = document.getElementById('uploadedFile');
+  if (uploadedBox) uploadedBox.style.display = 'block';
   const nameEl = document.getElementById('fileName');
   const sizeEl = document.getElementById('fileSize');
   if (nameEl) nameEl.textContent = file.name;
@@ -113,12 +141,12 @@ function handleFile(file){
     const sendBtn = document.getElementById('sendBtn');
     if (sendBtn && !sendBtn.disabled) {
       sendBtn.classList.add('flash');
-      setTimeout(()=> sendBtn.classList.remove('flash'), 900);
+      setTimeout(() => sendBtn.classList.remove('flash'), 900);
     }
   }
 }
 
-function removeFile(){
+function removeFile() {
   window.uploadedFile = null;
   const uploadedBox = document.getElementById('uploadedFile');
   if (uploadedBox) uploadedBox.style.display = 'none';
@@ -133,8 +161,9 @@ function preselectByName(universityName) {
   try {
     if (!Array.isArray(window.universities) || !universities.length) return;
     const targetName = norm(universityName);
-    let match = universities.find(u => norm(u.name) === targetName) 
-             || universities.find(u => norm(u.name).includes(targetName));
+    let match =
+      universities.find((u) => norm(u.name) === targetName) ||
+      universities.find((u) => norm(u.name).includes(targetName));
     if (!match) return;
 
     window.studentUnitIds = window.studentUnitIds || new Set();
@@ -153,12 +182,12 @@ function preselectByName(universityName) {
 }
 
 // run preselect after loadDataset completes (if present)
-(function wrapLoadDatasetForPreselect(){
+(function wrapLoadDatasetForPreselect() {
   if (typeof window.loadDataset !== 'function') {
     const obs = new MutationObserver(() => {
       if (typeof window.loadDataset === 'function') {
         const original = window.loadDataset;
-        window.loadDataset = async function(...args) {
+        window.loadDataset = async function (...args) {
           const result = await original.apply(this, args);
           preselectByName('Experimental University');
           return result;
@@ -166,20 +195,21 @@ function preselectByName(universityName) {
         obs.disconnect();
       }
     });
-    obs.observe(document.documentElement, {childList:true, subtree:true});
+    obs.observe(document.documentElement, { childList: true, subtree: true });
   } else {
     const original = window.loadDataset;
-    window.loadDataset = async function(...args) {
+    window.loadDataset = async function (...args) {
       const result = await original.apply(this, args);
       preselectByName('Experimental University');
       return result;
     };
   }
 })();
-/* ===================== USER DROPDOWN (no “how it works” override) ===================== */
+
+/* ===================== USER DROPDOWN ===================== */
 function setupUserDropdown() {
   const avatarBtn = document.getElementById('userAvatarBtn');
-  const dropdown  = document.getElementById('userDropdown');
+  const dropdown = document.getElementById('userDropdown');
   const contactAdminItem = document.getElementById('contactAdminItem');
   if (!avatarBtn || !dropdown) return;
 
@@ -196,11 +226,20 @@ function setupUserDropdown() {
     dropdown.setAttribute('aria-hidden', 'true');
     isOpen = false;
   }
-  function toggleDropdown() { isOpen ? closeDropdown() : openDropdown(); }
+  function toggleDropdown() {
+    isOpen ? closeDropdown() : openDropdown();
+  }
 
-  avatarBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
-  document.addEventListener('click', (e) => { if (isOpen && !e.target.closest('.user-info')) closeDropdown(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) closeDropdown(); });
+  avatarBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleDropdown();
+  });
+  document.addEventListener('click', (e) => {
+    if (isOpen && !e.target.closest('.user-info')) closeDropdown();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen) closeDropdown();
+  });
 
   // Contact Admin (open overlay modal)
   contactAdminItem?.addEventListener('click', () => {
@@ -208,93 +247,111 @@ function setupUserDropdown() {
     closeDropdown();
   });
 
-  function openContactOverlay(){
+  function openContactOverlay() {
     const overlay = document.getElementById('contactOverlay');
-    if (!overlay) { toast('Contact admin would open here.', 'info'); return; }
+    if (!overlay) {
+      toast('Contact admin would open here.', 'info');
+      return;
+    }
     overlay.style.display = 'flex';
     setTimeout(() => {
-      const panel = overlay.querySelector('div[style*="transform"]') || overlay.querySelector('div > div');
-      if (panel) { panel.style.transform = 'translateY(0)'; panel.style.opacity = '1'; }
+      const panel =
+        overlay.querySelector('div[style*="transform"]') || overlay.querySelector('div > div');
+      if (panel) {
+        panel.style.transform = 'translateY(0)';
+        panel.style.opacity = '1';
+      }
     }, 10);
   }
 
   // Overlay buttons
-  document.getElementById('contactCloseBtn2')?.addEventListener('click', ()=> closeOverlay());
-  document.getElementById('contactCancelBtn2')?.addEventListener('click', ()=> closeOverlay());
-  function closeOverlay(){
+  document.getElementById('contactCloseBtn2')?.addEventListener('click', () => closeOverlay());
+  document.getElementById('contactCancelBtn2')?.addEventListener('click', () => closeOverlay());
+  function closeOverlay() {
     const overlay = document.getElementById('contactOverlay');
     if (!overlay) return;
     overlay.style.display = 'none';
   }
 
   // Legacy small modal (if used)
-  document.getElementById('contactCloseBtn')?.addEventListener('click', ()=> closeLegacy());
-  document.getElementById('contactCancelBtn')?.addEventListener('click', ()=> closeLegacy());
-  function closeLegacy(){
+  document.getElementById('contactCloseBtn')?.addEventListener('click', () => closeLegacy());
+  document.getElementById('contactCancelBtn')?.addEventListener('click', () => closeLegacy());
+  function closeLegacy() {
     const modal = document.getElementById('contactModal');
     if (!modal) return;
     modal.style.display = 'none';
   }
 }
 
-/* ===================== BULK IMPORT (button lives inside white box) ===================== */
-function setupBulkImport(){
-  const openBtn  = document.getElementById('bulkImportBtn');
-  const modal    = document.getElementById('importModal');
+/* ===================== BULK IMPORT ===================== */
+function setupBulkImport() {
+  const openBtn = document.getElementById('bulkImportBtn');
+  const modal = document.getElementById('importModal');
   const closeBtn = document.getElementById('importCloseBtn');
-  const cancel   = document.getElementById('importCancelBtn');
-  const confirm  = document.getElementById('importConfirmBtn');
+  const cancel = document.getElementById('importCancelBtn');
+  const confirm = document.getElementById('importConfirmBtn');
   const textarea = document.getElementById('importTextarea');
-  const preview  = document.getElementById('importPreview');
+  const preview = document.getElementById('importPreview');
 
   if (!openBtn || !modal) return;
 
-  openBtn.addEventListener('click', ()=> {
+  openBtn.addEventListener('click', () => {
     modal.style.display = 'flex';
     textarea.value = '';
     preview.textContent = '';
     textarea.focus();
   });
-  function close(){ modal.style.display = 'none'; }
+  function close() {
+    modal.style.display = 'none';
+  }
   closeBtn?.addEventListener('click', close);
   cancel?.addEventListener('click', close);
 
   // Live preview: count lines + found matches
-  textarea?.addEventListener('input', ()=>{
-    const lines = textarea.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  textarea?.addEventListener('input', () => {
+    const lines = textarea.value.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
     const unique = Array.from(new Set(lines));
     const total = unique.length;
     let matches = 0;
-    if (Array.isArray(window.universities) && total){
-      for (const name of unique){
+    if (Array.isArray(window.universities) && total) {
+      for (const name of unique) {
         const q = norm(name);
-        const hit = window.universities.find(u => norm(u.name).includes(q));
+        const hit = window.universities.find((u) => norm(u.name).includes(q));
         if (hit) matches++;
       }
     }
     preview.textContent = total ? `Entries: ${total} • Potential matches: ${matches}` : '';
   });
 
-  confirm?.addEventListener('click', ()=>{
-    if (!Array.isArray(window.universities)) { toast('University dataset not loaded yet.', 'error'); return; }
-    const names = textarea.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
-    if (!names.length) { toast('Paste at least one university name.', 'error'); return; }
+  confirm?.addEventListener('click', () => {
+    if (!Array.isArray(window.universities)) {
+      toast('University dataset not loaded yet.', 'error');
+      return;
+    }
+    const names = textarea.value.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+    if (!names.length) {
+      toast('Paste at least one university name.', 'error');
+      return;
+    }
 
     // simple fuzzy "includes" match per line
     const chosen = [];
-    for (const raw of Array.from(new Set(names))){
+    for (const raw of Array.from(new Set(names))) {
       const q = norm(raw);
-      const u = window.universities.find(x => norm(x.name).includes(q));
+      const u = window.universities.find((x) => norm(x.name).includes(q));
       if (u) chosen.push(u);
     }
 
-    if (!chosen.length){ toast('No matches found. Try shorter names (e.g., "Carnegie Mellon").', 'info'); return; }
+    if (!chosen.length) {
+      toast('No matches found. Try shorter names (e.g., "Carnegie Mellon").', 'info');
+      return;
+    }
 
     window.studentUnitIds = window.studentUnitIds || new Set();
     window.addedByRecommender = window.addedByRecommender || new Set();
     window.removedByRecommender = window.removedByRecommender || new Set();
 
-    for (const u of chosen){
+    for (const u of chosen) {
       if (window.studentUnitIds.has(u.unitid)) {
         window.removedByRecommender.delete(u.unitid);
       } else {
@@ -304,10 +361,132 @@ function setupBulkImport(){
 
     window.updateSelectedList?.();
     window.updateSendButton?.();
-    toast(`Added ${chosen.length} match${chosen.length>1?'es':''} from bulk import.`, 'success');
+    toast(`Added ${chosen.length} match${chosen.length > 1 ? 'es' : ''} from bulk import.`, 'success');
     close();
   });
 }
+
+/* ===================== HEADER CENTER TABS (Recommender / Student) ===================== */
+(function setupHeaderViewTabs() {
+  const recBtn = document.getElementById('hdrRecTab');
+  const stuBtn = document.getElementById('hdrStuTab');
+
+  if (!recBtn && !stuBtn) return; // header may not include tabs on some pages
+
+  function setActive(which) {
+    const isRec = which === 'recommender';
+    recBtn?.setAttribute('aria-selected', isRec ? 'true' : 'false');
+    stuBtn?.setAttribute('aria-selected', isRec ? 'false' : 'true');
+  }
+
+  recBtn?.addEventListener('click', () => {
+    setActive('recommender');
+    document.getElementById('panel-recommender')?.style.setProperty('display', 'block');
+    document.getElementById('panel-student')?.style.setProperty('display', 'none');
+    if (typeof switchView === 'function') switchView('recommender');
+  });
+
+  stuBtn?.addEventListener('click', () => {
+    setActive('student');
+    document.getElementById('panel-recommender')?.style.setProperty('display', 'none');
+    document.getElementById('panel-student')?.style.setProperty('display', 'block');
+    if (typeof switchView === 'function') switchView('student');
+  });
+
+  // on load, honor saved view if any
+  const saved = localStorage.getItem('sr_current_view');
+  if (saved === 'student') {
+    stuBtn?.click();
+  } else {
+    recBtn?.click();
+  }
+})();
+
+/* ===================== STUDENT VIEW (tabs + demo behavior) ===================== */
+(function setupStudentTabs() {
+  const tSend = document.getElementById('stuTabSend');
+  const tTrack = document.getElementById('stuTabTrack');
+  const pSend = document.getElementById('stuPanelSend');
+  const pTrack = document.getElementById('stuPanelTrack');
+  const body = document.getElementById('stuTrackBody');
+
+  if (!tSend && !tTrack) return; // student view not present on this page
+
+  function select(which) {
+    const send = which === 'send';
+    tSend?.setAttribute('aria-selected', send ? 'true' : 'false');
+    tTrack?.setAttribute('aria-selected', send ? 'false' : 'true');
+    if (pSend) pSend.hidden = !send;
+    if (pTrack) pTrack.hidden = send;
+  }
+
+  tSend?.addEventListener('click', () => select('send'));
+  tTrack?.addEventListener('click', () => select('track'));
+
+  // seed demo rows once
+  if (body && !body.dataset.seeded) {
+    body.dataset.seeded = '1';
+    const rows = [
+      { name: 'Prof. Ada Lovelace', email: 'ada@maths.example.edu', date: '2025-09-01', status: 'sent' },
+      { name: 'Dr. Grace Hopper', email: 'grace@cs.example.edu', date: '2025-09-03', status: 'pending' },
+    ];
+    rows.forEach((r) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${r.name}</td>
+        <td>${r.email}</td>
+        <td>${r.date}</td>
+        <td>
+          <span class="track-pill ${r.status}">
+            ${r.status === 'received' ? 'Received' : r.status === 'sent' ? 'Sent' : 'Pending'}
+          </span>
+        </td>
+      `;
+      body.appendChild(tr);
+    });
+  }
+
+  // handle the Send Request form (demo only)
+  (function wireSendForm() {
+    const form = document.getElementById('stuSendForm');
+    const name = document.getElementById('stuName');
+    const seml = document.getElementById('stuEmail');
+    const rnm = document.getElementById('recName');
+    const rml = document.getElementById('recEmail');
+
+    function vEmail(v) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || ''));
+    }
+
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!name.value.trim() || !rnm.value.trim() || !vEmail(seml.value) || !vEmail(rml.value)) {
+        window.toast?.('Please complete name and valid emails.', 'error');
+        return;
+      }
+      // add to tracker as "sent"
+      if (body) {
+        const tr = document.createElement('tr');
+        const today = new Date().toISOString().slice(0, 10);
+        tr.innerHTML = `
+          <td>${rnm.value}</td>
+          <td>${rml.value}</td>
+          <td>${today}</td>
+          <td><span class="track-pill sent">Sent</span></td>
+        `;
+        body.prepend(tr);
+      }
+      window.toast?.('Request sent to recommender.', 'success');
+      form.reset();
+      // jump user to Track tab so they can see it
+      tTrack?.click();
+    });
+  })();
+
+  // default to Send tab
+  select('send');
+})();
+
 /* ===================== INIT ===================== */
 document.addEventListener('DOMContentLoaded', () => {
   // If your data loader exists, it will run; preselect is patched above.
@@ -321,19 +500,12 @@ document.addEventListener('DOMContentLoaded', () => {
   setupUserDropdown();
   setupBulkImport();
 
-  // IMPORTANT: We intentionally DO NOT call any old search/filter/pagination initializers here,
-  // because those are now implemented inline in your HTML. If you still have functions like
-  // setupUniversitySearch()/setupFilterHandlers()/setupPagination() in older code, remove their calls.
-
   // Tagline hotfix (optional)
   const h1 = document.querySelector('.hero-title');
   if (h1) h1.textContent = 'One upload. Unlimited reach.';
 });
 
 /* Optional global exports (handy for debugging) */
-window.SR = Object.assign(window.SR||{}, {
-  preselectByName
+window.SR = Object.assign(window.SR || {}, {
+  preselectByName,
 });
-
-
-
