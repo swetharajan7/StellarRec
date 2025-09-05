@@ -1,1041 +1,355 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StellarRec - University Recommendation System</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f8f9fa;
-        }
-
-        /* Header Styles */
-        .header {
-            background: #fff;
-            border-bottom: 1px solid #e5e7eb;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem 1.5rem;
-            max-width: 1400px;
-            margin: 0 auto;
-            gap: 1rem;
-            flex-wrap: nowrap;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
-            color: #1f2937;
-            font-weight: 700;
-            font-size: 1.25rem;
-            flex-shrink: 0;
-        }
-
-        .logo .material-icons {
-            color: #3b82f6;
-            font-size: 24px;
-        }
-
-        .center-controls {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-            min-width: 0;
-        }
-
-        .theme-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: #f3f4f6;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .theme-btn:hover {
-            background: #e5e7eb;
-        }
-
-        .user-info {
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .user-avatar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            background: #f3f4f6;
-            border: 1px solid #d1d5db;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .user-avatar:hover {
-            background: #e5e7eb;
-        }
-
-        .user-dropdown {
-            position: absolute;
-            right: 0;
-            top: calc(100% + 8px);
-            width: 280px;
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            z-index: 1001;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.2s;
-        }
-
-        .user-dropdown[aria-hidden="false"] {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .dropdown-header {
-            padding: 1rem 1.25rem 0.5rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #6b7280;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1.25rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .dropdown-item:hover {
-            background: #f9fafb;
-        }
-
-        .dropdown-item .material-icons {
-            color: #6b7280;
-            font-size: 20px;
-        }
-
-        .view-label {
-            flex: 1;
-        }
-
-        .view-name {
-            font-weight: 500;
-            color: #1f2937;
-            font-size: 0.875rem;
-        }
-
-        .view-description {
-            font-size: 0.75rem;
-            color: #6b7280;
-            margin-top: 2px;
-        }
-
-        /* Container */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem 1.5rem;
-        }
-
-        /* Student Bar */
-        .student-bar {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            background: #fff;
-            border: 1px solid #eaeaea;
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Hero Section */
-        .hero-section {
-            text-align: center;
-            margin-bottom: 3rem;
-            padding: 2rem 0;
-        }
-
-        .hero-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #1f2937;
-            margin-bottom: 1rem;
-        }
-
-        .hero-subtitle {
-            font-size: 1.125rem;
-            color: #6b7280;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Compose Grid */
-        .compose-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-
-        .upload-section,
-        .writer-section {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e5e7eb;
-        }
-
-        .section-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Upload Area */
-        .upload-area {
-            border: 2px dashed #d1d5db;
-            border-radius: 12px;
-            padding: 3rem 2rem;
-            text-align: center;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .upload-area:hover {
-            border-color: #3b82f6;
-            background: #f8faff;
-        }
-
-        .upload-icon .material-icons {
-            font-size: 48px;
-            color: #6b7280;
-            margin-bottom: 1rem;
-        }
-
-        .upload-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 0.5rem;
-        }
-
-        .upload-subtitle {
-            color: #6b7280;
-            margin-bottom: 1rem;
-        }
-
-        .file-input {
-            display: none;
-        }
-
-        .upload-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            margin: 0 auto;
-            transition: background 0.2s;
-        }
-
-        .upload-btn:hover {
-            background: #2563eb;
-        }
-
-        .uploaded-file {
-            display: none;
-            padding: 1rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            background: #f9fafb;
-        }
-
-        .file-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .file-icon .material-icons {
-            font-size: 32px;
-            color: #3b82f6;
-        }
-
-        .file-details h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin: 0;
-        }
-
-        .file-details p {
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin: 0;
-        }
-
-        .remove-file {
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            margin-left: auto;
-            transition: background 0.2s;
-        }
-
-        .remove-file:hover {
-            background: #dc2626;
-        }
-
-        /* Writer Section */
-        .writer-title {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .writer-toolbar {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem;
-            border: 1px solid #d1d5db;
-            border-bottom: none;
-            border-radius: 8px 8px 0 0;
-            background: #f9fafb;
-        }
-
-        .btn {
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            background: white;
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: all 0.2s;
-        }
-
-        .btn:hover {
-            background: #f3f4f6;
-        }
-
-        .btn-muted {
-            color: #6b7280;
-        }
-
-        .btn-primary {
-            background: #3b82f6;
-            color: white;
-            border-color: #3b82f6;
-        }
-
-        .btn-primary:hover {
-            background: #2563eb;
-        }
-
-        .btn-success {
-            background: #10b981;
-            color: white;
-            border-color: #10b981;
-        }
-
-        .btn-success:hover {
-            background: #059669;
-        }
-
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-            border-color: #ef4444;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        .meta {
-            margin-left: auto;
-            font-size: 0.75rem;
-            color: #6b7280;
-            display: flex;
-            gap: 1rem;
-        }
-
-        .writer-box {
-            min-height: 200px;
-            padding: 1rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0 0 8px 8px;
-            border-top: none;
-            background: white;
-            outline: none;
-        }
-
-        .writer-box[contenteditable]:empty:before {
-            content: attr(placeholder);
-            color: #9ca3af;
-        }
-
-        .writer-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            flex-wrap: wrap;
-        }
-
-        /* University Section */
-        .university-section {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e5e7eb;
-            margin-bottom: 3rem;
-        }
-
-        .university-search {
-            position: relative;
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .search-input,
-        .filter-select {
-            padding: 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            flex: 1;
-        }
-
-        .apply-btn {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-            white-space: nowrap;
-        }
-
-        .apply-btn:hover {
-            background: #2563eb;
-        }
-
-        .page-btn {
-            background: #f3f4f6;
-            color: #374151;
-            border: 1px solid #d1d5db;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .page-btn:hover {
-            background: #e5e7eb;
-        }
-
-        .filter-meta {
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-bottom: 1rem;
-        }
-
-        .filter-bar {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .suggest-popover {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 80px;
-            background: white;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 100;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: #6b7280;
-        }
-
-        .empty-state .actions {
-            margin-top: 1rem;
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
-        }
-
-        .university-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .university-card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .university-card:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
-        }
-
-        .university-card.selected {
-            border-color: #3b82f6;
-            background: #f0f9ff;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 2rem;
-        }
-
-        .pager {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .page-size {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-        }
-
-        /* Selected Section */
-        .selected-section {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e5e7eb;
-            margin-bottom: 3rem;
-        }
-
-        .selected-count {
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-bottom: 1rem;
-        }
-
-        .selected-list {
-            margin-bottom: 2rem;
-        }
-
-        .send-section {
-            text-align: center;
-        }
-
-        .send-btn {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-size: 1.125rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 0 auto;
-        }
-
-        .send-btn:hover:not(:disabled) {
-            background: #059669;
-        }
-
-        .send-btn:disabled {
-            background: #d1d5db;
-            cursor: not-allowed;
-        }
-
-        /* Progress Section */
-        .progress-section {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e5e7eb;
-            margin-bottom: 3rem;
-            display: none;
-        }
-
-        .progress-title {
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 1.5rem;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e5e7eb;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 1rem;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: #3b82f6;
-            border-radius: 4px;
-            transition: width 0.3s;
-            width: 0%;
-        }
-
-        .progress-text {
-            text-align: center;
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-bottom: 2rem;
-        }
-
-        .delivery-list {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        /* Success Section */
-        .success-section {
-            background: white;
-            border-radius: 16px;
-            padding: 3rem 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e5e7eb;
-            text-align: center;
-            margin-bottom: 3rem;
-            display: none;
-        }
-
-        .success-icon .material-icons {
-            font-size: 64px;
-            color: #10b981;
-            margin-bottom: 1rem;
-        }
-
-        .success-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 1rem;
-        }
-
-        .success-subtitle {
-            font-size: 1.125rem;
-            color: #6b7280;
-            margin-bottom: 2rem;
-        }
-
-        .new-upload-btn {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-size: 1.125rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 0 auto;
-        }
-
-        .new-upload-btn:hover {
-            background: #2563eb;
-        }
-
-        /* Footer */
-        .footer {
-            background: #1f2937;
-            color: #d1d5db;
-            padding: 3rem 0 2rem;
-            margin-top: 4rem;
-        }
-
-        .footer-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-        }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 3rem;
-            margin-bottom: 2rem;
-        }
-
-        .footer-brand {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: white;
-        }
-
-        .footer-logo .material-icons {
-            color: #3b82f6;
-            font-size: 28px;
-        }
-
-        .footer-description {
-            color: #9ca3af;
-            line-height: 1.6;
-            max-width: 300px;
-        }
-
-        .footer-section h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: white;
-            margin-bottom: 1rem;
-        }
-
-        .footer-links {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .footer-links a {
-            color: #9ca3af;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .footer-links a:hover {
-            color: #3b82f6;
-        }
-
-        .footer-bottom {
-            border-top: 1px solid #374151;
-            padding-top: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .footer-copyright {
-            color: #9ca3af;
-            font-size: 0.875rem;
-        }
-
-        .footer-social {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .social-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            background: #374151;
-            border-radius: 50%;
-            color: #9ca3af;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .social-link:hover {
-            background: #3b82f6;
-            color: white;
-        }
-
-        /* Modal Styles */
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.35);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            padding: 1rem;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.22);
-            overflow: hidden;
-            width: 100%;
-            max-width: 720px;
-        }
-
-        .modal-header {
-            padding: 1.2rem 1.4rem;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-weight: 700;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .container {
-                padding: 1.5rem 1rem;
-            }
-            
-            .footer-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 2rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header-content {
-                padding: 0.75rem 1rem;
-                gap: 0.5rem;
-            }
-
-            .theme-btn span:last-child {
-                display: none;
-            }
-
-            .hero-title {
-                font-size: 2rem;
-            }
-
-            .compose-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .filter-bar {
-                flex-direction: column;
-            }
-
-            .filter-bar > * {
-                width: 100%;
-            }
-
-            .university-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .pagination {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .student-bar {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 1rem;
-            }
-
-            .footer-grid {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-                text-align: center;
-            }
-
-            .footer-bottom {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .logo span:last-child {
-                display: none;
-            }
-
-            .hero-title {
-                font-size: 1.75rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1rem;
-            }
-
-            .upload-section,
-            .writer-section,
-            .university-section,
-            .selected-section {
-                padding: 1.5rem;
-            }
-
-            .modal-content {
-                margin: 0.5rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StellarRec - One upload. Unlimited reach.</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Roboto',sans-serif;
+      background:linear-gradient(135deg,var(--bg-grad-1,#f8f9fa) 0%,var(--bg-grad-2,#e9ecef) 100%);
+      color:var(--text,#333);
+      min-height:100vh;
+    }
+
+    /* Header */
+    .header {
+      background:linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
+      color:#fff; padding:1.5rem 2rem;
+      box-shadow:0 4px 20px rgba(25,118,210,0.3);
+    }
+    .header-content {
+      max-width:1200px; margin:0 auto;
+      display:flex; justify-content:space-between; align-items:center; gap:1rem;
+    }
+    .logo {
+      display:flex; align-items:center; gap:.5rem;
+      font-size:1.8rem; font-weight:700;
+      text-decoration:none; color:#fff; transition:.3s;
+    }
+    .logo:hover { opacity:.85; transform:translateY(-1px); }
+
+    /* Avatar + dropdown */
+    .user-info { position:relative; display:flex; align-items:center; gap:1rem; }
+    .user-avatar {
+      width:45px; height:45px;
+      background:rgba(255,255,255,.2); border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.2rem; cursor:pointer; transition:.2s;
+      border:2px solid rgba(255,255,255,0.1);
+    }
+    .user-avatar:hover { background:rgba(255,255,255,.3); transform:scale(1.05); border-color:rgba(255,255,255,.3); }
+    .user-avatar:focus { outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.3); }
+
+    .user-dropdown {
+      position:absolute; top:100%; right:0; margin-top:.5rem;
+      background:#fff; border-radius:12px;
+      box-shadow:0 8px 32px rgba(0,0,0,.15);
+      min-width:260px; max-width:min(92vw,360px);
+      opacity:0; visibility:hidden;
+      transform:translateY(-10px) scale(.95);
+      transition:all .2s cubic-bezier(0.4,0,0.2,1); z-index:1000;
+      border:1px solid rgba(0,0,0,.08);
+    }
+    .user-dropdown.show { opacity:1; visibility:visible; transform:translateY(0) scale(1); }
+    .user-dropdown::before{
+      content:''; position:absolute; top:-8px; right:16px; width:16px; height:16px;
+      background:#fff; border:1px solid rgba(0,0,0,.08); border-bottom:none; border-right:none;
+      transform:rotate(45deg);
+    }
+    .dropdown-header { padding:1rem; border-bottom:1px solid #f0f0f0; color:#333; font-weight:600; font-size:.9rem; }
+    .dropdown-item {
+      display:flex; align-items:center; gap:.75rem;
+      padding:.75rem 1rem; color:#333; cursor:pointer; transition:.15s;
+    }
+    .dropdown-item:hover, .dropdown-item:focus { background:#f8f9fa; outline:none; }
+    .dropdown-item .material-icons { font-size:1.2rem; color:#666; }
+    .dropdown-item.active { background:#e3f2fd; color:#1976d2; }
+    .dropdown-item.active .material-icons { color:#1976d2; }
+    .view-label { display:flex; flex-direction:column; }
+    .view-name { font-weight:600; font-size:.9rem; }
+    .view-description { font-size:.8rem; color:#666; margin-top:.1rem; }
+
+    .container { max-width:1200px; margin:0 auto; padding:2rem; }
+    .hero-section { text-align:center; margin-bottom:3rem; }
+    .hero-title { font-size:2.5rem; font-weight:700; color:#1976d2; margin-bottom:1rem; }
+    .hero-subtitle { font-size:1.2rem; color:#666; margin-bottom:2rem; }
+
+    /* Two-column layout */
+    .compose-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:2rem; }
+    @media (max-width: 980px) { .compose-grid { grid-template-columns:1fr; } }
+
+    .upload-section, .writer-section, .university-section,
+    .selected-section, .progress-section {
+      background:#fff; border-radius:16px; padding:2rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.1); margin-bottom:0;
+    }
+    .upload-section { border:2px dashed #e0e0e0; transition:.3s; }
+    .upload-section.dragover { border-color:#1976d2; background:#f3f8ff; }
+
+    .upload-area { text-align:center; padding:2rem; }
+    .upload-icon { font-size:4rem; color:#1976d2; margin-bottom:1rem; }
+    .upload-title { font-size:1.5rem; font-weight:600; margin-bottom:.5rem; color:#333; }
+    .upload-subtitle { color:#666; margin-bottom:2rem; }
+    .file-input { display:none; }
+    .upload-btn {
+      background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff;
+      padding:1rem 2rem; border:none; border-radius:12px;
+      font-size:1.1rem; font-weight:600; cursor:pointer;
+      transition:.3s; display:inline-flex; align-items:center; gap:.5rem;
+    }
+    .upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
+    .uploaded-file {
+      display:none; background:#e8f5e8; border:2px solid #4caf50;
+      border-radius:12px; padding:1.5rem; margin-top:1rem;
+    }
+    .file-info { display:flex; align-items:center; gap:1rem; }
+    .file-icon { font-size:2rem; color:#4caf50; }
+    .file-details h3 { color:#2e7d32; margin-bottom:.25rem; }
+    .file-details p { color:#4caf50; font-size:.9rem; }
+    .remove-file {
+      margin-left:auto; background:none; border:none; color:#666;
+      cursor:pointer; padding:.5rem; border-radius:50%; transition:.2s;
+    }
+    .remove-file:hover { background:rgba(244,67,54,.1); color:#f44336; }
+
+    .section-title {
+      font-size:1.5rem; font-weight:600; color:#333;
+      margin-bottom:1rem; display:flex; align-items:center; gap:.5rem;
+    }
+
+    /* Writer */
+    .writer-toolbar { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.75rem; align-items:center; }
+    .writer-toolbar .btn {
+      background:#fff; border:2px solid #e5e7eb; border-radius:10px;
+      padding:.45rem .75rem; cursor:pointer; font-weight:600;
+    }
+    .writer-toolbar .btn:hover { background:#f8f9fa; }
+    .writer-toolbar .meta { margin-left:auto; font-size:.9rem; color:#667; display:flex; gap:.75rem; align-items:center; }
+    .writer-title {
+      width:100%; padding:.7rem .9rem;
+      border:2px solid #e0e0e0; border-radius:12px;
+      font-size:1rem; margin-bottom:.6rem;
+    }
+    .writer-box {
+      border:2px solid #e0e0e0; border-radius:12px;
+      min-height:280px; padding:1rem; line-height:1.55;
+    }
+    .writer-box:focus { outline:none; border-color:#1976d2; }
+    .writer-actions { display:flex; gap:.5rem; margin-top:.75rem; flex-wrap:wrap; }
+    .btn-primary { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none; }
+    .btn-success { background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; border:none; }
+    .btn-danger  { background:linear-gradient(135deg,#e53935,#ef5350); color:#fff; border:none; }
+    .btn-muted   { background:#fff; color:#333; }
+
+    .filter-meta { font-size:.9rem; color:#666; margin:.25rem 0 .5rem; }
+    .filter-bar { display:grid; grid-template-columns: repeat(8, minmax(140px, 1fr)); gap:.5rem; margin-bottom:.75rem; align-items:center; }
+    .filter-select { width:100%; padding:.7rem .9rem; border:2px solid #e0e0e0; border-radius:12px; background:#fff; font-size:.95rem; }
+
+    .university-grid {
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:1rem;
+      max-height:480px; overflow-y:auto; padding:1rem; border:1px solid #f0f0f0; border-radius:12px;
+    }
+    .university-card { background:#f8f9fa; border:2px solid transparent; border-radius:12px; padding:1rem; cursor:pointer; transition:.2s; }
+    .university-card:hover { border-color:#1976d2; background:#f3f8ff; }
+    .university-card.selected { border-color:#1976d2; background:#e3f2fd; }
+    .university-header { display:flex; align-items:center; gap:1rem; margin-bottom:.5rem; }
+    .university-logo { width:40px; height:40px; background:#1976d2; color:#fff; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:600; }
+    .university-name { font-weight:600; color:#333; }
+    .university-location { color:#666; font-size:.9rem; }
+    .university-pill { margin-top:.25rem; display:inline-block; font-size:.75rem; color:#555; background:#eef3ff; border:1px solid #dbe7ff; padding:.15rem .5rem; border-radius:999px; }
+
+    .pagination { display:flex; justify-content:space-between; align-items:center; margin-top:.75rem; }
+    .pager { display:flex; gap:.5rem; }
+    .page-btn { background:#fff; border:2px solid #e0e0e0; border-radius:10px; padding:.5rem .9rem; cursor:pointer; font-weight:600; }
+    .page-btn[disabled] { opacity:.5; cursor:not-allowed; }
+    .page-size { margin-left:auto; display:flex; align-items:center; gap:.5rem; }
+
+    .selected-count { color:#1976d2; font-weight:600; margin-bottom:1rem; }
+    .selected-list { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:2rem; }
+    .selected-tag { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:.5rem 1rem; border-radius:20px; font-size:.9rem; display:flex; align-items:center; gap:.5rem; }
+    .remove-tag { cursor:pointer; background:rgba(255,255,255,.2); border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
+    .remove-tag:hover { background:rgba(255,255,255,.3); }
+
+    .send-section { text-align:center; }
+    .send-btn {
+      background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; padding:1.2rem 3rem; border:none; border-radius:12px;
+      font-size:1.2rem; font-weight:600; cursor:pointer; transition:.2s; display:inline-flex; align-items:center; gap:.5rem;
+    }
+    .send-btn:disabled { background:#ccc; cursor:not-allowed; }
+    .send-btn:not(:disabled):hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(76,175,80,.3); }
+
+    .progress-section { display:none; }
+    .progress-title { font-size:1.3rem; font-weight:600; color:#333; margin-bottom:1rem; text-align:center; }
+    .progress-bar { width:100%; height:12px; background:#e0e0e0; border-radius:6px; overflow:hidden; margin-bottom:1rem; }
+    .progress-fill { height:100%; background:linear-gradient(135deg,#4caf50,#66bb6a); border-radius:6px; transition:width .5s ease; width:0%; }
+    .progress-text { text-align:center; color:#666; font-size:.9rem; }
+    .delivery-list { margin-top:1rem; }
+    .delivery-item { display:flex; align-items:center; gap:1rem; padding:.75rem; border-radius:8px; margin-bottom:.5rem; background:#f8f9fa; }
+    .delivery-status { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
+    .delivery-status.pending { background:#fff3e0; color:#ff9800; }
+    .delivery-status.success { background:#e8f5e8; color:#4caf50; }
+    .delivery-status.error { background:#ffebee; color:#f44336; }
+
+    .success-section {
+      display:none; background:linear-gradient(135deg,#e8f5e8,#f1f8e9);
+      border:2px solid #4caf50; border-radius:16px; padding:2rem; text-align:center; box-shadow:0 8px 32px rgba(76,175,80,.2);
+    }
+    .success-icon { font-size:4rem; color:#4caf50; margin-bottom:1rem; }
+    .success-title { font-size:1.8rem; font-weight:600; color:#2e7d32; margin-bottom:1rem; }
+    .success-subtitle { color:#4caf50; margin-bottom:2rem; }
+    .new-upload-btn { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:1rem 2rem; border:none; border-radius:12px; font-size:1rem; font-weight:600; cursor:pointer; transition:.2s; }
+    .new-upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
+
+    @keyframes flash { 0%{box-shadow:0 0 0 rgba(25,118,210,0);} 25%{box-shadow:0 0 0 6px rgba(25,118,210,.25);} 100%{box-shadow:0 0 0 rgba(25,118,210,0);} }
+    .flash { animation: flash 1.2s ease; }
+
+    .badge { display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; font-size:.75rem; border-radius:999px; border:1px solid; }
+    .badge-student { background:#f1f8ff; color:#0d47a1; border-color:#bbdefb; }
+    .badge-added   { background:#e8f5e9; color:#1b5e20; border-color:#c8e6c9; }
+    .badge-removed { background:#ffebee; color:#b71c1c; border-color:#ffcdd2; }
+
+    .toast-wrap { position: fixed; right: 16px; bottom: 16px; z-index: 99999; display: grid; gap: 8px; }
+    .toast {
+      min-width: 240px; max-width: 420px; padding: .75rem .9rem; border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.15); color:#0f172a; background:#fff; border:1px solid #e5e7eb;
+      display:flex; align-items:flex-start; gap:.6rem; animation: toast-in .18s ease;
+    }
+    .toast.success { border-color:#c8e6c9; background:#f1f8f3; }
+    .toast.error   { border-color:#ffcdd2; background:#fff2f2; }
+    .toast.info    { border-color:#bbdefb; background:#f3f8ff; }
+    .toast .icon { font-size: 1.1rem; line-height:1; margin-top:.1rem; }
+    .toast .msg  { flex:1; font-size:.95rem; }
+    .toast .x    { border:none; background:transparent; cursor:pointer; font-size:1rem; opacity:.6; }
+    .toast .x:hover { opacity:.9; }
+    @keyframes toast-in { from { transform: translateY(6px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+
+    .empty-state { display:none; background:#fff; border:1px dashed #d0d7de; border-radius:12px; padding:1.25rem; color:#445; text-align:center; }
+    .empty-state .actions { margin-top:.75rem; display:flex; gap:.5rem; justify-content:center; }
+
+    @media (max-width:768px) {
+      .container { padding:1rem; }
+      .hero-title { font-size:2rem; }
+      .university-grid { grid-template-columns:1fr; }
+      .header-content { flex-direction:column; gap:1rem; }
+      .filter-bar { grid-template-columns:1fr 1fr; }
+    }
+
+    /* Dark theme basics (CSS side) */
+    :root[data-theme="dark"] {
+      --bg:#0b1220; --panel:#111a2a; --text:#e5eefc; --muted:#93a3bc; --primary:#7aa2ff; --border:#24324a;
+    }
+    :root[data-theme="dark"] body { background: linear-gradient(135deg,#0b1220 0%,#0f1729 100%); color: var(--text); }
+    :root[data-theme="dark"] .upload-section,
+    :root[data-theme="dark"] .writer-section,
+    :root[data-theme="dark"] .university-section,
+    :root[data-theme="dark"] .selected-section,
+    :root[data-theme="dark"] .progress-section { background: var(--panel); box-shadow:none; }
+    :root[data-theme="dark"] .filter-select,
+    :root[data-theme="dark"] .writer-title,
+    :root[data-theme="dark"] .writer-box,
+    :root[data-theme="dark"] .page-btn { background:#0f1729; color:var(--text); border-color: var(--border); }
+    :root[data-theme="dark"] .university-card { background:#0f1729; }
+    :root[data-theme="dark"] .university-card:hover { background:#12203a; border-color:#274780; }
+    :root[data-theme="dark"] .university-card.selected { background:#13254a; }
+    :root[data-theme="dark"] .hero-subtitle, :root[data-theme="dark"] .university-location { color: var(--muted); }
+
+    /* Footer (match header) */
+    .site-footer {
+      background: linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
+      color: #fff;
+      padding: 1.5rem 0;
+      text-align: center;
+    }
+    .site-footer p { margin: 0; font-size: 0.95rem; }
+
+    /* center theme button in header */
+    .center-controls { display:flex; justify-content:center; align-items:center; flex:1 1 auto; }
+    .header-content > .logo { flex:0 0 auto; }
+    .header-content > .center-controls { flex:1 1 auto; }
+    .header-content > .user-info { flex:0 0 auto; }
+
+    .theme-btn {
+      display:inline-flex; align-items:center; gap:.5rem;
+      padding:.55rem 1rem; border-radius:999px;
+      border:1px solid #ffffff55; background:#ffffff22; color:#fff; font-weight:600;
+      cursor:pointer; transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+    }
+    .theme-btn:hover { transform: translateY(-1px); background:#ffffff33; border-color:#ffffff88; }
+    .theme-btn:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
+    .theme-btn .material-icons { font-size:18px; }
+  </style>
 </head>
 <body>
-<div class="header">
-  <div class="header-content">
-    <!-- Left: Logo -->
-    <a href="/" class="logo" target="_self" aria-label="Go to homepage">
-      <span class="material-icons">star</span>
-      <span>stellarrec</span>
-    </a>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-content">
+      <!-- Left: Logo -->
+      <a href="/" class="logo" target="_self" aria-label="Go to homepage">
+        <span class="material-icons">star</span>
+        stellarrec
+      </a>
 
-    <!-- Center: Theme button -->
-    <div class="center-controls">
-      <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false">
-        <span class="material-icons" aria-hidden="true">dark_mode</span>
-        <span>Light / Dark</span>
-      </button>
-    </div>
-
-  <!-- Right: Avatar dropdown (theme item removed) -->
-<div class="user-info">
-  <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
-    <span class="material-icons">person</span>
-  </button>
-
-  <!-- Dropdown menu -->
-  <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
-    <div class="dropdown-header">Quick actions</div>
-
-    <!-- How it works -->
-    <div class="dropdown-item" role="menuitem" tabindex="0">
-      <span class="material-icons">help_outline</span>
-      <div class="view-label">
-        <a href="/portal-signin" class="view-name" style="text-decoration:none; color:inherit;" target="_self">
-          How it works
-        </a>
-        <div class="view-description">Sign-in portal</div>
+      <!-- Center: Theme button -->
+      <div class="center-controls">
+        <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false">
+          <span class="material-icons" aria-hidden="true">dark_mode</span>
+          Light / Dark
+        </button>
       </div>
-    </div>
 
-    <!-- Contact Admin -->
-    <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
-      <span class="material-icons">support_agent</span>
-      <div class="view-label">
-        <div class="view-name">Contact admin</div>
-        <div class="view-description">Send a message</div>
-      </div>
-    </div>
+      <!-- Right: Avatar dropdown -->
+      <div class="user-info">
+        <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
+          <span class="material-icons">person</span>
+        </button>
 
-    <!-- Mock API toggle -->
-    <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
-      <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
-        <span class="material-icons">build</span>
-        <div class="view-label">
-          <div class="view-name">Use mock API</div>
-          <div class="view-description">Toggle mock vs real backend</div>
+        <!-- Dropdown menu (kept inside .user-info) -->
+        <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
+          <div class="dropdown-header">Quick actions</div>
+
+          <!-- How it works -->
+          <div class="dropdown-item" role="menuitem" tabindex="0">
+            <span class="material-icons">help_outline</span>
+            <div class="view-label">
+              <a href="/portal-signin" class="view-name" style="text-decoration:none; color:inherit;" target="_self">
+                How it works
+              </a>
+              <div class="view-description">Sign-in portal</div>
+            </div>
+          </div>
+
+          <!-- Contact Admin -->
+          <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
+            <span class="material-icons">support_agent</span>
+            <div class="view-label">
+              <div class="view-name">Contact admin</div>
+              <div class="view-description">Send a message</div>
+            </div>
+          </div>
+
+          <!-- Mock API toggle -->
+          <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
+            <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
+              <span class="material-icons">build</span>
+              <div class="view-label">
+                <div class="view-name">Use mock API</div>
+                <div class="view-description">Toggle mock vs real backend</div>
+              </div>
+              <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
+            </label>
+          </div>
         </div>
-        <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
-      </label>
-    </div>
-  </div>
-</div>
+      </div><!-- /.user-info -->
+    </div><!-- /.header-content -->
+  </div><!-- /.header -->
 
-
-  <!-- Contact Admin Modal -->
+  <!-- Contact Admin Modal (legacy modal) -->
   <div id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactTitle"
        style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
     <div style="background:#fff; width:min(560px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
@@ -1049,4 +363,365 @@
         </label>
         <label>Email address
           <input type="email" id="contactEmail" required class="filter-select" style="margin-top:.35rem;">
+        </label>
+        <label>Query
+          <textarea id="contactQuery" rows="5" required class="filter-select" style="margin-top:.35rem;"></textarea>
+        </label>
+        <div style="display:flex; gap:.5rem; justify-content:flex-end; padding-top:.5rem;">
+          <button type="button" class="page-btn" id="contactCancelBtn">Cancel</button>
+          <button type="submit" class="apply-btn" id="contactSendBtn">Send</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="container" id="panel-recommender">
+    <!-- Student Context Bar -->
+    <div class="student-bar" id="studentBar" style="display:flex; align-items:center; gap:.75rem; background:#fff; border:1px solid #eaeaea; border-radius:12px; padding:1rem; margin-bottom:1rem;">
+      <span class="material-icons" aria-hidden="true">account_circle</span>
+      <div style="flex:1">
+        <div id="studentTitle" style="font-weight:700;">No student loaded</div>
+        <div id="studentMeta" style="color:#666; font-size:.9rem;">Load a student to see their preselected universities.</div>
+      </div>
+      <input id="studentIdInput" class="filter-select" placeholder="Student ID or email" style="max-width:220px;" aria-label="Student identifier"/>
+      <button class="apply-btn" id="loadStudentBtn">Load student</button>
+      <label style="display:flex; align-items:center; gap:.4rem; margin-left:.5rem; font-size:.9rem;">
+        <input type="checkbox" id="allowEditsToggle"/>
+        Allow recommender edits
+      </label>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero-section">
+      <h1 class="hero-title">One upload. Unlimited reach.</h1>
+      <p class="hero-subtitle">Upload your recommendation letter once and send it to multiple US universities instantly.</p>
+    </div>
+
+    <!-- Upload + Writer -->
+    <div class="compose-grid">
+      <!-- Upload Section -->
+      <div class="upload-section" id="uploadSection">
+        <div class="upload-area" id="uploadArea">
+          <div class="upload-icon"><span class="material-icons">cloud_upload</span></div>
+          <h2 class="upload-title">Upload Recommendation Letter</h2>
+          <p class="upload-subtitle">Drag and drop your PDF file here, or click to browse</p>
+          <div id="uploadHint" style="margin:.5rem 0 0; font-size:.9rem; color:#556;">PDF only. Recommended size ≤ 10 MB.</div>
+
+          <input type="file" id="fileInput" class="file-input" accept=".pdf,.txt" />
+          <button class="upload-btn" id="chooseFileBtn">
+            <span class="material-icons">upload_file</span>
+            Choose File
+          </button>
+        </div>
+        <div class="uploaded-file" id="uploadedFile">
+          <div class="file-info">
+            <div class="file-icon"><span class="material-icons">description</span></div>
+            <div class="file-details">
+              <h3 id="fileName">recommendation-letter.pdf</h3>
+              <p id="fileSize">2.4 MB • Uploaded successfully</p>
+            </div>
+            <button class="remove-file" id="removeFileBtn"><span class="material-icons">close</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Writer -->
+      <div class="writer-section" id="writerSection">
+        <h2 class="section-title"><span class="material-icons">edit</span> Write Letter</h2>
+        <input id="writerTitle" class="writer-title" placeholder="Letter title (optional, e.g., 'Recommendation for Jane Doe')" />
+        <div class="writer-toolbar">
+          <button class="btn btn-muted" data-wcmd="bold" title="Bold (Ctrl/Cmd+B)"><b>B</b></button>
+          <button class="btn btn-muted" data-wcmd="italic" title="Italic (Ctrl/Cmd+I)"><i>I</i></button>
+          <button class="btn btn-muted" data-wcmd="underline" title="Underline (Ctrl/Cmd+U)"><u>U</u></button>
+          <div class="meta">
+            <span id="writerCount">0 words • 0 chars</span>
+            <span id="writerSaved">Not saved</span>
+          </div>
+        </div>
+        <div id="writerBox" class="writer-box" contenteditable="true" aria-label="Letter editor"
+             placeholder="Write your recommendation letter here..."></div>
+        <div class="writer-actions">
+          <button class="btn btn-primary" id="saveDraftBtn">Save draft</button>
+          <button class="btn btn-muted" id="restoreDraftBtn">Restore</button>
+          <button class="btn btn-danger" id="clearDraftBtn">Clear</button>
+          <button class="btn btn-muted" id="copyDraftBtn">Copy</button>
+          <button class="btn btn-muted" id="downloadDraftBtn">Download .txt</button>
+          <button class="btn btn-success" id="attachDraftBtn">Attach draft</button>
+          <label style="display:flex; align-items:center; gap:.4rem; margin-left:auto;">
+            <input type="checkbox" id="writerAutosaveToggle" checked />
+            Autosave
+          </label>
+        </div>
+      </div>
+    </div>
+    <!-- University Selection -->
+    <div class="university-section">
+      <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
+
+      <!-- Search + Apply -->
+      <div class="university-search" style="position:relative;">
+        <input type="text" class="search-input filter-select" placeholder="Search universities..." id="universitySearch" autocomplete="off"/>
+        <div id="searchSuggest" class="suggest-popover" style="display:none;"></div>
+        <button class="apply-btn" id="searchApplyBtn" title="Apply search (Enter)">Apply</button>
+      </div>
+
+      <!-- Browse-all dropdown -->
+      <select id="universitySelect" class="filter-select" title="Browse all universities" style="margin-bottom:.5rem;">
+        <option value="" selected disabled>Browse all universities (6000+)</option>
+      </select>
+
+      <!-- Filters -->
+      <div class="filter-meta" id="resultMeta" aria-live="polite">Showing 0 of 0</div>
+      <div class="filter-bar">
+        <!-- States -->
+        <select id="stateFilter" class="filter-select" aria-label="Filter by state">
+          <option value="">All states</option>
+          <option value="AL">Alabama</option><option value="AK">Alaska</option><option value="AZ">Arizona</option><option value="AR">Arkansas</option>
+          <option value="CA">California</option><option value="CO">Colorado</option><option value="CT">Connecticut</option><option value="DE">Delaware</option>
+          <option value="FL">Florida</option><option value="GA">Georgia</option><option value="HI">Hawaii</option><option value="ID">Idaho</option>
+          <option value="IL">Illinois</option><option value="IN">Indiana</option><option value="IA">Iowa</option><option value="KS">Kansas</option>
+          <option value="KY">Kentucky</option><option value="LA">Louisiana</option><option value="ME">Maine</option><option value="MD">Maryland</option>
+          <option value="MA">Massachusetts</option><option value="MI">Michigan</option><option value="MN">Minnesota</option><option value="MS">Mississippi</option>
+          <option value="MO">Missouri</option><option value="MT">Montana</option><option value="NE">Nebraska</option><option value="NV">Nevada</option>
+          <option value="NH">New Hampshire</option><option value="NJ">New Jersey</option><option value="NM">New Mexico</option><option value="NY">New York</option>
+          <option value="NC">North Carolina</option><option value="ND">North Dakota</option><option value="OH">Ohio</option><option value="OK">Oklahoma</option>
+          <option value="OR">Oregon</option><option value="PA">Pennsylvania</option><option value="RI">Rhode Island</option><option value="SC">South Carolina</option>
+          <option value="SD">South Dakota</option><option value="TN">Tennessee</option><option value="TX">Texas</option><option value="UT">Utah</option>
+          <option value="VT">Vermont</option><option value="VA">Virginia</option><option value="WA">Washington</option><option value="WV">West Virginia</option>
+          <option value="WI">Wisconsin</option><option value="WY">Wyoming</option>
+        </select>
+
+        <select id="typeFilter" class="filter-select" aria-label="Filter by institution type">
+          <option value="">All types</option>
+          <option value="Public">Public</option>
+          <option value="Private nonprofit">Private nonprofit</option>
+          <option value="Private for-profit">Private for-profit</option>
+        </select>
+
+        <select id="levelFilter" class="filter-select" aria-label="Filter by level">
+          <option value="">All levels</option>
+          <option value="4-year">4-year</option>
+          <option value="2-year">2-year</option>
+          <option value="Less-than-2-year">Less-than-2-year</option>
+        </select>
+
+        <select id="sortBy" class="filter-select" aria-label="Sort results">
+          <option value="name_asc">Sort: Name (A–Z)</option>
+          <option value="state_asc">Sort: State (A–Z)</option>
+        </select>
+
+        <button class="apply-btn" id="filterApplyBtn" title="Apply filters and sort">Apply filters</button>
+        <button class="apply-btn" id="resetBtn" title="Reset search and filters">Reset</button>
+        <button class="apply-btn" id="selectPageBtn" title="Select all universities on this page">Select page</button>
+        <button class="page-btn" id="bulkImportBtn" title="Bulk import by names">Bulk import</button>
+      </div>
+
+      <!-- Empty state -->
+      <div id="emptyState" class="empty-state" aria-live="polite">
+        <div style="font-weight:600; margin-bottom:.25rem;">No universities match your filters</div>
+        <div style="font-size:.9rem; color:#667;">Try adjusting search or clearing filters.</div>
+        <div class="actions">
+          <button class="apply-btn" id="clearFiltersBtn" type="button">Clear filters</button>
+          <button class="page-btn" id="retryLoadBtn" style="display:none;" type="button">Retry loading</button>
+        </div>
+      </div>
+
+      <!-- Results grid -->
+      <div class="university-grid" id="universityGrid" role="list" aria-label="Universities list"></div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <div class="pager">
+          <button class="page-btn" id="prevPage">Prev</button>
+          <span id="pageInfo" style="font-weight:600;">Page 1 of 1</span>
+          <button class="page-btn" id="nextPage">Next</button>
+        </div>
+        <div class="page-size">
+          <label for="pageSize">Per page:</label>
+          <select id="pageSize" class="filter-select" style="width:auto;display:inline-block;">
+            <option value="20">20</option>
+            <option value="40" selected>40</option>
+            <option value="80">80</option>
+            <option value="120">120</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selected Universities -->
+    <div class="selected-section">
+      <h2 class="section-title" style="display:flex;align-items:center;gap:.5rem;">
+        <span class="material-icons">check_circle</span> Selected Universities
+        <button id="copyLinkBtn" class="page-btn" title="Copy shareable link" style="margin-left:auto;">Copy link</button>
+      </h2>
+      <div class="selected-count" id="selectedCount">0 universities selected</div>
+      <div class="selected-list" id="selectedList" role="list" aria-live="polite"></div>
+      <div class="send-section">
+        <button class="send-btn" id="sendBtn" disabled>
+          <span class="material-icons">send</span>
+          Send to Selected Universities
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress Section -->
+    <div class="progress-section" id="progressSection">
+      <h2 class="progress-title">Sending Letters...</h2>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText" aria-live="polite">Preparing to send...</div>
+      <div class="delivery-list" id="deliveryList"></div>
+    </div>
+
+    <!-- Success Section -->
+    <div class="success-section" id="successSection">
+      <div class="success-icon"><span class="material-icons">check_circle</span></div>
+      <h2 class="success-title">Letters Sent Successfully!</h2>
+      <p class="success-subtitle">Your recommendation letter has been delivered to all selected universities.</p>
+      <button class="new-upload-btn" id="newUploadBtn">
+        <span class="material-icons">add</span>
+        Send Another Letter
+      </button>
+    </div>
+
+    <!-- Confirm Send Modal -->
+    <div id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle"
+         style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
+      <div style="background:#fff; width:min(720px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
+        <div style="padding:1.2rem 1.4rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+          <div id="confirmModalTitle" style="font-weight:700;">Confirm recipients</div>
+          <button aria-label="Close" id="modalCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:1rem 1.4rem; max-height:60vh; overflow:auto; line-height:1.45;">
+          <div id="modalSummary" style="margin-bottom:1rem;"></div>
+          <div id="modalLists" style="display:grid; gap:1rem;">
+            <div>
+              <div style="font-weight:600;">Included (<span id="modalIncludedCount">0</span>)</div>
+              <div id="modalIncluded"></div>
+            </div>
+            <div>
+              <div style="font-weight:600;">Removed vs student’s list (<span id="modalRemovedCount">0</span>)</div>
+              <div id="modalRemoved" style="color:#b00020;"></div>
+            </div>
+            <div>
+              <div style="font-weight:600;">Added by you (<span id="modalAddedCount">0</span>)</div>
+              <div id="modalAdded" style="color:#1b5e20;"></div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:1rem 1.4rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
+          <button class="page-btn" id="modalCancelBtn">Cancel</button>
+          <button class="apply-btn" id="modalConfirmBtn">Send now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Import Modal -->
+    <div id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle"
+         style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
+      <div style="background:#fff; width:min(680px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
+        <div style="padding:1rem 1.2rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+          <div id="importTitle" style="font-weight:700;">Bulk import universities</div>
+          <button aria-label="Close" id="importCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:1rem 1.2rem; display:grid; gap:.75rem;">
+          <div style="font-size:.92rem; color:#556;">
+            Paste one <b>name per line</b>. We’ll fuzzy-match against the master list.
+          </div>
+          <textarea id="importTextarea" rows="10" style="width:100%; padding:.8rem; border:1px solid #e5e7eb; border-radius:10px; font-family:inherit;"></textarea>
+          <div id="importPreview" style="font-size:.9rem; color:#667;"></div>
+        </div>
+        <div style="padding:1rem 1.2rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
+          <button class="page-btn" id="importCancelBtn">Cancel</button>
+          <button class="apply-btn" id="importConfirmBtn">Add matches</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Admin Overlay -->
+    <div id="contactOverlay" role="dialog" aria-modal="true" aria-labelledby="contactTitle"
+         style="position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; z-index:10000;">
+      <div style="background:#fff; width:min(560px,92vw); border-radius:16px; box-shadow:0 18px 50px rgba(0,0,0,.22); overflow:hidden; transform:translateY(12px); opacity:0; transition:.18s;">
+        <div style="padding:1rem 1.25rem; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
+          <div id="contactTitle" style="font-weight:700;">Contact admin</div>
+          <button aria-label="Close" id="contactCloseBtn2" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+        <form id="contactForm2" style="padding:1rem 1.25rem; display:grid; gap:.75rem;">
+          <div>
+            <label for="cFirst2" style="display:block; font-weight:600; margin-bottom:.35rem;">First name</label>
+            <input id="cFirst2" name="first" class="filter-select" type="text" placeholder="Your first name" required />
+          </div>
+          <div>
+            <label for="cEmail2" style="display:block; font-weight:600; margin-bottom:.35rem;">Email address</label>
+            <input id="cEmail2" name="email" class="filter-select" type="email" placeholder="you@example.com" required />
+          </div>
+          <div>
+            <label for="cQuery2" style="display:block; font-weight:600; margin-bottom:.35rem;">Query</label>
+            <textarea id="cQuery2" name="query" rows="5" style="width:100%; padding:.8rem; border:1px solid #e5e7eb; border-radius:10px; font-family:inherit;" placeholder="How can we help?" required></textarea>
+          </div>
+          <div style="display:flex; gap:.5rem; justify-content:flex-end; border-top:1px solid #f1f5f9; padding-top:.75rem;">
+            <button type="button" class="page-btn" id="contactCancelBtn2">Cancel</button>
+            <button type="submit" class="apply-btn" id="contactSendBtn2">Send</button>
+          </div>
+          <input type="hidden" name="form-name" value="contact-admin">
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
+  </div><!-- /.container -->
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2025 <span style="color: #ffeb3b; font-weight: 600;">StellarRec™</span>. All rights reserved. |
+        Making recommendations stellar since 2025 🚀</p>
+    </div>
+  </footer>
+
+  <!-- Sanity checks -->
+  <script>
+    (function(){
+      if (typeof Fuse !== 'function') console.warn('[SR] Fuse.js not loaded');
+      if (typeof localforage === 'undefined') console.warn('[SR] localForage not loaded');
+      else localforage.config({ name: 'StellarRec' });
+
+      // Avatar dropdown toggling (ensure it works with corrected structure)
+      const btn = document.getElementById('userAvatarBtn');
+      const dd  = document.getElementById('userDropdown');
+      function closeDD(e){
+        if (!dd) return;
+        if (e && (dd.contains(e.target) || btn.contains(e.target))) return;
+        dd.classList.remove('show');
+        btn.setAttribute('aria-expanded','false');
+        document.removeEventListener('click', closeDD);
+      }
+      btn?.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        dd.classList.toggle('show');
+        btn.setAttribute('aria-expanded', dd.classList.contains('show') ? 'true' : 'false');
+        if (dd.classList.contains('show')) {
+          setTimeout(()=>document.addEventListener('click', closeDD), 0);
+        }
+      });
+
+      // Center theme button hook (dashboard.js also handles theme; this is a safe fallback)
+      document.getElementById('headerThemeBtn')?.addEventListener('click', ()=>{
+        const root = document.documentElement;
+        const isDark = root.getAttribute('data-theme') === 'dark';
+        root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      });
+    })();
+  </script>
+
+  <!-- Vendor scripts (self-hosted) -->
+  <script src="/assets/js/vendor/fuse.min.js" defer></script>
+  <script src="/assets/js/vendor/localforage.min.js" defer></script>
+
+  <!-- Your app code -->
+  <script src="/assets/js/dashboard.js" defer></script>
+</body>
+</html>
+
 
