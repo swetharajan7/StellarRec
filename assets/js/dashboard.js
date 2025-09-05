@@ -29,7 +29,6 @@ const escapeHtml = s => (s??'').toString()
   .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const debounce = (fn,wait=300)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),wait); }; };
 
-/* Keep Send button state sensible even if other code isn't loaded yet */
 if (typeof window.updateSendButton !== 'function') {
   window.updateSendButton = function () {
     const sendBtn = document.getElementById('sendBtn');
@@ -42,8 +41,8 @@ if (typeof window.updateSendButton !== 'function') {
 }
 
 /* ===================== UPLOAD (robust + size warning) ===================== */
-const MAX_WARN_MB = 10;     // soft warn threshold
-const HARD_LIMIT_MB = null; // set a number to hard-reject large files
+const MAX_WARN_MB = 10;
+const HARD_LIMIT_MB = null;
 
 function setupUpload(){
   const fileInput  = document.getElementById('fileInput');
@@ -51,21 +50,15 @@ function setupUpload(){
   const uploadArea = document.getElementById('uploadArea');
   const removeBtn  = document.getElementById('removeFileBtn');
 
-  // 1) button opens picker
   if (chooseBtn && fileInput) {
-    chooseBtn.addEventListener('click', (e)=> {
-      e.preventDefault();
-      fileInput.click();
-    });
+    chooseBtn.addEventListener('click', (e)=>{ e.preventDefault(); fileInput.click(); });
   }
 
-  // 2) picker -> handle file
   fileInput?.addEventListener('change', (e)=>{
     const f = e.target.files && e.target.files[0];
     if (f) handleFile(f);
   });
 
-  // 3) drag & drop
   if (uploadArea) {
     uploadArea.addEventListener('dragover', (e)=>{ 
       e.preventDefault(); 
@@ -82,7 +75,6 @@ function setupUpload(){
     });
   }
 
-  // 4) remove file
   removeBtn?.addEventListener('click', removeFile);
 }
 
@@ -92,8 +84,8 @@ function isPdf(file){
 
 function handleFile(file){
   if (!isPdf(file)) { toast('Please upload a PDF file.', 'error'); return; }
-
   const sizeMB = file.size / 1024 / 1024;
+
   if (HARD_LIMIT_MB && sizeMB > HARD_LIMIT_MB) {
     toast(`File is ${sizeMB.toFixed(1)} MB — the limit is ${HARD_LIMIT_MB} MB.`, 'error', { ttl: 4000 });
     return;
@@ -103,14 +95,11 @@ function handleFile(file){
   }
 
   window.uploadedFile = file;
-
   const uploadedBox = document.getElementById('uploadedFile');
   if (uploadedBox) uploadedBox.style.display = 'block';
 
-  const nameEl = document.getElementById('fileName');
-  const sizeEl = document.getElementById('fileSize');
-  if (nameEl) nameEl.textContent = file.name;
-  if (sizeEl) sizeEl.textContent = `${sizeMB.toFixed(1)} MB • Uploaded successfully`;
+  document.getElementById('fileName')?.textContent = file.name;
+  document.getElementById('fileSize')?.textContent = `${sizeMB.toFixed(1)} MB • Uploaded successfully`;
 
   toast('PDF attached. Ready to send.', 'success');
   updateSendButton();
@@ -128,22 +117,21 @@ function handleFile(file){
 
 function removeFile(){
   window.uploadedFile = null;
-  const uploadedBox = document.getElementById('uploadedFile');
-  if (uploadedBox) uploadedBox.style.display = 'none';
+  document.getElementById('uploadedFile')?.style.setProperty('display','none');
   const fi = document.getElementById('fileInput');
   if (fi) fi.value = '';
   updateSendButton();
   toast('Attachment removed.', 'info');
 }
 
-/* ===================== Preselect “Experimental University” ===================== */
+/* ===================== Preselect ===================== */
 function preselectByName(universityName) {
   try {
     if (!window.universities || !universities.length) return;
     const targetName = norm(universityName);
     let match = universities.find(u => norm(u.name) === targetName);
     if (!match) match = universities.find(u => norm(u.name).includes(targetName));
-    if (!match) { console.warn('[SR] Could not find university named:', universityName); return; }
+    if (!match) return;
 
     const id = match.unitid;
     window.studentUnitIds = window.studentUnitIds || new Set();
@@ -157,15 +145,11 @@ function preselectByName(universityName) {
     if (typeof updateSelectedList === 'function') updateSelectedList();
     updateSendButton();
 
-    const selSection = document.querySelector('.selected-section');
-    if (selSection) selSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelector('.selected-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     toast(`Preselected: ${match.name}`, 'success', { ttl: 1500 });
-  } catch (e) {
-    console.warn('[SR] preselectByName error:', e);
-  }
+  } catch (e) { console.warn('[SR] preselectByName error:', e); }
 }
 
-/* Patch loadDataset so preselect runs AFTER first render */
 (function wrapLoadDatasetForPreselect(){
   if (typeof window.loadDataset !== 'function') {
     const obs = new MutationObserver(() => {
@@ -190,7 +174,7 @@ function preselectByName(universityName) {
   }
 })();
 
-/* ===================== SINGLE INIT ===================== */
+/* ===================== INIT ===================== */
 document.addEventListener('DOMContentLoaded', () => {
   if (typeof setupWriter === 'function') setupWriter();
   if (typeof setupUniversitySearch === 'function') setupUniversitySearch();
@@ -203,16 +187,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof loadDataset === 'function') loadDataset();
 
   setupUpload();
-  setupUserDropdown();   // defined in Chunk 2
-  themeButtonInit();     // defined in Chunk 3
+  setupUserDropdown();
+  themeButtonInit();
 
-  // Restore last view if you use multi-panels (safe no-op if not present)
   const savedView = localStorage.getItem('sr_current_view');
   if (savedView && (savedView === 'recommender' || savedView === 'student')) {
     switchView(savedView);
   }
 
-  // Tagline hotfix
   const h1 = document.querySelector('.hero-title');
   if (h1) h1.textContent = 'One upload. Unlimited reach.';
 });
@@ -223,7 +205,6 @@ function setupUserDropdown() {
   const contactAdminItem = document.getElementById('contactAdminItem');
 
   if (!avatarBtn || !dropdown) return;
-
   let isOpen = false;
 
   function openDropdown() {
@@ -243,32 +224,34 @@ function setupUserDropdown() {
   function toggleDropdown() { isOpen ? closeDropdown() : openDropdown(); }
 
   avatarBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
+  document.addEventListener('click', (e) => { if (isOpen && !e.target.closest('.user-info')) closeDropdown(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) closeDropdown(); });
 
-  // Close on outside click / Esc
-  document.addEventListener('click', (e) => {
-    if (isOpen && !e.target.closest('.user-info')) closeDropdown();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && isOpen) closeDropdown();
-  });
+  /* === HOW IT WORKS (link to /portal-signin in same tab) === */
+  const howItWorksLink = document.getElementById('howItWorksLink');
+  const howItWorksItem = document.getElementById('howItWorksItem');
 
-  // SAME-TAB "How it works" — prefer the anchor inside the item if present
-  const howItWorksLink = dropdown.querySelector('a.view-name[href*="portal-signin"]');
-  const howItWorksItem = howItWorksLink ? howItWorksLink.closest('.dropdown-item') : null;
+  if (howItWorksLink) howItWorksLink.setAttribute('href', '/portal-signin');
 
-  if (howItWorksLink) {
-    // Let the anchor behave normally (same tab). Also make the whole row clickable.
-    howItWorksItem?.addEventListener('click', (e) => {
-      // If they didn't click the anchor directly, navigate to the same URL in the same tab.
-      if (!(e.target instanceof HTMLAnchorElement)) {
+  if (howItWorksItem && howItWorksLink) {
+    howItWorksItem.addEventListener('click', (e) => {
+      const clickedAnchor = e.target.closest('a');
+      if (!clickedAnchor) {
         e.preventDefault();
         window.location.assign(howItWorksLink.href);
       }
       closeDropdown();
     });
+    howItWorksItem.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        window.location.assign(howItWorksLink.href);
+        closeDropdown();
+      }
+    });
   }
 
-  // Contact Admin
+  /* === CONTACT ADMIN === */
   if (contactAdminItem) {
     contactAdminItem.addEventListener('click', () => {
       openContactModal();
@@ -276,7 +259,6 @@ function setupUserDropdown() {
     });
   }
 
-  // Optional: if you keep recommender/student items with [data-sr-view], handle them
   dropdown.addEventListener('click', (e) => {
     const viewItem = e.target.closest('[data-sr-view]');
     if (viewItem) {
@@ -304,23 +286,19 @@ function setupUserDropdown() {
     }
   }
 }
-
 /* ===================== VIEW SWITCHING FUNCTIONALITY ===================== */
 function switchView(view, event) {
   if (event) { event.preventDefault(); event.stopPropagation(); }
 
-  // Update active states in dropdown, if those items exist
   document.querySelectorAll('[data-sr-view]').forEach(item => {
     item.classList.toggle('active', item.getAttribute('data-sr-view') === view);
   });
 
-  // Update any tabs if they exist (safe no-op if you removed them)
   document.querySelectorAll('.sr-tab').forEach(tab => {
     const isActive = tab.id === `tab-${view}`;
     tab.setAttribute('aria-selected', isActive.toString());
   });
 
-  // Show panel if you are using multi-panel layout
   document.querySelectorAll('[id^="panel-"]').forEach(panel => {
     const panelView = panel.id.replace('panel-', '');
     panel.style.display = panelView === view ? 'block' : 'none';
@@ -329,6 +307,7 @@ function switchView(view, event) {
   localStorage.setItem('sr_current_view', view);
   toast(`Switched to ${view} view`, 'success', { ttl: 1200 });
 }
+
 /* ===================== THEME BUTTON (center) ===================== */
 function themeButtonInit(){
   const KEY = 'sr_theme';
@@ -351,10 +330,11 @@ function themeButtonInit(){
   btn?.addEventListener('click', toggleTheme);
 }
 
-/* Optional global exports (handy for debugging) */
+/* ===================== EXPORTS ===================== */
 window.SR = Object.assign(window.SR||{}, {
   preselectByName,
   switchView
 });
+
 
 
