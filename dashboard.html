@@ -1,726 +1,513 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>StellarRec - One upload. Unlimited reach.</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StellarRec - Fixed Header</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+        }
 
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family:'Roboto',sans-serif;
-      background:linear-gradient(135deg,var(--bg-grad-1,#f8f9fa) 0%,var(--bg-grad-2,#e9ecef) 100%);
-      color:var(--text,#333);
-      min-height:100vh;
-    }
+        /* Header Styles */
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            width: 100%;
+        }
 
-    /* Header */
-    .header {
-      background:linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
-      color:#fff; padding:1.5rem 2rem;
-      box-shadow:0 4px 20px rgba(25,118,210,0.3);
-    }
-    .header-content {
-      max-width:1200px; margin:0 auto;
-      display:flex; justify-content:space-between; align-items:center; gap:1rem;
-    }
-    .logo {
-      display:flex; align-items:center; gap:.5rem;
-      font-size:1.8rem; font-weight:700;
-      text-decoration:none; color:#fff; transition:.3s;
-    }
-    .logo:hover { opacity:.85; transform:translateY(-1px); }
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 60px;
+            gap: 1rem;
+        }
 
-    /* Tabs in header */
-    .sr-tabs { display:flex; gap:.5rem; }
-    .sr-tab {
-      background:#ffffff22; color:#fff;
-      border:1px solid #ffffff44; border-radius:999px;
-      padding:.4rem .9rem; font-weight:600; cursor:pointer; transition:.15s; outline: none;
-    }
-    .sr-tab[aria-selected="true"] { background:#fff; color:#1976d2; }
-    .sr-tab:focus-visible { box-shadow:0 0 0 3px rgba(255,255,255,.5); }
-    @media (max-width:768px){ .sr-tabs{ align-self:flex-start; } }
+        /* Logo */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: #1f2937;
+            font-weight: 700;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
 
-    /* Avatar + dropdown */
-    .user-info { position:relative; display:flex; align-items:center; gap:1rem; }
-    .user-avatar {
-      width:45px; height:45px;
-      background:rgba(255,255,255,.2); border-radius:50%;
-      display:flex; align-items:center; justify-content:center;
-      font-size:1.2rem; cursor:pointer; transition:.2s;
-      border:2px solid rgba(255,255,255,0.1);
-    }
-    .user-avatar:hover { background:rgba(255,255,255,.3); transform:scale(1.05); border-color:rgba(255,255,255,.3); }
-    .user-avatar:focus { outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.3); }
+        .logo .material-icons {
+            color: #3b82f6;
+        }
 
-    .user-dropdown {
-      position:absolute; top:100%; right:0; margin-top:.5rem;
-      background:#fff; border-radius:12px;
-      box-shadow:0 8px 32px rgba(0,0,0,.15);
-      min-width:260px; max-width:min(92vw,360px);
-      opacity:0; visibility:hidden;
-      transform:translateY(-10px) scale(.95);
-      transition:all .2s cubic-bezier(0.4,0,0.2,1); z-index:1000;
-      border:1px solid rgba(0,0,0,.08);
-    }
-    .user-dropdown.show { opacity:1; visibility:visible; transform:translateY(0) scale(1); }
-    .user-dropdown::before{
-      content:''; position:absolute; top:-8px; right:16px; width:16px; height:16px;
-      background:#fff; border:1px solid rgba(0,0,0,.08); border-bottom:none; border-right:none;
-      transform:rotate(45deg);
-    }
-    .dropdown-header { padding:1rem; border-bottom:1px solid #f0f0f0; color:#333; font-weight:600; font-size:.9rem; }
-    .dropdown-item {
-      display:flex; align-items:center; gap:.75rem;
-      padding:.75rem 1rem; color:#333; cursor:pointer; transition:.15s;
-    }
-    .dropdown-item:hover, .dropdown-item:focus { background:#f8f9fa; outline:none; }
-    .dropdown-item .material-icons { font-size:1.2rem; color:#666; }
-    .dropdown-item.active { background:#e3f2fd; color:#1976d2; }
-    .dropdown-item.active .material-icons { color:#1976d2; }
-    .view-label { display:flex; flex-direction:column; }
-    .view-name { font-weight:600; font-size:.9rem; }
-    .view-description { font-size:.8rem; color:#666; margin-top:.1rem; }
+        /* Center controls */
+        .center-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            min-width: 0;
+        }
 
-    .container { max-width:1200px; margin:0 auto; padding:2rem; }
-    .hero-section { text-align:center; margin-bottom:3rem; }
-    .hero-title { font-size:2.5rem; font-weight:700; color:#1976d2; margin-bottom:1rem; }
-    .hero-subtitle { font-size:1.2rem; color:#666; margin-bottom:2rem; }
+        .theme-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
 
-    /* Two-column layout */
-    .compose-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:2rem; }
-    @media (max-width: 980px) { .compose-grid { grid-template-columns:1fr; } }
+        .theme-btn:hover {
+            background: #e5e7eb;
+        }
 
-    .upload-section, .writer-section, .university-section,
-    .selected-section, .progress-section {
-      background:#fff; border-radius:16px; padding:2rem;
-      box-shadow:0 8px 32px rgba(0,0,0,.1); margin-bottom:0;
-    }
-    .upload-section { border:2px dashed #e0e0e0; transition:.3s; }
-    .upload-section.dragover { border-color:#1976d2; background:#f3f8ff; }
+        /* User info */
+        .user-info {
+            position: relative;
+            flex-shrink: 0;
+        }
 
-    .upload-area { text-align:center; padding:2rem; }
-    .upload-icon { font-size:4rem; color:#1976d2; margin-bottom:1rem; }
-    .upload-title { font-size:1.5rem; font-weight:600; margin-bottom:.5rem; color:#333; }
-    .upload-subtitle { color:#666; margin-bottom:2rem; }
-    .file-input { display:none; }
-    .upload-btn {
-      background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff;
-      padding:1rem 2rem; border:none; border-radius:12px;
-      font-size:1.1rem; font-weight:600; cursor:pointer;
-      transition:.3s; display:inline-flex; align-items:center; gap:.5rem;
-    }
-    .upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
-    .uploaded-file {
-      display:none; background:#e8f5e8; border:2px solid #4caf50;
-      border-radius:12px; padding:1.5rem; margin-top:1rem;
-    }
-    .file-info { display:flex; align-items:center; gap:1rem; }
-    .file-icon { font-size:2rem; color:#4caf50; }
-    .file-details h3 { color:#2e7d32; margin-bottom:.25rem; }
-    .file-details p { color:#4caf50; font-size:.9rem; }
-    .remove-file {
-      margin-left:auto; background:none; border:none; color:#666;
-      cursor:pointer; padding:.5rem; border-radius:50%; transition:.2s;
-    }
-    .remove-file:hover { background:rgba(244,67,54,.1); color:#f44336; }
+        .user-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
-    .section-title {
-      font-size:1.5rem; font-weight:600; color:#333;
-      margin-bottom:1rem; display:flex; align-items:center; gap:.5rem;
-    }
+        .user-avatar:hover {
+            background: #e5e7eb;
+        }
 
-    /* Writer */
-    .writer-toolbar { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.75rem; align-items:center; }
-    .writer-toolbar .btn {
-      background:#fff; border:2px solid #e5e7eb; border-radius:10px;
-      padding:.45rem .75rem; cursor:pointer; font-weight:600;
-    }
-    .writer-toolbar .btn:hover { background:#f8f9fa; }
-    .writer-toolbar .meta { margin-left:auto; font-size:.9rem; color:#667; display:flex; gap:.75rem; align-items:center; }
-    .writer-title {
-      width:100%; padding:.7rem .9rem;
-      border:2px solid #e0e0e0; border-radius:12px;
-      font-size:1rem; margin-bottom:.6rem;
-    }
-    .writer-box {
-      border:2px solid #e0e0e0; border-radius:12px;
-      min-height:280px; padding:1rem; line-height:1.55;
-    }
-    .writer-box:focus { outline:none; border-color:#1976d2; }
-    .writer-actions { display:flex; gap:.5rem; margin-top:.75rem; flex-wrap:wrap; }
-    .btn-primary { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none; }
-    .btn-success { background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; border:none; }
-    .btn-danger  { background:linear-gradient(135deg,#e53935,#ef5350); color:#fff; border:none; }
-    .btn-muted   { background:#fff; color:#333; }
+        .user-dropdown {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            width: 280px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s;
+        }
 
-    .filter-meta { font-size:.9rem; color:#666; margin:.25rem 0 .5rem; }
-    .filter-bar { display:grid; grid-template-columns: repeat(8, minmax(140px, 1fr)); gap:.5rem; margin-bottom:.75rem; align-items:center; }
-    .filter-select { width:100%; padding:.7rem .9rem; border:2px solid #e0e0e0; border-radius:12px; background:#fff; font-size:.95rem; }
+        .user-dropdown[aria-hidden="false"] {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
 
-    .university-grid {
-      display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:1rem;
-      max-height:480px; overflow-y:auto; padding:1rem; border:1px solid #f0f0f0; border-radius:12px;
-    }
-    .university-card { background:#f8f9fa; border:2px solid transparent; border-radius:12px; padding:1rem; cursor:pointer; transition:.2s; }
-    .university-card:hover { border-color:#1976d2; background:#f3f8ff; }
-    .university-card.selected { border-color:#1976d2; background:#e3f2fd; }
-    .university-header { display:flex; align-items:center; gap:1rem; margin-bottom:.5rem; }
-    .university-logo { width:40px; height:40px; background:#1976d2; color:#fff; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:600; }
-    .university-name { font-weight:600; color:#333; }
-    .university-location { color:#666; font-size:.9rem; }
-    .university-pill { margin-top:.25rem; display:inline-block; font-size:.75rem; color:#555; background:#eef3ff; border:1px solid #dbe7ff; padding:.15rem .5rem; border-radius:999px; }
+        .dropdown-header {
+            padding: 1rem 1.25rem 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #6b7280;
+            border-bottom: 1px solid #f3f4f6;
+        }
 
-    .pagination { display:flex; justify-content:space-between; align-items:center; margin-top:.75rem; }
-    .pager { display:flex; gap:.5rem; }
-    .page-btn { background:#fff; border:2px solid #e0e0e0; border-radius:10px; padding:.5rem .9rem; cursor:pointer; font-weight:600; }
-    .page-btn[disabled] { opacity:.5; cursor:not-allowed; }
-    .page-size { margin-left:auto; display:flex; align-items:center; gap:.5rem; }
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
 
-    .selected-count { color:#1976d2; font-weight:600; margin-bottom:1rem; }
-    .selected-list { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:2rem; }
-    .selected-tag { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:.5rem 1rem; border-radius:20px; font-size:.9rem; display:flex; align-items:center; gap:.5rem; }
-    .remove-tag { cursor:pointer; background:rgba(255,255,255,.2); border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
-    .remove-tag:hover { background:rgba(255,255,255,.3); }
+        .dropdown-item:hover {
+            background: #f9fafb;
+        }
 
-    .send-section { text-align:center; }
-    .send-btn {
-      background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; padding:1.2rem 3rem; border:none; border-radius:12px;
-      font-size:1.2rem; font-weight:600; cursor:pointer; transition:.2s; display:inline-flex; align-items:center; gap:.5rem;
-    }
-    .send-btn:disabled { background:#ccc; cursor:not-allowed; }
-    .send-btn:not(:disabled):hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(76,175,80,.3); }
+        .dropdown-item .material-icons {
+            color: #6b7280;
+            font-size: 20px;
+        }
 
-    .progress-section { display:none; }
-    .progress-title { font-size:1.3rem; font-weight:600; color:#333; margin-bottom:1rem; text-align:center; }
-    .progress-bar { width:100%; height:12px; background:#e0e0e0; border-radius:6px; overflow:hidden; margin-bottom:1rem; }
-    .progress-fill { height:100%; background:linear-gradient(135deg,#4caf50,#66bb6a); border-radius:6px; transition:width .5s ease; width:0%; }
-    .progress-text { text-align:center; color:#666; font-size:.9rem; }
-    .delivery-list { margin-top:1rem; }
-    .delivery-item { display:flex; align-items:center; gap:1rem; padding:.75rem; border-radius:8px; margin-bottom:.5rem; background:#f8f9fa; }
-    .delivery-status { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
-    .delivery-status.pending { background:#fff3e0; color:#ff9800; }
-    .delivery-status.success { background:#e8f5e8; color:#4caf50; }
-    .delivery-status.error { background:#ffebee; color:#f44336; }
+        .view-label {
+            flex: 1;
+        }
 
-    .success-section {
-      display:none; background:linear-gradient(135deg,#e8f5e8,#f1f8e9);
-      border:2px solid #4caf50; border-radius:16px; padding:2rem; text-align:center; box-shadow:0 8px 32px rgba(76,175,80,.2);
-    }
-    .success-icon { font-size:4rem; color:#4caf50; margin-bottom:1rem; }
-    .success-title { font-size:1.8rem; font-weight:600; color:#2e7d32; margin-bottom:1rem; }
-    .success-subtitle { color:#4caf50; margin-bottom:2rem; }
-    .new-upload-btn { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:1rem 2rem; border:none; border-radius:12px; font-size:1rem; font-weight:600; cursor:pointer; transition:.2s; }
-    .new-upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
+        .view-name {
+            font-weight: 500;
+            color: #1f2937;
+            font-size: 0.875rem;
+        }
 
-    @keyframes flash { 0%{box-shadow:0 0 0 rgba(25,118,210,0);} 25%{box-shadow:0 0 0 6px rgba(25,118,210,.25);} 100%{box-shadow:0 0 0 rgba(25,118,210,0);} }
-    .flash { animation: flash 1.2s ease; }
+        .view-description {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 2px;
+        }
 
-    .badge { display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; font-size:.75rem; border-radius:999px; border:1px solid; }
-    .badge-student { background:#f1f8ff; color:#0d47a1; border-color:#bbdefb; }
-    .badge-added   { background:#e8f5e9; color:#1b5e20; border-color:#c8e6c9; }
-    .badge-removed { background:#ffebee; color:#b71c1c; border-color:#ffcdd2; }
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 1rem;
+        }
 
-    .toast-wrap { position: fixed; right: 16px; bottom: 16px; z-index: 99999; display: grid; gap: 8px; }
-    .toast {
-      min-width: 240px; max-width: 420px; padding: .75rem .9rem; border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0,0,0,.15); color:#0f172a; background:#fff; border:1px solid #e5e7eb;
-      display:flex; align-items:flex-start; gap:.6rem; animation: toast-in .18s ease;
-    }
-    .toast.success { border-color:#c8e6c9; background:#f1f8f3; }
-    .toast.error   { border-color:#ffcdd2; background:#fff2f2; }
-    .toast.info    { border-color:#bbdefb; background:#f3f8ff; }
-    .toast .icon { font-size: 1.1rem; line-height:1; margin-top:.1rem; }
-    .toast .msg  { flex:1; font-size:.95rem; }
-    .toast .x    { border:none; background:transparent; cursor:pointer; font-size:1rem; opacity:.6; }
-    .toast .x:hover { opacity:.9; }
-    @keyframes toast-in { from { transform: translateY(6px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 560px;
+            border-radius: 16px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.22);
+            overflow: hidden;
+        }
 
-    .empty-state { display:none; background:#fff; border:1px dashed #d0d7de; border-radius:12px; padding:1.25rem; color:#445; text-align:center; }
-    .empty-state .actions { margin-top:.75rem; display:flex; gap:.5rem; justify-content:center; }
+        .modal-header {
+            padding: 1.2rem 1.4rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    @media (max-width:768px) {
-      .container { padding:1rem; }
-      .hero-title { font-size:2rem; }
-      .university-grid { grid-template-columns:1fr; }
-      .header-content { flex-direction:column; gap:1rem; }
-      .filter-bar { grid-template-columns:1fr 1fr; }
-    }
+        .modal-title {
+            font-weight: 700;
+        }
 
-    /* Dark theme basics (CSS side) */
-    :root[data-theme="dark"] {
-      --bg:#0b1220; --panel:#111a2a; --text:#e5eefc; --muted:#93a3bc; --primary:#7aa2ff; --border:#24324a;
-    }
-    :root[data-theme="dark"] body { background: linear-gradient(135deg,#0b1220 0%,#0f1729 100%); color: var(--text); }
-    :root[data-theme="dark"] .upload-section,
-    :root[data-theme="dark"] .writer-section,
-    :root[data-theme="dark"] .university-section,
-    :root[data-theme="dark"] .selected-section,
-    :root[data-theme="dark"] .progress-section { background: var(--panel); box-shadow:none; }
-    :root[data-theme="dark"] .filter-select,
-    :root[data-theme="dark"] .writer-title,
-    :root[data-theme="dark"] .writer-box,
-    :root[data-theme="dark"] .page-btn { background:#0f1729; color:var(--text); border-color: var(--border); }
-    :root[data-theme="dark"] .university-card { background:#0f1729; }
-    :root[data-theme="dark"] .university-card:hover { background:#12203a; border-color:#274780; }
-    :root[data-theme="dark"] .university-card.selected { background:#13254a; }
-    :root[data-theme="dark"] .hero-subtitle, :root[data-theme="dark"] .university-location { color: var(--muted); }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
 
-    /* Footer (match header) */
-    .site-footer {
-      background: linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
-      color: #fff;
-      padding: 1.5rem 0;
-      text-align: center;
-    }
-    .site-footer p { margin: 0; font-size: 0.95rem; }
-    /* center container takes the middle space */
-.center-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: 1 1 auto;
-}
+        .modal-form {
+            padding: 1rem 1.4rem;
+            display: grid;
+            gap: 0.75rem;
+        }
 
-/* make header-content a 3-column flex: left | center grows | right */
-.header-content {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-.header-content > .logo { flex: 0 0 auto; }
-.header-content > .center-controls { flex: 1 1 auto; }
-.header-content > .user-info { flex: 0 0 auto; }
+        .modal-form label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
 
-/* theme button */
-.theme-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .55rem 1rem;
-  border-radius: 999px;
-  border: 1px solid #ffffff55;
-  background: #ffffff22;
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
-}
-.theme-btn:hover { transform: translateY(-1px); background: #ffffff33; border-color: #ffffff88; }
-.theme-btn:focus-visible { outline: 3px solid rgba(255,255,255,.5); outline-offset: 2px; }
-.theme-btn .material-icons { font-size: 18px; }
+        .form-input {
+            margin-top: 0.35rem;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
 
-  </style>
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+            padding-top: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border-color: #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        /* Main content placeholder */
+        .main-content {
+            padding: 2rem 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0.5rem;
+                gap: 0.5rem;
+            }
+
+            .logo {
+                font-size: 1.1rem;
+            }
+
+            .theme-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .theme-btn span:last-child {
+                display: none;
+            }
+
+            .user-dropdown {
+                width: 260px;
+                right: -10px;
+            }
+
+            .modal-content {
+                margin: 0.5rem;
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-content {
+                padding: 0.5rem;
+            }
+
+            .logo span:last-child {
+                display: none;
+            }
+
+            .theme-btn {
+                padding: 0.4rem 0.6rem;
+            }
+
+            .user-dropdown {
+                width: 240px;
+                right: -20px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="header">
-  <div class="header-content">
-    <!-- Left: Logo -->
-    <a href="/" class="logo" target="_self" aria-label="Go to homepage">
-      <span class="material-icons">star</span>
-      stellarrec
-    </a>
+    <div class="header">
+        <div class="header-content">
+            <!-- Left: Logo -->
+            <a href="/" class="logo" target="_self" aria-label="Go to homepage">
+                <span class="material-icons">star</span>
+                <span>stellarrec</span>
+            </a>
 
-    <!-- Center: Theme button -->
-    <div class="center-controls">
-      <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false">
-        <span class="material-icons" aria-hidden="true">dark_mode</span>
-        Light / Dark
-      </button>
-    </div>
-
-  <!-- Right: Avatar dropdown (theme item removed) -->
-<div class="user-info">
-  <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
-    <span class="material-icons">person</span>
-  </button>
-
-  <!-- Dropdown menu -->
-  <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
-    <div class="dropdown-header">Quick actions</div>
-
-    <!-- How it works -->
-    <div class="dropdown-item" role="menuitem" tabindex="0">
-      <span class="material-icons">help_outline</span>
-      <div class="view-label">
-        <a href="/portal-signin" class="view-name" style="text-decoration:none; color:inherit;" target="_self">
-          How it works
-        </a>
-        <div class="view-description">Sign-in portal</div>
-      </div>
-    </div>
-
-    <!-- Contact Admin -->
-    <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
-      <span class="material-icons">support_agent</span>
-      <div class="view-label">
-        <div class="view-name">Contact admin</div>
-        <div class="view-description">Send a message</div>
-      </div>
-    </div>
-
-    <!-- Mock API toggle -->
-    <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
-      <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
-        <span class="material-icons">build</span>
-        <div class="view-label">
-          <div class="view-name">Use mock API</div>
-          <div class="view-description">Toggle mock vs real backend</div>
-        </div>
-        <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
-      </label>
-    </div>
-  </div>
-</div>
-
-
-  <!-- Contact Admin Modal -->
-  <div id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactTitle"
-       style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
-    <div style="background:#fff; width:min(560px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
-      <div style="padding:1.2rem 1.4rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-        <div id="contactTitle" style="font-weight:700;">Contact Admin</div>
-        <button aria-label="Close" id="contactCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
-      </div>
-      <form id="contactForm" style="padding:1rem 1.4rem; display:grid; gap:.75rem;">
-        <label>First name
-          <input type="text" id="contactFirst" required class="filter-select" style="margin-top:.35rem;">
-        </label>
-        <label>Email address
-          <input type="email" id="contactEmail" required class="filter-select" style="margin-top:.35rem;">
-        </label>
-        <label>Query
-          <textarea id="contactQuery" rows="5" required class="filter-select" style="margin-top:.35rem;"></textarea>
-        </label>
-        <div style="display:flex; gap:.5rem; justify-content:flex-end; padding-top:.5rem;">
-          <button type="button" class="page-btn" id="contactCancelBtn">Cancel</button>
-          <button type="submit" class="apply-btn" id="contactSendBtn">Send</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="container" id="panel-recommender">
-    <!-- Student Context Bar -->
-    <div class="student-bar" id="studentBar" style="display:flex; align-items:center; gap:.75rem; background:#fff; border:1px solid #eaeaea; border-radius:12px; padding:1rem; margin-bottom:1rem;">
-      <span class="material-icons" aria-hidden="true">account_circle</span>
-      <div style="flex:1">
-        <div id="studentTitle" style="font-weight:700;">No student loaded</div>
-        <div id="studentMeta" style="color:#666; font-size:.9rem;">Load a student to see their preselected universities.</div>
-      </div>
-      <input id="studentIdInput" class="filter-select" placeholder="Student ID or email" style="max-width:220px;" aria-label="Student identifier"/>
-      <button class="apply-btn" id="loadStudentBtn">Load student</button>
-      <label style="display:flex; align-items:center; gap:.4rem; margin-left:.5rem; font-size:.9rem;">
-        <input type="checkbox" id="allowEditsToggle"/>
-        Allow recommender edits
-      </label>
-    </div>
-
-    <!-- Hero -->
-    <div class="hero-section">
-      <h1 class="hero-title">One upload. Unlimited reach.</h1>
-      <p class="hero-subtitle">Upload your recommendation letter once and send it to multiple US universities instantly.</p>
-    </div>
-
-    <!-- Upload + Writer -->
-    <div class="compose-grid">
-      <!-- Upload Section -->
-      <div class="upload-section" id="uploadSection">
-        <div class="upload-area" id="uploadArea">
-          <div class="upload-icon"><span class="material-icons">cloud_upload</span></div>
-          <h2 class="upload-title">Upload Recommendation Letter</h2>
-          <p class="upload-subtitle">Drag and drop your PDF file here, or click to browse</p>
-          <div id="uploadHint" style="margin:.5rem 0 0; font-size:.9rem; color:#556;">PDF only. Recommended size ≤ 10 MB.</div>
-
-          <input type="file" id="fileInput" class="file-input" accept=".pdf,.txt" />
-          <button class="upload-btn" id="chooseFileBtn">
-            <span class="material-icons">upload_file</span>
-            Choose File
-          </button>
-        </div>
-        <div class="uploaded-file" id="uploadedFile">
-          <div class="file-info">
-            <div class="file-icon"><span class="material-icons">description</span></div>
-            <div class="file-details">
-              <h3 id="fileName">recommendation-letter.pdf</h3>
-              <p id="fileSize">2.4 MB • Uploaded successfully</p>
+            <!-- Center: Theme button -->
+            <div class="center-controls">
+                <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false">
+                    <span class="material-icons" aria-hidden="true">dark_mode</span>
+                    <span>Light / Dark</span>
+                </button>
             </div>
-            <button class="remove-file" id="removeFileBtn"><span class="material-icons">close</span></button>
-          </div>
-        </div>
-      </div>
 
-      <!-- Writer -->
-      <div class="writer-section" id="writerSection">
-        <h2 class="section-title"><span class="material-icons">edit</span> Write Letter</h2>
-        <input id="writerTitle" class="writer-title" placeholder="Letter title (optional, e.g., 'Recommendation for Jane Doe')" />
-        <div class="writer-toolbar">
-          <button class="btn btn-muted" data-wcmd="bold" title="Bold (Ctrl/Cmd+B)"><b>B</b></button>
-          <button class="btn btn-muted" data-wcmd="italic" title="Italic (Ctrl/Cmd+I)"><i>I</i></button>
-          <button class="btn btn-muted" data-wcmd="underline" title="Underline (Ctrl/Cmd+U)"><u>U</u></button>
-          <div class="meta">
-            <span id="writerCount">0 words • 0 chars</span>
-            <span id="writerSaved">Not saved</span>
-          </div>
-        </div>
-        <div id="writerBox" class="writer-box" contenteditable="true" aria-label="Letter editor"
-             placeholder="Write your recommendation letter here..."></div>
-        <div class="writer-actions">
-          <button class="btn btn-primary" id="saveDraftBtn">Save draft</button>
-          <button class="btn btn-muted" id="restoreDraftBtn">Restore</button>
-          <button class="btn btn-danger" id="clearDraftBtn">Clear</button>
-          <button class="btn btn-muted" id="copyDraftBtn">Copy</button>
-          <button class="btn btn-muted" id="downloadDraftBtn">Download .txt</button>
-          <button class="btn btn-success" id="attachDraftBtn">Attach draft</button>
-          <label style="display:flex; align-items:center; gap:.4rem; margin-left:auto;">
-            <input type="checkbox" id="writerAutosaveToggle" checked />
-            Autosave
-          </label>
-        </div>
-      </div>
-    </div>
+            <!-- Right: Avatar dropdown -->
+            <div class="user-info">
+                <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
+                    <span class="material-icons">person</span>
+                </button>
 
-    <!-- University Selection -->
-    <div class="university-section">
-      <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
+                <!-- Dropdown menu -->
+                <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
+                    <div class="dropdown-header">Quick actions</div>
 
-      <!-- Search + Apply -->
-      <div class="university-search" style="position:relative;">
-        <input type="text" class="search-input filter-select" placeholder="Search universities..." id="universitySearch" autocomplete="off"/>
-        <div id="searchSuggest" class="suggest-popover" style="display:none;"></div>
-        <button class="apply-btn" id="searchApplyBtn" title="Apply search (Enter)">Apply</button>
-      </div>
+                    <!-- How it works -->
+                    <div class="dropdown-item" role="menuitem" tabindex="0">
+                        <span class="material-icons">help_outline</span>
+                        <div class="view-label">
+                            <a href="/portal-signin" class="view-name" style="text-decoration:none; color:inherit;" target="_self">
+                                How it works
+                            </a>
+                            <div class="view-description">Sign-in portal</div>
+                        </div>
+                    </div>
 
-      <!-- Browse-all dropdown -->
-      <select id="universitySelect" class="filter-select" title="Browse all universities" style="margin-bottom:.5rem;">
-        <option value="" selected disabled>Browse all universities (6000+)</option>
-      </select>
+                    <!-- Contact Admin -->
+                    <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
+                        <span class="material-icons">support_agent</span>
+                        <div class="view-label">
+                            <div class="view-name">Contact admin</div>
+                            <div class="view-description">Send a message</div>
+                        </div>
+                    </div>
 
-      <!-- Filters -->
-      <div class="filter-meta" id="resultMeta" aria-live="polite">Showing 0 of 0</div>
-      <div class="filter-bar">
-        <!-- (states)… -->
-        <select id="stateFilter" class="filter-select" aria-label="Filter by state">
-          <option value="">All states</option>
-          <option value="AL">Alabama</option><option value="AK">Alaska</option><option value="AZ">Arizona</option><option value="AR">Arkansas</option>
-          <option value="CA">California</option><option value="CO">Colorado</option><option value="CT">Connecticut</option><option value="DE">Delaware</option>
-          <option value="FL">Florida</option><option value="GA">Georgia</option><option value="HI">Hawaii</option><option value="ID">Idaho</option>
-          <option value="IL">Illinois</option><option value="IN">Indiana</option><option value="IA">Iowa</option><option value="KS">Kansas</option>
-          <option value="KY">Kentucky</option><option value="LA">Louisiana</option><option value="ME">Maine</option><option value="MD">Maryland</option>
-          <option value="MA">Massachusetts</option><option value="MI">Michigan</option><option value="MN">Minnesota</option><option value="MS">Mississippi</option>
-          <option value="MO">Missouri</option><option value="MT">Montana</option><option value="NE">Nebraska</option><option value="NV">Nevada</option>
-          <option value="NH">New Hampshire</option><option value="NJ">New Jersey</option><option value="NM">New Mexico</option><option value="NY">New York</option>
-          <option value="NC">North Carolina</option><option value="ND">North Dakota</option><option value="OH">Ohio</option><option value="OK">Oklahoma</option>
-          <option value="OR">Oregon</option><option value="PA">Pennsylvania</option><option value="RI">Rhode Island</option><option value="SC">South Carolina</option>
-          <option value="SD">South Dakota</option><option value="TN">Tennessee</option><option value="TX">Texas</option><option value="UT">Utah</option>
-          <option value="VT">Vermont</option><option value="VA">Virginia</option><option value="WA">Washington</option><option value="WV">West Virginia</option>
-          <option value="WI">Wisconsin</option><option value="WY">Wyoming</option>
-        </select>
-
-        <select id="typeFilter" class="filter-select" aria-label="Filter by institution type">
-          <option value="">All types</option>
-          <option value="Public">Public</option>
-          <option value="Private nonprofit">Private nonprofit</option>
-          <option value="Private for-profit">Private for-profit</option>
-        </select>
-
-        <select id="levelFilter" class="filter-select" aria-label="Filter by level">
-          <option value="">All levels</option>
-          <option value="4-year">4-year</option>
-          <option value="2-year">2-year</option>
-          <option value="Less-than-2-year">Less-than-2-year</option>
-        </select>
-
-        <select id="sortBy" class="filter-select" aria-label="Sort results">
-          <option value="name_asc">Sort: Name (A–Z)</option>
-          <option value="state_asc">Sort: State (A–Z)</option>
-        </select>
-
-        <button class="apply-btn" id="filterApplyBtn" title="Apply filters and sort">Apply filters</button>
-        <button class="apply-btn" id="resetBtn" title="Reset search and filters">Reset</button>
-        <button class="apply-btn" id="selectPageBtn" title="Select all universities on this page">Select page</button>
-        <button class="page-btn" id="bulkImportBtn" title="Bulk import by names">Bulk import</button>
-      </div>
-
-      <!-- Empty state -->
-      <div id="emptyState" class="empty-state" aria-live="polite">
-        <div style="font-weight:600; margin-bottom:.25rem;">No universities match your filters</div>
-        <div style="font-size:.9rem; color:#667;">Try adjusting search or clearing filters.</div>
-        <div class="actions">
-          <button class="apply-btn" id="clearFiltersBtn" type="button">Clear filters</button>
-          <button class="page-btn" id="retryLoadBtn" style="display:none;" type="button">Retry loading</button>
-        </div>
-      </div>
-
-      <!-- Results grid -->
-      <div class="university-grid" id="universityGrid" role="list" aria-label="Universities list"></div>
-
-      <!-- Pagination -->
-      <div class="pagination">
-        <div class="pager">
-          <button class="page-btn" id="prevPage">Prev</button>
-          <span id="pageInfo" style="font-weight:600;">Page 1 of 1</span>
-          <button class="page-btn" id="nextPage">Next</button>
-        </div>
-        <div class="page-size">
-          <label for="pageSize">Per page:</label>
-          <select id="pageSize" class="filter-select" style="width:auto;display:inline-block;">
-            <option value="20">20</option>
-            <option value="40" selected>40</option>
-            <option value="80">80</option>
-            <option value="120">120</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Selected Universities -->
-    <div class="selected-section">
-      <h2 class="section-title" style="display:flex;align-items:center;gap:.5rem;">
-        <span class="material-icons">check_circle</span> Selected Universities
-        <button id="copyLinkBtn" class="page-btn" title="Copy shareable link" style="margin-left:auto;">Copy link</button>
-      </h2>
-      <div class="selected-count" id="selectedCount">0 universities selected</div>
-      <div class="selected-list" id="selectedList" role="list" aria-live="polite"></div>
-      <div class="send-section">
-        <button class="send-btn" id="sendBtn" disabled>
-          <span class="material-icons">send</span>
-          Send to Selected Universities
-        </button>
-      </div>
-    </div>
-
-    <!-- Progress Section -->
-    <div class="progress-section" id="progressSection">
-      <h2 class="progress-title">Sending Letters...</h2>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-      <div class="progress-text" id="progressText" aria-live="polite">Preparing to send...</div>
-      <div class="delivery-list" id="deliveryList"></div>
-    </div>
-
-    <!-- Success Section -->
-    <div class="success-section" id="successSection">
-      <div class="success-icon"><span class="material-icons">check_circle</span></div>
-      <h2 class="success-title">Letters Sent Successfully!</h2>
-      <p class="success-subtitle">Your recommendation letter has been delivered to all selected universities.</p>
-      <button class="new-upload-btn" id="newUploadBtn">
-        <span class="material-icons">add</span>
-        Send Another Letter
-      </button>
-    </div>
-
-    <!-- Confirm Send Modal -->
-    <div id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle"
-         style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
-      <div style="background:#fff; width:min(720px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
-        <div style="padding:1.2rem 1.4rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-          <div id="confirmModalTitle" style="font-weight:700;">Confirm recipients</div>
-          <button aria-label="Close" id="modalCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
-        </div>
-        <div style="padding:1rem 1.4rem; max-height:60vh; overflow:auto; line-height:1.45;">
-          <div id="modalSummary" style="margin-bottom:1rem;"></div>
-          <div id="modalLists" style="display:grid; gap:1rem;">
-            <div>
-              <div style="font-weight:600;">Included (<span id="modalIncludedCount">0</span>)</div>
-              <div id="modalIncluded"></div>
+                    <!-- Mock API toggle -->
+                    <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
+                        <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
+                            <span class="material-icons">build</span>
+                            <div class="view-label">
+                                <div class="view-name">Use mock API</div>
+                                <div class="view-description">Toggle mock vs real backend</div>
+                            </div>
+                            <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
+                        </label>
+                    </div>
+                </div>
             </div>
-            <div>
-              <div style="font-weight:600;">Removed vs student’s list (<span id="modalRemovedCount">0</span>)</div>
-              <div id="modalRemoved" style="color:#b00020;"></div>
+        </div>
+    </div>
+
+    <!-- Contact Admin Modal -->
+    <div id="contactModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="contactTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div id="contactTitle" class="modal-title">Contact Admin</div>
+                <button aria-label="Close" id="contactCloseBtn" class="modal-close">✕</button>
             </div>
-            <div>
-              <div style="font-weight:600;">Added by you (<span id="modalAddedCount">0</span>)</div>
-              <div id="modalAdded" style="color:#1b5e20;"></div>
-            </div>
-          </div>
+            <form id="contactForm" class="modal-form">
+                <label>
+                    First name
+                    <input type="text" id="contactFirst" required class="form-input">
+                </label>
+                <label>
+                    Email address
+                    <input type="email" id="contactEmail" required class="form-input">
+                </label>
+                <label>
+                    Query
+                    <textarea id="contactQuery" rows="5" required class="form-input"></textarea>
+                </label>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="contactCancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="contactSendBtn">Send</button>
+                </div>
+            </form>
         </div>
-        <div style="padding:1rem 1.4rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
-          <button class="page-btn" id="modalCancelBtn">Cancel</button>
-          <button class="apply-btn" id="modalConfirmBtn">Send now</button>
-        </div>
-      </div>
     </div>
 
-    <!-- Bulk Import Modal -->
-    <div id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle"
-         style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
-      <div style="background:#fff; width:min(680px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
-        <div style="padding:1rem 1.2rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-          <div id="importTitle" style="font-weight:700;">Bulk import universities</div>
-          <button aria-label="Close" id="importCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+    <!-- Main content placeholder -->
+    <div class="main-content">
+        <h1>Your main content goes here...</h1>
+        <p>This is a demonstration of the fixed header. Scroll down to see the sticky behavior.</p>
+        
+        <!-- Add some content to demonstrate scrolling -->
+        <div style="height: 200vh; background: linear-gradient(to bottom, #f3f4f6, #e5e7eb); margin-top: 2rem; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+            <p style="font-size: 1.5rem; color: #6b7280;">Scroll to test sticky header</p>
         </div>
-        <div style="padding:1rem 1.2rem; display:grid; gap:.75rem;">
-          <div style="font-size:.92rem; color:#556;">
-            Paste one <b>name per line</b>. We’ll fuzzy-match against the master list.
-          </div>
-          <textarea id="importTextarea" rows="10" style="width:100%; padding:.8rem; border:1px solid #e5e7eb; border-radius:10px; font-family:inherit;"></textarea>
-          <div id="importPreview" style="font-size:.9rem; color:#667;"></div>
-        </div>
-        <div style="padding:1rem 1.2rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
-          <button class="page-btn" id="importCancelBtn">Cancel</button>
-          <button class="apply-btn" id="importConfirmBtn">Add matches</button>
-        </div>
-      </div>
     </div>
 
-    <!-- Contact Admin Overlay -->
-    <div id="contactOverlay" role="dialog" aria-modal="true" aria-labelledby="contactTitle"
-         style="position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; z-index:10000;">
-      <div style="background:#fff; width:min(560px,92vw); border-radius:16px; box-shadow:0 18px 50px rgba(0,0,0,.22); overflow:hidden; transform:translateY(12px); opacity:0; transition:.18s;">
-        <div style="padding:1rem 1.25rem; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
-          <div id="contactTitle" style="font-weight:700;">Contact admin</div>
-          <button aria-label="Close" id="contactCloseBtn2" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
-        </div>
-        <form id="contactForm2" style="padding:1rem 1.25rem; display:grid; gap:.75rem;">
-          <div>
-            <label for="cFirst2" style="display:block; font-weight:600; margin-bottom:.35rem;">First name</label>
-            <input id="cFirst2" name="first" class="filter-select" type="text" placeholder="Your first name" required />
-          </div>
-          <div>
-            <label for="cEmail2" style="display:block; font-weight:600; margin-bottom:.35rem;">Email address</label>
-            <input id="cEmail2" name="email" class="filter-select" type="email" placeholder="you@example.com" required />
-          </div>
-          <div>
-            <label for="cQuery2" style="display:block; font-weight:600; margin-bottom:.35rem;">Query</label>
-            <textarea id="cQuery2" name="query" rows="5" style="width:100%; padding:.8rem; border:1px solid #e5e7eb; border-radius:10px; font-family:inherit;" placeholder="How can we help?" required></textarea>
-          </div>
-          <div style="display:flex; gap:.5rem; justify-content:flex-end; border-top:1px solid #f1f5f9; padding-top:.75rem;">
-            <button type="button" class="page-btn" id="contactCancelBtn2">Cancel</button>
-            <button type="submit" class="apply-btn" id="contactSendBtn2">Send</button>
-          </div>
-          <input type="hidden" name="form-name" value="contact-admin">
-        </form>
-      </div>
-    </div>
+    <script>
+        // Toggle user dropdown
+        const userAvatarBtn = document.getElementById('userAvatarBtn');
+        const userDropdown = document.getElementById('userDropdown');
 
-    <!-- Toast container -->
-    <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
-  </div>
-  <footer class="site-footer">
-    <div class="container">
-      <p>&copy; 2025 <span style="color: #ffeb3b; font-weight: 600;">StellarRec™</span>. All rights reserved. |
-        Making recommendations stellar since 2025 🚀</p>
-    </div>
-  </footer>
-  <!-- Sanity checks -->
-  <script>
-    (function(){
-      if (typeof Fuse !== 'function') console.warn('[SR] Fuse.js not loaded');
-      if (typeof localforage === 'undefined') console.warn('[SR] localForage not loaded');
-      else localforage.config({ name: 'StellarRec' });
-    })();
-  </script>
+        userAvatarBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = userDropdown.getAttribute('aria-hidden') === 'false';
+            userDropdown.setAttribute('aria-hidden', !isOpen);
+            userAvatarBtn.setAttribute('aria-expanded', !isOpen);
+        });
 
-  <!-- Vendor scripts (self-hosted) -->
-  <script src="/assets/js/vendor/fuse.min.js" defer></script>
-  <script src="/assets/js/vendor/localforage.min.js" defer></script>
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            userDropdown.setAttribute('aria-hidden', 'true');
+            userAvatarBtn.setAttribute('aria-expanded', 'false');
+        });
 
-  <!-- Your app code -->
-  <script src="/assets/js/dashboard.js" defer></script>
+        // Prevent dropdown from closing when clicking inside
+        userDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Contact modal functionality
+        const contactAdminItem = document.getElementById('contactAdminItem');
+        const contactModal = document.getElementById('contactModal');
+        const contactCloseBtn = document.getElementById('contactCloseBtn');
+        const contactCancelBtn = document.getElementById('contactCancelBtn');
+        const contactForm = document.getElementById('contactForm');
+
+        function openContactModal() {
+            contactModal.style.display = 'flex';
+            userDropdown.setAttribute('aria-hidden', 'true');
+            userAvatarBtn.setAttribute('aria-expanded', 'false');
+        }
+
+        function closeContactModal() {
+            contactModal.style.display = 'none';
+            contactForm.reset();
+        }
+
+        contactAdminItem.addEventListener('click', openContactModal);
+        contactCloseBtn.addEventListener('click', closeContactModal);
+        contactCancelBtn.addEventListener('click', closeContactModal);
+
+        // Close modal when clicking outside
+        contactModal.addEventListener('click', (e) => {
+            if (e.target === contactModal) {
+                closeContactModal();
+            }
+        });
+
+        // Handle form submission
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Add your form submission logic here
+            alert('Form submitted! (This is a demo)');
+            closeContactModal();
+        });
+
+        // Theme toggle functionality
+        const themeBtn = document.getElementById('headerThemeBtn');
+        themeBtn.addEventListener('click', () => {
+            // Add your theme toggle logic here
+            const isDark = themeBtn.getAttribute('aria-pressed') === 'true';
+            themeBtn.setAttribute('aria-pressed', !isDark);
+            // Toggle theme logic would go here
+        });
+
+        // Mock toggle functionality
+        const mockToggle = document.getElementById('mockToggle');
+        mockToggle.addEventListener('change', () => {
+            // Add your mock API toggle logic here
+            console.log('Mock API toggled:', mockToggle.checked);
+        });
+    </script>
 </body>
 </html>
 
