@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StellarRec - Fixed Header</title>
+    <title>StellarRec - University Recommendation System</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         * {
@@ -15,6 +15,8 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
         }
 
         /* Header Styles */
@@ -24,21 +26,20 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            width: 100%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .header-content {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.75rem 1rem;
-            max-width: 1200px;
+            padding: 0.75rem 1.5rem;
+            max-width: 1400px;
             margin: 0 auto;
-            min-height: 60px;
             gap: 1rem;
+            flex-wrap: nowrap;
         }
 
-        /* Logo */
         .logo {
             display: flex;
             align-items: center;
@@ -52,9 +53,9 @@
 
         .logo .material-icons {
             color: #3b82f6;
+            font-size: 24px;
         }
 
-        /* Center controls */
         .center-controls {
             display: flex;
             align-items: center;
@@ -81,7 +82,6 @@
             background: #e5e7eb;
         }
 
-        /* User info */
         .user-info {
             position: relative;
             flex-shrink: 0;
@@ -112,7 +112,7 @@
             background: white;
             border: 1px solid #e5e7eb;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             z-index: 1001;
             opacity: 0;
             visibility: hidden;
@@ -168,7 +168,680 @@
             margin-top: 2px;
         }
 
-        /* Modal styles */
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Student Bar */
+        .student-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: #fff;
+            border: 1px solid #eaeaea;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.125rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Compose Grid */
+        .compose-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .upload-section,
+        .writer-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background: #f8faff;
+        }
+
+        .upload-icon .material-icons {
+            font-size: 48px;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .upload-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-subtitle {
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0 auto;
+            transition: background 0.2s;
+        }
+
+        .upload-btn:hover {
+            background: #2563eb;
+        }
+
+        .uploaded-file {
+            display: none;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .file-icon .material-icons {
+            font-size: 32px;
+            color: #3b82f6;
+        }
+
+        .file-details h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .file-details p {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .remove-file {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            margin-left: auto;
+            transition: background 0.2s;
+        }
+
+        .remove-file:hover {
+            background: #dc2626;
+        }
+
+        /* Writer Section */
+        .writer-title {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .writer-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            background: #f9fafb;
+        }
+
+        .btn {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #f3f4f6;
+        }
+
+        .btn-muted {
+            color: #6b7280;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .meta {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: #6b7280;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .writer-box {
+            min-height: 200px;
+            padding: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0 0 8px 8px;
+            border-top: none;
+            background: white;
+            outline: none;
+        }
+
+        .writer-box[contenteditable]:empty:before {
+            content: attr(placeholder);
+            color: #9ca3af;
+        }
+
+        .writer-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* University Section */
+        .university-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 3rem;
+        }
+
+        .university-search {
+            position: relative;
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-input,
+        .filter-select {
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            flex: 1;
+        }
+
+        .apply-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .apply-btn:hover {
+            background: #2563eb;
+        }
+
+        .page-btn {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .page-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .filter-meta {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .suggest-popover {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 80px;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .empty-state .actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .university-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .university-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .university-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+
+        .university-card.selected {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        .pager {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .page-size {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* Selected Section */
+        .selected-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 3rem;
+        }
+
+        .selected-count {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .selected-list {
+            margin-bottom: 2rem;
+        }
+
+        .send-section {
+            text-align: center;
+        }
+
+        .send-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 auto;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background: #059669;
+        }
+
+        .send-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+
+        /* Progress Section */
+        .progress-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 3rem;
+            display: none;
+        }
+
+        .progress-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #3b82f6;
+            border-radius: 4px;
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+
+        .delivery-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Success Section */
+        .success-section {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            text-align: center;
+            margin-bottom: 3rem;
+            display: none;
+        }
+
+        .success-icon .material-icons {
+            font-size: 64px;
+            color: #10b981;
+            margin-bottom: 1rem;
+        }
+
+        .success-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .success-subtitle {
+            font-size: 1.125rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+
+        .new-upload-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 auto;
+        }
+
+        .new-upload-btn:hover {
+            background: #2563eb;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1f2937;
+            color: #d1d5db;
+            padding: 3rem 0 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .footer-logo .material-icons {
+            color: #3b82f6;
+            font-size: 28px;
+        }
+
+        .footer-description {
+            color: #9ca3af;
+            line-height: 1.6;
+            max-width: 300px;
+        }
+
+        .footer-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .footer-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #3b82f6;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #374151;
+            padding-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-copyright {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #374151;
+            border-radius: 50%;
+            color: #9ca3af;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .social-link:hover {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* Modal Styles */
         .modal {
             position: fixed;
             inset: 0;
@@ -182,11 +855,11 @@
 
         .modal-content {
             background: white;
-            width: 100%;
-            max-width: 560px;
             border-radius: 16px;
             box-shadow: 0 12px 48px rgba(0, 0, 0, 0.22);
             overflow: hidden;
+            width: 100%;
+            max-width: 720px;
         }
 
         .modal-header {
@@ -206,308 +879,174 @@
             border: none;
             font-size: 1.2rem;
             cursor: pointer;
-            color: #6b7280;
         }
 
-        .modal-form {
-            padding: 1rem 1.4rem;
-            display: grid;
-            gap: 0.75rem;
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .container {
+                padding: 1.5rem 1rem;
+            }
+            
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 2rem;
+            }
         }
 
-        .modal-form label {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #374151;
-        }
-
-        .form-input {
-            margin-top: 0.35rem;
-            padding: 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            transition: border-color 0.2s;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: flex-end;
-            padding-top: 0.5rem;
-        }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
-
-        .btn-secondary {
-            background: #f3f4f6;
-            color: #374151;
-            border-color: #d1d5db;
-        }
-
-        .btn-secondary:hover {
-            background: #e5e7eb;
-        }
-
-        .btn-primary {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2563eb;
-        }
-
-        /* Main content placeholder */
-        .main-content {
-            padding: 2rem 1rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* Mobile responsive */
         @media (max-width: 768px) {
             .header-content {
-                padding: 0.5rem;
+                padding: 0.75rem 1rem;
                 gap: 0.5rem;
-            }
-
-            .logo {
-                font-size: 1.1rem;
-            }
-
-            .theme-btn {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.8rem;
             }
 
             .theme-btn span:last-child {
                 display: none;
             }
 
-            .user-dropdown {
-                width: 260px;
-                right: -10px;
+            .hero-title {
+                font-size: 2rem;
             }
 
-            .modal-content {
-                margin: 0.5rem;
-                max-width: none;
+            .compose-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+            }
+
+            .filter-bar > * {
+                width: 100%;
+            }
+
+            .university-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pagination {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .student-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                text-align: center;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
             }
         }
 
         @media (max-width: 480px) {
-            .header-content {
-                padding: 0.5rem;
-            }
-
             .logo span:last-child {
                 display: none;
             }
 
-            .theme-btn {
-                padding: 0.4rem 0.6rem;
+            .hero-title {
+                font-size: 1.75rem;
             }
 
-            .user-dropdown {
-                width: 240px;
-                right: -20px;
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .upload-section,
+            .writer-section,
+            .university-section,
+            .selected-section {
+                padding: 1.5rem;
+            }
+
+            .modal-content {
+                margin: 0.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-content">
-            <!-- Left: Logo -->
-            <a href="/" class="logo" target="_self" aria-label="Go to homepage">
-                <span class="material-icons">star</span>
-                <span>stellarrec</span>
-            </a>
+<div class="header">
+  <div class="header-content">
+    <!-- Left: Logo -->
+    <a href="/" class="logo" target="_self" aria-label="Go to homepage">
+      <span class="material-icons">star</span>
+      <span>stellarrec</span>
+    </a>
 
-            <!-- Center: Theme button -->
-            <div class="center-controls">
-                <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false">
-                    <span class="material-icons" aria-hidden="true">dark_mode</span>
-                    <span>Light / Dark</span>
-                </button>
-            </div>
-
-            <!-- Right: Avatar dropdown -->
-            <div class="user-info">
-                <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
-                    <span class="material-icons">person</span>
-                </button>
-
-                <!-- Dropdown menu -->
-                <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
-                    <div class="dropdown-header">Quick actions</div>
-
-                    <!-- How it works -->
-                    <div class="dropdown-item" role="menuitem" tabindex="0">
-                        <span class="material-icons">help_outline</span>
-                        <div class="view-label">
-                            <a href="/portal-signin" class="view-name" style="text-decoration:none; color:inherit;" target="_self">
-                                How it works
-                            </a>
-                            <div class="view-description">Sign-in portal</div>
-                        </div>
-                    </div>
-
-                    <!-- Contact Admin -->
-                    <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
-                        <span class="material-icons">support_agent</span>
-                        <div class="view-label">
-                            <div class="view-name">Contact admin</div>
-                            <div class="view-description">Send a message</div>
-                        </div>
-                    </div>
-
-                    <!-- Mock API toggle -->
-                    <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
-                        <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
-                            <span class="material-icons">build</span>
-                            <div class="view-label">
-                                <div class="view-name">Use mock API</div>
-                                <div class="view-description">Toggle mock vs real backend</div>
-                            </div>
-                            <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Center: Theme button -->
+    <div class="center-controls">
+      <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false">
+        <span class="material-icons" aria-hidden="true">dark_mode</span>
+        <span>Light / Dark</span>
+      </button>
     </div>
 
-    <!-- Contact Admin Modal -->
-    <div id="contactModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="contactTitle">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div id="contactTitle" class="modal-title">Contact Admin</div>
-                <button aria-label="Close" id="contactCloseBtn" class="modal-close">✕</button>
-            </div>
-            <form id="contactForm" class="modal-form">
-                <label>
-                    First name
-                    <input type="text" id="contactFirst" required class="form-input">
-                </label>
-                <label>
-                    Email address
-                    <input type="email" id="contactEmail" required class="form-input">
-                </label>
-                <label>
-                    Query
-                    <textarea id="contactQuery" rows="5" required class="form-input"></textarea>
-                </label>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" id="contactCancelBtn">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="contactSendBtn">Send</button>
-                </div>
-            </form>
-        </div>
+  <!-- Right: Avatar dropdown (theme item removed) -->
+<div class="user-info">
+  <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
+    <span class="material-icons">person</span>
+  </button>
+
+  <!-- Dropdown menu -->
+  <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
+    <div class="dropdown-header">Quick actions</div>
+
+    <!-- How it works -->
+    <div class="dropdown-item" role="menuitem" tabindex="0">
+      <span class="material-icons">help_outline</span>
+      <div class="view-label">
+        <a href="/portal-signin" class="view-name" style="text-decoration:none; color:inherit;" target="_self">
+          How it works
+        </a>
+        <div class="view-description">Sign-in portal</div>
+      </div>
     </div>
 
-    <!-- Main content placeholder -->
-    <div class="main-content">
-        <h1>Your main content goes here...</h1>
-        <p>This is a demonstration of the fixed header. Scroll down to see the sticky behavior.</p>
-        
-        <!-- Add some content to demonstrate scrolling -->
-        <div style="height: 200vh; background: linear-gradient(to bottom, #f3f4f6, #e5e7eb); margin-top: 2rem; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-            <p style="font-size: 1.5rem; color: #6b7280;">Scroll to test sticky header</p>
-        </div>
+    <!-- Contact Admin -->
+    <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
+      <span class="material-icons">support_agent</span>
+      <div class="view-label">
+        <div class="view-name">Contact admin</div>
+        <div class="view-description">Send a message</div>
+      </div>
     </div>
 
-    <script>
-        // Toggle user dropdown
-        const userAvatarBtn = document.getElementById('userAvatarBtn');
-        const userDropdown = document.getElementById('userDropdown');
+    <!-- Mock API toggle -->
+    <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
+      <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
+        <span class="material-icons">build</span>
+        <div class="view-label">
+          <div class="view-name">Use mock API</div>
+          <div class="view-description">Toggle mock vs real backend</div>
+        </div>
+        <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
+      </label>
+    </div>
+  </div>
+</div>
 
-        userAvatarBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isOpen = userDropdown.getAttribute('aria-hidden') === 'false';
-            userDropdown.setAttribute('aria-hidden', !isOpen);
-            userAvatarBtn.setAttribute('aria-expanded', !isOpen);
-        });
 
-        // Close dropdown when clicking outside
-        document.addEventListener('click', () => {
-            userDropdown.setAttribute('aria-hidden', 'true');
-            userAvatarBtn.setAttribute('aria-expanded', 'false');
-        });
-
-        // Prevent dropdown from closing when clicking inside
-        userDropdown.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-
-        // Contact modal functionality
-        const contactAdminItem = document.getElementById('contactAdminItem');
-        const contactModal = document.getElementById('contactModal');
-        const contactCloseBtn = document.getElementById('contactCloseBtn');
-        const contactCancelBtn = document.getElementById('contactCancelBtn');
-        const contactForm = document.getElementById('contactForm');
-
-        function openContactModal() {
-            contactModal.style.display = 'flex';
-            userDropdown.setAttribute('aria-hidden', 'true');
-            userAvatarBtn.setAttribute('aria-expanded', 'false');
-        }
-
-        function closeContactModal() {
-            contactModal.style.display = 'none';
-            contactForm.reset();
-        }
-
-        contactAdminItem.addEventListener('click', openContactModal);
-        contactCloseBtn.addEventListener('click', closeContactModal);
-        contactCancelBtn.addEventListener('click', closeContactModal);
-
-        // Close modal when clicking outside
-        contactModal.addEventListener('click', (e) => {
-            if (e.target === contactModal) {
-                closeContactModal();
-            }
-        });
-
-        // Handle form submission
-        contactForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            // Add your form submission logic here
-            alert('Form submitted! (This is a demo)');
-            closeContactModal();
-        });
-
-        // Theme toggle functionality
-        const themeBtn = document.getElementById('headerThemeBtn');
-        themeBtn.addEventListener('click', () => {
-            // Add your theme toggle logic here
-            const isDark = themeBtn.getAttribute('aria-pressed') === 'true';
-            themeBtn.setAttribute('aria-pressed', !isDark);
-            // Toggle theme logic would go here
-        });
-
-        // Mock toggle functionality
-        const mockToggle = document.getElementById('mockToggle');
-        mockToggle.addEventListener('change', () => {
-            // Add your mock API toggle logic here
-            console.log('Mock API toggled:', mockToggle.checked);
-        });
-    </script>
-</body>
-</html>
+  <!-- Contact Admin Modal -->
+  <div id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactTitle"
+       style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
+    <div style="background:#fff; width:min(560px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
+      <div style="padding:1.2rem 1.4rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+        <div id="contactTitle" style="font-weight:700;">Contact Admin</div>
+        <button aria-label="Close" id="contactCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+      </div>
+      <form id="contactForm" style="padding:1rem 1.4rem; display:grid; gap:.75rem;">
+        <label>First name
+          <input type="text" id="contactFirst" required class="filter-select" style="margin-top:.35rem;">
+        </label>
+        <label>Email address
+          <input type="email" id="contactEmail" required class="filter-select" style="margin-top:.35rem;">
 
