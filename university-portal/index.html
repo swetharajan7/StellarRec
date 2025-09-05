@@ -13,7 +13,7 @@
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Roboto',sans-serif;color:#0f172a;background:#fff}
 
-    /* ==== Shared header (matches index/dashboard) ==== */
+    /* ==== Shared header ==== */
     .header{
       background:linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
       color:#fff; padding:1.5rem 2rem;
@@ -26,69 +26,59 @@
     }
     .logo{
       display:inline-flex; align-items:center; gap:.5rem;
-      font-size:1.8rem; font-weight:700; color:#fff; text-decoration:none; transition:.3s;
+      font-size:1.8rem; font-weight:700; color:#fff; text-decoration:none;
       justify-self:start;
     }
     .logo:hover{opacity:.85; transform:translateY(-1px)}
 
-    .portal-name{justify-self:center; text-align:center; line-height:1.2}
-    .portal-name .u-name{font-size:1.25rem; font-weight:700; letter-spacing:.2px}
+    /* Center portal name */
+    .portal-name{justify-self:center; text-align:center}
+    .portal-name a{
+      text-decoration:none; color:#fff;
+      font-size:1.25rem; font-weight:700;
+    }
+    .portal-name a:hover{opacity:.9; text-decoration:underline}
     .portal-name .u-sub{font-size:.9rem; opacity:.9}
 
-    .header-nav{display:flex; gap:1.5rem; align-items:center; justify-self:end}
-    .header-nav .nav-link{color:#fff; text-decoration:none; font-weight:500; transition:opacity .2s, transform .2s}
-    .header-nav .nav-link:hover{opacity:.85; transform:translateY(-1px)}
+    /* Right nav */
+    .header-nav{display:flex; gap:1.5rem; justify-self:end}
+    .header-nav .nav-link{
+      color:#fff; text-decoration:none; font-weight:500;
+    }
+    .header-nav .nav-link:hover{opacity:.85}
 
-    /* ==== Hero (Application Portal & Sign in) ==== */
+    /* ==== Hero ==== */
     .portal-hero{
       background:linear-gradient(135deg,#eef5ff 0%,#f3e9ff 100%);
       padding:clamp(3rem,6vw,6rem) 2rem; text-align:center;
     }
-    .portal-hero .title{color:#1976d2; font-size:clamp(2rem,4vw,3rem); font-weight:800; letter-spacing:.2px}
+    .portal-hero .title{color:#1976d2; font-size:clamp(2rem,4vw,3rem); font-weight:800}
     .portal-hero .tagline{color:#475569; margin-top:.5rem; font-size:1.05rem}
     .portal-hero .cta{
-      margin-top:1.25rem; display:inline-block; padding:.9rem 1.4rem; border-radius:12px; font-weight:700; text-decoration:none;
-      background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; box-shadow:0 8px 24px rgba(124,77,255,.25); transition:transform .15s ease;
+      margin-top:1.25rem; display:inline-block; padding:.9rem 1.4rem;
+      border-radius:12px; font-weight:700; text-decoration:none;
+      background:linear-gradient(135deg,#1976d2,#7c4dff);
+      color:#fff; box-shadow:0 8px 24px rgba(124,77,255,.25);
     }
-    .portal-hero .cta:hover{transform:translateY(-2px)}
+    .portal-hero .cta:hover{filter:brightness(.95)}
 
-    /* ==== Main content sections (cards/stats) ==== */
-    .container{max-width:1200px; margin:0 auto; padding:2rem}
-    .stats{display:flex; justify-content:space-around; gap:1rem; margin:2rem 0}
-    .stat{text-align:center; color:#0f172a}
-    .stat-number{font-size:2.2rem; font-weight:700; display:block; color:#1976d2}
-    .stat-label{font-size:.95rem; color:#475569}
+    /* ==== Video placeholder ==== */
+    .video-section{
+      max-width:900px; margin:2rem auto; padding:0 1rem; text-align:center;
+    }
+    .video-placeholder{
+      width:100%; height:500px; background:#e2e8f0;
+      display:flex; align-items:center; justify-content:center;
+      color:#475569; font-size:1.2rem; border-radius:12px;
+    }
 
-    .dashboard-grid{
-      display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-      gap:1.25rem; margin-top:1rem;
-    }
-    .card{
-      background:#fff; border-radius:16px; padding:1.5rem;
-      box-shadow:0 8px 24px rgba(0,0,0,.08); transition:transform .2s, box-shadow .2s;
-    }
-    .card:hover{transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,.12)}
-    .card-header{display:flex; align-items:center; gap:1rem; margin-bottom:1rem}
-    .card-icon{background:#1976d2; color:#fff; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center}
-    .card h3{font-size:1.15rem; color:#0f172a}
-    .card p{color:#475569; line-height:1.55; margin:.5rem 0 1rem}
-    .btn{
-      background:#1976d2; color:#fff; border:none; padding:.7rem 1.1rem; border-radius:10px; font-weight:600; text-decoration:none; display:inline-block;
-      transition:background .2s
-    }
-    .btn:hover{background:#1565c0}
-
-    /* ==== Shared footer ==== */
+    /* ==== Footer ==== */
     .site-footer{
       background:linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
       color:#fff; padding:1.5rem 0; text-align:center;
     }
     .site-footer .container{max-width:1200px; margin:0 auto; padding:0 20px}
     .site-footer p{margin:0; font-size:.95rem}
-
-    @media (max-width:768px){
-      .stats{flex-direction:column}
-    }
   </style>
 </head>
 <body>
@@ -96,20 +86,20 @@
   <!-- Header -->
   <div class="header">
     <div class="header-content">
-      <!-- Left: stellarrec (home) -->
-      <a href="/" class="logo" target="_self" aria-label="Go to homepage">
-        <span class="material-icons" aria-hidden="true">star</span>
+      <!-- Left: stellarrec -->
+      <a href="/" class="logo" target="_self">
+        <span class="material-icons">star</span>
         stellarrec
       </a>
 
-      <!-- Center: Example University -->
-      <div class="portal-name" aria-label="Portal name">
-        <div class="u-name">Example University</div>
+      <!-- Center: Example University (clickable) -->
+      <div class="portal-name">
+        <a href="/university-portal/" target="_self">Example University</a>
         <div class="u-sub">Application Portal</div>
       </div>
 
       <!-- Right: Dashboard -->
-      <nav class="header-nav" aria-label="Top navigation">
+      <nav class="header-nav">
         <a href="/dashboard" class="nav-link" target="_self">Dashboard</a>
       </nav>
     </div>
@@ -122,66 +112,12 @@
     <a class="cta" href="#sign-in" target="_self">Sign in</a>
   </section>
 
-  <!-- Main content -->
-  <main class="container">
-    <!-- Optional stats -->
-    <section class="stats" aria-label="Portal statistics">
-      <div class="stat">
-        <span class="stat-number" id="applications-count">0</span>
-        <span class="stat-label">Applications Received</span>
-      </div>
-      <div class="stat">
-        <span class="stat-number" id="recommendations-count">0</span>
-        <span class="stat-label">Recommendations Pending</span>
-      </div>
-      <div class="stat">
-        <span class="stat-number" id="completed-count">0</span>
-        <span class="stat-label">Reviews Completed</span>
-      </div>
-    </section>
-
-    <!-- Cards -->
-    <section class="dashboard-grid" aria-label="Quick links">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon"><span class="material-icons">inbox</span></div>
-          <h3>New Applications</h3>
-        </div>
-        <p>Review and process incoming applications. View student profiles, essays, and academic records.</p>
-        <a href="applications.html" class="btn">View Applications</a>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon"><span class="material-icons">rate_review</span></div>
-          <h3>Recommendation Requests</h3>
-        </div>
-        <p>Manage recommendation letters. Track status, send reminders, and review submitted letters.</p>
-        <a href="recommendations.html" class="btn">Manage Requests</a>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon"><span class="material-icons">analytics</span></div>
-          <h3>Analytics Dashboard</h3>
-        </div>
-        <p>View application trends, completion rates, and admission statistics.</p>
-        <a href="analytics.html" class="btn">View Analytics</a>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon"><span class="material-icons">integration_instructions</span></div>
-          <h3>StellarRec Integration</h3>
-        </div>
-        <p>Configure and monitor the integration with StellarRec. Test API connections and webhooks.</p>
-        <a href="integration.html" class="btn">Manage Integration</a>
-      </div>
-    </section>
-
-    <!-- (Optional) Sign-in anchor target -->
-    <div id="sign-in" style="margin-top:3rem"></div>
-  </main>
+  <!-- Video Placeholder -->
+  <section class="video-section">
+    <div class="video-placeholder">
+      🎥 Video walkthrough of backend (placeholder)
+    </div>
+  </section>
 
   <!-- Footer -->
   <footer class="site-footer">
@@ -191,24 +127,5 @@
     </div>
   </footer>
 
-  <script>
-    // Simple demo stats (optional)
-    function updateStats(){
-      const rand=(min,max)=>Math.floor(Math.random()*(max-min+1))+min;
-      document.getElementById('applications-count').textContent = rand(25,75);
-      document.getElementById('recommendations-count').textContent = rand(10,30);
-      document.getElementById('completed-count').textContent = rand(15,45);
-    }
-    updateStats(); setInterval(updateStats,30000);
-
-    // Smooth scroll for #sign-in
-    document.querySelectorAll('a[href^="#"]').forEach(a=>{
-      a.addEventListener('click',e=>{
-        const id=a.getAttribute('href'); if(id.length>1){
-          const el=document.querySelector(id); if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth'}); }
-        }
-      });
-    });
-  </script>
 </body>
 </html>
