@@ -1,723 +1,241 @@
-<!DOCTYPE html>
+       <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Portal Sign In - StellarRec</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Header Navigation */
-        .nav-header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 15px 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #2c5282;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .logo:hover {
-            color: #3182ce;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-        }
-
-        .nav-link {
-            color: #4a5568;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s ease;
-            padding: 8px 16px;
-            border-radius: 6px;
-        }
-
-        .nav-link:hover {
-            color: #2c5282;
-            background: rgba(49, 130, 206, 0.1);
-        }
-
-        /* Main Content Container */
-        .main-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-        }
-
-        .container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-            padding: 0;
-            max-width: 900px;
-            width: 100%;
-            min-height: 600px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #2c5282 0%, #3182ce 100%);
-            color: white;
-            padding: 40px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/><circle cx="20" cy="20" r="1" fill="white" opacity="0.1"/><circle cx="80" cy="30" r="1.5" fill="white" opacity="0.1"/><circle cx="30" cy="80" r="1" fill="white" opacity="0.1"/><circle cx="70" cy="70" r="2" fill="white" opacity="0.1"/></svg>') repeat;
-            animation: float 20s linear infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            100% { transform: translate(-50px, -50px) rotate(360deg); }
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            position: relative;
-            z-index: 1;
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.5;
-        }
-
-        .content {
-            padding: 50px 40px;
-            display: flex;
-            gap: 40px;
-            align-items: stretch;
-        }
-
-        .student-portal {
-            flex: 2;
-            padding: 0;
-        }
-
-        .student-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            font-size: 24px;
-        }
-
-        .student-icon {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-            color: white;
-        }
-
-        .recommender-icon {
-            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-            color: white;
-        }
-
-        .student-header h2 {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 5px;
-        }
-
-        .student-header p {
-            color: #718096;
-            margin: 0;
-        }
-
-        .recommender-info {
-            flex: 1;
-            margin-left: 40px;
-        }
-
-        .info-card {
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 30px;
-            height: fit-content;
-            position: sticky;
-            top: 20px;
-        }
-
-        .info-card h3 {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .info-card > p {
-            color: #718096;
-            text-align: center;
-            margin-bottom: 25px;
-            line-height: 1.5;
-        }
-
-        .info-steps {
-            margin: 25px 0;
-        }
-
-        .step {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 20px;
-        }
-
-        .step-number {
-            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-            color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 14px;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-
-        .step p {
-            margin: 0;
-            color: #4a5568;
-            line-height: 1.4;
-            font-size: 14px;
-        }
-
-        .demo-link {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 25px;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .demo-link p {
-            color: #718096;
-            font-size: 14px;
-            margin-bottom: 15px;
-        }
-
-        .auth-section {
-            display: none;
-        }
-
-        .auth-section.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .auth-section h3 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #2d3748;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-            background: white;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #3182ce;
-            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
-        }
-
-        .auth-tabs {
-            display: flex;
-            margin-bottom: 25px;
-            background: #f1f5f9;
-            border-radius: 8px;
-            padding: 4px;
-        }
-
-        .auth-tab {
-            flex: 1;
-            padding: 10px 20px;
-            text-align: center;
-            background: none;
-            border: none;
-            border-radius: 6px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: #64748b;
-        }
-
-        .auth-tab.active {
-            background: white;
-            color: #3182ce;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 14px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 25px rgba(49, 130, 206, 0.3);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.3);
-        }
-
-        .forgot-link {
-            color: #3182ce;
-            text-decoration: none;
-            font-size: 14px;
-            text-align: center;
-            display: block;
-            margin-top: 15px;
-        }
-
-        .forgot-link:hover {
-            text-decoration: underline;
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .status-success {
-            background: #f0fff4;
-            color: #22543d;
-            border: 1px solid #9ae6b4;
-        }
-
-        .status-error {
-            background: #fed7d7;
-            color: #742a2a;
-            border: 1px solid #feb2b2;
-        }
-
-        /* Footer */
-        .footer {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 30px 0;
-            margin-top: auto;
-            border-top: 1px solid rgba(226, 232, 240, 0.5);
-        }
-
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 40px;
-            text-align: center;
-        }
-
-        .footer p {
-            color: #718096;
-            margin-bottom: 15px;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-bottom: 15px;
-        }
-
-        .footer-link {
-            color: #4a5568;
-            text-decoration: none;
-            font-size: 14px;
-            transition: color 0.3s ease;
-        }
-
-        .footer-link:hover {
-            color: #2c5282;
-        }
-
-        .demo-notice {
-            background: linear-gradient(135deg, #fef5e7 0%, #fffaf0 100%);
-            border: 2px solid #f6e05e;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .demo-notice strong {
-            color: #744210;
-        }
-
-        .demo-notice p {
-            color: #975a16;
-            margin: 5px 0 0 0;
-            font-size: 14px;
-        }
-
-        @media (max-width: 768px) {
-            .nav-container {
-                padding: 0 20px;
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .nav-links {
-                gap: 20px;
-            }
-
-            .content {
-                flex-direction: column;
-                gap: 30px;
-                padding: 30px 20px;
-            }
-            
-            .header {
-                padding: 30px 20px;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .recommender-info {
-                margin-left: 0;
-                margin-top: 30px;
-            }
-            
-            .info-card {
-                position: static;
-            }
-
-            .footer-container {
-                padding: 0 20px;
-            }
-
-            .footer-links {
-                flex-direction: column;
-                gap: 15px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Example University – Sign in | StellarRec</title>
+
+  <!-- Fonts & icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    :root{
+      --brand-1:#1976d2; --brand-2:#7c4dff; --text:#0f172a; --muted:#475569;
+      --panel:#ffffff; --border:#e5e7eb; --shadow:0 12px 32px rgba(0,0,0,.10);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Roboto',sans-serif; color:var(--text); background:#f7f9fc;}
+
+    /* Header (matches index/dashboard) */
+    .header{background:linear-gradient(135deg,var(--brand-1) 0%,var(--brand-2) 100%); color:#fff; padding:1.5rem 2rem; box-shadow:0 4px 20px rgba(25,118,210,.30);}
+    .header-content{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:1rem}
+    .logo{display:inline-flex;align-items:center;gap:.5rem;font-size:1.8rem;font-weight:700;color:#fff;text-decoration:none;justify-self:start;transition:.2s}
+    .logo:hover{opacity:.9;transform:translateY(-1px)}
+    .portal-name{justify-self:center;text-align:center;line-height:1.2}
+    .portal-name .u-name{font-size:1.15rem;font-weight:800;letter-spacing:.2px}
+    .portal-name .u-sub{font-size:.92rem;opacity:.95}
+    .header-nav{justify-self:end;display:flex;gap:1.25rem;align-items:center}
+    .header-nav .nav-link{color:#fff;text-decoration:none;font-weight:600;transition:opacity .15s, transform .15s}
+    .header-nav .nav-link:hover{opacity:.9;transform:translateY(-1px)}
+
+    /* Hero */
+    .portal-hero{background:linear-gradient(135deg,#eef5ff 0%, #f3e9ff 100%); padding:clamp(2.5rem,5vw,4rem) 1.5rem; text-align:center}
+    .portal-hero .title{color:var(--brand-1); font-size:clamp(2rem,4vw,3rem); font-weight:800; letter-spacing:.2px}
+    .portal-hero .tagline{color:var(--muted); margin-top:.5rem; font-size:1.05rem}
+
+    /* Sign-in section */
+    .container{max-width:1100px;margin:0 auto;padding:2rem 1.25rem}
+    .signin-wrap{display:grid;grid-template-columns:1.15fr .85fr; gap:2rem; align-items:start}
+    @media (max-width: 980px){ .signin-wrap{grid-template-columns:1fr} }
+
+    .card{background:var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow)}
+    .card-body{padding:1.5rem 1.5rem}
+    .card-title{font-size:1.45rem;font-weight:800;margin-bottom:.35rem}
+    .card-sub{color:var(--muted); font-size:.98rem; margin-bottom:1.2rem}
+
+    .form-row{display:grid; gap:.45rem; margin-bottom:1rem}
+    .label{font-weight:600; font-size:.95rem}
+    .input{width:100%; padding:.85rem 1rem; border:1px solid var(--border); border-radius:12px; font-size:1rem; outline:none}
+    .input:focus{border-color:#c7d7ff; box-shadow:0 0 0 3px rgba(122,162,255,.25)}
+    .pw-wrap{position:relative}
+    .pw-toggle{position:absolute; right:.5rem; top:50%; transform:translateY(-50%); border:none; background:transparent; cursor:pointer; padding:.25rem; border-radius:8px}
+    .pw-toggle .material-icons{font-size:20px; color:#64748b}
+    .row-flex{display:flex;align-items:center;justify-content:space-between; gap:1rem}
+    .checkbox{display:inline-flex;align-items:center;gap:.5rem; font-size:.95rem}
+    .link{color:var(--brand-1); text-decoration:none; font-weight:600}
+    .link:hover{text-decoration:underline}
+
+    .btn{display:inline-flex; align-items:center; justify-content:center; gap:.5rem; padding:.9rem 1.2rem; border:none; border-radius:12px; font-weight:700; cursor:pointer}
+    .btn-primary{background:linear-gradient(135deg,var(--brand-1),var(--brand-2)); color:#fff}
+    .btn-primary:hover{filter:brightness(0.98); transform:translateY(-1px)}
+    .btn-ghost{background:#fff; color:var(--text); border:1px solid var(--border)}
+    .btn-ghost:hover{background:#f8fafc}
+
+    .error{display:none; color:#b00020; font-size:.9rem}
+    .hint{color:#64748b; font-size:.9rem}
+
+    /* Right column (video placeholder) */
+    .media-card .card-body{padding:0}
+    .media-box{aspect-ratio:16/9; width:100%; background:
+      radial-gradient(120% 140% at 0% 0%, #e6efff 0%, transparent 70%),
+      radial-gradient(120% 160% at 100% 0%, #efe6ff 0%, transparent 70%),
+      #0b1220;
+      border-radius:16px 16px 0 0; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden}
+    .media-box .play{width:86px;height:86px;border-radius:50%;background:#ffffff26;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+    .media-box .play .material-icons{font-size:48px;color:#fff}
+    .media-caption{padding:1rem 1.25rem; color:#334155; border-top:1px solid var(--border); border-radius:0 0 16px 16px}
+
+    /* Footer (matches index/dashboard) */
+    .site-footer{background:linear-gradient(135deg,var(--brand-1) 0%,var(--brand-2) 100%); color:#fff; text-align:center; padding:1.5rem 0; margin-top:2.5rem}
+    .site-footer .container{max-width:1200px;margin:0 auto;padding:0 20px}
+    .site-footer p{margin:0;font-size:.95rem}
+  </style>
 </head>
 <body>
-    <!-- Navigation Header -->
-    <div class="nav-header">
-        <div class="nav-container">
-            <a href="index.html" class="logo">StellarRec</a>
-            <div class="nav-links">
-                <a href="dashboard.html" class="nav-link">Dashboard</a>
-                <a href="university-portal.html" class="nav-link">Demo Portal</a>
-            </div>
-        </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <!-- Left: stellarrec (home) -->
+      <a class="logo" href="/" target="_self" aria-label="Go to homepage">
+        <span class="material-icons" aria-hidden="true">star</span>
+        stellarrec
+      </a>
+
+      <!-- Center: Example University (clickable, stays on this page) -->
+      <a href="/portal-signin.html#top" class="portal-name" target="_self" aria-label="Example University portal home" style="text-decoration:none; color:inherit;">
+        <div class="u-name">Example University</div>
+        <div class="u-sub">Application Portal</div>
+      </a>
+
+      <!-- Right: Dashboard -->
+      <nav class="header-nav" aria-label="Top navigation">
+        <a href="/dashboard" class="nav-link" target="_self">Dashboard</a>
+      </nav>
     </div>
+  </div>
 
-    <!-- Main Content -->
-    <div class="main-container">
-        <div class="container">
-            <div class="header">
-                <h1>🎓 Example University</h1>
-                <p>Student Portal - Streamlined recommendation management powered by StellarRec integration</p>
+  <!-- Hero -->
+  <section id="top" class="portal-hero">
+    <h1 class="title">Application Portal</h1>
+    <p class="tagline">Sign in to submit and track your application materials.</p>
+  </section>
+
+  <!-- Sign-in + Video -->
+  <main class="container" id="sign-in">
+    <div class="signin-wrap">
+      <!-- Sign-in card -->
+      <section class="card" aria-labelledby="signinTitle">
+        <div class="card-body">
+          <h2 id="signinTitle" class="card-title">Sign in</h2>
+          <p class="card-sub">Use your email and password to access the portal.</p>
+
+          <form id="signinForm" novalidate>
+            <div class="form-row">
+              <label class="label" for="email">Email address</label>
+              <input class="input" type="email" id="email" name="email" placeholder="you@example.com" autocomplete="username" required/>
+              <div id="emailErr" class="error">Please enter a valid email.</div>
             </div>
 
-            <div class="demo-notice">
-                <strong>🚀 Live Demo Portal</strong>
-                <p>Experience real-time recommendation tracking and management</p>
+            <div class="form-row">
+              <label class="label" for="password">Password</label>
+              <div class="pw-wrap">
+                <input class="input" type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" minlength="8" required/>
+                <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">
+                  <span class="material-icons" aria-hidden="true">visibility</span>
+                </button>
+              </div>
+              <div class="hint">Minimum 8 characters.</div>
+              <div id="pwErr" class="error">Password must be at least 8 characters.</div>
             </div>
 
-            <div class="content">
-                <!-- Student Portal Section -->
-                <div class="student-portal">
-                    <div class="student-header">
-                        <div class="icon student-icon">👨‍🎓</div>
-                        <div>
-                            <h2>Student Portal</h2>
-                            <p>Request recommendations, track status, and manage your application process</p>
-                        </div>
-                    </div>
-                    
-                    <div class="auth-tabs">
-                        <button class="auth-tab active" onclick="switchTab('signin')">Returning Students</button>
-                        <button class="auth-tab" onclick="switchTab('register')">First-Time Users</button>
-                    </div>
-
-                    <div class="auth-section active" id="signin">
-                        <h3>Sign in to your account</h3>
-                        <form onsubmit="handleSignin(event)">
-                            <div class="form-group">
-                                <label for="email">Email Address</label>
-                                <input type="email" id="email" placeholder="your.email@university.edu" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="password">Password</label>
-                                <input type="password" id="password" placeholder="Enter your password" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Sign In to Portal</button>
-                            <a href="#" class="forgot-link">Forgot your password?</a>
-                        </form>
-                    </div>
-
-                    <div class="auth-section" id="register">
-                        <h3>Create your student account</h3>
-                        <form onsubmit="handleRegister(event)">
-                            <div class="form-group">
-                                <label for="name">Full Name</label>
-                                <input type="text" id="name" placeholder="Enter your full name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="email-reg">Email Address</label>
-                                <input type="email" id="email-reg" placeholder="your.email@university.edu" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="student-id">Student ID</label>
-                                <input type="text" id="student-id" placeholder="Enter your student ID" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="password-reg">Create Password</label>
-                                <input type="password" id="password-reg" placeholder="Create a secure password" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="program">Program/Major</label>
-                                <input type="text" id="program" placeholder="e.g., Computer Science, MBA" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Create Account</button>
-                        </form>
-                    </div>
-
-                    <div id="status"></div>
-                </div>
-
-                <!-- Recommender Info Panel -->
-                <div class="recommender-info">
-                    <div class="info-card">
-                        <div class="icon recommender-icon">👨‍🏫</div>
-                        <h3>For Recommenders</h3>
-                        <p>Received a recommendation request? You don't need to create an account!</p>
-                        
-                        <div class="info-steps">
-                            <div class="step">
-                                <span class="step-number">1</span>
-                                <p>Check your email for the recommendation link</p>
-                            </div>
-                            <div class="step">
-                                <span class="step-number">2</span>
-                                <p>Click the secure link provided by the student</p>
-                            </div>
-                            <div class="step">
-                                <span class="step-number">3</span>
-                                <p>Complete the recommendation form directly</p>
-                            </div>
-                        </div>
-                        
-                        <div class="demo-link">
-                            <p><strong>Demo Link for Testing:</strong></p>
-                            <a href="#" onclick="showRecommenderDemo()" class="btn btn-secondary">View Sample Recommendation Request</a>
-                        </div>
-                    </div>
-                </div>
+            <div class="row-flex" style="margin:.35rem 0 1rem;">
+              <label class="checkbox">
+                <input type="checkbox" id="remember" name="remember"/> Remember me
+              </label>
+              <a class="link" href="#" aria-disabled="true">Forgot password?</a>
             </div>
+
+            <button class="btn btn-primary" type="submit" id="signinBtn">
+              <span class="material-icons" aria-hidden="true">login</span>
+              Sign in
+            </button>
+          </form>
+
+          <p class="hint" style="margin-top:1rem;">By continuing you agree to the University’s terms and privacy policy.</p>
         </div>
-    </div>
+      </section>
 
-    <!-- Footer -->
-    <div class="footer">
-        <div class="footer-container">
-            <p>Streamlined application management powered by StellarRec integration</p>
-            <div class="footer-links">
-                <a href="#" class="footer-link">Privacy Policy</a>
-                <a href="#" class="footer-link">Terms of Service</a>
-                <a href="#" class="footer-link">Support</a>
-                <a href="#" class="footer-link">Contact</a>
+      <!-- Video / walkthrough placeholder -->
+      <aside class="card media-card" aria-labelledby="videoTitle">
+        <div class="card-body">
+          <div class="media-box" role="img" aria-label="Video placeholder: How the backend works">
+            <div class="play" title="Demo video coming soon">
+              <span class="material-icons" aria-hidden="true">play_arrow</span>
             </div>
-            <p style="font-size: 14px; color: #a0aec0;">© 2024 StellarRec. All rights reserved.</p>
+          </div>
+          <div class="media-caption">
+            Backend walkthrough: how StellarRec routes recommendations to admissions. (Video placeholder)
+          </div>
         </div>
+      </aside>
     </div>
+  </main>
 
-    <script>
-        // Tab switching functions
-        function switchTab(tab) {
-            // Update tab buttons
-            document.querySelectorAll('.auth-tab').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Update sections
-            document.querySelectorAll('.auth-section').forEach(section => section.classList.remove('active'));
-            document.getElementById(tab).classList.add('active');
-            
-            // Clear status
-            document.getElementById('status').innerHTML = '';
-        }
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2025 <span style="color:#ffeb3b; font-weight:600;">StellarRec™</span>. All rights reserved. |
+        Making recommendations stellar since 2025 🚀</p>
+    </div>
+  </footer>
 
-        // Form handlers
-        function handleSignin(event) {
-            event.preventDefault();
-            const email = document.getElementById('email').value;
-            
-            // Simulate authentication
-            showStatus('success', `Welcome back! Loading your dashboard...`);
-            
-            setTimeout(() => {
-                showStatus('success', 
-                    `✅ Signed in successfully as ${email}<br>
-                     📊 You have 3 pending recommendations<br>
-                     🔔 2 letters submitted, 1 awaiting response<br>
-                     🚀 <a href="university-portal.html" style="color: #2c5282; text-decoration: underline;">Go to Student Dashboard</a>`);
-            }, 1500);
-        }
+  <script>
+    // Show/hide password
+    (function(){
+      const pw = document.getElementById('password');
+      const btn = document.getElementById('pwToggle');
+      if(!pw || !btn) return;
 
-        function handleRegister(event) {
-            event.preventDefault();
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email-reg').value;
-            
-            showStatus('success', 
-                `🎉 Account created successfully for ${name}!<br>
-                 📧 Verification email sent to ${email}<br>
-                 🚀 You can now start requesting recommendations<br>
-                 📋 <a href="university-portal.html" style="color: #2c5282; text-decoration: underline;">Complete your profile setup</a>`);
-        }
+      btn.addEventListener('click', ()=>{
+        const show = pw.getAttribute('type') === 'password';
+        pw.setAttribute('type', show ? 'text' : 'password');
+        btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        btn.querySelector('.material-icons').textContent = show ? 'visibility_off' : 'visibility';
+        pw.focus();
+      });
+    })();
 
-        function showRecommenderDemo() {
-            // Simulate what a recommender would see
-            const demoWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
-            demoWindow.document.write(`
-                <html>
-                <head><title>Recommendation Request - Example University</title></head>
-                <body style="font-family: Arial, sans-serif; padding: 40px; background: #f7fafc;">
-                    <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-                        <h2 style="color: #2c5282; text-align: center;">📝 Recommendation Request</h2>
-                        <div style="background: #e6fffa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                            <p><strong>Student:</strong> John Smith</p>
-                            <p><strong>Program:</strong> Master's in Computer Science</p>
-                            <p><strong>Deadline:</strong> December 15, 2024</p>
-                            <p><strong>Personal Message:</strong> "Thank you for agreeing to write my recommendation letter for graduate school. I really appreciate your support!"</p>
-                        </div>
-                        <p style="text-align: center;">
-                            <a href="dashboard.html" style="background: #3182ce; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Complete Recommendation Form</a>
-                        </p>
-                        <p style="font-size: 14px; color: #666; text-align: center; margin-top: 20px;">
-                            This link is secure and expires after submission. No account required.
-                        </p>
-                    </div>
-                </body>
-                </html>
-            `);
-        }
+    // Simple client-side validation (demo)
+    (function(){
+      const form = document.getElementById('signinForm');
+      const email = document.getElementById('email');
+      const pw = document.getElementById('password');
+      const emailErr = document.getElementById('emailErr');
+      const pwErr = document.getElementById('pwErr');
 
-        function showStatus(type, message) {
-            const statusElement = document.getElementById('status');
-            statusElement.innerHTML = `<div class="status-indicator status-${type}">${message}</div>`;
-        }
-    </script>
+      function show(el){ el.style.display='block'; }
+      function hide(el){ el.style.display='none'; }
+
+      function validEmail(v){
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').toLowerCase());
+      }
+
+      form.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        let ok = true;
+
+        if(!validEmail(email.value)){
+          show(emailErr); ok = false;
+          email.focus();
+        } else { hide(emailErr); }
+
+        if(!pw.value || pw.value.length < 8){
+          show(pwErr); ok = false;
+          if(ok) pw.focus();
+        } else { hide(pwErr); }
+
+        if(!ok) return;
+
+        // TODO: replace with your real auth flow / fetch
+        alert('Signed in (demo). Wire this to your backend / SSO.');
+      });
+
+      email.addEventListener('input', ()=> hide(emailErr));
+      pw.addEventListener('input', ()=> hide(pwErr));
+    })();
+  </script>
 </body>
 </html>
+            
