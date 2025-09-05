@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Example University - Recommendation Portal</title>
+    <title>Student Portal Sign In - StellarRec</title>
     <style>
         * {
             margin: 0;
@@ -16,9 +16,67 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Navigation */
+        .nav-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c5282;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .logo:hover {
+            color: #3182ce;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-link {
+            color: #4a5568;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+
+        .nav-link:hover {
+            color: #2c5282;
+            background: rgba(49, 130, 206, 0.1);
+        }
+
+        /* Main Content Container */
+        .main-container {
+            flex: 1;
+            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 40px 20px;
         }
 
         .container {
@@ -83,31 +141,17 @@
             align-items: stretch;
         }
 
-        .user-type {
-            flex: 1;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 30px;
-            transition: all 0.3s ease;
-            position: relative;
-            background: #f8fafc;
+        .student-portal {
+            flex: 2;
+            padding: 0;
         }
 
-        .user-type:hover {
-            border-color: #3182ce;
-            box-shadow: 0 8px 25px rgba(49, 130, 206, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .user-type.active {
-            border-color: #3182ce;
-            background: linear-gradient(135deg, #ebf8ff 0%, #f0f9ff 100%);
-        }
-
-        .user-type-header {
+        .student-header {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
         }
 
         .icon {
@@ -131,17 +175,91 @@
             color: white;
         }
 
-        .user-type h3 {
-            font-size: 1.3rem;
+        .student-header h2 {
+            font-size: 1.8rem;
             font-weight: 600;
             color: #2d3748;
             margin-bottom: 5px;
         }
 
-        .user-type p {
+        .student-header p {
             color: #718096;
-            line-height: 1.5;
+            margin: 0;
+        }
+
+        .recommender-info {
+            flex: 1;
+            margin-left: 40px;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .info-card h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .info-card > p {
+            color: #718096;
+            text-align: center;
             margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .info-steps {
+            margin: 25px 0;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .step p {
+            margin: 0;
+            color: #4a5568;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+
+        .demo-link {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .demo-link p {
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 15px;
         }
 
         .auth-section {
@@ -151,6 +269,14 @@
         .auth-section.active {
             display: block;
             animation: fadeIn 0.5s ease;
+        }
+
+        .auth-section h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 25px;
+            text-align: center;
         }
 
         @keyframes fadeIn {
@@ -245,29 +371,6 @@
             box-shadow: 0 8px 25px rgba(72, 187, 120, 0.3);
         }
 
-        .divider {
-            text-align: center;
-            margin: 20px 0;
-            position: relative;
-            color: #718096;
-        }
-
-        .divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: #e2e8f0;
-        }
-
-        .divider span {
-            background: white;
-            padding: 0 15px;
-            font-size: 14px;
-        }
-
         .forgot-link {
             color: #3182ce;
             text-decoration: none;
@@ -304,20 +407,43 @@
             border: 1px solid #feb2b2;
         }
 
-        @media (max-width: 768px) {
-            .content {
-                flex-direction: column;
-                gap: 30px;
-                padding: 30px 20px;
-            }
-            
-            .header {
-                padding: 30px 20px;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
+        /* Footer */
+        .footer {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px 0;
+            margin-top: auto;
+            border-top: 1px solid rgba(226, 232, 240, 0.5);
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+            text-align: center;
+        }
+
+        .footer p {
+            color: #718096;
+            margin-bottom: 15px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 15px;
+        }
+
+        .footer-link {
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: #2c5282;
         }
 
         .demo-notice {
@@ -338,227 +464,260 @@
             margin: 5px 0 0 0;
             font-size: 14px;
         }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-links {
+                gap: 20px;
+            }
+
+            .content {
+                flex-direction: column;
+                gap: 30px;
+                padding: 30px 20px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .recommender-info {
+                margin-left: 0;
+                margin-top: 30px;
+            }
+            
+            .info-card {
+                position: static;
+            }
+
+            .footer-container {
+                padding: 0 20px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🎓 Example University</h1>
-            <p>Recommendation Portal - Streamlined letter management powered by StellarRec integration</p>
+    <!-- Navigation Header -->
+    <div class="nav-header">
+        <div class="nav-container">
+            <a href="index.html" class="logo">StellarRec</a>
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="university-portal.html" class="nav-link">Demo Portal</a>
+            </div>
         </div>
+    </div>
 
-        <div class="demo-notice">
-            <strong>🚀 Live Demo Portal</strong>
-            <p>Experience real-time recommendation tracking and management</p>
-        </div>
-
-        <div class="content">
-            <!-- Student Section -->
-            <div class="user-type" id="student-section">
-                <div class="user-type-header">
-                    <div class="icon student-icon">👨‍🎓</div>
-                    <div>
-                        <h3>Students</h3>
-                    </div>
-                </div>
-                <p>Track your recommendation letters, view submission status, send reminders to recommenders, and monitor your application progress.</p>
-                
-                <div class="auth-tabs">
-                    <button class="auth-tab active" onclick="switchStudentTab('signin')">Sign In</button>
-                    <button class="auth-tab" onclick="switchStudentTab('register')">Create Account</button>
-                </div>
-
-                <div class="auth-section active" id="student-signin">
-                    <form onsubmit="handleStudentSignin(event)">
-                        <div class="form-group">
-                            <label for="student-email">Email Address</label>
-                            <input type="email" id="student-email" placeholder="your.email@university.edu" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="student-password">Password</label>
-                            <input type="password" id="student-password" placeholder="Enter your password" required>
-                        </div>
-                        <button type="submit" class="btn btn-secondary">Sign In</button>
-                        <a href="#" class="forgot-link">Forgot your password?</a>
-                    </form>
-                </div>
-
-                <div class="auth-section" id="student-register">
-                    <form onsubmit="handleStudentRegister(event)">
-                        <div class="form-group">
-                            <label for="student-name">Full Name</label>
-                            <input type="text" id="student-name" placeholder="John Doe" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="student-email-reg">Email Address</label>
-                            <input type="email" id="student-email-reg" placeholder="your.email@university.edu" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="student-id">Student ID</label>
-                            <input type="text" id="student-id" placeholder="Enter your student ID" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="student-password-reg">Password</label>
-                            <input type="password" id="student-password-reg" placeholder="Create a password" required>
-                        </div>
-                        <button type="submit" class="btn btn-secondary">Create Account</button>
-                    </form>
-                </div>
-
-                <div id="student-status"></div>
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="container">
+            <div class="header">
+                <h1>🎓 Example University</h1>
+                <p>Student Portal - Streamlined recommendation management powered by StellarRec integration</p>
             </div>
 
-            <!-- Recommender Section -->
-            <div class="user-type" id="recommender-section">
-                <div class="user-type-header">
-                    <div class="icon recommender-icon">👨‍🏫</div>
-                    <div>
-                        <h3>Recommenders</h3>
+            <div class="demo-notice">
+                <strong>🚀 Live Demo Portal</strong>
+                <p>Experience real-time recommendation tracking and management</p>
+            </div>
+
+            <div class="content">
+                <!-- Student Portal Section -->
+                <div class="student-portal">
+                    <div class="student-header">
+                        <div class="icon student-icon">👨‍🎓</div>
+                        <div>
+                            <h2>Student Portal</h2>
+                            <p>Request recommendations, track status, and manage your application process</p>
+                        </div>
+                    </div>
+                    
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" onclick="switchTab('signin')">Returning Students</button>
+                        <button class="auth-tab" onclick="switchTab('register')">First-Time Users</button>
+                    </div>
+
+                    <div class="auth-section active" id="signin">
+                        <h3>Sign in to your account</h3>
+                        <form onsubmit="handleSignin(event)">
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" placeholder="your.email@university.edu" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input type="password" id="password" placeholder="Enter your password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Sign In to Portal</button>
+                            <a href="#" class="forgot-link">Forgot your password?</a>
+                        </form>
+                    </div>
+
+                    <div class="auth-section" id="register">
+                        <h3>Create your student account</h3>
+                        <form onsubmit="handleRegister(event)">
+                            <div class="form-group">
+                                <label for="name">Full Name</label>
+                                <input type="text" id="name" placeholder="Enter your full name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email-reg">Email Address</label>
+                                <input type="email" id="email-reg" placeholder="your.email@university.edu" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="student-id">Student ID</label>
+                                <input type="text" id="student-id" placeholder="Enter your student ID" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password-reg">Create Password</label>
+                                <input type="password" id="password-reg" placeholder="Create a secure password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="program">Program/Major</label>
+                                <input type="text" id="program" placeholder="e.g., Computer Science, MBA" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create Account</button>
+                        </form>
+                    </div>
+
+                    <div id="status"></div>
+                </div>
+
+                <!-- Recommender Info Panel -->
+                <div class="recommender-info">
+                    <div class="info-card">
+                        <div class="icon recommender-icon">👨‍🏫</div>
+                        <h3>For Recommenders</h3>
+                        <p>Received a recommendation request? You don't need to create an account!</p>
+                        
+                        <div class="info-steps">
+                            <div class="step">
+                                <span class="step-number">1</span>
+                                <p>Check your email for the recommendation link</p>
+                            </div>
+                            <div class="step">
+                                <span class="step-number">2</span>
+                                <p>Click the secure link provided by the student</p>
+                            </div>
+                            <div class="step">
+                                <span class="step-number">3</span>
+                                <p>Complete the recommendation form directly</p>
+                            </div>
+                        </div>
+                        
+                        <div class="demo-link">
+                            <p><strong>Demo Link for Testing:</strong></p>
+                            <a href="#" onclick="showRecommenderDemo()" class="btn btn-secondary">View Sample Recommendation Request</a>
+                        </div>
                     </div>
                 </div>
-                <p>Access your recommendation requests, submit letters securely, view deadlines, and communicate with students about their applications.</p>
-                
-                <div class="auth-tabs">
-                    <button class="auth-tab active" onclick="switchRecommenderTab('signin')">Sign In</button>
-                    <button class="auth-tab" onclick="switchRecommenderTab('register')">Create Account</button>
-                </div>
-
-                <div class="auth-section active" id="recommender-signin">
-                    <form onsubmit="handleRecommenderSignin(event)">
-                        <div class="form-group">
-                            <label for="recommender-email">Email Address</label>
-                            <input type="email" id="recommender-email" placeholder="professor@university.edu" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="recommender-password">Password</label>
-                            <input type="password" id="recommender-password" placeholder="Enter your password" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Sign In</button>
-                        <a href="#" class="forgot-link">Forgot your password?</a>
-                    </form>
-                </div>
-
-                <div class="auth-section" id="recommender-register">
-                    <form onsubmit="handleRecommenderRegister(event)">
-                        <div class="form-group">
-                            <label for="recommender-name">Full Name</label>
-                            <input type="text" id="recommender-name" placeholder="Dr. Jane Smith" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="recommender-email-reg">Email Address</label>
-                            <input type="email" id="recommender-email-reg" placeholder="professor@university.edu" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="recommender-title">Title/Position</label>
-                            <input type="text" id="recommender-title" placeholder="Professor, Department of..." required>
-                        </div>
-                        <div class="form-group">
-                            <label for="recommender-institution">Institution</label>
-                            <input type="text" id="recommender-institution" placeholder="University/Organization" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="recommender-password-reg">Password</label>
-                            <input type="password" id="recommender-password-reg" placeholder="Create a password" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Create Account</button>
-                    </form>
-                </div>
-
-                <div id="recommender-status"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-container">
+            <p>Streamlined application management powered by StellarRec integration</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Privacy Policy</a>
+                <a href="#" class="footer-link">Terms of Service</a>
+                <a href="#" class="footer-link">Support</a>
+                <a href="#" class="footer-link">Contact</a>
+            </div>
+            <p style="font-size: 14px; color: #a0aec0;">© 2024 StellarRec. All rights reserved.</p>
         </div>
     </div>
 
     <script>
         // Tab switching functions
-        function switchStudentTab(tab) {
+        function switchTab(tab) {
             // Update tab buttons
-            document.querySelectorAll('#student-section .auth-tab').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.auth-tab').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             
             // Update sections
-            document.querySelectorAll('#student-section .auth-section').forEach(section => section.classList.remove('active'));
-            document.getElementById(`student-${tab}`).classList.add('active');
+            document.querySelectorAll('.auth-section').forEach(section => section.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
             
             // Clear status
-            document.getElementById('student-status').innerHTML = '';
-        }
-
-        function switchRecommenderTab(tab) {
-            // Update tab buttons
-            document.querySelectorAll('#recommender-section .auth-tab').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Update sections
-            document.querySelectorAll('#recommender-section .auth-section').forEach(section => section.classList.remove('active'));
-            document.getElementById(`recommender-${tab}`).classList.add('active');
-            
-            // Clear status
-            document.getElementById('recommender-status').innerHTML = '';
+            document.getElementById('status').innerHTML = '';
         }
 
         // Form handlers
-        function handleStudentSignin(event) {
+        function handleSignin(event) {
             event.preventDefault();
-            const email = document.getElementById('student-email').value;
-            const password = document.getElementById('student-password').value;
+            const email = document.getElementById('email').value;
             
             // Simulate authentication
-            showStatus('student-status', 'success', `Welcome back! Loading your dashboard...`);
+            showStatus('success', `Welcome back! Loading your dashboard...`);
             
             setTimeout(() => {
-                showStatus('student-status', 'success', 
+                showStatus('success', 
                     `✅ Signed in successfully as ${email}<br>
                      📊 You have 3 pending recommendations<br>
-                     🔔 2 letters submitted, 1 awaiting response`);
+                     🔔 2 letters submitted, 1 awaiting response<br>
+                     🚀 <a href="university-portal.html" style="color: #2c5282; text-decoration: underline;">Go to Student Dashboard</a>`);
             }, 1500);
         }
 
-        function handleStudentRegister(event) {
+        function handleRegister(event) {
             event.preventDefault();
-            const name = document.getElementById('student-name').value;
-            const email = document.getElementById('student-email-reg').value;
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email-reg').value;
             
-            showStatus('student-status', 'success', 
+            showStatus('success', 
                 `🎉 Account created successfully for ${name}!<br>
                  📧 Verification email sent to ${email}<br>
-                 🚀 You can now start requesting recommendations`);
+                 🚀 You can now start requesting recommendations<br>
+                 📋 <a href="university-portal.html" style="color: #2c5282; text-decoration: underline;">Complete your profile setup</a>`);
         }
 
-        function handleRecommenderSignin(event) {
-            event.preventDefault();
-            const email = document.getElementById('recommender-email').value;
-            
-            showStatus('recommender-status', 'success', `Welcome back! Loading your requests...`);
-            
-            setTimeout(() => {
-                showStatus('recommender-status', 'success', 
-                    `✅ Signed in successfully as ${email}<br>
-                     📝 You have 5 pending recommendation requests<br>
-                     ⏰ 2 deadlines approaching this week`);
-            }, 1500);
+        function showRecommenderDemo() {
+            // Simulate what a recommender would see
+            const demoWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
+            demoWindow.document.write(`
+                <html>
+                <head><title>Recommendation Request - Example University</title></head>
+                <body style="font-family: Arial, sans-serif; padding: 40px; background: #f7fafc;">
+                    <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                        <h2 style="color: #2c5282; text-align: center;">📝 Recommendation Request</h2>
+                        <div style="background: #e6fffa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            <p><strong>Student:</strong> John Smith</p>
+                            <p><strong>Program:</strong> Master's in Computer Science</p>
+                            <p><strong>Deadline:</strong> December 15, 2024</p>
+                            <p><strong>Personal Message:</strong> "Thank you for agreeing to write my recommendation letter for graduate school. I really appreciate your support!"</p>
+                        </div>
+                        <p style="text-align: center;">
+                            <a href="dashboard.html" style="background: #3182ce; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Complete Recommendation Form</a>
+                        </p>
+                        <p style="font-size: 14px; color: #666; text-align: center; margin-top: 20px;">
+                            This link is secure and expires after submission. No account required.
+                        </p>
+                    </div>
+                </body>
+                </html>
+            `);
         }
 
-        function handleRecommenderRegister(event) {
-            event.preventDefault();
-            const name = document.getElementById('recommender-name').value;
-            const email = document.getElementById('recommender-email-reg').value;
-            
-            showStatus('recommender-status', 'success', 
-                `🎉 Account created successfully for ${name}!<br>
-                 📧 Verification email sent to ${email}<br>
-                 📋 You're now ready to receive recommendation requests`);
-        }
-
-        function showStatus(elementId, type, message) {
-            const statusElement = document.getElementById(elementId);
+        function showStatus(type, message) {
+            const statusElement = document.getElementById('status');
             statusElement.innerHTML = `<div class="status-indicator status-${type}">${message}</div>`;
         }
-
-        // Add some interactive effects
-        document.addEventListener('DOMContentLoaded', function() {
-            // No need for user type switching since we only have students now
-        });
     </script>
 </body>
 </html>
