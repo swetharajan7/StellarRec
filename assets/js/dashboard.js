@@ -447,4 +447,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const h1 = document.querySelector('.hero-title');
   if (h1) h1.textContent = 'One upload. Unlimited reach.';
 });
+(function themeButtonInit(){
+  const KEY = 'sr_theme';
+  const root = document.documentElement;
+  const btn  = document.getElementById('headerThemeBtn');
+
+  const saved = localStorage.getItem(KEY) || 'light';
+  root.dataset.theme = (saved === 'dark') ? 'dark' : 'light';
+  if (btn) btn.setAttribute('aria-pressed', saved === 'dark' ? 'true' : 'false');
+
+  function toggleTheme(){
+    const current = root.dataset.theme === 'dark' ? 'dark' : 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    localStorage.setItem(KEY, next);
+    if (btn) btn.setAttribute('aria-pressed', next === 'dark' ? 'true' : 'false');
+    if (typeof window.toast === 'function') {
+      window.toast(`Theme: ${next}`, 'info', { ttl: 1200 });
+    }
+  }
+
+  if (btn) btn.addEventListener('click', toggleTheme);
+})();
+
 
