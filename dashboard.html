@@ -146,7 +146,6 @@
     .btn-success { background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; border:none; }
     .btn-danger  { background:linear-gradient(135deg,#e53935,#ef5350); color:#fff; border:none; }
     .btn-muted   { background:#fff; color:#333; }
-
     .filter-meta { font-size:.9rem; color:#666; margin:.25rem 0 .5rem; }
     .filter-bar { display:grid; grid-template-columns: repeat(8, minmax(140px, 1fr)); gap:.5rem; margin-bottom:.75rem; align-items:center; }
     .filter-select { width:100%; padding:.7rem .9rem; border:2px solid #e0e0e0; border-radius:12px; background:#fff; font-size:.95rem; }
@@ -268,7 +267,7 @@
     }
     .site-footer p { margin: 0; font-size: 0.95rem; }
 
-    /* center theme button in header */
+    /* theme button centered in header */
     .center-controls { display:flex; justify-content:center; align-items:center; flex:1 1 auto; }
     .header-content > .logo { flex:0 0 auto; }
     .header-content > .center-controls { flex:1 1 auto; }
@@ -283,23 +282,21 @@
     .theme-btn:hover { transform: translateY(-1px); background:#ffffff33; border-color:#ffffff88; }
     .theme-btn:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
     .theme-btn .material-icons { font-size:18px; }
-    /* Keep the autosuggest list tidy on narrow screens */
-.suggest-popover { max-height: 280px; overflow-y: auto; }
-.suggest-item { padding:.55rem .8rem; cursor:pointer; display:flex; align-items:center; gap:.5rem; font-size:.95rem; }
-.suggest-item[aria-selected="true"], .suggest-item:hover { background:#f3f8ff; }
 
-/* subtle “fly” animation helper for items added to Selected list */
-@keyframes fly-to-selected {
-  0% { transform: translate(0,0) scale(1); opacity: 1; }
-  100% { transform: translate(var(--dx,0), var(--dy,0)) scale(0.85); opacity: 0; }
-}
-.fly-chip {
-  position: fixed; z-index: 99999; pointer-events: none;
-  background: linear-gradient(135deg,#1976d2,#7c4dff); color: #fff;
-  padding: .4rem .8rem; border-radius: 999px; font-size: .85rem; box-shadow: 0 8px 24px rgba(0,0,0,.18);
-  animation: fly-to-selected .45s ease forwards;
-}
-
+    /* Autosuggest styling + fly animation */
+    .suggest-popover { max-height: 280px; overflow-y: auto; }
+    .suggest-item { padding:.55rem .8rem; cursor:pointer; display:flex; align-items:center; gap:.5rem; font-size:.95rem; }
+    .suggest-item[aria-selected="true"], .suggest-item:hover { background:#f3f8ff; }
+    @keyframes fly-to-selected {
+      0% { transform: translate(0,0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--dx,0), var(--dy,0)) scale(0.85); opacity: 0; }
+    }
+    .fly-chip {
+      position: fixed; z-index: 99999; pointer-events: none;
+      background: linear-gradient(135deg,#1976d2,#7c4dff); color: #fff;
+      padding: .4rem .8rem; border-radius: 999px; font-size: .85rem; box-shadow: 0 8px 24px rgba(0,0,0,.18);
+      animation: fly-to-selected .45s ease forwards;
+    }
   </style>
 </head>
 <body>
@@ -326,24 +323,23 @@
           <span class="material-icons">person</span>
         </button>
 
-        <!-- Dropdown menu (kept inside .user-info) -->
+        <!-- Dropdown menu -->
         <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
           <div class="dropdown-header">Quick actions</div>
 
           <!-- How it works -->
-<div class="dropdown-item" role="menuitem" tabindex="0">
-  <span class="material-icons">help_outline</span>
-  <div class="view-label">
-    <a href="https://stellarrec.netlify.app/portal-signin"
-       class="view-name"
-       style="text-decoration:none; color:inherit;"
-       target="_self">
-      How it works
-    </a>
-    <div class="view-description">Sign-in portal</div>
-  </div>
-</div>
-
+          <div class="dropdown-item" role="menuitem" tabindex="0">
+            <span class="material-icons">help_outline</span>
+            <div class="view-label">
+              <a href="https://stellarrec.netlify.app/portal-signin"
+                 class="view-name"
+                 style="text-decoration:none; color:inherit;"
+                 target="_self">
+                How it works
+              </a>
+              <div class="view-description">Sign-in portal</div>
+            </div>
+          </div>
 
           <!-- Contact Admin -->
           <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
@@ -480,449 +476,76 @@
     <div class="university-section">
       <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
 
-      <!-- Search + Apply -->
       <!-- Search + Apply (inline) + Bulk import INSIDE the white box -->
-<div class="university-search" style="position:relative; display:flex; gap:.5rem; align-items:center; margin-bottom:.5rem;">
-  <input
-    type="text"
-    class="search-input filter-select"
-    placeholder="Search universities..."
-    id="universitySearch"
-    autocomplete="off"
-    aria-autocomplete="list"
-    aria-expanded="false"
-    aria-owns="searchSuggest"
-  />
-  <button class="apply-btn" id="searchApplyBtn" title="Apply search (Enter)" type="button">Apply</button>
+      <div class="university-search" style="position:relative; display:flex; gap:.5rem; align-items:center; margin-bottom:.5rem;">
+        <input
+          type="text"
+          class="search-input filter-select"
+          placeholder="Search universities..."
+          id="universitySearch"
+          autocomplete="off"
+          aria-autocomplete="list"
+          aria-expanded="false"
+          aria-owns="searchSuggest"
+        />
+        <button class="apply-btn" id="searchApplyBtn" title="Apply search (Enter)" type="button">Apply</button>
 
-  <!-- Bulk import moved here (inside the same white panel) -->
-  <button class="page-btn" id="bulkImportBtn" title="Bulk import by names" type="button">Bulk import</button>
+        <!-- Bulk import moved here (inside the same white panel) -->
+        <button class="page-btn" id="bulkImportBtn" title="Bulk import by names" type="button">Bulk import</button>
 
-  <!-- Suggestions popover -->
-  <div id="searchSuggest" class="suggest-popover" style="display:none;"></div>
-</div>
-      /* ======== AUTOSUGGEST + FILTERS + PAGINATION + ANIMATION ======== */
-(function(){
-  // Data expectations:
-  // - window.universities: Array<{ unitid, name, state, type, level }>
-  // - Selected sets: window.studentUnitIds, window.addedByRecommender, window.removedByRecommender
-  // - UI helpers: refreshList(), updateSelectedList(), updateSendButton() (if present)
-
-  // ---- Utilities ----
-  const norm = s => (s||'').toString().trim().toLowerCase();
-
-  function renderResultMeta(filtered, total){
-    const meta = document.getElementById('resultMeta');
-    if (meta) meta.textContent = `Showing ${filtered} of ${total}`;
-  }
-
-  // ---- Core “view model” ----
-  const state = {
-    q: '',             // search query
-    byState: '',       // state filter
-    byType: '',        // type filter
-    byLevel: '',       // level filter
-    sort: 'name_asc',  // sort key
-    page: 1,
-    pageSize: 40,
-    filteredIds: [],   // unitids after filter/sort
-  };
-
-  // ---- Read controls ----
-  const $ = id => document.getElementById(id);
-  const el = {
-    input: $('universitySearch'),
-    apply: $('searchApplyBtn'),
-    suggest: $('searchSuggest'),
-    state: $('stateFilter'),
-    type: $('typeFilter'),
-    level: $('levelFilter'),
-    sort: $('sortBy'),
-    reset: $('resetBtn'),
-    applyFilters: $('filterApplyBtn'),
-    select: $('universitySelect'),
-    grid: $('universityGrid'),
-    empty: $('emptyState'),
-    prev: $('prevPage'),
-    next: $('nextPage'),
-    pageInfo: $('pageInfo'),
-    pageSize: $('pageSize'),
-    selectedList: $('selectedList'),
-  };
-
-  // Guard: if grid doesn’t exist, bail
-  if (!el.grid) return;
-
-  // ---- Filtering + sorting ----
-  function applyFiltersAndSort(){
-    if (!Array.isArray(window.universities)) return;
-
-    const q = norm(state.q);
-    let rows = window.universities.slice();
-
-    if (q) {
-      rows = rows.filter(u => norm(u.name).includes(q));
-    }
-    if (state.byState) rows = rows.filter(u => (u.state || '') === state.byState);
-    if (state.byType)  rows = rows.filter(u => (u.type  || '') === state.byType);
-    if (state.byLevel) rows = rows.filter(u => (u.level || '') === state.byLevel);
-
-    if (state.sort === 'name_asc') {
-      rows.sort((a,b)=> a.name.localeCompare(b.name));
-    } else if (state.sort === 'state_asc') {
-      rows.sort((a,b)=> (a.state||'').localeCompare(b.state||'') || a.name.localeCompare(b.name));
-    }
-
-    state.filteredIds = rows.map(u => u.unitid);
-    state.page = 1; // reset to first page after a new apply
-    renderResultMeta(state.filteredIds.length, window.universities.length);
-    renderPage();
-  }
-
-  // ---- Render one page of cards ----
-  function renderPage(){
-    const { page, pageSize, filteredIds } = state;
-    const start = (page - 1) * pageSize;
-    const end   = start + pageSize;
-    const ids = filteredIds.slice(start, end);
-
-    el.grid.innerHTML = '';
-
-    if (ids.length === 0) {
-      if (el.empty) el.empty.style.display = 'block';
-      el.grid.style.display = 'none';
-    } else {
-      if (el.empty) el.empty.style.display = 'none';
-      el.grid.style.display = 'grid';
-
-      ids.forEach(id => {
-        const u = window.universities.find(x => x.unitid === id);
-        if (!u) return;
-
-        const card = document.createElement('div');
-        card.className = 'university-card';
-        card.role = 'listitem';
-        card.innerHTML = `
-          <div class="university-header">
-            <div class="university-logo">${(u.name||'U').slice(0,1)}</div>
-            <div>
-              <div class="university-name">${u.name}</div>
-              <div class="university-location">${u.state || ''}</div>
-              ${u.level ? `<span class="university-pill">${u.level}</span>` : ''}
-            </div>
-          </div>
-          <div style="display:flex; gap:.5rem; align-items:center; margin-top:.5rem;">
-            <button type="button" class="apply-btn add-btn">Add</button>
-          </div>
-        `;
-        // Click “Add” -> select and animate
-        card.querySelector('.add-btn').addEventListener('click', () => {
-          selectUniversity(u);
-          animateToSelected(card, u.name);
-        });
-
-        el.grid.appendChild(card);
-      });
-    }
-
-    // Pagination labels + buttons
-    const totalPages = Math.max(1, Math.ceil(filteredIds.length / state.pageSize));
-    if (el.pageInfo) el.pageInfo.textContent = `Page ${Math.min(page,totalPages)} of ${totalPages}`;
-    if (el.prev) el.prev.disabled = (page <= 1);
-    if (el.next) el.next.disabled = (page >= totalPages);
-  }
-
-  // ---- Selecting (adds to Selected Universities section) ----
-  function selectUniversity(u){
-    window.studentUnitIds = window.studentUnitIds || new Set();
-    window.addedByRecommender = window.addedByRecommender || new Set();
-    window.removedByRecommender = window.removedByRecommender || new Set();
-
-    // If this was in student list and removed, undo the removal; else add
-    if (window.studentUnitIds.has(u.unitid)) {
-      window.removedByRecommender.delete(u.unitid);
-    } else {
-      window.addedByRecommender.add(u.unitid);
-    }
-
-    if (typeof window.updateSelectedList === 'function') window.updateSelectedList();
-    if (typeof window.updateSendButton === 'function') window.updateSendButton();
-  }
-
-  // ---- Animation: “fly” chip from card/search to Selected list ----
-  function animateToSelected(fromEl, label){
-    try {
-      const list = el.selectedList;
-      if (!fromEl || !list) return;
-
-      // where we start
-      const r1 = fromEl.getBoundingClientRect();
-      // where we end (center of selected list header)
-      const r2 = list.getBoundingClientRect();
-      const dx = (r2.left + r2.width * 0.15) - (r1.left + r1.width/2);
-      const dy = (r2.top  + 8) - (r1.top  + r1.height/2);
-
-      const chip = document.createElement('div');
-      chip.className = 'fly-chip';
-      chip.textContent = label || 'Added';
-      chip.style.left = `${r1.left + r1.width/2}px`;
-      chip.style.top  = `${r1.top  + r1.height/2}px`;
-      chip.style.setProperty('--dx', `${dx}px`);
-      chip.style.setProperty('--dy', `${dy}px`);
-      document.body.appendChild(chip);
-      setTimeout(()=> chip.remove(), 480);
-    } catch {}
-  }
-
-  // ---- AUTOSUGGEST ----
-  function buildSuggestions(query){
-    if (!Array.isArray(window.universities)) return [];
-    const q = norm(query);
-    if (!q) return [];
-    const max = 10;
-    const matches = [];
-    for (const u of window.universities) {
-      if (norm(u.name).includes(q)) {
-        matches.push(u);
-        if (matches.length >= max) break;
-      }
-    }
-    return matches;
-  }
-
-  function showSuggest(list){
-    if (!el.suggest) return;
-    if (!list.length) { el.suggest.style.display='none'; el.input.setAttribute('aria-expanded','false'); return; }
-    el.suggest.innerHTML = list.map((u,i)=>`
-      <div class="suggest-item" role="option" data-id="${u.unitid}" aria-selected="${i===0?'true':'false'}">
-        <span class="material-icons" aria-hidden="true">school</span>
-        <span>${u.name}</span>
-        <span class="suggest-muted">· ${u.state||''}</span>
+        <!-- Suggestions popover -->
+        <div id="searchSuggest" class="suggest-popover" style="display:none;"></div>
       </div>
-    `).join('');
-    el.suggest.style.display = 'block';
-    el.input.setAttribute('aria-expanded','true');
-  }
 
-  function hideSuggest(){
-    if (!el.suggest) return;
-    el.suggest.style.display='none';
-    el.input?.setAttribute('aria-expanded','false');
-  }
+      <!-- Browse-all dropdown -->
+      <select id="universitySelect" class="filter-select" title="Browse all universities" style="margin-bottom:.5rem;">
+        <option value="" selected disabled>Browse all universities (6000+)</option>
+      </select>
 
-  function setupAutosuggest(){
-    if (!el.input) return;
+      <!-- Filters -->
+      <div class="filter-meta" id="resultMeta" aria-live="polite">Showing 0 of 0</div>
 
-    let hoverIdx = -1;
-    let items = [];
+      <div class="filter-bar">
+        <select id="stateFilter" class="filter-select" aria-label="Filter by state">
+          <option value="">All states</option>
+          <option value="AL">Alabama</option><option value="AK">Alaska</option><option value="AZ">Arizona</option><option value="AR">Arkansas</option>
+          <option value="CA">California</option><option value="CO">Colorado</option><option value="CT">Connecticut</option><option value="DE">Delaware</option>
+          <option value="FL">Florida</option><option value="GA">Georgia</option><option value="HI">Hawaii</option><option value="ID">Idaho</option>
+          <option value="IL">Illinois</option><option value="IN">Indiana</option><option value="IA">Iowa</option><option value="KS">Kansas</option>
+          <option value="KY">Kentucky</option><option value="LA">Louisiana</option><option value="ME">Maine</option><option value="MD">Maryland</option>
+          <option value="MA">Massachusetts</option><option value="MI">Michigan</option><option value="MN">Minnesota</option><option value="MS">Mississippi</option>
+          <option value="MO">Missouri</option><option value="MT">Montana</option><option value="NE">Nebraska</option><option value="NV">Nevada</option>
+          <option value="NH">New Hampshire</option><option value="NJ">New Jersey</option><option value="NM">New Mexico</option><option value="NY">New York</option>
+          <option value="NC">North Carolina</option><option value="ND">North Dakota</option><option value="OH">Ohio</option><option value="OK">Oklahoma</option>
+          <option value="OR">Oregon</option><option value="PA">Pennsylvania</option><option value="RI">Rhode Island</option><option value="SC">South Carolina</option>
+          <option value="SD">South Dakota</option><option value="TN">Tennessee</option><option value="TX">Texas</option><option value="UT">Utah</option>
+          <option value="VT">Vermont</option><option value="VA">Virginia</option><option value="WA">Washington</option><option value="WV">West Virginia</option>
+          <option value="WI">Wisconsin</option><option value="WY">Wyoming</option>
+        </select>
 
-    function refresh(){
-      items = buildSuggestions(el.input.value);
-      showSuggest(items);
-      hoverIdx = items.length ? 0 : -1;
-      highlight();
-    }
+        <select id="typeFilter" class="filter-select" aria-label="Filter by institution type">
+          <option value="">All types</option>
+          <option value="Public">Public</option>
+          <option value="Private nonprofit">Private nonprofit</option>
+          <option value="Private for-profit">Private for-profit</option>
+        </select>
 
-    function highlight(){
-      if (!el.suggest) return;
-      [...el.suggest.querySelectorAll('.suggest-item')].forEach((n,i)=>{
-        n.setAttribute('aria-selected', i===hoverIdx ? 'true' : 'false');
-      });
-    }
+        <select id="levelFilter" class="filter-select" aria-label="Filter by level">
+          <option value="">All levels</option>
+          <option value="4-year">4-year</option>
+          <option value="2-year">2-year</option>
+          <option value="Less-than-2-year">Less-than-2-year</option>
+        </select>
 
-    el.input.addEventListener('input', refresh);
-    el.input.addEventListener('keydown', (e)=>{
-      if (!items.length) return;
-      if (e.key === 'ArrowDown') { e.preventDefault(); hoverIdx = Math.min(hoverIdx+1, items.length-1); highlight(); }
-      if (e.key === 'ArrowUp')   { e.preventDefault(); hoverIdx = Math.max(0, hoverIdx-1); highlight(); }
-      if (e.key === 'Enter')     { e.preventDefault(); choose(items[hoverIdx]); }
-      if (e.key === 'Escape')    { hideSuggest(); }
-    });
+        <select id="sortBy" class="filter-select" aria-label="Sort results">
+          <option value="name_asc">Sort: Name (A–Z)</option>
+          <option value="state_asc">Sort: State (A–Z)</option>
+        </select>
 
-    // Click pick
-    el.suggest?.addEventListener('click', (e)=>{
-      const it = e.target.closest('.suggest-item');
-      if (!it) return;
-      const id = it.getAttribute('data-id');
-      const u = window.universities?.find(x=> String(x.unitid) === String(id));
-      choose(u);
-    });
-
-    // Dismiss on outside click
-    document.addEventListener('click', (e)=>{
-      if (!e.target.closest('.university-search')) hideSuggest();
-    });
-
-    function choose(u){
-      if (!u) return;
-      // fill input and apply
-      el.input.value = u.name;
-      state.q = u.name;
-      hideSuggest();
-      applyFiltersAndSort();
-      // Find the just-rendered card and animate from it; fallback animate from the input
-      const card = [...el.grid.querySelectorAll('.university-card')]
-        .find(c => c.querySelector('.university-name')?.textContent === u.name);
-      if (card) {
-        selectUniversity(u);
-        animateToSelected(card, u.name);
-      } else {
-        // fallback animate from input box
-        animateToSelected(el.input, u.name);
-        selectUniversity(u);
-      }
-    }
-  }
-
-  // ---- Filter handlers (Apply / Reset) ----
-  function setupFilterHandlers(){
-    // Apply search (button and Enter)
-    el.apply?.addEventListener('click', ()=>{
-      state.q = el.input?.value || '';
-      applyFiltersAndSort();
-    });
-    el.input?.addEventListener('keydown', (e)=>{
-      if (e.key === 'Enter') { e.preventDefault(); el.apply?.click(); }
-    });
-
-    // Filter dropdowns
-    el.applyFilters?.addEventListener('click', ()=>{
-      state.byState = el.state?.value || '';
-      state.byType  = el.type?.value  || '';
-      state.byLevel = el.level?.value || '';
-      state.sort    = el.sort?.value  || 'name_asc';
-      applyFiltersAndSort();
-    });
-
-    // Reset
-    el.reset?.addEventListener('click', ()=>{
-      state.q = '';
-      state.byState = '';
-      state.byType  = '';
-      state.byLevel = '';
-      state.sort    = 'name_asc';
-      el.input.value = '';
-      if (el.state) el.state.value = '';
-      if (el.type)  el.type.value  = '';
-      if (el.level) el.level.value = '';
-      if (el.sort)  el.sort.value  = 'name_asc';
-      applyFiltersAndSort();
-    });
-
-    // Browse-all selector adds immediately
-    el.select?.addEventListener('change', ()=>{
-      const id = el.select.value;
-      const u = window.universities?.find(x => String(x.unitid) === String(id) || x.name === id);
-      if (u) {
-        selectUniversity(u);
-        // animate from the select (fallback)
-        animateToSelected(el.select, u.name);
-      }
-      // reset dropdown prompt
-      el.select.value = '';
-    });
-  }
-
-  // ---- Pagination ----
-  function setupPagination(){
-    el.prev?.addEventListener('click', ()=>{
-      if (state.page > 1) { state.page--; renderPage(); }
-    });
-    el.next?.addEventListener('click', ()=>{
-      const totalPages = Math.max(1, Math.ceil(state.filteredIds.length / state.pageSize));
-      if (state.page < totalPages) { state.page++; renderPage(); }
-    });
-    el.pageSize?.addEventListener('change', ()=>{
-      const v = parseInt(el.pageSize.value, 10);
-      state.pageSize = isNaN(v) ? 40 : v;
-      state.page = 1;
-      renderPage();
-    });
-  }
-
-  // ---- Boot ----
-  function bootOnceDataReady(){
-    if (!Array.isArray(window.universities) || !window.universities.length) {
-      // Try again shortly if dataset loads async
-      setTimeout(bootOnceDataReady, 200);
-      return;
-    }
-    setupAutosuggest();
-    setupFilterHandlers();
-    setupPagination();
-
-    // Seed the “Browse all” dropdown with a few thousand options is heavy;
-    // If you already populate this elsewhere, remove the next block.
-    if (el.select && el.select.options.length <= 1) {
-      const frag = document.createDocumentFragment();
-      window.universities.slice(0, 1000).forEach(u=>{
-        const opt = document.createElement('option');
-        opt.value = String(u.unitid);
-        opt.textContent = u.name;
-        frag.appendChild(opt);
-      });
-      el.select.appendChild(frag);
-    }
-
-    // First render
-    applyFiltersAndSort();
-  }
-
-  bootOnceDataReady();
-})();
-
-
-<!-- Browse-all dropdown (unchanged) -->
-<select id="universitySelect" class="filter-select" title="Browse all universities" style="margin-bottom:.5rem;">
-  <option value="" selected disabled>Browse all universities (6000+)</option>
-</select>
-
-<!-- Filters -->
-<div class="filter-meta" id="resultMeta" aria-live="polite">Showing 0 of 0</div>
-
-<div class="filter-bar">
-  <select id="stateFilter" class="filter-select" aria-label="Filter by state">
-    <option value="">All states</option>
-    <option value="AL">Alabama</option><option value="AK">Alaska</option><option value="AZ">Arizona</option><option value="AR">Arkansas</option>
-    <option value="CA">California</option><option value="CO">Colorado</option><option value="CT">Connecticut</option><option value="DE">Delaware</option>
-    <option value="FL">Florida</option><option value="GA">Georgia</option><option value="HI">Hawaii</option><option value="ID">Idaho</option>
-    <option value="IL">Illinois</option><option value="IN">Indiana</option><option value="IA">Iowa</option><option value="KS">Kansas</option>
-    <option value="KY">Kentucky</option><option value="LA">Louisiana</option><option value="ME">Maine</option><option value="MD">Maryland</option>
-    <option value="MA">Massachusetts</option><option value="MI">Michigan</option><option value="MN">Minnesota</option><option value="MS">Mississippi</option>
-    <option value="MO">Missouri</option><option value="MT">Montana</option><option value="NE">Nebraska</option><option value="NV">Nevada</option>
-    <option value="NH">New Hampshire</option><option value="NJ">New Jersey</option><option value="NM">New Mexico</option><option value="NY">New York</option>
-    <option value="NC">North Carolina</option><option value="ND">North Dakota</option><option value="OH">Ohio</option><option value="OK">Oklahoma</option>
-    <option value="OR">Oregon</option><option value="PA">Pennsylvania</option><option value="RI">Rhode Island</option><option value="SC">South Carolina</option>
-    <option value="SD">South Dakota</option><option value="TN">Tennessee</option><option value="TX">Texas</option><option value="UT">Utah</option>
-    <option value="VT">Vermont</option><option value="VA">Virginia</option><option value="WA">Washington</option><option value="WV">West Virginia</option>
-    <option value="WI">Wisconsin</option><option value="WY">Wyoming</option>
-  </select>
-
-  <select id="typeFilter" class="filter-select" aria-label="Filter by institution type">
-    <option value="">All types</option>
-    <option value="Public">Public</option>
-    <option value="Private nonprofit">Private nonprofit</option>
-    <option value="Private for-profit">Private for-profit</option>
-  </select>
-
-  <select id="levelFilter" class="filter-select" aria-label="Filter by level">
-    <option value="">All levels</option>
-    <option value="4-year">4-year</option>
-    <option value="2-year">2-year</option>
-    <option value="Less-than-2-year">Less-than-2-year</option>
-  </select>
-
-  <select id="sortBy" class="filter-select" aria-label="Sort results">
-    <option value="name_asc">Sort: Name (A–Z)</option>
-    <option value="state_asc">Sort: State (A–Z)</option>
-  </select>
-
-  <button class="apply-btn" id="filterApplyBtn" title="Apply filters and sort" type="button">Apply filters</button>
-  <button class="apply-btn" id="resetBtn" title="Reset search and filters" type="button">Reset</button>
-
-  <!-- REMOVED: Select page button entirely -->
-</div>
-
+        <button class="apply-btn" id="filterApplyBtn" title="Apply filters and sort" type="button">Apply filters</button>
+        <button class="apply-btn" id="resetBtn" title="Reset search and filters" type="button">Reset</button>
+        <!-- REMOVED: Select page button entirely -->
+      </div>
 
       <!-- Empty state -->
       <div id="emptyState" class="empty-state" aria-live="polite">
@@ -971,7 +594,6 @@
         </button>
       </div>
     </div>
-
     <!-- Progress Section -->
     <div class="progress-section" id="progressSection">
       <h2 class="progress-title">Sending Letters...</h2>
@@ -999,7 +621,7 @@
           <div id="confirmModalTitle" style="font-weight:700;">Confirm recipients</div>
           <button aria-label="Close" id="modalCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
         </div>
-        <div style="padding:1rem 1.4rem; max-height:60vh; overflow:auto; line-height:1.45;">
+        <div style="padding:1.2rem 1.4rem; max-height:60vh; overflow:auto; line-height:1.45;">
           <div id="modalSummary" style="margin-bottom:1rem;"></div>
           <div id="modalLists" style="display:grid; gap:1rem;">
             <div>
@@ -1086,34 +708,31 @@
         Making recommendations stellar since 2025 🚀</p>
     </div>
   </footer>
-
-  <!-- Sanity checks -->
+  <!-- Sanity checks + header interactions -->
   <script>
     (function(){
       if (typeof Fuse !== 'function') console.warn('[SR] Fuse.js not loaded');
       if (typeof localforage === 'undefined') console.warn('[SR] localForage not loaded');
       else localforage.config({ name: 'StellarRec' });
 
-      // Avatar dropdown toggling (ensure it works with corrected structure)
+      // Avatar dropdown toggling (works with corrected structure)
       const btn = document.getElementById('userAvatarBtn');
       const dd  = document.getElementById('userDropdown');
       function closeDD(e){
         if (!dd) return;
         if (e && (dd.contains(e.target) || btn.contains(e.target))) return;
         dd.classList.remove('show');
-        btn.setAttribute('aria-expanded','false');
+        btn?.setAttribute('aria-expanded','false');
         document.removeEventListener('click', closeDD);
       }
       btn?.addEventListener('click', (e)=>{
         e.stopPropagation();
-        dd.classList.toggle('show');
-        btn.setAttribute('aria-expanded', dd.classList.contains('show') ? 'true' : 'false');
-        if (dd.classList.contains('show')) {
-          setTimeout(()=>document.addEventListener('click', closeDD), 0);
-        }
+        dd?.classList.toggle('show');
+        btn.setAttribute('aria-expanded', dd?.classList.contains('show') ? 'true' : 'false');
+        if (dd?.classList.contains('show')) setTimeout(()=>document.addEventListener('click', closeDD), 0);
       });
 
-      // Center theme button hook (dashboard.js also handles theme; this is a safe fallback)
+      // Theme button fallback (dashboard.js will also manage this)
       document.getElementById('headerThemeBtn')?.addEventListener('click', ()=>{
         const root = document.documentElement;
         const isDark = root.getAttribute('data-theme') === 'dark';
@@ -1128,6 +747,339 @@
 
   <!-- Your app code -->
   <script src="/assets/js/dashboard.js" defer></script>
+
+  <!-- Search/Filters/Autosuggest/Pagination + “fly” animation -->
+  <script>
+  (function(){
+    // Utilities + state used here (we avoid clobbering global code)
+    const norm = s => (s||'').toString().trim().toLowerCase();
+
+    const el = {
+      input: document.getElementById('universitySearch'),
+      apply: document.getElementById('searchApplyBtn'),
+      suggest: document.getElementById('searchSuggest'),
+      state: document.getElementById('stateFilter'),
+      type: document.getElementById('typeFilter'),
+      level: document.getElementById('levelFilter'),
+      sort: document.getElementById('sortBy'),
+      reset: document.getElementById('resetBtn'),
+      applyFilters: document.getElementById('filterApplyBtn'),
+      select: document.getElementById('universitySelect'),
+      grid: document.getElementById('universityGrid'),
+      empty: document.getElementById('emptyState'),
+      prev: document.getElementById('prevPage'),
+      next: document.getElementById('nextPage'),
+      pageInfo: document.getElementById('pageInfo'),
+      pageSize: document.getElementById('pageSize'),
+      selectedList: document.getElementById('selectedList'),
+      resultMeta: document.getElementById('resultMeta'),
+    };
+
+    if (!el.grid) return;
+
+    const state = {
+      q: '',
+      byState: '',
+      byType: '',
+      byLevel: '',
+      sort: 'name_asc',
+      page: 1,
+      pageSize: 40,
+      filteredIds: [],
+    };
+
+    function renderResultMeta(filtered, total){
+      if (el.resultMeta) el.resultMeta.textContent = `Showing ${filtered} of ${total}`;
+    }
+
+    function applyFiltersAndSort(){
+      if (!Array.isArray(window.universities)) return;
+      const q = norm(state.q);
+      let rows = window.universities.slice();
+
+      if (q) rows = rows.filter(u => norm(u.name).includes(q));
+      if (state.byState) rows = rows.filter(u => (u.state || '') === state.byState);
+      if (state.byType)  rows = rows.filter(u => (u.type  || '') === state.byType);
+      if (state.byLevel) rows = rows.filter(u => (u.level || '') === state.byLevel);
+
+      if (state.sort === 'name_asc') {
+        rows.sort((a,b)=> a.name.localeCompare(b.name));
+      } else if (state.sort === 'state_asc') {
+        rows.sort((a,b)=> (a.state||'').localeCompare(b.state||'') || a.name.localeCompare(b.name));
+      }
+
+      state.filteredIds = rows.map(u => u.unitid);
+      state.page = 1;
+      renderResultMeta(state.filteredIds.length, window.universities.length);
+      renderPage();
+    }
+
+    function renderPage(){
+      const { page, pageSize, filteredIds } = state;
+      const start = (page - 1) * pageSize;
+      const end   = start + pageSize;
+      const ids = filteredIds.slice(start, end);
+
+      el.grid.innerHTML = '';
+
+      if (!ids.length) {
+        if (el.empty) el.empty.style.display = 'block';
+        el.grid.style.display = 'none';
+      } else {
+        if (el.empty) el.empty.style.display = 'none';
+        el.grid.style.display = 'grid';
+
+        ids.forEach(id => {
+          const u = window.universities.find(x => x.unitid === id);
+          if (!u) return;
+
+          const card = document.createElement('div');
+          card.className = 'university-card';
+          card.role = 'listitem';
+          card.innerHTML = `
+            <div class="university-header">
+              <div class="university-logo">${(u.name||'U').slice(0,1)}</div>
+              <div>
+                <div class="university-name">${u.name}</div>
+                <div class="university-location">${u.state || ''}</div>
+                ${u.level ? `<span class="university-pill">${u.level}</span>` : ''}
+              </div>
+            </div>
+            <div style="display:flex; gap:.5rem; align-items:center; margin-top:.5rem;">
+              <button type="button" class="apply-btn add-btn">Add</button>
+            </div>
+          `;
+          card.querySelector('.add-btn').addEventListener('click', () => {
+            selectUniversity(u);
+            animateToSelected(card, u.name);
+          });
+          el.grid.appendChild(card);
+        });
+      }
+
+      const totalPages = Math.max(1, Math.ceil(filteredIds.length / state.pageSize));
+      if (el.pageInfo) el.pageInfo.textContent = `Page ${Math.min(page,totalPages)} of ${totalPages}`;
+      if (el.prev) el.prev.disabled = (page <= 1);
+      if (el.next) el.next.disabled = (page >= totalPages);
+    }
+
+    function selectUniversity(u){
+      window.studentUnitIds = window.studentUnitIds || new Set();
+      window.addedByRecommender = window.addedByRecommender || new Set();
+      window.removedByRecommender = window.removedByRecommender || new Set();
+
+      if (window.studentUnitIds.has(u.unitid)) {
+        window.removedByRecommender.delete(u.unitid);
+      } else {
+        window.addedByRecommender.add(u.unitid);
+      }
+
+      window.updateSelectedList?.();
+      window.updateSendButton?.();
+    }
+
+    function animateToSelected(fromEl, label){
+      try {
+        const list = el.selectedList;
+        if (!fromEl || !list) return;
+
+        const r1 = fromEl.getBoundingClientRect();
+        const r2 = list.getBoundingClientRect();
+        const dx = (r2.left + r2.width * 0.15) - (r1.left + r1.width/2);
+        const dy = (r2.top  + 8) - (r1.top  + r1.height/2);
+
+        const chip = document.createElement('div');
+        chip.className = 'fly-chip';
+        chip.textContent = label || 'Added';
+        chip.style.left = `${r1.left + r1.width/2}px`;
+        chip.style.top  = `${r1.top  + r1.height/2}px`;
+        chip.style.setProperty('--dx', `${dx}px`);
+        chip.style.setProperty('--dy', `${dy}px`);
+        document.body.appendChild(chip);
+        setTimeout(()=> chip.remove(), 480);
+      } catch {}
+    }
+
+    function buildSuggestions(query){
+      if (!Array.isArray(window.universities)) return [];
+      const q = norm(query);
+      if (!q) return [];
+      const max = 10, out = [];
+      for (const u of window.universities) {
+        if (norm(u.name).includes(q)) {
+          out.push(u);
+          if (out.length >= max) break;
+        }
+      }
+      return out;
+    }
+
+    function showSuggest(list){
+      if (!el.suggest) return;
+      if (!list.length) { el.suggest.style.display='none'; el.input?.setAttribute('aria-expanded','false'); return; }
+      el.suggest.innerHTML = list.map((u,i)=>`
+        <div class="suggest-item" role="option" data-id="${u.unitid}" aria-selected="${i===0?'true':'false'}">
+          <span class="material-icons" aria-hidden="true">school</span>
+          <span>${u.name}</span>
+          <span class="suggest-muted">· ${u.state||''}</span>
+        </div>
+      `).join('');
+      el.suggest.style.display = 'block';
+      el.input?.setAttribute('aria-expanded','true');
+    }
+
+    function hideSuggest(){
+      if (!el.suggest) return;
+      el.suggest.style.display='none';
+      el.input?.setAttribute('aria-expanded','false');
+    }
+
+    function setupAutosuggest(){
+      if (!el.input) return;
+      let hoverIdx = -1;
+      let items = [];
+
+      function refresh(){
+        items = buildSuggestions(el.input.value);
+        showSuggest(items);
+        hoverIdx = items.length ? 0 : -1;
+        highlight();
+      }
+      function highlight(){
+        if (!el.suggest) return;
+        [...el.suggest.querySelectorAll('.suggest-item')].forEach((n,i)=>{
+          n.setAttribute('aria-selected', i===hoverIdx ? 'true' : 'false');
+        });
+      }
+
+      el.input.addEventListener('input', refresh);
+      el.input.addEventListener('keydown', (e)=>{
+        if (!items.length) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); hoverIdx = Math.min(hoverIdx+1, items.length-1); highlight(); }
+        if (e.key === 'ArrowUp')   { e.preventDefault(); hoverIdx = Math.max(0, hoverIdx-1); highlight(); }
+        if (e.key === 'Enter')     { e.preventDefault(); choose(items[hoverIdx]); }
+        if (e.key === 'Escape')    { hideSuggest(); }
+      });
+
+      el.suggest?.addEventListener('click', (e)=>{
+        const it = e.target.closest('.suggest-item');
+        if (!it) return;
+        const id = it.getAttribute('data-id');
+        const u = window.universities?.find(x=> String(x.unitid) === String(id));
+        choose(u);
+      });
+
+      document.addEventListener('click', (e)=>{
+        if (!e.target.closest('.university-search')) hideSuggest();
+      });
+
+      function choose(u){
+        if (!u) return;
+        el.input.value = u.name;
+        state.q = u.name;
+        hideSuggest();
+        applyFiltersAndSort();
+
+        const card = [...el.grid.querySelectorAll('.university-card')]
+          .find(c => c.querySelector('.university-name')?.textContent === u.name);
+        if (card) {
+          selectUniversity(u);
+          animateToSelected(card, u.name);
+        } else {
+          animateToSelected(el.input, u.name);
+          selectUniversity(u);
+        }
+      }
+    }
+
+    function setupFilterHandlers(){
+      el.apply?.addEventListener('click', ()=>{
+        state.q = el.input?.value || '';
+        applyFiltersAndSort();
+      });
+      el.input?.addEventListener('keydown', (e)=>{
+        if (e.key === 'Enter') { e.preventDefault(); el.apply?.click(); }
+      });
+
+      el.applyFilters?.addEventListener('click', ()=>{
+        state.byState = el.state?.value || '';
+        state.byType  = el.type?.value  || '';
+        state.byLevel = el.level?.value || '';
+        state.sort    = el.sort?.value  || 'name_asc';
+        applyFiltersAndSort();
+      });
+
+      el.reset?.addEventListener('click', ()=>{
+        state.q = '';
+        state.byState = '';
+        state.byType  = '';
+        state.byLevel = '';
+        state.sort    = 'name_asc';
+        if (el.input) el.input.value = '';
+        if (el.state) el.state.value = '';
+        if (el.type)  el.type.value  = '';
+        if (el.level) el.level.value = '';
+        if (el.sort)  el.sort.value  = 'name_asc';
+        applyFiltersAndSort();
+      });
+
+      el.select?.addEventListener('change', ()=>{
+        const id = el.select.value;
+        const u = window.universities?.find(x => String(x.unitid) === String(id) || x.name === id);
+        if (u) {
+          selectUniversity(u);
+          animateToSelected(el.select, u.name);
+        }
+        el.select.value = '';
+      });
+
+      // Clear filters button in empty-state
+      document.getElementById('clearFiltersBtn')?.addEventListener('click', ()=> el.reset?.click());
+    }
+
+    function setupPagination(){
+      el.prev?.addEventListener('click', ()=>{
+        if (state.page > 1) { state.page--; renderPage(); }
+      });
+      el.next?.addEventListener('click', ()=>{
+        const totalPages = Math.max(1, Math.ceil(state.filteredIds.length / state.pageSize));
+        if (state.page < totalPages) { state.page++; renderPage(); }
+      });
+      el.pageSize?.addEventListener('change', ()=>{
+        const v = parseInt(el.pageSize.value, 10);
+        state.pageSize = isNaN(v) ? 40 : v;
+        state.page = 1;
+        renderPage();
+      });
+    }
+
+    function bootOnceDataReady(){
+      if (!Array.isArray(window.universities) || !window.universities.length) {
+        setTimeout(bootOnceDataReady, 200);
+        return;
+      }
+      setupAutosuggest();
+      setupFilterHandlers();
+      setupPagination();
+
+      // Populate Browse-all if not already done elsewhere
+      if (el.select && el.select.options.length <= 1) {
+        const frag = document.createDocumentFragment();
+        window.universities.slice(0, 1000).forEach(u=>{
+          const opt = document.createElement('option');
+          opt.value = String(u.unitid);
+          opt.textContent = u.name;
+          frag.appendChild(opt);
+        });
+        el.select.appendChild(frag);
+      }
+
+      applyFiltersAndSort();
+    }
+
+    bootOnceDataReady();
+  })();
+  </script>
 </body>
 </html>
 
