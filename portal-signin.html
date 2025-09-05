@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example University - Recommendation Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            padding: 0;
+            max-width: 900px;
+            width: 100%;
+            min-height: 600px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c5282 0%, #3182ce 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/><circle cx="20" cy="20" r="1" fill="white" opacity="0.1"/><circle cx="80" cy="30" r="1.5" fill="white" opacity="0.1"/><circle cx="30" cy="80" r="1" fill="white" opacity="0.1"/><circle cx="70" cy="70" r="2" fill="white" opacity="0.1"/></svg>') repeat;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-50px, -50px) rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .content {
+            padding: 50px 40px;
+            display: flex;
+            gap: 40px;
+            align-items: stretch;
+        }
+
+        .user-type {
+            flex: 1;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+            background: #f8fafc;
+        }
+
+        .user-type:hover {
+            border-color: #3182ce;
+            box-shadow: 0 8px 25px rgba(49, 130, 206, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .user-type.active {
+            border-color: #3182ce;
+            background: linear-gradient(135deg, #ebf8ff 0%, #f0f9ff 100%);
+        }
+
+        .user-type-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 24px;
+        }
+
+        .student-icon {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .recommender-icon {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: white;
+        }
+
+        .user-type h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .user-type p {
+            color: #718096;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+
+        .auth-section {
+            display: none;
+        }
+
+        .auth-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 25px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px 20px;
+            text-align: center;
+            background: none;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #64748b;
+        }
+
+        .auth-tab.active {
+            background: white;
+            color: #3182ce;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(49, 130, 206, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.3);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+            color: #718096;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            font-size: 14px;
+        }
+
+        .forgot-link {
+            color: #3182ce;
+            text-decoration: none;
+            font-size: 14px;
+            text-align: center;
+            display: block;
+            margin-top: 15px;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status-success {
+            background: #f0fff4;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .status-error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #feb2b2;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+                gap: 30px;
+                padding: 30px 20px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .demo-notice {
+            background: linear-gradient(135deg, #fef5e7 0%, #fffaf0 100%);
+            border: 2px solid #f6e05e;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .demo-notice strong {
+            color: #744210;
+        }
+
+        .demo-notice p {
+            color: #975a16;
+            margin: 5px 0 0 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Example University</h1>
+            <p>Recommendation Portal - Streamlined letter management powered by StellarRec integration</p>
+        </div>
+
+        <div class="demo-notice">
+            <strong>🚀 Live Demo Portal</strong>
+            <p>Experience real-time recommendation tracking and management</p>
+        </div>
+
+        <div class="content">
+            <!-- Student Section -->
+            <div class="user-type" id="student-section">
+                <div class="user-type-header">
+                    <div class="icon student-icon">👨‍🎓</div>
+                    <div>
+                        <h3>Students</h3>
+                    </div>
+                </div>
+                <p>Track your recommendation letters, view submission status, send reminders to recommenders, and monitor your application progress.</p>
+                
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="switchStudentTab('signin')">Sign In</button>
+                    <button class="auth-tab" onclick="switchStudentTab('register')">Create Account</button>
+                </div>
+
+                <div class="auth-section active" id="student-signin">
+                    <form onsubmit="handleStudentSignin(event)">
+                        <div class="form-group">
+                            <label for="student-email">Email Address</label>
+                            <input type="email" id="student-email" placeholder="your.email@university.edu" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="student-password">Password</label>
+                            <input type="password" id="student-password" placeholder="Enter your password" required>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Sign In</button>
+                        <a href="#" class="forgot-link">Forgot your password?</a>
+                    </form>
+                </div>
+
+                <div class="auth-section" id="student-register">
+                    <form onsubmit="handleStudentRegister(event)">
+                        <div class="form-group">
+                            <label for="student-name">Full Name</label>
+                            <input type="text" id="student-name" placeholder="John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="student-email-reg">Email Address</label>
+                            <input type="email" id="student-email-reg" placeholder="your.email@university.edu" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="student-id">Student ID</label>
+                            <input type="text" id="student-id" placeholder="Enter your student ID" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="student-password-reg">Password</label>
+                            <input type="password" id="student-password-reg" placeholder="Create a password" required>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Create Account</button>
+                    </form>
+                </div>
+
+                <div id="student-status"></div>
+            </div>
+
+            <!-- Recommender Section -->
+            <div class="user-type" id="recommender-section">
+                <div class="user-type-header">
+                    <div class="icon recommender-icon">👨‍🏫</div>
+                    <div>
+                        <h3>Recommenders</h3>
+                    </div>
+                </div>
+                <p>Access your recommendation requests, submit letters securely, view deadlines, and communicate with students about their applications.</p>
+                
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="switchRecommenderTab('signin')">Sign In</button>
+                    <button class="auth-tab" onclick="switchRecommenderTab('register')">Create Account</button>
+                </div>
+
+                <div class="auth-section active" id="recommender-signin">
+                    <form onsubmit="handleRecommenderSignin(event)">
+                        <div class="form-group">
+                            <label for="recommender-email">Email Address</label>
+                            <input type="email" id="recommender-email" placeholder="professor@university.edu" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="recommender-password">Password</label>
+                            <input type="password" id="recommender-password" placeholder="Enter your password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign In</button>
+                        <a href="#" class="forgot-link">Forgot your password?</a>
+                    </form>
+                </div>
+
+                <div class="auth-section" id="recommender-register">
+                    <form onsubmit="handleRecommenderRegister(event)">
+                        <div class="form-group">
+                            <label for="recommender-name">Full Name</label>
+                            <input type="text" id="recommender-name" placeholder="Dr. Jane Smith" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="recommender-email-reg">Email Address</label>
+                            <input type="email" id="recommender-email-reg" placeholder="professor@university.edu" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="recommender-title">Title/Position</label>
+                            <input type="text" id="recommender-title" placeholder="Professor, Department of..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="recommender-institution">Institution</label>
+                            <input type="text" id="recommender-institution" placeholder="University/Organization" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="recommender-password-reg">Password</label>
+                            <input type="password" id="recommender-password-reg" placeholder="Create a password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create Account</button>
+                    </form>
+                </div>
+
+                <div id="recommender-status"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functions
+        function switchStudentTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('#student-section .auth-tab').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update sections
+            document.querySelectorAll('#student-section .auth-section').forEach(section => section.classList.remove('active'));
+            document.getElementById(`student-${tab}`).classList.add('active');
+            
+            // Clear status
+            document.getElementById('student-status').innerHTML = '';
+        }
+
+        function switchRecommenderTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('#recommender-section .auth-tab').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update sections
+            document.querySelectorAll('#recommender-section .auth-section').forEach(section => section.classList.remove('active'));
+            document.getElementById(`recommender-${tab}`).classList.add('active');
+            
+            // Clear status
+            document.getElementById('recommender-status').innerHTML = '';
+        }
+
+        // Form handlers
+        function handleStudentSignin(event) {
+            event.preventDefault();
+            const email = document.getElementById('student-email').value;
+            const password = document.getElementById('student-password').value;
+            
+            // Simulate authentication
+            showStatus('student-status', 'success', `Welcome back! Loading your dashboard...`);
+            
+            setTimeout(() => {
+                showStatus('student-status', 'success', 
+                    `✅ Signed in successfully as ${email}<br>
+                     📊 You have 3 pending recommendations<br>
+                     🔔 2 letters submitted, 1 awaiting response`);
+            }, 1500);
+        }
+
+        function handleStudentRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById('student-name').value;
+            const email = document.getElementById('student-email-reg').value;
+            
+            showStatus('student-status', 'success', 
+                `🎉 Account created successfully for ${name}!<br>
+                 📧 Verification email sent to ${email}<br>
+                 🚀 You can now start requesting recommendations`);
+        }
+
+        function handleRecommenderSignin(event) {
+            event.preventDefault();
+            const email = document.getElementById('recommender-email').value;
+            
+            showStatus('recommender-status', 'success', `Welcome back! Loading your requests...`);
+            
+            setTimeout(() => {
+                showStatus('recommender-status', 'success', 
+                    `✅ Signed in successfully as ${email}<br>
+                     📝 You have 5 pending recommendation requests<br>
+                     ⏰ 2 deadlines approaching this week`);
+            }, 1500);
+        }
+
+        function handleRecommenderRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById('recommender-name').value;
+            const email = document.getElementById('recommender-email-reg').value;
+            
+            showStatus('recommender-status', 'success', 
+                `🎉 Account created successfully for ${name}!<br>
+                 📧 Verification email sent to ${email}<br>
+                 📋 You're now ready to receive recommendation requests`);
+        }
+
+        function showStatus(elementId, type, message) {
+            const statusElement = document.getElementById(elementId);
+            statusElement.innerHTML = `<div class="status-indicator status-${type}">${message}</div>`;
+        }
+
+        // Add some interactive hover effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const userTypes = document.querySelectorAll('.user-type');
+            
+            userTypes.forEach(userType => {
+                userType.addEventListener('click', function() {
+                    // Remove active class from all user types
+                    userTypes.forEach(type => type.classList.remove('active'));
+                    // Add active class to clicked user type
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
