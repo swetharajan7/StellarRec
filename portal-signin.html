@@ -555,18 +555,9 @@
             statusElement.innerHTML = `<div class="status-indicator status-${type}">${message}</div>`;
         }
 
-        // Add some interactive hover effects
+        // Add some interactive effects
         document.addEventListener('DOMContentLoaded', function() {
-            const userTypes = document.querySelectorAll('.user-type');
-            
-            userTypes.forEach(userType => {
-                userType.addEventListener('click', function() {
-                    // Remove active class from all user types
-                    userTypes.forEach(type => type.classList.remove('active'));
-                    // Add active class to clicked user type
-                    this.classList.add('active');
-                });
-            });
+            // No need for user type switching since we only have students now
         });
     </script>
 </body>
