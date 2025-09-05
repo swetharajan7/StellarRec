@@ -278,91 +278,104 @@
       text-align: center;
     }
     .site-footer p { margin: 0; font-size: 0.95rem; }
+    /* center container takes the middle space */
+.center-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1 1 auto;
+}
+
+/* make header-content a 3-column flex: left | center grows | right */
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.header-content > .logo { flex: 0 0 auto; }
+.header-content > .center-controls { flex: 1 1 auto; }
+.header-content > .user-info { flex: 0 0 auto; }
+
+/* theme button */
+.theme-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #ffffff55;
+  background: #ffffff22;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+}
+.theme-btn:hover { transform: translateY(-1px); background: #ffffff33; border-color: #ffffff88; }
+.theme-btn:focus-visible { outline: 3px solid rgba(255,255,255,.5); outline-offset: 2px; }
+.theme-btn .material-icons { font-size: 18px; }
+
   </style>
 </head>
 <body>
   <div class="header">
-    <div class="header-content">
-      <a href="/" class="logo" target="_self">
-        <span class="material-icons">star</span>
-        stellarrec
-      </a>
+  <div class="header-content">
+    <!-- Left: Logo -->
+    <a href="/" class="logo" target="_self" aria-label="Go to homepage">
+      <span class="material-icons">star</span>
+      stellarrec
+    </a>
 
-      <!-- View Tabs -->
-      <div id="sr-tabs" role="tablist" aria-label="Switch View" class="sr-tabs">
-        <button id="tab-recommender" role="tab" aria-selected="true" aria-controls="panel-recommender" class="sr-tab">Recommender</button>
-        <button id="tab-student" role="tab" aria-selected="false" aria-controls="panel-student" class="sr-tab">Student</button>
-      </div>
+    <!-- Center: Theme button -->
+    <div class="center-controls">
+      <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false">
+        <span class="material-icons" aria-hidden="true">dark_mode</span>
+        Light / Dark
+      </button>
+    </div>
 
-      <!-- User / settings (single dropdown instance) -->
-      <div class="user-info">
-        <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
-          <span class="material-icons">person</span>
-        </button>
+    <!-- Right: Avatar dropdown (theme item removed) -->
+    <div class="user-info">
+      <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
+        <span class="material-icons">person</span>
+      </button>
 
-        <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
-          <div class="dropdown-header">Quick actions</div>
+      <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
+        <div class="dropdown-header">Quick actions</div>
 
-          <div class="dropdown-item" id="howItWorksItem" role="menuitem" tabindex="0">
-            <span class="material-icons" aria-hidden="true">help</span>
+        <div class="dropdown-item" id="howItWorksItem" role="menuitem" tabindex="0">
+          <span class="material-icons" aria-hidden="true">help</span>
+          <div class="view-label">
+            <a href="/university-portal/" class="view-name" style="text-decoration:none; color:inherit;" target="_self">
+              How it works
+            </a>
+            <div class="view-description">University portal</div>
+          </div>
+        </div>
+
+        <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
+          <span class="material-icons">support_agent</span>
+          <div class="view-label">
+            <div class="view-name">Contact admin</div>
+            <div class="view-description">Send a message</div>
+          </div>
+        </div>
+
+        <!-- Keep any other items you want (mock API etc.). Just don’t re-add theme here. -->
+        <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
+          <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
+            <span class="material-icons">build</span>
             <div class="view-label">
-              <a href="/university-portal/" class="view-name" style="text-decoration:none; color:inherit;" target="_self">
-                How it works
-              </a>
-              <div class="view-description">University portal</div>
+              <div class="view-name">Use mock API</div>
+              <div class="view-description">Toggle mock vs real backend</div>
             </div>
-          </div>
-
-          <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
-            <span class="material-icons">support_agent</span>
-            <div class="view-label">
-              <div class="view-name">Contact admin</div>
-              <div class="view-description">Send a message</div>
-            </div>
-          </div>
-
-          <div class="dropdown-item" id="themeToggleItem" role="menuitem" tabindex="0">
-            <span class="material-icons">dark_mode</span>
-            <div class="view-label">
-              <div class="view-name">Theme</div>
-              <div class="view-description">Light / Dark</div>
-            </div>
-            <label style="margin-left:auto;display:flex;align-items:center;gap:.4rem;">
-              <input id="themeToggle" type="checkbox" />
-              <span style="font-size:.85rem;">Dark</span>
-            </label>
-          </div>
-
-          <div class="dropdown-item active" data-sr-view="recommender" role="menuitem" tabindex="0">
-            <span class="material-icons">edit</span>
-            <div class="view-label">
-              <div class="view-name">Recommender</div>
-              <div class="view-description">Write & send letters</div>
-            </div>
-          </div>
-
-          <div class="dropdown-item" data-sr-view="student" role="menuitem" tabindex="0">
-            <span class="material-icons">school</span>
-            <div class="view-label">
-              <div class="view-name">Student</div>
-              <div class="view-description">Track applications</div>
-            </div>
-          </div>
-
-          <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
-            <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
-              <span class="material-icons">build</span>
-              <div class="view-label">
-                <div class="view-name">Use mock API</div>
-                <div class="view-description">Toggle mock vs real backend</div>
-              </div>
-              <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
-            </label>
-          </div>
+            <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
+          </label>
         </div>
       </div>
     </div>
   </div>
+</div>
+
   <!-- Contact Admin Modal -->
   <div id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactTitle"
        style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
