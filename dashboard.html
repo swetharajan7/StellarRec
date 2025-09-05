@@ -419,184 +419,115 @@
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <div class="header">
-    <div class="header-content">
-      <a href="index.html" class="logo">
-        <span class="material-icons">star</span>
-        stellarrec
-      </a>
-
-      <!-- View Tabs -->
-      <div id="sr-tabs" role="tablist" aria-label="Switch View" class="sr-tabs">
-        <button id="tab-recommender" role="tab" aria-selected="true" aria-controls="panel-recommender" class="sr-tab">Recommender</button>
-        <button id="tab-student" role="tab" aria-selected="false" aria-controls="panel-student" class="sr-tab">Student</button>
-      </div>
-
-      <!-- User / settings -->
-     <!-- User / settings -->
-<!-- Replace your existing user-info section with this clean version -->
-<div class="user-info">
-  <div class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false">
-    <span class="material-icons">person</span>
-  </div>
-
-  <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
-    <div class="dropdown-header">Quick actions</div>
-
-    <div class="dropdown-item" id="contactAdminItem">
-      <span class="material-icons">support_agent</span>
-      <div class="view-label">
-        <div class="view-name">Contact admin</div>
-        <div class="view-description">Send a message</div>
-      </div>
-    </div>
-
-    <div class="dropdown-item" id="themeToggleItem">
-      <span class="material-icons">dark_mode</span>
-      <div class="view-label">
-        <div class="view-name">Theme</div>
-        <div class="view-description">Light / Dark</div>
-      </div>
-      <label style="margin-left:auto;display:flex;align-items:center;gap:.4rem;">
-        <input id="themeToggle" type="checkbox" />
-        <span style="font-size:.85rem;">Dark</span>
-      </label>
-    </div>
-
-    <div class="dropdown-item active" data-sr-view="recommender">
-      <span class="material-icons">edit</span>
-      <div class="view-label">
-        <div class="view-name">Recommender</div>
-        <div class="view-description">Write & send letters</div>
-      </div>
-    </div>
-
-    <div class="dropdown-item" data-sr-view="student">
-      <span class="material-icons">school</span>
-      <div class="view-label">
-        <div class="view-name">Student</div>
-        <div class="view-description">Track applications</div>
-      </div>
-    </div>
-
-    <!-- Mock API toggle -->
-    <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
-      <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
-        <span class="material-icons">build</span>
-        <div class="view-label">
-          <div class="view-name">Use mock API</div>
-          <div class="view-description">Toggle mock vs real backend</div>
-        </div>
-        <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
-      </label>
-    </div>
-  </div>
-</div>
-      
-
-       <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
-          <div class="dropdown-header">Quick actions</div>
-          <!-- How it works (goes to university-portal) -->
-<!-- Inside the avatar dropdown -->
-<div class="dropdown-item" role="menuitem">
-  <span class="material-icons" aria-hidden="true">help</span>
-  <div class="view-label">
-    <a href="/university-portal/" class="view-name" style="text-decoration:none; color:inherit;" target="_self">
-      How it works
+ <!-- Header -->
+<div class="header">
+  <div class="header-content">
+    <a href="index.html" class="logo">
+      <span class="material-icons">star</span>
+      stellarrec
     </a>
-    <div class="view-description">University portal</div>
-  </div>
-</div>
 
-</div>
+    <!-- View Tabs -->
+    <div id="sr-tabs" role="tablist" aria-label="Switch View" class="sr-tabs">
+      <button id="tab-recommender" role="tab" aria-selected="true" aria-controls="panel-recommender" class="sr-tab">Recommender</button>
+      <button id="tab-student" role="tab" aria-selected="false" aria-controls="panel-student" class="sr-tab">Student</button>
+    </div>
 
+    <!-- User Menu - CLEAN VERSION -->
+    <div class="user-info">
+      <div class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false">
+        <span class="material-icons">person</span>
+      </div>
 
-          <div class="dropdown-item" id="contactAdminItem">
-            <span class="material-icons">support_agent</span>
+      <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
+        <div class="dropdown-header">Quick actions</div>
+
+        <!-- How it works (goes to university-portal) -->
+        <div class="dropdown-item" id="howItWorksItem" role="menuitem" tabindex="0">
+          <span class="material-icons" aria-hidden="true">help</span>
+          <div class="view-label">
+            <div class="view-name">How it works</div>
+            <div class="view-description">University portal</div>
+          </div>
+        </div>
+
+        <div class="dropdown-item" id="contactAdminItem">
+          <span class="material-icons">support_agent</span>
+          <div class="view-label">
+            <div class="view-name">Contact admin</div>
+            <div class="view-description">Send a message</div>
+          </div>
+        </div>
+
+        <div class="dropdown-item" id="themeToggleItem">
+          <span class="material-icons">dark_mode</span>
+          <div class="view-label">
+            <div class="view-name">Theme</div>
+            <div class="view-description">Light / Dark</div>
+          </div>
+          <label style="margin-left:auto;display:flex;align-items:center;gap:.4rem;">
+            <input id="themeToggle" type="checkbox" />
+            <span style="font-size:.85rem;">Dark</span>
+          </label>
+        </div>
+
+        <div class="dropdown-item active" data-sr-view="recommender">
+          <span class="material-icons">edit</span>
+          <div class="view-label">
+            <div class="view-name">Recommender</div>
+            <div class="view-description">Write & send letters</div>
+          </div>
+        </div>
+
+        <div class="dropdown-item" data-sr-view="student">
+          <span class="material-icons">school</span>
+          <div class="view-label">
+            <div class="view-name">Student</div>
+            <div class="view-description">Track applications</div>
+          </div>
+        </div>
+
+        <!-- Mock API toggle -->
+        <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
+          <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
+            <span class="material-icons">build</span>
             <div class="view-label">
-              <div class="view-name">Contact admin</div>
-              <div class="view-description">Send a message</div>
+              <div class="view-name">Use mock API</div>
+              <div class="view-description">Toggle mock vs real backend</div>
             </div>
-          </div>
-
-          <div class="dropdown-item" id="themeToggleItem">
-            <span class="material-icons">dark_mode</span>
-            <div class="view-label">
-              <div class="view-name">Theme</div>
-              <div class="view-description">Light / Dark</div>
-            </div>
-            <label style="margin-left:auto;display:flex;align-items:center;gap:.4rem;">
-              <input id="themeToggle" type="checkbox" />
-              <span style="font-size:.85rem;">Dark</span>
-            </label>
-          </div>
-
-          <div class="dropdown-item active" onclick="switchView('recommender', event)">
-            <span class="material-icons">edit</span>
-            <div class="view-label">
-              <div class="view-name">Recommender</div>
-              <div class="view-description">Write & send letters</div>
-            </div>
-          </div>
-          <div class="dropdown-item" onclick="switchView('student', event)">
-            <span class="material-icons">school</span>
-            <div class="view-label">
-              <div class="view-name">Student</div>
-              <div class="view-description">Track applications</div>
-            </div>
-          </div>
-<div class="dropdown-item">
-  <span class="material-icons">help_outline</span>
-  <div class="view-label">
-    <a href="/university-portal/" class="view-name" style="text-decoration:none; color:inherit;">
-      How it works
-    </a>
-    <div class="view-description">See the process explained</div>
-  </div>
-</div>
-
-          <!-- Mock API toggle -->
-          <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
-            <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
-              <span class="material-icons">build</span>
-              <div class="view-label">
-                <div class="view-name">Use mock API</div>
-                <div class="view-description">Toggle mock vs real backend</div>
-              </div>
-              <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
-            </label>
-          </div>
+            <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
+          </label>
         </div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Contact Admin Modal -->
-  <div id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactTitle"
-       style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
-    <div style="background:#fff; width:min(560px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
-      <div style="padding:1.2rem 1.4rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-        <div id="contactTitle" style="font-weight:700;">Contact Admin</div>
-        <button aria-label="Close" id="contactCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
-      </div>
-      <form id="contactForm" style="padding:1rem 1.4rem; display:grid; gap:.75rem;">
-        <label>First name
-          <input type="text" id="contactFirst" required class="filter-select" style="margin-top:.35rem;">
-        </label>
-        <label>Email address
-          <input type="email" id="contactEmail" required class="filter-select" style="margin-top:.35rem;">
-        </label>
-        <label>Query
-          <textarea id="contactQuery" rows="5" required class="filter-select" style="margin-top:.35rem;"></textarea>
-        </label>
-        <div style="display:flex; gap:.5rem; justify-content:flex-end; padding-top:.5rem;">
-          <button type="button" class="page-btn" id="contactCancelBtn">Cancel</button>
-          <button type="submit" class="apply-btn" id="contactSendBtn">Send</button>
-        </div>
-      </form>
+<!-- Contact Admin Modal -->
+<div id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactTitle"
+     style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
+  <div style="background:#fff; width:min(560px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
+    <div style="padding:1.2rem 1.4rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+      <div id="contactTitle" style="font-weight:700;">Contact Admin</div>
+      <button aria-label="Close" id="contactCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
     </div>
+    <form id="contactForm" style="padding:1rem 1.4rem; display:grid; gap:.75rem;">
+      <label>First name
+        <input type="text" id="contactFirst" required class="filter-select" style="margin-top:.35rem;">
+      </label>
+      <label>Email address
+        <input type="email" id="contactEmail" required class="filter-select" style="margin-top:.35rem;">
+      </label>
+      <label>Query
+        <textarea id="contactQuery" rows="5" required class="filter-select" style="margin-top:.35rem;"></textarea>
+      </label>
+      <div style="display:flex; gap:.5rem; justify-content:flex-end; padding-top:.5rem;">
+        <button type="button" class="page-btn" id="contactCancelBtn">Cancel</button>
+        <button type="submit" class="apply-btn" id="contactSendBtn">Send</button>
+      </div>
+    </form>
   </div>
+</div>
 
   <div class="container" id="panel-recommender">
     <!-- Student Context Bar -->
