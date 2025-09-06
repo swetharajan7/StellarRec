@@ -16,13 +16,6 @@
       color:var(--text,#333);
       min-height:100vh;
     }
-    /* unify apply/page buttons inside student view */
-.apply-btn {
-  background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none;
-  padding:.6rem 1rem; border-radius:10px; font-weight:700; cursor:pointer;
-}
-.apply-btn:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(25,118,210,.25); }
-
 
     /* Header */
     .header {
@@ -40,6 +33,26 @@
       text-decoration:none; color:#fff; transition:.3s;
     }
     .logo:hover { opacity:.85; transform:translateY(-1px); }
+
+    /* Center header tabs (A) */
+    .hdr-tabs {
+      display:flex; align-items:center; gap:.4rem;
+      background:#ffffff22; border:1px solid #ffffff55; border-radius:999px;
+      padding:.2rem; min-height:40px;
+    }
+    .hdr-tab {
+      appearance:none; border:0; background:transparent; color:#fff;
+      padding:.45rem .9rem; border-radius:999px; font-weight:700; cursor:pointer;
+      letter-spacing:.2px; font-size:.95rem; opacity:.9;
+    }
+    .hdr-tab[aria-selected="true"] {
+      background:#fff; color:#1976d2; box-shadow:0 6px 20px rgba(0,0,0,.12);
+      opacity:1;
+    }
+    .hdr-tab:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
+
+    /* Right controls (theme + avatar) */
+    .right-controls { display:flex; align-items:center; gap:.75rem; }
 
     /* Avatar + dropdown */
     .user-info { position:relative; display:flex; align-items:center; gap:1rem; }
@@ -86,72 +99,6 @@
     .hero-section { text-align:center; margin-bottom:3rem; }
     .hero-title { font-size:2.5rem; font-weight:700; color:#1976d2; margin-bottom:1rem; }
     .hero-subtitle { font-size:1.2rem; color:#666; margin-bottom:2rem; }
-
-    /* === Header center tabs (A) === */
-.hdr-tabs {
-  display:flex; align-items:center; gap:.4rem;
-  background:#ffffff22; border:1px solid #ffffff55; border-radius:999px;
-  padding:.2rem; min-height:40px;
-}
-.hdr-tab {
-  appearance:none; border:0; background:transparent; color:#fff;
-  padding:.45rem .9rem; border-radius:999px; font-weight:700; cursor:pointer;
-  letter-spacing:.2px; font-size:.95rem; opacity:.9;
-}
-.hdr-tab[aria-selected="true"] {
-  background:#fff; color:#1976d2; box-shadow:0 6px 20px rgba(0,0,0,.12);
-  opacity:1;
-}
-.hdr-tab:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
-
-/* right controls container so we can move the theme button right */
-.right-controls { display:flex; align-items:center; gap:.75rem; }
-
-/* === Student view (B) === */
-.student-card {
-  background:#fff; border-radius:16px; padding:1.25rem 1.5rem;
-  box-shadow:0 8px 32px rgba(0,0,0,.08);
-}
-.student-tabs {
-  display:flex; gap:.4rem; background:#f1f5f9; border-radius:999px; padding:.2rem;
-  border:1px solid #e5e7eb; margin-bottom:.9rem;
-}
-.student-tab {
-  appearance:none; background:transparent; border:0; cursor:pointer;
-  padding:.5rem 1rem; border-radius:999px; font-weight:700; color:#334155;
-}
-.student-tab[aria-selected="true"] {
-  background:#fff; color:#0f172a; box-shadow:0 6px 18px rgba(0,0,0,.06);
-}
-.student-panels > section { display:block; }
-.student-panels > section[hidden] { display:none; }
-
-/* tracker table */
-.table {
-  width:100%; border-collapse:separate; border-spacing:0; overflow:hidden;
-  border:1px solid #e5e7eb; border-radius:12px; background:#fff;
-}
-.table th, .table td { padding:.7rem .8rem; text-align:left; border-bottom:1px solid #eef2f7; }
-.table th { background:#f8fafc; color:#334155; font-weight:700; }
-.table tr:last-child td { border-bottom:none; }
-.track-pill {
-  display:inline-block; padding:.2rem .6rem; border-radius:999px; font-weight:700; font-size:.8rem;
-}
-.track-pill.pending { background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; }
-.track-pill.sent    { background:#ecfeff; color:#155e75; border:1px solid #a5f3fc; }
-.track-pill.received{ background:#ecfdf5; color:#166534; border:1px solid #bbf7d0; }
-
-/* dark theme tweaks for new elements */
-:root[data-theme="dark"] .hdr-tabs { background:#ffffff11; border-color:#ffffff33; }
-:root[data-theme="dark"] .hdr-tab { color:#e5eefc; }
-:root[data-theme="dark"] .hdr-tab[aria-selected="true"] { background:#0f1729; color:#7aa2ff; }
-:root[data-theme="dark"] .student-card,
-:root[data-theme="dark"] .table,
-:root[data-theme="dark"] .student-tabs { background:#111a2a; border-color:#24324a; }
-:root[data-theme="dark"] .table th { background:#0f1729; color:#e5eefc; }
-:root[data-theme="dark"] .student-tab { color:#c9d6ee; }
-:root[data-theme="dark"] .student-tab[aria-selected="true"] { background:#0f1729; color:#7aa2ff; }
-
     /* Two-column layout */
     .compose-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:2rem; }
     @media (max-width: 980px) { .compose-grid { grid-template-columns:1fr; } }
@@ -286,11 +233,9 @@
     .badge-removed { background:#ffebee; color:#b71c1c; border-color:#ffcdd2; }
 
     .toast-wrap { position: fixed; right: 16px; bottom: 16px; z-index: 99999; display: grid; gap: 8px; }
-    .toast {
-      min-width: 240px; max-width: 420px; padding: .75rem .9rem; border-radius: 12px;
+    .toast { min-width: 240px; max-width: 420px; padding: .75rem .9rem; border-radius: 12px;
       box-shadow: 0 8px 30px rgba(0,0,0,.15); color:#0f172a; background:#fff; border:1px solid #e5e7eb;
-      display:flex; align-items:flex-start; gap:.6rem; animation: toast-in .18s ease;
-    }
+      display:flex; align-items:flex-start; gap:.6rem; animation: toast-in .18s ease; }
     .toast.success { border-color:#c8e6c9; background:#f1f8f3; }
     .toast.error   { border-color:#ffcdd2; background:#fff2f2; }
     .toast.info    { border-color:#bbdefb; background:#f3f8ff; }
@@ -302,6 +247,35 @@
 
     .empty-state { display:none; background:#fff; border:1px dashed #d0d7de; border-radius:12px; padding:1.25rem; color:#445; text-align:center; }
     .empty-state .actions { margin-top:.75rem; display:flex; gap:.5rem; justify-content:center; }
+
+    /* Student view (B) */
+    .student-card {
+      background:#fff; border-radius:16px; padding:1.25rem 1.5rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.08);
+    }
+    .student-tabs {
+      display:flex; gap:.4rem; background:#f1f5f9; border-radius:999px; padding:.2rem;
+      border:1px solid #e5e7eb; margin-bottom:.9rem;
+    }
+    .student-tab {
+      appearance:none; background:transparent; border:0; cursor:pointer;
+      padding:.5rem 1rem; border-radius:999px; font-weight:700; color:#334155;
+    }
+    .student-tab[aria-selected="true"] {
+      background:#fff; color:#0f172a; box-shadow:0 6px 18px rgba(0,0,0,.06);
+    }
+    .student-panels > section { display:block; }
+    .student-panels > section[hidden] { display:none; }
+
+    .table { width:100%; border-collapse:separate; border-spacing:0; overflow:hidden;
+      border:1px solid #e5e7eb; border-radius:12px; background:#fff; }
+    .table th, .table td { padding:.7rem .8rem; text-align:left; border-bottom:1px solid #eef2f7; }
+    .table th { background:#f8fafc; color:#334155; font-weight:700; }
+    .table tr:last-child td { border-bottom:none; }
+    .track-pill { display:inline-block; padding:.2rem .6rem; border-radius:999px; font-weight:700; font-size:.8rem; }
+    .track-pill.pending { background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; }
+    .track-pill.sent    { background:#ecfeff; color:#155e75; border:1px solid #a5f3fc; }
+    .track-pill.received{ background:#ecfdf5; color:#166534; border:1px solid #bbf7d0; }
 
     @media (max-width:768px) {
       .container { padding:1rem; }
@@ -329,6 +303,15 @@
     :root[data-theme="dark"] .university-card:hover { background:#12203a; border-color:#274780; }
     :root[data-theme="dark"] .university-card.selected { background:#13254a; }
     :root[data-theme="dark"] .hero-subtitle, :root[data-theme="dark"] .university-location { color: var(--muted); }
+    :root[data-theme="dark"] .hdr-tabs { background:#ffffff11; border-color:#ffffff33; }
+    :root[data-theme="dark"] .hdr-tab { color:#e5eefc; }
+    :root[data-theme="dark"] .hdr-tab[aria-selected="true"] { background:#0f1729; color:#7aa2ff; }
+    :root[data-theme="dark"] .student-card,
+    :root[data-theme="dark"] .table,
+    :root[data-theme="dark"] .student-tabs { background:#111a2a; border-color:#24324a; }
+    :root[data-theme="dark"] .table th { background:#0f1729; color:#e5eefc; }
+    :root[data-theme="dark"] .student-tab { color:#c9d6ee; }
+    :root[data-theme="dark"] .student-tab[aria-selected="true"] { background:#0f1729; color:#7aa2ff; }
 
     /* Footer (match header) */
     .site-footer {
@@ -338,12 +321,6 @@
       text-align: center;
     }
     .site-footer p { margin: 0; font-size: 0.95rem; }
-
-    /* theme button centered in header */
-    .center-controls { display:flex; justify-content:center; align-items:center; flex:1 1 auto; }
-    .header-content > .logo { flex:0 0 auto; }
-    .header-content > .center-controls { flex:1 1 auto; }
-    .header-content > .user-info { flex:0 0 auto; }
 
     .theme-btn {
       display:inline-flex; align-items:center; gap:.5rem;
@@ -355,87 +332,74 @@
     .theme-btn:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
     .theme-btn .material-icons { font-size:18px; }
 
-    /* Autosuggest styling + fly animation */
-    .suggest-popover { max-height: 280px; overflow-y: auto; }
-    .suggest-item { padding:.55rem .8rem; cursor:pointer; display:flex; align-items:center; gap:.5rem; font-size:.95rem; }
-    .suggest-item[aria-selected="true"], .suggest-item:hover { background:#f3f8ff; }
-    @keyframes fly-to-selected {
-      0% { transform: translate(0,0) scale(1); opacity: 1; }
-      100% { transform: translate(var(--dx,0), var(--dy,0)) scale(0.85); opacity: 0; }
+    /* unify apply/page buttons in student view */
+    .apply-btn {
+      background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none;
+      padding:.6rem 1rem; border-radius:10px; font-weight:700; cursor:pointer;
     }
-    .fly-chip {
-      position: fixed; z-index: 99999; pointer-events: none;
-      background: linear-gradient(135deg,#1976d2,#7c4dff); color: #fff;
-      padding: .4rem .8rem; border-radius: 999px; font-size: .85rem; box-shadow: 0 8px 24px rgba(0,0,0,.18);
-      animation: fly-to-selected .45s ease forwards;
-    }
+    .apply-btn:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(25,118,210,.25); }
   </style>
 </head>
 <body>
   <!-- HEADER -->
-  <div class="header-content">
-  <!-- Left: Logo -->
-  <a href="/" class="logo" target="_self" aria-label="Go to homepage">
-    <span class="material-icons">star</span>
-    stellarrec
-  </a>
+  <div class="header">
+    <div class="header-content">
+      <!-- Left: Logo -->
+      <a href="/" class="logo" target="_self" aria-label="Go to homepage">
+        <span class="material-icons">star</span>
+        stellarrec
+      </a>
 
-  <!-- Center: Recommender / Student tabs (A) -->
-  <nav class="hdr-tabs" role="tablist" aria-label="Primary view">
-    <button id="hdrRecTab" class="hdr-tab" role="tab" aria-selected="true" type="button">Recommender</button>
-    <button id="hdrStuTab" class="hdr-tab" role="tab" aria-selected="false" type="button">Student</button>
-  </nav>
+      <!-- Center: Recommender / Student tabs -->
+      <nav class="hdr-tabs" role="tablist" aria-label="Primary view">
+        <button id="hdrRecTab" class="hdr-tab" role="tab" aria-selected="true" type="button">Recommender</button>
+        <button id="hdrStuTab" class="hdr-tab" role="tab" aria-selected="false" type="button">Student</button>
+      </nav>
 
-  <!-- Right: Theme button + Avatar -->
-  <div class="right-controls">
-    <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false" title="Toggle theme">
-      <span class="material-icons" aria-hidden="true">dark_mode</span>
-      Light / Dark
-    </button>
-
-    <div class="user-info">
-      <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
-        <span class="material-icons">person</span>
-      </button>
-
-      <!-- Dropdown menu (unchanged) -->
-      <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
-        <div class="dropdown-header">Quick actions</div>
-
-        <div class="dropdown-item" role="menuitem" tabindex="0">
-          <span class="material-icons">help_outline</span>
-          <div class="view-label">
-            <a href="https://stellarrec.netlify.app/portal-signin"
-               class="view-name" style="text-decoration:none; color:inherit;" target="_self">
-              How it works
-            </a>
-            <div class="view-description">Sign-in portal</div>
-          </div>
-        </div>
-
-        <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
-          <span class="material-icons">support_agent</span>
-          <div class="view-label">
-            <div class="view-name">Contact admin</div>
-            <div class="view-description">Send a message</div>
-          </div>
-        </div>
-
-        <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
-          <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
-            <span class="material-icons">build</span>
-            <div class="view-label">
-              <div class="view-name">Use mock API</div>
-              <div class="view-description">Toggle mock vs real backend</div>
+      <!-- Right: Theme + Avatar -->
+      <div class="right-controls">
+        <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false" title="Toggle theme">
+          <span class="material-icons" aria-hidden="true">dark_mode</span>
+          Light / Dark
+        </button>
+        <div class="user-info">
+          <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
+            <span class="material-icons">person</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
+            <div class="dropdown-header">Quick actions</div>
+            <div class="dropdown-item" role="menuitem" tabindex="0">
+              <span class="material-icons">help_outline</span>
+              <div class="view-label">
+                <a href="https://stellarrec.netlify.app/portal-signin"
+                   class="view-name" style="text-decoration:none; color:inherit;" target="_self">
+                  How it works
+                </a>
+                <div class="view-description">Sign-in portal</div>
+              </div>
             </div>
-            <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
-          </label>
-        </div>
-      </div>
-    </div><!-- /.right-controls -->
-  </div><!-- /.header-content -->
-
-
+            <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
+              <span class="material-icons">support_agent</span>
+              <div class="view-label">
+                <div class="view-name">Contact admin</div>
+                <div class="view-description">Send a message</div>
+              </div>
+            </div>
+            <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
+              <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
+                <span class="material-icons">build</span>
+                <div class="view-label">
+                  <div class="view-name">Use mock API</div>
+                  <div class="view-description">Toggle mock vs real backend</div>
+                </div>
+                <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
+              </label>
+            </div>
+          </div>
+        </div><!-- /.user-info -->
+      </div><!-- /.right-controls -->
+    </div><!-- /.header-content -->
+  </div><!-- /.header -->
   <!-- Contact Admin Modal (legacy modal) -->
   <div id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactTitle"
        style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
@@ -462,7 +426,7 @@
     </div>
   </div>
 
-  <!-- MAIN -->
+  <!-- MAIN — RECOMMENDER VIEW -->
   <div class="container" id="panel-recommender">
     <!-- Student Context Bar -->
     <div class="student-bar" id="studentBar" style="display:flex; align-items:center; gap:.75rem; background:#fff; border:1px solid #eaeaea; border-radius:12px; padding:1rem; margin-bottom:1rem;">
@@ -478,7 +442,7 @@
         Allow recommender edits
       </label>
     </div>
-  
+
     <!-- Hero -->
     <div class="hero-section">
       <h1 class="hero-title">One upload. Unlimited reach.</h1>
@@ -542,11 +506,12 @@
         </div>
       </div>
     </div>
+
     <!-- University Selection -->
     <div class="university-section">
       <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
 
-      <!-- Search + Apply (inline) + Bulk import INSIDE the white box -->
+      <!-- Search + Apply + Bulk import -->
       <div class="university-search" style="position:relative; display:flex; gap:.5rem; align-items:center; margin-bottom:.5rem;">
         <input
           type="text"
@@ -559,11 +524,7 @@
           aria-owns="searchSuggest"
         />
         <button class="apply-btn" id="searchApplyBtn" title="Apply search (Enter)" type="button">Apply</button>
-
-        <!-- Bulk import moved here (inside the same white panel) -->
         <button class="page-btn" id="bulkImportBtn" title="Bulk import by names" type="button">Bulk import</button>
-
-        <!-- Suggestions popover -->
         <div id="searchSuggest" class="suggest-popover" style="display:none;"></div>
       </div>
 
@@ -574,7 +535,6 @@
 
       <!-- Filters -->
       <div class="filter-meta" id="resultMeta" aria-live="polite">Showing 0 of 0</div>
-
       <div class="filter-bar">
         <select id="stateFilter" class="filter-select" aria-label="Filter by state">
           <option value="">All states</option>
@@ -614,7 +574,6 @@
 
         <button class="apply-btn" id="filterApplyBtn" title="Apply filters and sort" type="button">Apply filters</button>
         <button class="apply-btn" id="resetBtn" title="Reset search and filters" type="button">Reset</button>
-        <!-- REMOVED: Select page button entirely -->
       </div>
 
       <!-- Empty state -->
@@ -648,7 +607,6 @@
         </div>
       </div>
     </div>
-
     <!-- Selected Universities -->
     <div class="selected-section">
       <h2 class="section-title" style="display:flex;align-items:center;gap:.5rem;">
@@ -664,6 +622,7 @@
         </button>
       </div>
     </div>
+
     <!-- Progress Section -->
     <div class="progress-section" id="progressSection">
       <h2 class="progress-title">Sending Letters...</h2>
@@ -769,95 +728,91 @@
 
     <!-- Toast container -->
     <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
-  </div><!-- /.container -->
-    <!-- STUDENT VIEW (B) -->
-<div class="container" id="panel-student" style="display:none;">
-  <div class="student-card" style="margin-bottom:1rem;">
-    <h1 class="hero-title" style="margin:0 0 .4rem;">Student Portal</h1>
-    <p class="hero-subtitle" style="margin:0 0 .8rem;">Request recommendations and track their status.</p>
+  </div><!-- /.container (Recommender) -->
 
-    <!-- Student tabs -->
-    <div class="student-tabs" role="tablist" aria-label="Student actions">
-      <button id="stuTabSend" class="student-tab" role="tab" aria-selected="true" type="button">
-        Send Recommendation Request
-      </button>
-      <button id="stuTabTrack" class="student-tab" role="tab" aria-selected="false" type="button">
-        Track Recommendation &amp; Status
-      </button>
-    </div>
+  <!-- STUDENT VIEW -->
+  <div class="container" id="panel-student" style="display:none;">
+    <div class="student-card" style="margin-bottom:1rem;">
+      <h1 class="hero-title" style="margin:0 0 .4rem;">Student Portal</h1>
+      <p class="hero-subtitle" style="margin:0 0 .8rem;">Request recommendations and track their status.</p>
 
-    <!-- Panels -->
-    <div class="student-panels">
-      <!-- Send -->
-      <section id="stuPanelSend">
-        <form id="stuSendForm" class="student-card" style="padding:1rem; box-shadow:none; border:1px solid #e5e7eb;">
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:.75rem;">
-            <div>
-              <label style="font-weight:600; display:block; margin-bottom:.25rem;">Your Name</label>
-              <input id="stuName" class="filter-select" type="text" placeholder="Student full name" required />
+      <div class="student-tabs" role="tablist" aria-label="Student actions">
+        <button id="stuTabSend" class="student-tab" role="tab" aria-selected="true" type="button">
+          Send Recommendation Request
+        </button>
+        <button id="stuTabTrack" class="student-tab" role="tab" aria-selected="false" type="button">
+          Track Recommendation &amp; Status
+        </button>
+      </div>
+
+      <div class="student-panels">
+        <!-- Send -->
+        <section id="stuPanelSend">
+          <form id="stuSendForm" class="student-card" style="padding:1rem; box-shadow:none; border:1px solid #e5e7eb;">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:.75rem;">
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Your Name</label>
+                <input id="stuName" class="filter-select" type="text" placeholder="Student full name" required />
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Your Email</label>
+                <input id="stuEmail" class="filter-select" type="email" placeholder="you@example.com" required />
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Recommender Name</label>
+                <input id="recName" class="filter-select" type="text" placeholder="Prof. Jane Smith" required />
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Recommender Email</label>
+                <input id="recEmail" class="filter-select" type="email" placeholder="jane@university.edu" required />
+              </div>
             </div>
-            <div>
-              <label style="font-weight:600; display:block; margin-bottom:.25rem;">Your Email</label>
-              <input id="stuEmail" class="filter-select" type="email" placeholder="you@example.com" required />
+            <div style="margin-top:.75rem; display:flex; gap:.5rem; justify-content:flex-end;">
+              <button type="reset" class="page-btn">Clear</button>
+              <button type="submit" class="apply-btn">Send Request</button>
             </div>
-            <div>
-              <label style="font-weight:600; display:block; margin-bottom:.25rem;">Recommender Name</label>
-              <input id="recName" class="filter-select" type="text" placeholder="Prof. Jane Smith" required />
-            </div>
-            <div>
-              <label style="font-weight:600; display:block; margin-bottom:.25rem;">Recommender Email</label>
-              <input id="recEmail" class="filter-select" type="email" placeholder="jane@university.edu" required />
-            </div>
+          </form>
+        </section>
+
+        <!-- Track -->
+        <section id="stuPanelTrack" hidden>
+          <div class="student-card" style="padding:0; overflow:hidden;">
+            <table class="table" aria-label="Recommendation requests">
+              <thead>
+                <tr>
+                  <th>Recommender</th>
+                  <th>Email</th>
+                  <th>Requested</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="stuTrackBody">
+                <!-- Populated by dashboard.js -->
+              </tbody>
+            </table>
           </div>
-          <div style="margin-top:.75rem; display:flex; gap:.5rem; justify-content:flex-end;">
-            <button type="reset" class="page-btn">Clear</button>
-            <button type="submit" class="apply-btn">Send Request</button>
-          </div>
-        </form>
-      </section>
-
-      <!-- Track -->
-      <section id="stuPanelTrack" hidden>
-        <div class="student-card" style="padding:0; overflow:hidden;">
-          <table class="table" aria-label="Recommendation requests">
-            <thead>
-              <tr>
-                <th>Recommender</th>
-                <th>Email</th>
-                <th>Requested</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="stuTrackBody">
-              <!-- Rows seeded by JS -->
-            </tbody>
-          </table>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   </div>
-</div>
-
-
   <!-- Footer -->
   <footer class="site-footer">
     <div class="container">
       <p>&copy; 2025 <span style="color: #ffeb3b; font-weight: 600;">StellarRec™</span>. All rights reserved. |
         Making recommendations stellar since 2025 🚀</p>
     </div>
-  </footer>  
+  </footer>
 
-<!-- Vendor scripts (self-hosted) -->
-<script src="/assets/js/vendor/fuse.min.js" defer></script>
-<script src="/assets/js/vendor/localforage.min.js" defer></script>
+  <!-- Vendor scripts (self-hosted) -->
+  <script src="/assets/js/vendor/fuse.min.js" defer></script>
+  <script src="/assets/js/vendor/localforage.min.js" defer></script>
 
-<!-- Your app code -->
-<script src="/assets/js/dashboard.js" defer></script>
-<script src="/assets/js/init-header.js" defer></script>
-<script src="/assets/js/university-search.js" defer></script>
-
-
+  <!-- Your app code -->
+  <script src="/assets/js/dashboard.js" defer></script>
+  <script src="/assets/js/init-header.js" defer></script>
+  <script src="/assets/js/university-search.js" defer></script>
 </body>
 </html>
+
 
 
