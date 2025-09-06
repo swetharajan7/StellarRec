@@ -1,15 +1,12 @@
-# netlify.toml (root-based deploy)
 [build]
-  publish = "."
+  publish = "public"
   command = ""
 
-# send "/" to "/dashboard"
 [[redirects]]
   from = "/"
   to   = "/dashboard"
   status = 200
 
-# make "/dashboard" resolve to "dashboard.html" at the root
 [[redirects]]
   from = "/dashboard"
   to   = "/dashboard.html"
