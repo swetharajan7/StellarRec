@@ -1,16 +1,15 @@
-# netlify.toml (put at the repo root)
-
+# netlify.toml (root-based deploy)
 [build]
-  publish = "public"
+  publish = "."
   command = ""
 
-# Redirect the site root to /dashboard
+# send "/" to "/dashboard"
 [[redirects]]
   from = "/"
   to   = "/dashboard"
   status = 200
 
-# Make /dashboard resolve to /dashboard.html (handy for static sites)
+# make "/dashboard" resolve to "dashboard.html" at the root
 [[redirects]]
   from = "/dashboard"
   to   = "/dashboard.html"
