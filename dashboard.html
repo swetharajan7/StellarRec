@@ -338,6 +338,15 @@
       padding:.6rem 1rem; border-radius:10px; font-weight:700; cursor:pointer;
     }
     .apply-btn:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(25,118,210,.25); }
+    .header-nav {
+  display: flex;
+  justify-content: space-between;
+}
+.nav-left, .nav-right {
+  display: flex;
+  gap: 1.25rem;
+}
+
   </style>
 </head>
 <body>
@@ -351,10 +360,15 @@
       </a>
 
       <!-- Center: Recommender / Student tabs -->
-      <nav class="hdr-tabs" role="tablist" aria-label="Primary view">
-        <button id="hdrRecTab" class="hdr-tab" role="tab" aria-selected="true" type="button">Recommender</button>
-        <button id="hdrStuTab" class="hdr-tab" role="tab" aria-selected="false" type="button">Student</button>
-      </nav>
+   <nav class="header-nav">
+  <div class="nav-left">
+    <a href="/student" class="nav-link">Student</a>
+  </div>
+  <div class="nav-right">
+    <a href="/recommender" class="nav-link">Recommender</a>
+  </div>
+</nav>
+
 
       <!-- Right: Theme + Avatar -->
       <div class="right-controls">
