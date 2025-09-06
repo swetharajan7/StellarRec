@@ -19,3 +19,12 @@
   from = "/*"
   to = "/dashboard"
   status = 200
+[build]
+  publish = "public"
+  command = ""
+
+# Send "/" to "/dashboard"
+[[redirects]]
+  from = "/"
+  to   = "/dashboard"
+  status = 200
