@@ -1,1 +1,22 @@
+# 1) Create the publish dir and JS folders
+mkdir -p public/assets/js
+
+# 2) Move your files into public/
+# adjust the left-hand paths if your files live elsewhere
+git mv dashboard.html public/ 2>/dev/null || mv dashboard.html public/
+git mv assets/js/dashboard.js public/assets/js/ 2>/dev/null || mv assets/js/dashboard.js public/assets/js/
+git mv assets/js/university-search.js public/assets/js/ 2>/dev/null || mv assets/js/university-search.js public/assets/js/
+
+# 3) (optional) add a tiny index that redirects / -> /dashboard
+cat > public/index.html <<'HTML'
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="refresh" content="0; url=/dashboard">
+    <link rel="canonical" href="/dashboard"/>
+    <title>Redirecting…</title>
+  </head>
+  <body>Redirecting to <a href="/dashboard">/dashboard</a>…</body>
+</html>
+HTML
 
