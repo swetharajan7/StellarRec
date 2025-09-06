@@ -1,30 +1,17 @@
-[build]
-  # Serve everything in the /public folder
-  publish = "public"
-  # No build step — it's a static site
-  command = ""
+# netlify.toml (put at the repo root)
 
-[build.environment]
-  NODE_VERSION = "18"
-
-# Redirect root to /dashboard
-[[redirects]]
-  from = "/"
-  to   = "/dashboard"
-  status = 200
-  force = true
-
-# Optional: handle trailing slashes and SPA-style routes
-[[redirects]]
-  from = "/*"
-  to = "/dashboard"
-  status = 200
 [build]
   publish = "public"
   command = ""
 
-# Send "/" to "/dashboard"
+# Redirect the site root to /dashboard
 [[redirects]]
   from = "/"
   to   = "/dashboard"
+  status = 200
+
+# Make /dashboard resolve to /dashboard.html (handy for static sites)
+[[redirects]]
+  from = "/dashboard"
+  to   = "/dashboard.html"
   status = 200
