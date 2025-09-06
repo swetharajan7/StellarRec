@@ -16,7 +16,6 @@
       color:var(--text,#333);
       min-height:100vh;
     }
-
     /* Header */
     .header {
       background:linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
@@ -33,23 +32,17 @@
       text-decoration:none; color:#fff; transition:.3s;
     }
     .logo:hover { opacity:.85; transform:translateY(-1px); }
-
     /* Header nav (Student left, Recommender right) */
     .header-nav { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex:1; margin:0 1rem; }
     .nav-left, .nav-right { display:flex; gap:1.25rem; align-items:center; }
-
-    /* Hidden utility for view panels */
     [hidden] { display: none !important; }
 
     .nav-link{
       color:#fff; text-decoration:none; font-weight:700; opacity:.95;
       padding:.35rem .75rem; border-radius:10px; transition:opacity .15s, transform .15s;
-      background:transparent; border:0; cursor:pointer; /* works for <button> */
-      font-family:inherit;
     }
     .nav-link:hover{ opacity:1; transform:translateY(-1px); }
     .nav-link[aria-current="page"]{ background:#ffffff22; }
-
     /* Center header tabs (A) */
     .hdr-tabs {
       display:flex; align-items:center; gap:.4rem;
@@ -66,10 +59,8 @@
       opacity:1;
     }
     .hdr-tab:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
-
     /* Right controls (theme + avatar) */
     .right-controls { display:flex; align-items:center; gap:.75rem; }
-
     /* Avatar + dropdown */
     .user-info { position:relative; display:flex; align-items:center; gap:1rem; }
     .user-avatar {
@@ -81,7 +72,6 @@
     }
     .user-avatar:hover { background:rgba(255,255,255,.3); transform:scale(1.05); border-color:rgba(255,255,255,.3); }
     .user-avatar:focus { outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.3); }
-
     .user-dropdown {
       position:absolute; top:100%; right:0; margin-top:.5rem;
       background:#fff; border-radius:12px;
@@ -110,16 +100,13 @@
     .view-label { display:flex; flex-direction:column; }
     .view-name { font-weight:600; font-size:.9rem; }
     .view-description { font-size:.8rem; color:#666; margin-top:.1rem; }
-
     .container { max-width:1200px; margin:0 auto; padding:1.25rem; }
     .hero-section { text-align:center; margin:1rem 0 1.5rem; }
     .hero-title { font-size:2.3rem; font-weight:700; color:#1976d2; margin-bottom:.6rem; }
     .hero-subtitle { font-size:1.1rem; color:#666; margin-bottom:1.25rem; }
-
     /* Two-column layout */
     .compose-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:2rem; }
     @media (max-width: 980px) { .compose-grid { grid-template-columns:1fr; } }
-
     .upload-section, .writer-section, .university-section,
     .selected-section, .progress-section {
       background:#fff; border-radius:16px; padding:2rem;
@@ -127,7 +114,6 @@
     }
     .upload-section { border:2px dashed #e0e0e0; transition:.3s; }
     .upload-section.dragover { border-color:#1976d2; background:#f3f8ff; }
-
     .upload-area { text-align:center; padding:2rem; }
     .upload-icon { font-size:4rem; color:#1976d2; margin-bottom:1rem; }
     .upload-title { font-size:1.5rem; font-weight:600; margin-bottom:.5rem; color:#333; }
@@ -140,7 +126,6 @@
       transition:.3s; display:inline-flex; align-items:center; gap:.5rem;
     }
     .upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
-
     .uploaded-file {
       display:none; background:#e8f5e8; border:2px solid #4caf50;
       border-radius:12px; padding:1.5rem; margin-top:1rem;
@@ -154,12 +139,10 @@
       cursor:pointer; padding:.5rem; border-radius:50%; transition:.2s;
     }
     .remove-file:hover { background:rgba(244,67,54,.1); color:#f44336; }
-
     .section-title {
       font-size:1.5rem; font-weight:600; color:#333;
       margin-bottom:1rem; display:flex; align-items:center; gap:.5rem;
     }
-
     /* Writer */
     .writer-toolbar { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.75rem; align-items:center; }
     .writer-toolbar .btn {
@@ -183,11 +166,9 @@
     .btn-success { background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; border:none; }
     .btn-danger  { background:linear-gradient(135deg,#e53935,#ef5350); color:#fff; border:none; }
     .btn-muted   { background:#fff; color:#333; }
-
     .filter-meta { font-size:.9rem; color:#666; margin:.25rem 0 .5rem; }
     .filter-bar { display:grid; grid-template-columns: repeat(8, minmax(140px, 1fr)); gap:.5rem; margin-bottom:.75rem; align-items:center; }
     .filter-select { width:100%; padding:.7rem .9rem; border:2px solid #e0e0e0; border-radius:12px; background:#fff; font-size:.95rem; }
-
     .university-grid {
       display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:1rem;
       max-height:480px; overflow-y:auto; padding:1rem; border:1px solid #f0f0f0; border-radius:12px;
@@ -200,19 +181,16 @@
     .university-name { font-weight:600; color:#333; }
     .university-location { color:#666; font-size:.9rem; }
     .university-pill { margin-top:.25rem; display:inline-block; font-size:.75rem; color:#555; background:#eef3ff; border:1px solid #dbe7ff; padding:.15rem .5rem; border-radius:999px; }
-
     .pagination { display:flex; justify-content:space-between; align-items:center; margin-top:.75rem; }
     .pager { display:flex; gap:.5rem; }
     .page-btn { background:#fff; border:2px solid #e0e0e0; border-radius:10px; padding:.5rem .9rem; cursor:pointer; font-weight:600; }
     .page-btn[disabled] { opacity:.5; cursor:not-allowed; }
     .page-size { margin-left:auto; display:flex; align-items:center; gap:.5rem; }
-
     .selected-count { color:#1976d2; font-weight:600; margin-bottom:1rem; }
     .selected-list { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:2rem; }
     .selected-tag { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:.5rem 1rem; border-radius:20px; font-size:.9rem; display:flex; align-items:center; gap:.5rem; }
     .remove-tag { cursor:pointer; background:rgba(255,255,255,.2); border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
     .remove-tag:hover { background:rgba(255,255,255,.3); }
-
     .send-section { text-align:center; }
     .send-btn {
       background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; padding:1.2rem 3rem; border:none; border-radius:12px;
@@ -220,8 +198,7 @@
     }
     .send-btn:disabled { background:#ccc; cursor:not-allowed; }
     .send-btn:not(:disabled):hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(76,175,80,.3); }
-
-        .progress-section { display:none; }
+    .progress-section { display:none; }
     .progress-title { font-size:1.3rem; font-weight:600; color:#333; margin-bottom:1rem; text-align:center; }
     .progress-bar { width:100%; height:12px; background:#e0e0e0; border-radius:6px; overflow:hidden; margin-bottom:1rem; }
     .progress-fill { height:100%; background:linear-gradient(135deg,#4caf50,#66bb6a); border-radius:6px; transition:width .5s ease; width:0%; }
@@ -232,7 +209,6 @@
     .delivery-status.pending { background:#fff3e0; color:#ff9800; }
     .delivery-status.success { background:#e8f5e8; color:#4caf50; }
     .delivery-status.error { background:#ffebee; color:#f44336; }
-
     .success-section {
       display:none; background:linear-gradient(135deg,#e8f5e8,#f1f8e9);
       border:2px solid #4caf50; border-radius:16px; padding:2rem; text-align:center; box-shadow:0 8px 32px rgba(76,175,80,.2);
@@ -242,15 +218,12 @@
     .success-subtitle { color:#4caf50; margin-bottom:2rem; }
     .new-upload-btn { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:1rem 2rem; border:none; border-radius:12px; font-size:1rem; font-weight:600; cursor:pointer; transition:.2s; }
     .new-upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
-
     @keyframes flash { 0%{box-shadow:0 0 0 rgba(25,118,210,0);} 25%{box-shadow:0 0 0 6px rgba(25,118,210,.25);} 100%{box-shadow:0 0 0 rgba(25,118,210,0);} }
     .flash { animation: flash 1.2s ease; }
-
     .badge { display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; font-size:.75rem; border-radius:999px; border:1px solid; }
     .badge-student { background:#f1f8ff; color:#0d47a1; border-color:#bbdefb; }
     .badge-added   { background:#e8f5e9; color:#1b5e20; border-color:#c8e6c9; }
     .badge-removed { background:#ffebee; color:#b71c1c; border-color:#ffcdd2; }
-
     .toast-wrap { position: fixed; right: 16px; bottom: 16px; z-index: 99999; display: grid; gap: 8px; }
     .toast { min-width: 240px; max-width: 420px; padding: .75rem .9rem; border-radius: 12px;
       box-shadow: 0 8px 30px rgba(0,0,0,.15); color:#0f172a; background:#fff; border:1px solid #e5e7eb;
@@ -263,10 +236,8 @@
     .toast .x    { border:none; background:transparent; cursor:pointer; font-size:1rem; opacity:.6; }
     .toast .x:hover { opacity:.9; }
     @keyframes toast-in { from { transform: translateY(6px); opacity:0; } to { transform: translateY(0); opacity:1; } }
-
     .empty-state { display:none; background:#fff; border:1px dashed #d0d7de; border-radius:12px; padding:1.25rem; color:#445; text-align:center; }
     .empty-state .actions { margin-top:.75rem; display:flex; gap:.5rem; justify-content:center; }
-
     /* Student view (B) */
     .student-card {
       background:#fff; border-radius:16px; padding:1.25rem 1.5rem;
@@ -285,18 +256,15 @@
     }
     .student-panels > section { display:block; }
     .student-panels > section[hidden] { display:none; }
-
     .table { width:100%; border-collapse:separate; border-spacing:0; overflow:hidden;
       border:1px solid #e5e7eb; border-radius:12px; background:#fff; }
     .table th, .table td { padding:.7rem .8rem; text-align:left; border-bottom:1px solid #eef2f7; }
     .table th { background:#f8fafc; color:#334155; font-weight:700; }
     .table tr:last-child td { border-bottom:none; }
-
     .track-pill { display:inline-block; padding:.2rem .6rem; border-radius:999px; font-weight:700; font-size:.8rem; }
     .track-pill.pending { background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; }
     .track-pill.sent    { background:#ecfeff; color:#155e75; border:1px solid #a5f3fc; }
     .track-pill.received{ background:#ecfdf5; color:#166534; border:1px solid #bbf7d0; }
-
     @media (max-width:768px) {
       .container { padding:1rem; }
       .hero-title { font-size:2rem; }
@@ -304,7 +272,6 @@
       .header-content { flex-direction:column; gap:1rem; }
       .filter-bar { grid-template-columns:1fr 1fr; }
     }
-
     /* Dark theme basics (CSS side) */
     :root[data-theme="dark"] {
       --bg:#0b1220; --panel:#111a2a; --text:#e5eefc; --muted:#93a3bc; --primary:#7aa2ff; --border:#24324a;
@@ -332,7 +299,6 @@
     :root[data-theme="dark"] .table th { background:#0f1729; color:#e5eefc; }
     :root[data-theme="dark"] .student-tab { color:#c9d6ee; }
     :root[data-theme="dark"] .student-tab[aria-selected="true"] { background:#0f1729; color:#7aa2ff; }
-
     /* Footer (match header) */
     .site-footer {
       background: linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
@@ -341,7 +307,6 @@
       text-align: center;
     }
     .site-footer p { margin: 0; font-size: 0.95rem; }
-
     .theme-btn {
       display:inline-flex; align-items:center; gap:.5rem;
       padding:.55rem 1rem; border-radius:999px;
@@ -351,7 +316,6 @@
     .theme-btn:hover { transform: translateY(-1px); background:#ffffff33; border-color:#ffffff88; }
     .theme-btn:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
     .theme-btn .material-icons { font-size:18px; }
-
     /* unify apply/page buttons in student view */
     .apply-btn {
       background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none;
@@ -369,16 +333,15 @@
         <span class="material-icons">star</span>
         stellarrec
       </a>
-
       <!-- Center: Student / Recommender toggles -->
-      <nav class="header-nav" role="tablist" aria-label="Choose portal">
-        <div class="nav-left">
-          <button class="nav-link" data-view="student" role="tab" aria-selected="true" type="button">Student</button>
-        </div>
-        <div class="nav-right">
-          <button class="nav-link" data-view="recommender" role="tab" aria-selected="false" type="button">Recommender</button>
-        </div>
-      </nav>
+   <nav class="header-nav" role="tablist" aria-label="Choose portal">
+  <div class="nav-left">
+    <button class="nav-link" data-view="student" role="tab" aria-selected="true" type="button">Student</button>
+  </div>
+  <div class="nav-right">
+    <button class="nav-link" data-view="recommender" role="tab" aria-selected="false" type="button">Recommender</button>
+  </div>
+</nav>
 
       <!-- Right: Theme + Avatar -->
       <div class="right-controls">
@@ -425,13 +388,12 @@
     </div><!-- /.header-content -->
   </div><!-- /.header -->
   <!-- MAIN — RECOMMENDER VIEW (hidden by default) -->
-  <div class="container" id="panel-recommender" hidden>
+  <div class="container" id="panel-recommender" style="display:none;">
     <!-- Hero -->
     <div class="hero-section">
       <h1 class="hero-title">One upload. Unlimited reach.</h1>
       <p class="hero-subtitle">Upload your recommendation letter once and send it to multiple US universities instantly.</p>
     </div>
-
     <!-- Upload + Writer -->
     <div class="compose-grid">
       <!-- Upload Section -->
@@ -441,7 +403,6 @@
           <h2 class="upload-title">Upload Recommendation Letter</h2>
           <p class="upload-subtitle">Drag and drop your PDF file here, or click to browse</p>
           <div id="uploadHint" style="margin:.5rem 0 0; font-size:.9rem; color:#556;">PDF only. Recommended size ≤ 10 MB.</div>
-
           <input type="file" id="fileInput" class="file-input" accept=".pdf,.txt" />
           <button class="upload-btn" id="chooseFileBtn">
             <span class="material-icons">upload_file</span>
@@ -459,7 +420,6 @@
           </div>
         </div>
       </div>
-
       <!-- Writer -->
       <div class="writer-section" id="writerSection">
         <h2 class="section-title"><span class="material-icons">edit</span> Write Letter</h2>
@@ -489,11 +449,9 @@
         </div>
       </div>
     </div>
-
     <!-- University Selection -->
     <div class="university-section">
       <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
-
       <!-- Search + Apply + Bulk import -->
       <div class="university-search" style="position:relative; display:flex; gap:.5rem; align-items:center; margin-bottom:.5rem;">
         <input
@@ -510,12 +468,10 @@
         <button class="page-btn" id="bulkImportBtn" title="Bulk import by names" type="button">Bulk import</button>
         <div id="searchSuggest" class="suggest-popover" style="display:none;"></div>
       </div>
-
       <!-- Browse-all dropdown -->
       <select id="universitySelect" class="filter-select" title="Browse all universities" style="margin-bottom:.5rem;">
         <option value="" selected disabled>Browse all universities (6000+)</option>
       </select>
-
       <!-- Filters -->
       <div class="filter-meta" id="resultMeta" aria-live="polite">Showing 0 of 0</div>
       <div class="filter-bar">
@@ -535,30 +491,25 @@
           <option value="VT">Vermont</option><option value="VA">Virginia</option><option value="WA">Washington</option><option value="WV">West Virginia</option>
           <option value="WI">Wisconsin</option><option value="WY">Wyoming</option>
         </select>
-
         <select id="typeFilter" class="filter-select" aria-label="Filter by institution type">
           <option value="">All types</option>
           <option value="Public">Public</option>
           <option value="Private nonprofit">Private nonprofit</option>
           <option value="Private for-profit">Private for-profit</option>
         </select>
-
         <select id="levelFilter" class="filter-select" aria-label="Filter by level">
           <option value="">All levels</option>
           <option value="4-year">4-year</option>
           <option value="2-year">2-year</option>
           <option value="Less-than-2-year">Less-than-2-year</option>
         </select>
-
         <select id="sortBy" class="filter-select" aria-label="Sort results">
           <option value="name_asc">Sort: Name (A–Z)</option>
           <option value="state_asc">Sort: State (A–Z)</option>
         </select>
-
         <button class="apply-btn" id="filterApplyBtn" title="Apply filters and sort" type="button">Apply filters</button>
         <button class="apply-btn" id="resetBtn" title="Reset search and filters" type="button">Reset</button>
       </div>
-
       <!-- Empty state -->
       <div id="emptyState" class="empty-state" aria-live="polite">
         <div style="font-weight:600; margin-bottom:.25rem;">No universities match your filters</div>
@@ -568,10 +519,8 @@
           <button class="page-btn" id="retryLoadBtn" style="display:none;" type="button">Retry loading</button>
         </div>
       </div>
-
       <!-- Results grid -->
       <div class="university-grid" id="universityGrid" role="list" aria-label="Universities list"></div>
-
       <!-- Pagination -->
       <div class="pagination">
         <div class="pager">
@@ -590,7 +539,6 @@
         </div>
       </div>
     </div>
-
     <!-- Selected Universities -->
     <div class="selected-section">
       <h2 class="section-title" style="display:flex;align-items:center;gap:.5rem;">
@@ -606,7 +554,6 @@
         </button>
       </div>
     </div>
-
     <!-- Progress Section -->
     <div class="progress-section" id="progressSection">
       <h2 class="progress-title">Sending Letters...</h2>
@@ -614,7 +561,6 @@
       <div class="progress-text" id="progressText" aria-live="polite">Preparing to send...</div>
       <div class="delivery-list" id="deliveryList"></div>
     </div>
-
     <!-- Success Section -->
     <div class="success-section" id="successSection">
       <div class="success-icon"><span class="material-icons">check_circle</span></div>
@@ -625,7 +571,6 @@
         Send Another Letter
       </button>
     </div>
-
     <!-- Confirm Send Modal -->
     <div id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle"
          style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
@@ -713,6 +658,7 @@
     <!-- Toast container -->
     <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
   </div><!-- /.container (Recommender) -->
+
   <!-- STUDENT VIEW (default visible) -->
   <div class="container" id="panel-student">
     <div class="student-card" style="margin-bottom:1rem;">
@@ -795,103 +741,77 @@
   <script src="/assets/js/dashboard.js" defer></script>
   <script src="/assets/js/university-search.js" defer></script>
 
-  <!-- View toggler (uses [hidden], Student default) -->
+  <!-- View toggler & simple header behaviors -->
   <script>
-  (function(){
-    const studentPanel = document.getElementById('panel-student');
-    const recPanel     = document.getElementById('panel-recommender');
-    const tabs         = document.querySelectorAll('.header-nav .nav-link');
+    (function(){
+      // Panels
+      const studentPanel = document.getElementById('panel-student');
+      const recPanel     = document.getElementById('panel-recommender');
 
-    if (!studentPanel || !recPanel || !tabs.length) return;
+      // Header toggles
+      const toggles = document.querySelectorAll('.header-nav .nav-link');
 
-    // Initial state: Student visible, Recommender hidden (attribute already set on HTML)
-    studentPanel.hidden = false;
-    recPanel.hidden     = true;
+      // Ensure initial state: Student visible, Recommender hidden
+      studentPanel.hidden = false;
+      recPanel.hidden     = true;
 
-    function setActive(view){
-      const isStudent = (view === 'student');
-      studentPanel.hidden = !isStudent;
-      recPanel.hidden     =  isStudent;
+      function setActive(view){
+        const isStudent = (view === 'student');
+        studentPanel.hidden = !isStudent;
+        recPanel.hidden     =  isStudent;
 
-      // ARIA & current state on header buttons
-      tabs.forEach(btn => {
-        const on = btn.dataset.view === view;
-        btn.setAttribute('aria-selected', on ? 'true' : 'false');
-        if (on) btn.setAttribute('aria-current', 'page');
-        else btn.removeAttribute('aria-current');
-        btn.toggleAttribute('data-active', on);
+        // visual current
+        toggles.forEach(btn => {
+          const on = btn.dataset.view === view;
+          btn.setAttribute('aria-selected', on ? 'true' : 'false');
+          if (on) btn.setAttribute('aria-current','page'); else btn.removeAttribute('aria-current');
+        });
+
+        // hash (deep-link)
+        history.replaceState(null, '', '#' + view);
+      }
+
+      // Click handlers
+      toggles.forEach(btn => btn.addEventListener('click', () => setActive(btn.dataset.view)));
+
+      // Deep-link support (#student / #recommender)
+      const initial = (location.hash || '#student').slice(1);
+      setActive(initial === 'recommender' ? 'recommender' : 'student');
+
+      window.addEventListener('hashchange', () => {
+        const v = (location.hash || '#student').slice(1);
+        setActive(v === 'recommender' ? 'recommender' : 'student');
       });
 
-      // Keep hash in sync for deep links
-      const wanted = '#' + (isStudent ? 'student' : 'recommender');
-      if (location.hash !== wanted) history.replaceState(null, '', wanted);
-    }
+      // Basic user dropdown toggle (optional)
+      const avatarBtn = document.getElementById('userAvatarBtn');
+      const dropdown  = document.getElementById('userDropdown');
+      if (avatarBtn && dropdown) {
+        avatarBtn.addEventListener('click', () => {
+          const open = dropdown.classList.toggle('show');
+          avatarBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+        document.addEventListener('click', (e)=>{
+          if (!dropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
+            dropdown.classList.remove('show');
+            avatarBtn.setAttribute('aria-expanded','false');
+          }
+        });
+      }
 
-    // Click to switch
-    tabs.forEach(btn => {
-      btn.addEventListener('click', () => setActive(btn.dataset.view));
-    });
-
-    // Support #student / #recommender on load & hashchange
-    const hash = (location.hash || '#student').slice(1);
-    if (hash === 'recommender' || hash === 'student') setActive(hash);
-    else setActive('student');
-
-    window.addEventListener('hashchange', () => {
-      const v = (location.hash || '#student').slice(1);
-      if (v === 'recommender' || v === 'student') setActive(v);
-    });
-  })();
-  </script>
-  <!-- (Optional) Simple avatar dropdown controller -->
-  <script>
-  (function(){
-    const btn = document.getElementById('userAvatarBtn');
-    const dd  = document.getElementById('userDropdown');
-    if(!btn || !dd) return;
-
-    function hide(){ dd.classList.remove('show'); dd.setAttribute('aria-hidden','true'); btn.setAttribute('aria-expanded','false'); }
-    function show(){ dd.classList.add('show'); dd.setAttribute('aria-hidden','false'); btn.setAttribute('aria-expanded','true'); }
-
-    btn.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      if(dd.classList.contains('show')) hide(); else show();
-    });
-
-    document.addEventListener('click', (e)=>{
-      if(!dd.contains(e.target) && e.target !== btn) hide();
-    });
-
-    document.addEventListener('keydown', (e)=>{
-      if(e.key === 'Escape') hide();
-    });
-  })();
-  </script>
-
-  <!-- (Optional) Theme toggle (light/dark via data-theme) -->
-  <script>
-  (function(){
-    const root = document.documentElement;
-    const btn  = document.getElementById('headerThemeBtn');
-    if(!btn) return;
-
-    const THEME_KEY = 'stellarrec_theme';
-    function setTheme(mode){
-      if(mode === 'dark'){ root.setAttribute('data-theme','dark'); }
-      else { root.removeAttribute('data-theme'); }
-      localStorage.setItem(THEME_KEY, mode);
-      btn.setAttribute('aria-pressed', mode === 'dark' ? 'true' : 'false');
-    }
-    // load previous choice
-    const saved = localStorage.getItem(THEME_KEY) || 'light';
-    setTheme(saved);
-
-    btn.addEventListener('click', ()=>{
-      const current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-      setTheme(current === 'dark' ? 'light' : 'dark');
-    });
-  })();
+      // Theme toggle (very simple)
+      const themeBtn = document.getElementById('headerThemeBtn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', ()=>{
+          const root = document.documentElement;
+          const isDark = root.getAttribute('data-theme') === 'dark';
+          root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+          themeBtn.setAttribute('aria-pressed', isDark ? 'false' : 'true');
+        });
+      }
+    })();
   </script>
 </body>
 </html>
+
 
