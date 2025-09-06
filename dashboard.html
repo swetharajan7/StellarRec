@@ -749,13 +749,14 @@
     </div>
   </footer>
 
-  <!-- Vendor scripts (use CDN to avoid partial/broken files) -->
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js" defer></script>
+<!-- Vendor scripts (CDN, with cache-busting) -->
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js?v=2025-09-06" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js?v=2025-09-06" defer></script>
 
-  <!-- Your app code -->
-  <script src="/assets/js/dashboard.js" defer></script>
-  <script src="/assets/js/university-search.js" defer></script>
+<!-- Your app code (keep after vendors; add cache-busting too) -->
+<script src="/assets/js/dashboard.js?v=2025-09-06-1" defer></script>
+<script src="/assets/js/university-search.js?v=2025-09-06-1" defer></script>
+
 
   <!-- View toggler & simple header behaviors (safe localStorage) -->
   <script>
