@@ -107,6 +107,7 @@
     /* Two-column layout */
     .compose-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:2rem; }
     @media (max-width: 980px) { .compose-grid { grid-template-columns:1fr; } }
+
     .upload-section, .writer-section, .university-section,
     .selected-section, .progress-section {
       background:#fff; border-radius:16px; padding:2rem;
@@ -334,15 +335,14 @@
         stellarrec
       </a>
       <!-- Center: Student / Recommender toggles -->
-   <nav class="header-nav" role="tablist" aria-label="Choose portal">
-  <div class="nav-left">
-    <button class="nav-link" data-view="student" role="tab" aria-selected="true" type="button">Student</button>
-  </div>
-  <div class="nav-right">
-    <button class="nav-link" data-view="recommender" role="tab" aria-selected="false" type="button">Recommender</button>
-  </div>
-</nav>
-
+      <nav class="header-nav" role="tablist" aria-label="Choose portal">
+        <div class="nav-left">
+          <button class="nav-link" data-view="student" role="tab" aria-selected="true" type="button">Student</button>
+        </div>
+        <div class="nav-right">
+          <button class="nav-link" data-view="recommender" role="tab" aria-selected="false" type="button">Recommender</button>
+        </div>
+      </nav>
       <!-- Right: Theme + Avatar -->
       <div class="right-controls">
         <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false" title="Toggle theme">
@@ -394,6 +394,7 @@
       <h1 class="hero-title">One upload. Unlimited reach.</h1>
       <p class="hero-subtitle">Upload your recommendation letter once and send it to multiple US universities instantly.</p>
     </div>
+
     <!-- Upload + Writer -->
     <div class="compose-grid">
       <!-- Upload Section -->
@@ -420,6 +421,7 @@
           </div>
         </div>
       </div>
+
       <!-- Writer -->
       <div class="writer-section" id="writerSection">
         <h2 class="section-title"><span class="material-icons">edit</span> Write Letter</h2>
@@ -449,9 +451,11 @@
         </div>
       </div>
     </div>
+
     <!-- University Selection -->
     <div class="university-section">
       <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
+
       <!-- Search + Apply + Bulk import -->
       <div class="university-search" style="position:relative; display:flex; gap:.5rem; align-items:center; margin-bottom:.5rem;">
         <input
@@ -468,10 +472,12 @@
         <button class="page-btn" id="bulkImportBtn" title="Bulk import by names" type="button">Bulk import</button>
         <div id="searchSuggest" class="suggest-popover" style="display:none;"></div>
       </div>
+
       <!-- Browse-all dropdown -->
       <select id="universitySelect" class="filter-select" title="Browse all universities" style="margin-bottom:.5rem;">
         <option value="" selected disabled>Browse all universities (6000+)</option>
       </select>
+
       <!-- Filters -->
       <div class="filter-meta" id="resultMeta" aria-live="polite">Showing 0 of 0</div>
       <div class="filter-bar">
@@ -491,25 +497,30 @@
           <option value="VT">Vermont</option><option value="VA">Virginia</option><option value="WA">Washington</option><option value="WV">West Virginia</option>
           <option value="WI">Wisconsin</option><option value="WY">Wyoming</option>
         </select>
+
         <select id="typeFilter" class="filter-select" aria-label="Filter by institution type">
           <option value="">All types</option>
           <option value="Public">Public</option>
           <option value="Private nonprofit">Private nonprofit</option>
           <option value="Private for-profit">Private for-profit</option>
         </select>
+
         <select id="levelFilter" class="filter-select" aria-label="Filter by level">
           <option value="">All levels</option>
           <option value="4-year">4-year</option>
           <option value="2-year">2-year</option>
           <option value="Less-than-2-year">Less-than-2-year</option>
         </select>
+
         <select id="sortBy" class="filter-select" aria-label="Sort results">
           <option value="name_asc">Sort: Name (A–Z)</option>
           <option value="state_asc">Sort: State (A–Z)</option>
         </select>
+
         <button class="apply-btn" id="filterApplyBtn" title="Apply filters and sort" type="button">Apply filters</button>
         <button class="apply-btn" id="resetBtn" title="Reset search and filters" type="button">Reset</button>
       </div>
+
       <!-- Empty state -->
       <div id="emptyState" class="empty-state" aria-live="polite">
         <div style="font-weight:600; margin-bottom:.25rem;">No universities match your filters</div>
@@ -519,8 +530,10 @@
           <button class="page-btn" id="retryLoadBtn" style="display:none;" type="button">Retry loading</button>
         </div>
       </div>
+
       <!-- Results grid -->
       <div class="university-grid" id="universityGrid" role="list" aria-label="Universities list"></div>
+
       <!-- Pagination -->
       <div class="pagination">
         <div class="pager">
@@ -539,6 +552,7 @@
         </div>
       </div>
     </div>
+
     <!-- Selected Universities -->
     <div class="selected-section">
       <h2 class="section-title" style="display:flex;align-items:center;gap:.5rem;">
@@ -554,6 +568,7 @@
         </button>
       </div>
     </div>
+
     <!-- Progress Section -->
     <div class="progress-section" id="progressSection">
       <h2 class="progress-title">Sending Letters...</h2>
@@ -561,6 +576,7 @@
       <div class="progress-text" id="progressText" aria-live="polite">Preparing to send...</div>
       <div class="delivery-list" id="deliveryList"></div>
     </div>
+
     <!-- Success Section -->
     <div class="success-section" id="successSection">
       <div class="success-icon"><span class="material-icons">check_circle</span></div>
@@ -571,6 +587,7 @@
         Send Another Letter
       </button>
     </div>
+
     <!-- Confirm Send Modal -->
     <div id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle"
          style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
@@ -624,7 +641,6 @@
         </div>
       </div>
     </div>
-
     <!-- Contact Admin Overlay -->
     <div id="contactOverlay" role="dialog" aria-modal="true" aria-labelledby="contactTitle"
          style="position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; z-index:10000;">
@@ -733,18 +749,25 @@
     </div>
   </footer>
 
-  <!-- Vendor scripts (self-hosted) -->
-  <script src="/assets/js/vendor/fuse.min.js" defer></script>
-  <script src="/assets/js/vendor/localforage.min.js" defer></script>
+  <!-- Vendor scripts (use CDN to avoid partial/broken files) -->
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js" defer></script>
 
   <!-- Your app code -->
-<script src="/assets/js/dashboard.js" defer></script>
-<script src="/assets/js/university-search.js" defer></script>
+  <script src="/assets/js/dashboard.js" defer></script>
+  <script src="/assets/js/university-search.js" defer></script>
 
-
-  <!-- View toggler & simple header behaviors -->
+  <!-- View toggler & simple header behaviors (safe localStorage) -->
   <script>
     (function(){
+      // ---------- helpers ----------
+      function safeSet(key, val){
+        try { localStorage.setItem(key, val); } catch (e) { /* quota/private mode */ }
+      }
+      function safeGet(key, def){
+        try { return localStorage.getItem(key) ?? def; } catch (e) { return def; }
+      }
+
       // Panels
       const studentPanel = document.getElementById('panel-student');
       const recPanel     = document.getElementById('panel-recommender');
@@ -753,13 +776,13 @@
       const toggles = document.querySelectorAll('.header-nav .nav-link');
 
       // Ensure initial state: Student visible, Recommender hidden
-      studentPanel.hidden = false;
-      recPanel.hidden     = true;
+      if (studentPanel) studentPanel.hidden = false;
+      if (recPanel)     recPanel.hidden     = true;
 
       function setActive(view){
         const isStudent = (view === 'student');
-        studentPanel.hidden = !isStudent;
-        recPanel.hidden     =  isStudent;
+        if (studentPanel) studentPanel.hidden = !isStudent;
+        if (recPanel)     recPanel.hidden     =  isStudent;
 
         // visual current
         toggles.forEach(btn => {
@@ -768,15 +791,18 @@
           if (on) btn.setAttribute('aria-current','page'); else btn.removeAttribute('aria-current');
         });
 
-        // hash (deep-link)
+        // hash (deep-link) + persist (safe)
         history.replaceState(null, '', '#' + view);
+        safeSet('sr_current_view', view);
       }
 
       // Click handlers
       toggles.forEach(btn => btn.addEventListener('click', () => setActive(btn.dataset.view)));
 
-      // Deep-link support (#student / #recommender)
-      const initial = (location.hash || '#student').slice(1);
+      // Deep-link support (#student / #recommender) + saved preference
+      const fromHash = (location.hash || '').slice(1);
+      const saved = safeGet('sr_current_view', 'student');
+      const initial = (fromHash === 'recommender' || fromHash === 'student') ? fromHash : saved;
       setActive(initial === 'recommender' ? 'recommender' : 'student');
 
       window.addEventListener('hashchange', () => {
@@ -788,12 +814,19 @@
       const avatarBtn = document.getElementById('userAvatarBtn');
       const dropdown  = document.getElementById('userDropdown');
       if (avatarBtn && dropdown) {
-        avatarBtn.addEventListener('click', () => {
+        avatarBtn.addEventListener('click', (e)=>{
+          e.stopPropagation();
           const open = dropdown.classList.toggle('show');
           avatarBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
         });
         document.addEventListener('click', (e)=>{
           if (!dropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
+            dropdown.classList.remove('show');
+            avatarBtn.setAttribute('aria-expanded','false');
+          }
+        });
+        document.addEventListener('keydown', (e)=>{
+          if (e.key === 'Escape') {
             dropdown.classList.remove('show');
             avatarBtn.setAttribute('aria-expanded','false');
           }
@@ -808,11 +841,29 @@
           const isDark = root.getAttribute('data-theme') === 'dark';
           root.setAttribute('data-theme', isDark ? 'light' : 'dark');
           themeBtn.setAttribute('aria-pressed', isDark ? 'false' : 'true');
+          try { localStorage.setItem('sr_theme', isDark ? 'light' : 'dark'); } catch(e){}
         });
+
+        // load saved theme
+        try {
+          const t = localStorage.getItem('sr_theme');
+          if (t === 'dark' || t === 'light') {
+            document.documentElement.setAttribute('data-theme', t);
+            themeBtn.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
+          }
+        } catch(e){}
       }
     })();
+  </script>
+  <!-- (Optional) Fallback: if vendor CDNs fail, avoid crashing -->
+  <script>
+    window.addEventListener('error', function(e){
+      if ((e.filename || '').includes('fuse.min.js') || (e.filename || '').includes('localforage.min.js')) {
+        console.warn('[SR] Vendor script load issue. Features that depend on it may be limited.');
+      }
+    });
   </script>
 </body>
 </html>
 
-
+    
