@@ -35,6 +35,10 @@
     /* Header nav (Student left, Recommender right) */
     .header-nav { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex:1; margin:0 1rem; }
     .nav-left, .nav-right { display:flex; gap:1.25rem; align-items:center; }
+    [hidden] {
+  display: none !important;
+}
+
     .nav-link{
       color:#fff; text-decoration:none; font-weight:700; opacity:.95;
       padding:.35rem .75rem; border-radius:10px; transition:opacity .15s, transform .15s;
@@ -332,14 +336,15 @@
         stellarrec
       </a>
       <!-- Center: Student / Recommender toggles -->
-      <nav class="header-nav">
-        <div class="nav-left">
-          <a href="#student" class="nav-link" data-view="student" aria-current="page">Student</a>
-        </div>
-        <div class="nav-right">
-          <a href="#recommender" class="nav-link" data-view="recommender">Recommender</a>
-        </div>
-      </nav>
+   <nav class="header-nav" role="tablist" aria-label="Choose portal">
+  <div class="nav-left">
+    <button class="nav-link" data-view="student" role="tab" aria-selected="true" type="button">Student</button>
+  </div>
+  <div class="nav-right">
+    <button class="nav-link" data-view="recommender" role="tab" aria-selected="false" type="button">Recommender</button>
+  </div>
+</nav>
+
       <!-- Right: Theme + Avatar -->
       <div class="right-controls">
         <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false" title="Toggle theme">
@@ -726,7 +731,7 @@
   <script src="/assets/js/vendor/localforage.min.js" defer></script>
   <!-- Your app code -->
   <script src="/assets/js/dashboard.js" defer></script>
-  <script src="/assets/js/init-header.js" defer></script>
+
   <script src="/assets/js/university-search.js" defer></script>
   <!-- View toggler (make Student default; remove student context bar) -->
   <script>
@@ -758,6 +763,48 @@
     });
   })();
   </script>
+  <script>
+(function(){
+  const studentPanel = document.getElementById('panel-student');
+  const recPanel     = document.getElementById('panel-recommender');
+  const tabs         = document.querySelectorAll('.header-nav .nav-link');
+
+  if (!studentPanel || !recPanel || !tabs.length) return;
+
+  // Ensure initial state: Student visible, Recommender hidden
+  studentPanel.hidden = false;
+  recPanel.hidden     = true;
+
+  function setActive(view){
+    const isStudent = (view === 'student');
+    studentPanel.hidden = !isStudent;
+    recPanel.hidden     =  isStudent;
+
+    // ARIA & pressed state
+    tabs.forEach(btn => {
+      const on = btn.dataset.view === view;
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      btn.toggleAttribute('data-active', on);
+    });
+  }
+
+  // Click to switch
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => setActive(btn.dataset.view));
+  });
+
+  // Optional: enable #student / #recommender deep-links if you still use them
+  const hash = (location.hash || '#student').slice(1);
+  if (hash === 'recommender' || hash === 'student') setActive(hash);
+  else setActive('student');
+
+  window.addEventListener('hashchange', () => {
+    const v = (location.hash || '#student').slice(1);
+    if (v === 'recommender' || v === 'student') setActive(v);
+  });
+})();
+</script>
+
 </body>
 </html>
 
