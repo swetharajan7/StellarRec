@@ -1,1 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StellarRec - One upload. Unlimited reach.</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Roboto',sans-serif;
+      background:linear-gradient(135deg,var(--bg-grad-1,#f8f9fa) 0%,var(--bg-grad-2,#e9ecef) 100%);
+      color:var(--text,#333);
+      min-height:100vh;
+    }
+    /* Header */
+    .header {
+      background:linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
+      color:#fff; padding:1.1rem 2rem; /* tighter to bring hero closer */
+      box-shadow:0 4px 20px rgba(25,118,210,0.3);
+    }
+    .header-content {
+      max-width:1200px; margin:0 auto;
+      display:flex; justify-content:space-between; align-items:center; gap:1rem;
+    }
+    .logo {
+      display:flex; align-items:center; gap:.5rem;
+      font-size:1.8rem; font-weight:700;
+      text-decoration:none; color:#fff; transition:.3s;
+    }
+    .logo:hover { opacity:.85; transform:translateY(-1px); }
+    /* Header nav (Student left, Recommender right) */
+    .header-nav { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex:1; margin:0 1rem; }
+    .nav-left, .nav-right { display:flex; gap:1.25rem; align-items:center; }
+    [hidden] { display: none !important; }
+
+    .nav-link{
+      color:#fff; text-decoration:none; font-weight:700; opacity:.95;
+      padding:.35rem .75rem; border-radius:10px; transition:opacity .15s, transform .15s;
+    }
+    .nav-link:hover{ opacity:1; transform:translateY(-1px); }
+    .nav-link[aria-current="page"]{ background:#ffffff22; }
+    /* Center header tabs (A) */
+    .hdr-tabs {
+      display:flex; align-items:center; gap:.4rem;
+      background:#ffffff22; border:1px solid #ffffff55; border-radius:999px;
+      padding:.2rem; min-height:40px;
+    }
+    .hdr-tab {
+      appearance:none; border:0; background:transparent; color:#fff;
+      padding:.45rem .9rem; border-radius:999px; font-weight:700; cursor:pointer;
+      letter-spacing:.2px; font-size:.95rem; opacity:.9;
+    }
+    .hdr-tab[aria-selected="true"] {
+      background:#fff; color:#1976d2; box-shadow:0 6px 20px rgba(0,0,0,.12);
+      opacity:1;
+    }
+    .hdr-tab:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
+    /* Right controls (theme + avatar) */
+    .right-controls { display:flex; align-items:center; gap:.75rem; }
+    /* Avatar + dropdown */
+    .user-info { position:relative; display:flex; align-items:center; gap:1rem; }
+    .user-avatar {
+      width:45px; height:45px;
+      background:rgba(255,255,255,.2); border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.2rem; cursor:pointer; transition:.2s;
+      border:2px solid rgba(255,255,255,0.1);
+    }
+    .user-avatar:hover { background:rgba(255,255,255,.3); transform:scale(1.05); border-color:rgba(255,255,255,.3); }
+    .user-avatar:focus { outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.3); }
+    .user-dropdown {
+      position:absolute; top:100%; right:0; margin-top:.5rem;
+      background:#fff; border-radius:12px;
+      box-shadow:0 8px 32px rgba(0,0,0,.15);
+      min-width:260px; max-width:min(92vw,360px);
+      opacity:0; visibility:hidden;
+      transform:translateY(-10px) scale(.95);
+      transition:all .2s cubic-bezier(0.4,0,0.2,1); z-index:1000;
+      border:1px solid rgba(0,0,0,.08);
+    }
+    .user-dropdown.show { opacity:1; visibility:visible; transform:translateY(0) scale(1); }
+    .user-dropdown::before{
+      content:''; position:absolute; top:-8px; right:16px; width:16px; height:16px;
+      background:#fff; border:1px solid rgba(0,0,0,.08); border-bottom:none; border-right:none;
+      transform:rotate(45deg);
+    }
+    .dropdown-header { padding:1rem; border-bottom:1px solid #f0f0f0; color:#333; font-weight:600; font-size:.9rem; }
+    .dropdown-item {
+      display:flex; align-items:center; gap:.75rem;
+      padding:.75rem 1rem; color:#333; cursor:pointer; transition:.15s;
+    }
+    .dropdown-item:hover, .dropdown-item:focus { background:#f8f9fa; outline:none; }
+    .dropdown-item .material-icons { font-size:1.2rem; color:#666; }
+    .dropdown-item.active { background:#e3f2fd; color:#1976d2; }
+    .dropdown-item.active .material-icons { color:#1976d2; }
+    .view-label { display:flex; flex-direction:column; }
+    .view-name { font-weight:600; font-size:.9rem; }
+    .view-description { font-size:.8rem; color:#666; margin-top:.1rem; }
+    .container { max-width:1200px; margin:0 auto; padding:1.25rem; }
+    .hero-section { text-align:center; margin:1rem 0 1.5rem; }
+    .hero-title { font-size:2.3rem; font-weight:700; color:#1976d2; margin-bottom:.6rem; }
+    .hero-subtitle { font-size:1.1rem; color:#666; margin-bottom:1.25rem; }
+    /* Two-column layout */
+    .compose-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:2rem; }
+    @media (max-width: 980px) { .compose-grid { grid-template-columns:1fr; } }
+
+    .upload-section, .writer-section, .university-section,
+    .selected-section, .progress-section {
+      background:#fff; border-radius:16px; padding:2rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.1); margin-bottom:0;
+    }
+    .upload-section { border:2px dashed #e0e0e0; transition:.3s; }
+    .upload-section.dragover { border-color:#1976d2; background:#f3f8ff; }
+    .upload-area { text-align:center; padding:2rem; }
+    .upload-icon { font-size:4rem; color:#1976d2; margin-bottom:1rem; }
+    .upload-title { font-size:1.5rem; font-weight:600; margin-bottom:.5rem; color:#333; }
+    .upload-subtitle { color:#666; margin-bottom:2rem; }
+    .file-input { display:none; }
+    .upload-btn {
+      background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff;
+      padding:1rem 2rem; border:none; border-radius:12px;
+      font-size:1.1rem; font-weight:600; cursor:pointer;
+      transition:.3s; display:inline-flex; align-items:center; gap:.5rem;
+    }
+    .upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
+    .uploaded-file {
+      display:none; background:#e8f5e8; border:2px solid #4caf50;
+      border-radius:12px; padding:1.5rem; margin-top:1rem;
+    }
+    .file-info { display:flex; align-items:center; gap:1rem; }
+    .file-icon { font-size:2rem; color:#4caf50; }
+    .file-details h3 { color:#2e7d32; margin-bottom:.25rem; }
+    .file-details p { color:#4caf50; font-size:.9rem; }
+    .remove-file {
+      margin-left:auto; background:none; border:none; color:#666;
+      cursor:pointer; padding:.5rem; border-radius:50%; transition:.2s;
+    }
+    .remove-file:hover { background:rgba(244,67,54,.1); color:#f44336; }
+    .section-title {
+      font-size:1.5rem; font-weight:600; color:#333;
+      margin-bottom:1rem; display:flex; align-items:center; gap:.5rem;
+    }
+    /* Writer */
+    .writer-toolbar { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.75rem; align-items:center; }
+    .writer-toolbar .btn {
+      background:#fff; border:2px solid #e5e7eb; border-radius:10px;
+      padding:.45rem .75rem; cursor:pointer; font-weight:600;
+    }
+    .writer-toolbar .btn:hover { background:#f8f9fa; }
+    .writer-toolbar .meta { margin-left:auto; font-size:.9rem; color:#667; display:flex; gap:.75rem; align-items:center; }
+    .writer-title {
+      width:100%; padding:.7rem .9rem;
+      border:2px solid #e0e0e0; border-radius:12px;
+      font-size:1rem; margin-bottom:.6rem;
+    }
+    .writer-box {
+      border:2px solid #e0e0e0; border-radius:12px;
+      min-height:280px; padding:1rem; line-height:1.55;
+    }
+    .writer-box:focus { outline:none; border-color:#1976d2; }
+    .writer-actions { display:flex; gap:.5rem; margin-top:.75rem; flex-wrap:wrap; }
+    .btn-primary { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none; }
+    .btn-success { background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; border:none; }
+    .btn-danger  { background:linear-gradient(135deg,#e53935,#ef5350); color:#fff; border:none; }
+    .btn-muted   { background:#fff; color:#333; }
+    .filter-meta { font-size:.9rem; color:#666; margin:.25rem 0 .5rem; }
+    .filter-bar { display:grid; grid-template-columns: repeat(8, minmax(140px, 1fr)); gap:.5rem; margin-bottom:.75rem; align-items:center; }
+    .filter-select { width:100%; padding:.7rem .9rem; border:2px solid #e0e0e0; border-radius:12px; background:#fff; font-size:.95rem; }
+    .university-grid {
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:1rem;
+      max-height:480px; overflow-y:auto; padding:1rem; border:1px solid #f0f0f0; border-radius:12px;
+    }
+    .university-card { background:#f8f9fa; border:2px solid transparent; border-radius:12px; padding:1rem; cursor:pointer; transition:.2s; }
+    .university-card:hover { border-color:#1976d2; background:#f3f8ff; }
+    .university-card.selected { border-color:#1976d2; background:#e3f2fd; }
+    .university-header { display:flex; align-items:center; gap:1rem; margin-bottom:.5rem; }
+    .university-logo { width:40px; height:40px; background:#1976d2; color:#fff; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:600; }
+    .university-name { font-weight:600; color:#333; }
+    .university-location { color:#666; font-size:.9rem; }
+    .university-pill { margin-top:.25rem; display:inline-block; font-size:.75rem; color:#555; background:#eef3ff; border:1px solid #dbe7ff; padding:.15rem .5rem; border-radius:999px; }
+    .pagination { display:flex; justify-content:space-between; align-items:center; margin-top:.75rem; }
+    .pager { display:flex; gap:.5rem; }
+    .page-btn { background:#fff; border:2px solid #e0e0e0; border-radius:10px; padding:.5rem .9rem; cursor:pointer; font-weight:600; }
+    .page-btn[disabled] { opacity:.5; cursor:not-allowed; }
+    .page-size { margin-left:auto; display:flex; align-items:center; gap:.5rem; }
+    .selected-count { color:#1976d2; font-weight:600; margin-bottom:1rem; }
+    .selected-list { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:2rem; }
+    .selected-tag { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:.5rem 1rem; border-radius:20px; font-size:.9rem; display:flex; align-items:center; gap:.5rem; }
+    .remove-tag { cursor:pointer; background:rgba(255,255,255,.2); border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
+    .remove-tag:hover { background:rgba(255,255,255,.3); }
+    .send-section { text-align:center; }
+    .send-btn {
+      background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; padding:1.2rem 3rem; border:none; border-radius:12px;
+      font-size:1.2rem; font-weight:600; cursor:pointer; transition:.2s; display:inline-flex; align-items:center; gap:.5rem;
+    }
+    .send-btn:disabled { background:#ccc; cursor:not-allowed; }
+    .send-btn:not(:disabled):hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(76,175,80,.3); }
+    .progress-section { display:none; }
+    .progress-title { font-size:1.3rem; font-weight:600; color:#333; margin-bottom:1rem; text-align:center; }
+    .progress-bar { width:100%; height:12px; background:#e0e0e0; border-radius:6px; overflow:hidden; margin-bottom:1rem; }
+    .progress-fill { height:100%; background:linear-gradient(135deg,#4caf50,#66bb6a); border-radius:6px; transition:width .5s ease; width:0%; }
+    .progress-text { text-align:center; color:#666; font-size:.9rem; }
+    .delivery-list { margin-top:1rem; }
+    .delivery-item { display:flex; align-items:center; gap:1rem; padding:.75rem; border-radius:8px; margin-bottom:.5rem; background:#f8f9fa; }
+    .delivery-status { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
+    .delivery-status.pending { background:#fff3e0; color:#ff9800; }
+    .delivery-status.success { background:#e8f5e8; color:#4caf50; }
+    .delivery-status.error { background:#ffebee; color:#f44336; }
+    .success-section {
+      display:none; background:linear-gradient(135deg,#e8f5e8,#f1f8e9);
+      border:2px solid #4caf50; border-radius:16px; padding:2rem; text-align:center; box-shadow:0 8px 32px rgba(76,175,80,.2);
+    }
+    .success-icon { font-size:4rem; color:#4caf50; margin-bottom:1rem; }
+    .success-title { font-size:1.8rem; font-weight:600; color:#2e7d32; margin-bottom:1rem; }
+    .success-subtitle { color:#4caf50; margin-bottom:2rem; }
+    .new-upload-btn { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:1rem 2rem; border:none; border-radius:12px; font-size:1rem; font-weight:600; cursor:pointer; transition:.2s; }
+    .new-upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
+    @keyframes flash { 0%{box-shadow:0 0 0 rgba(25,118,210,0);} 25%{box-shadow:0 0 0 6px rgba(25,118,210,.25);} 100%{box-shadow:0 0 0 rgba(25,118,210,0);} }
+    .flash { animation: flash 1.2s ease; }
+    .badge { display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; font-size:.75rem; border-radius:999px; border:1px solid; }
+    .badge-student { background:#f1f8ff; color:#0d47a1; border-color:#bbdefb; }
+    .badge-added   { background:#e8f5e9; color:#1b5e20; border-color:#c8e6c9; }
+    .badge-removed { background:#ffebee; color:#b71c1c; border-color:#ffcdd2; }
+    .toast-wrap { position: fixed; right: 16px; bottom: 16px; z-index: 99999; display: grid; gap: 8px; }
+    .toast { min-width: 240px; max-width: 420px; padding: .75rem .9rem; border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.15); color:#0f172a; background:#fff; border:1px solid #e5e7eb;
+      display:flex; align-items:flex-start; gap:.6rem; animation: toast-in .18s ease; }
+    .toast.success { border-color:#c8e6c9; background:#f1f8f3; }
+    .toast.error   { border-color:#ffcdd2; background:#fff2f2; }
+    .toast.info    { border-color:#bbdefb; background:#f3f8ff; }
+    .toast .icon { font-size: 1.1rem; line-height:1; margin-top:.1rem; }
+    .toast .msg  { flex:1; font-size:.95rem; }
+    .toast .x    { border:none; background:transparent; cursor:pointer; font-size:1rem; opacity:.6; }
+    .toast .x:hover { opacity:.9; }
+    @keyframes toast-in { from { transform: translateY(6px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+    .empty-state { display:none; background:#fff; border:1px dashed #d0d7de; border-radius:12px; padding:1.25rem; color:#445; text-align:center; }
+    .empty-state .actions { margin-top:.75rem; display:flex; gap:.5rem; justify-content:center; }
+    /* Student view (B) */
+    .student-card {
+      background:#fff; border-radius:16px; padding:1.25rem 1.5rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.08);
+    }
+    .student-tabs {
+      display:flex; gap:.4rem; background:#f1f5f9; border-radius:999px; padding:.2rem;
+      border:1px solid #e5e7eb; margin-bottom:.9rem;
+    }
+    .student-tab {
+      appearance:none; background:transparent; border:0; cursor:pointer;
+      padding:.5rem 1rem; border-radius:999px; font-weight:700; color:#334155;
+    }
+    .student-tab[aria-selected="true"] {
+      background:#fff; color:#0f172a; box-shadow:0 6px 18px rgba(0,0,0,.06);
+    }
+    .student-panels > section { display:block; }
+    .student-panels > section[hidden] { display:none; }
+    .table { width:100%; border-collapse:separate; border-spacing:0; overflow:hidden;
+      border:1px solid #e5e7eb; border-radius:12px; background:#fff; }
+    .table th, .table td { padding:.7rem .8rem; text-align:left; border-bottom:1px solid #eef2f7; }
+    .table th { background:#f8fafc; color:#334155; font-weight:700; }
+    .table tr:last-child td { border-bottom:none; }
+    .track-pill { display:inline-block; padding:.2rem .6rem; border-radius:999px; font-weight:700; font-size:.8rem; }
+    .track-pill.pending { background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; }
+    .track-pill.sent    { background:#ecfeff; color:#155e75; border:1px solid #a5f3fc; }
+    .track-pill.received{ background:#ecfdf5; color:#166534; border:1px solid #bbf7d0; }
+    @media (max-width:768px) {
+      .container { padding:1rem; }
+      .hero-title { font-size:2rem; }
+      .university-grid { grid-template-columns:1fr; }
+      .header-content { flex-direction:column; gap:1rem; }
+      .filter-bar { grid-template-columns:1fr 1fr; }
+    }
+    /* Dark theme basics (CSS side) */
+    :root[data-theme="dark"] {
+      --bg:#0b1220; --panel:#111a2a; --text:#e5eefc; --muted:#93a3bc; --primary:#7aa2ff; --border:#24324a;
+    }
+    :root[data-theme="dark"] body { background: linear-gradient(135deg,#0b1220 0%,#0f1729 100%); color: var(--text); }
+    :root[data-theme="dark"] .upload-section,
+    :root[data-theme="dark"] .writer-section,
+    :root[data-theme="dark"] .university-section,
+    :root[data-theme="dark"] .selected-section,
+    :root[data-theme="dark"] .progress-section { background: var(--panel); box-shadow:none; }
+    :root[data-theme="dark"] .filter-select,
+    :root[data-theme="dark"] .writer-title,
+    :root[data-theme="dark"] .writer-box,
+    :root[data-theme="dark"] .page-btn { background:#0f1729; color:var(--text); border-color: var(--border); }
+    :root[data-theme="dark"] .university-card { background:#0f1729; }
+    :root[data-theme="dark"] .university-card:hover { background:#12203a; border-color:#274780; }
+    :root[data-theme="dark"] .university-card.selected { background:#13254a; }
+    :root[data-theme="dark"] .hero-subtitle, :root[data-theme="dark"] .university-location { color: var(--muted); }
+    :root[data-theme="dark"] .hdr-tabs { background:#ffffff11; border-color:#ffffff33; }
+    :root[data-theme="dark"] .hdr-tab { color:#e5eefc; }
+    :root[data-theme="dark"] .hdr-tab[aria-selected="true"] { background:#0f1729; color:#7aa2ff; }
+    :root[data-theme="dark"] .student-card,
+    :root[data-theme="dark"] .table,
+    :root[data-theme="dark"] .student-tabs { background:#111a2a; border-color:#24324a; }
+    :root[data-theme="dark"] .table th { background:#0f1729; color:#e5eefc; }
+    :root[data-theme="dark"] .student-tab { color:#c9d6ee; }
+    :root[data-theme="dark"] .student-tab[aria-selected="true"] { background:#0f1729; color:#7aa2ff; }
+    /* Footer (match header) */
+    .site-footer {
+      background: linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
+      color: #fff;
+      padding: 1.5rem 0;
+      text-align: center;
+    }
+    .site-footer p { margin: 0; font-size: 0.95rem; }
+    .theme-btn {
+      display:inline-flex; align-items:center; gap:.5rem;
+      padding:.55rem 1rem; border-radius:999px;
+      border:1px solid #ffffff55; background:#ffffff22; color:#fff; font-weight:600;
+      cursor:pointer; transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+    }
+    .theme-btn:hover { transform: translateY(-1px); background:#ffffff33; border-color:#ffffff88; }
+    .theme-btn:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
+    .theme-btn .material-icons { font-size:18px; }
+    /* unify apply/page buttons in student view */
+    .apply-btn {
+      background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none;
+      padding:.6rem 1rem; border-radius:10px; font-weight:700; cursor:pointer;
+    }
+    .apply-btn:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(25,118,210,.25); }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-content">
+      <!-- Left: Logo -->
+      <a href="/" class="logo" target="_self" aria-label="Go to homepage">
+        <span class="material-icons">star</span>
+        stellarrec
+      </a>
+      <!-- Center: Student / Recommender toggles -->
+      <nav class="header-nav" role="tablist" aria-label="Choose portal">
+        <div class="nav-left">
+          <button class="nav-link" data-view="student" role="tab" aria-selected="true" type="button">Student</button>
+        </div>
+        <div class="nav-right">
+          <button class="nav-link" data-view="recommender" role="tab" aria-selected="false" type="button">Recommender</button>
+        </div>
+      </nav>
+      <!-- Right: Theme + Avatar -->
+      <div class="right-controls">
+        <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false" title="Toggle theme">
+          <span class="material-icons" aria-hidden="true">dark_mode</span>
+          Light / Dark
+        </button>
+        <div class="user-info">
+          <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
+            <span class="material-icons">person</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
+            <div class="dropdown-header">Quick actions</div>
+            <div class="dropdown-item" role="menuitem" tabindex="0">
+              <span class="material-icons">help_outline</span>
+              <div class="view-label">
+                <a href="https://stellarrec.netlify.app/portal-signin"
+                   class="view-name" style="text-decoration:none; color:inherit;" target="_self">
+                  How it works
+                </a>
+                <div class="view-description">Sign-in portal</div>
+              </div>
+            </div>
+            <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
+              <span class="material-icons">support_agent</span>
+              <div class="view-label">
+                <div class="view-name">Contact admin</div>
+                <div class="view-description">Send a message</div>
+              </div>
+            </div>
+            <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
+              <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
+                <span class="material-icons">build</span>
+                <div class="view-label">
+                  <div class="view-name">Use mock API</div>
+                  <div class="view-description">Toggle mock vs real backend</div>
+                </div>
+                <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
+              </label>
+            </div>
+          </div>
+        </div><!-- /.user-info -->
+      </div><!-- /.right-controls -->
+    </div><!-- /.header-content -->
+  </div><!-- /.header -->
+  <!-- MAIN — RECOMMENDER VIEW (hidden by default) -->
+  <div class="container" id="panel-recommender" style="display:none;">
+    <!-- Hero -->
+    <div class="hero-section">
+      <h1 class="hero-title">One upload. Unlimited reach.</h1>
+      <p class="hero-subtitle">Upload your recommendation letter once and send it to multiple US universities instantly.</p>
+    </div>
+
+    <!-- Upload + Writer -->
+    <div class="compose-grid">
+      <!-- Upload Section -->
+      <div class="upload-section" id="uploadSection">
+        <div class="upload-area" id="uploadArea">
+          <div class="upload-icon"><span class="material-icons">cloud_upload</span></div>
+          <h2 class="upload-title">Upload Recommendation Letter</h2>
+          <p class="upload-subtitle">Drag and drop your PDF file here, or click to browse</p>
+          <div id="uploadHint" style="margin:.5rem 0 0; font-size:.9rem; color:#556;">PDF only. Recommended size ≤ 10 MB.</div>
+          <input type="file" id="fileInput" class="file-input" accept=".pdf,.txt" />
+          <button class="upload-btn" id="chooseFileBtn">
+            <span class="material-icons">upload_file</span>
+            Choose File
+          </button>
+        </div>
+        <div class="uploaded-file" id="uploadedFile">
+          <div class="file-info">
+            <div class="file-icon"><span class="material-icons">description</span></div>
+            <div class="file-details">
+              <h3 id="fileName">recommendation-letter.pdf</h3>
+              <p id="fileSize">2.4 MB • Uploaded successfully</p>
+            </div>
+            <button class="remove-file" id="removeFileBtn"><span class="material-icons">close</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Writer -->
+      <div class="writer-section" id="writerSection">
+        <h2 class="section-title"><span class="material-icons">edit</span> Write Letter</h2>
+        <input id="writerTitle" class="writer-title" placeholder="Letter title (optional, e.g., 'Recommendation for Jane Doe')" />
+        <div class="writer-toolbar">
+          <button class="btn btn-muted" data-wcmd="bold" title="Bold (Ctrl/Cmd+B)"><b>B</b></button>
+          <button class="btn btn-muted" data-wcmd="italic" title="Italic (Ctrl/Cmd+I)"><i>I</i></button>
+          <button class="btn btn-muted" data-wcmd="underline" title="Underline (Ctrl/Cmd+U)"><u>U</u></button>
+          <div class="meta">
+            <span id="writerCount">0 words • 0 chars</span>
+            <span id="writerSaved">Not saved</span>
+          </div>
+        </div>
+        <div id="writerBox" class="writer-box" contenteditable="true" aria-label="Letter editor"
+             placeholder="Write your recommendation letter here..."></div>
+        <div class="writer-actions">
+          <button class="btn btn-primary" id="saveDraftBtn">Save draft</button>
+          <button class="btn btn-muted" id="restoreDraftBtn">Restore</button>
+          <button class="btn btn-danger" id="clearDraftBtn">Clear</button>
+          <button class="btn btn-muted" id="copyDraftBtn">Copy</button>
+          <button class="btn btn-muted" id="downloadDraftBtn">Download .txt</button>
+          <button class="btn btn-success" id="attachDraftBtn">Attach draft</button>
+          <label style="display:flex; align-items:center; gap:.4rem; margin-left:auto;">
+            <input type="checkbox" id="writerAutosaveToggle" checked />
+            Autosave
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- University Selection -->
+    <div class="university-section">
+      <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
+
+      <!-- Search + Apply + Bulk import -->
+      <div class="university-search" style="position:relative; display:flex; gap:.5rem; align-items:center; margin-bottom:.5rem;">
+        <input
+          type="text"
+          class="search-input filter-select"
+          placeholder="Search universities..."
+          id="universitySearch"
+          autocomplete="off"
+          aria-autocomplete="list"
+          aria-expanded="false"
+          aria-owns="searchSuggest"
+        />
+        <button class="apply-btn" id="searchApplyBtn" title="Apply search (Enter)" type="button">Apply</button>
+        <button class="page-btn" id="bulkImportBtn" title="Bulk import by names" type="button">Bulk import</button>
+        <div id="searchSuggest" class="suggest-popover" style="display:none;"></div>
+      </div>
+
+      <!-- Browse-all dropdown -->
+      <select id="universitySelect" class="filter-select" title="Browse all universities" style="margin-bottom:.5rem;">
+        <option value="" selected disabled>Browse all universities (6000+)</option>
+      </select>
+
+      <!-- Filters -->
+      <div class="filter-meta" id="resultMeta" aria-live="polite">Showing 0 of 0</div>
+      <div class="filter-bar">
+        <select id="stateFilter" class="filter-select" aria-label="Filter by state">
+          <option value="">All states</option>
+          <option value="AL">Alabama</option><option value="AK">Alaska</option><option value="AZ">Arizona</option><option value="AR">Arkansas</option>
+          <option value="CA">California</option><option value="CO">Colorado</option><option value="CT">Connecticut</option><option value="DE">Delaware</option>
+          <option value="FL">Florida</option><option value="GA">Georgia</option><option value="HI">Hawaii</option><option value="ID">Idaho</option>
+          <option value="IL">Illinois</option><option value="IN">Indiana</option><option value="IA">Iowa</option><option value="KS">Kansas</option>
+          <option value="KY">Kentucky</option><option value="LA">Louisiana</option><option value="ME">Maine</option><option value="MD">Maryland</option>
+          <option value="MA">Massachusetts</option><option value="MI">Michigan</option><option value="MN">Minnesota</option><option value="MS">Mississippi</option>
+          <option value="MO">Missouri</option><option value="MT">Montana</option><option value="NE">Nebraska</option><option value="NV">Nevada</option>
+          <option value="NH">New Hampshire</option><option value="NJ">New Jersey</option><option value="NM">New Mexico</option><option value="NY">New York</option>
+          <option value="NC">North Carolina</option><option value="ND">North Dakota</option><option value="OH">Ohio</option><option value="OK">Oklahoma</option>
+          <option value="OR">Oregon</option><option value="PA">Pennsylvania</option><option value="RI">Rhode Island</option><option value="SC">South Carolina</option>
+          <option value="SD">South Dakota</option><option value="TN">Tennessee</option><option value="TX">Texas</option><option value="UT">Utah</option>
+          <option value="VT">Vermont</option><option value="VA">Virginia</option><option value="WA">Washington</option><option value="WV">West Virginia</option>
+          <option value="WI">Wisconsin</option><option value="WY">Wyoming</option>
+        </select>
+
+        <select id="typeFilter" class="filter-select" aria-label="Filter by institution type">
+          <option value="">All types</option>
+          <option value="Public">Public</option>
+          <option value="Private nonprofit">Private nonprofit</option>
+          <option value="Private for-profit">Private for-profit</option>
+        </select>
+
+        <select id="levelFilter" class="filter-select" aria-label="Filter by level">
+          <option value="">All levels</option>
+          <option value="4-year">4-year</option>
+          <option value="2-year">2-year</option>
+          <option value="Less-than-2-year">Less-than-2-year</option>
+        </select>
+
+        <select id="sortBy" class="filter-select" aria-label="Sort results">
+          <option value="name_asc">Sort: Name (A–Z)</option>
+          <option value="state_asc">Sort: State (A–Z)</option>
+        </select>
+
+        <button class="apply-btn" id="filterApplyBtn" title="Apply filters and sort" type="button">Apply filters</button>
+        <button class="apply-btn" id="resetBtn" title="Reset search and filters" type="button">Reset</button>
+      </div>
+
+      <!-- Empty state -->
+      <div id="emptyState" class="empty-state" aria-live="polite">
+        <div style="font-weight:600; margin-bottom:.25rem;">No universities match your filters</div>
+        <div style="font-size:.9rem; color:#667;">Try adjusting search or clearing filters.</div>
+        <div class="actions">
+          <button class="apply-btn" id="clearFiltersBtn" type="button">Clear filters</button>
+          <button class="page-btn" id="retryLoadBtn" style="display:none;" type="button">Retry loading</button>
+        </div>
+      </div>
+
+      <!-- Results grid -->
+      <div class="university-grid" id="universityGrid" role="list" aria-label="Universities list"></div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <div class="pager">
+          <button class="page-btn" id="prevPage">Prev</button>
+          <span id="pageInfo" style="font-weight:600;">Page 1 of 1</span>
+          <button class="page-btn" id="nextPage">Next</button>
+        </div>
+        <div class="page-size">
+          <label for="pageSize">Per page:</label>
+          <select id="pageSize" class="filter-select" style="width:auto;display:inline-block;">
+            <option value="20">20</option>
+            <option value="40" selected>40</option>
+            <option value="80">80</option>
+            <option value="120">120</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selected Universities -->
+    <div class="selected-section">
+      <h2 class="section-title" style="display:flex;align-items:center;gap:.5rem;">
+        <span class="material-icons">check_circle</span> Selected Universities
+        <button id="copyLinkBtn" class="page-btn" title="Copy shareable link" style="margin-left:auto;">Copy link</button>
+      </h2>
+      <div class="selected-count" id="selectedCount">0 universities selected</div>
+      <div class="selected-list" id="selectedList" role="list" aria-live="polite"></div>
+      <div class="send-section">
+        <button class="send-btn" id="sendBtn" disabled>
+          <span class="material-icons">send</span>
+          Send to Selected Universities
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress Section -->
+    <div class="progress-section" id="progressSection">
+      <h2 class="progress-title">Sending Letters...</h2>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText" aria-live="polite">Preparing to send...</div>
+      <div class="delivery-list" id="deliveryList"></div>
+    </div>
+
+    <!-- Success Section -->
+    <div class="success-section" id="successSection">
+      <div class="success-icon"><span class="material-icons">check_circle</span></div>
+      <h2 class="success-title">Letters Sent Successfully!</h2>
+      <p class="success-subtitle">Your recommendation letter has been delivered to all selected universities.</p>
+      <button class="new-upload-btn" id="newUploadBtn">
+        <span class="material-icons">add</span>
+        Send Another Letter
+      </button>
+    </div>
+
+    <!-- Confirm Send Modal -->
+    <div id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle"
+         style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
+      <div style="background:#fff; width:min(720px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
+        <div style="padding:1.2rem 1.4rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+          <div id="confirmModalTitle" style="font-weight:700;">Confirm recipients</div>
+          <button aria-label="Close" id="modalCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:1.2rem 1.4rem; max-height:60vh; overflow:auto; line-height:1.45;">
+          <div id="modalSummary" style="margin-bottom:1rem;"></div>
+          <div id="modalLists" style="display:grid; gap:1rem;">
+            <div>
+              <div style="font-weight:600;">Included (<span id="modalIncludedCount">0</span>)</div>
+              <div id="modalIncluded"></div>
+            </div>
+            <div>
+              <div style="font-weight:600;">Removed vs student’s list (<span id="modalRemovedCount">0</span>)</div>
+              <div id="modalRemoved" style="color:#b00020;"></div>
+            </div>
+            <div>
+              <div style="font-weight:600;">Added by you (<span id="modalAddedCount">0</span>)</div>
+              <div id="modalAdded" style="color:#1b5e20;"></div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:1rem 1.4rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
+          <button class="page-btn" id="modalCancelBtn">Cancel</button>
+          <button class="apply-btn" id="modalConfirmBtn">Send now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Import Modal -->
+    <div id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle"
+         style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
+      <div style="background:#fff; width:min(680px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
+        <div style="padding:1rem 1.2rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+          <div id="importTitle" style="font-weight:700;">Bulk import universities</div>
+          <button aria-label="Close" id="importCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:1rem 1.2rem; display:grid; gap:.75rem;">
+          <div style="font-size:.92rem; color:#556;">
+            Paste one <b>name per line</b>. We’ll fuzzy-match against the master list.
+          </div>
+          <textarea id="importTextarea" rows="10" style="width:100%; padding:.8rem; border:1px solid #e5e7eb; border-radius:10px; font-family:inherit;"></textarea>
+          <div id="importPreview" style="font-size:.9rem; color:#667;"></div>
+        </div>
+        <div style="padding:1rem 1.2rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
+          <button class="page-btn" id="importCancelBtn">Cancel</button>
+          <button class="apply-btn" id="importConfirmBtn">Add matches</button>
+        </div>
+      </div>
+    </div>
+    <!-- Contact Admin Overlay -->
+    <div id="contactOverlay" role="dialog" aria-modal="true" aria-labelledby="contactTitle"
+         style="position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; z-index:10000;">
+      <div style="background:#fff; width:min(560px,92vw); border-radius:16px; box-shadow:0 18px 50px rgba(0,0,0,.22); overflow:hidden; transform:translateY(12px); opacity:0; transition:.18s;">
+        <div style="padding:1rem 1.25rem; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
+          <div id="contactTitle" style="font-weight:700;">Contact admin</div>
+          <button aria-label="Close" id="contactCloseBtn2" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+        <form id="contactForm2" style="padding:1rem 1.25rem; display:grid; gap:.75rem;">
+          <div>
+            <label for="cFirst2" style="display:block; font-weight:600; margin-bottom:.35rem;">First name</label>
+            <input id="cFirst2" name="first" class="filter-select" type="text" placeholder="Your first name" required />
+          </div>
+          <div>
+            <label for="cEmail2" style="display:block; font-weight:600; margin-bottom:.35rem;">Email address</label>
+            <input id="cEmail2" name="email" class="filter-select" type="email" placeholder="you@example.com" required />
+          </div>
+          <div>
+            <label for="cQuery2" style="display:block; font-weight:600; margin-bottom:.35rem;">Query</label>
+            <textarea id="cQuery2" name="query" rows="5" style="width:100%; padding:.8rem; border:1px solid #e5e7eb; border-radius:10px; font-family:inherit;" placeholder="How can we help?" required></textarea>
+          </div>
+          <div style="display:flex; gap:.5rem; justify-content:flex-end; border-top:1px solid #f1f5f9; padding-top:.75rem;">
+            <button type="button" class="page-btn" id="contactCancelBtn2">Cancel</button>
+            <button type="submit" class="apply-btn" id="contactSendBtn2">Send</button>
+          </div>
+          <input type="hidden" name="form-name" value="contact-admin">
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
+  </div><!-- /.container (Recommender) -->
+
+  <!-- STUDENT VIEW (default visible) -->
+  <div class="container" id="panel-student">
+    <div class="student-card" style="margin-bottom:1rem;">
+      <h1 class="hero-title" style="margin:0 0 .4rem;">Student Portal</h1>
+      <p class="hero-subtitle" style="margin:0 0 .8rem;">Request recommendations and track their status.</p>
+
+      <div class="student-tabs" role="tablist" aria-label="Student actions">
+        <button id="stuTabSend" class="student-tab" role="tab" aria-selected="true" type="button">
+          Send Recommendation Request
+        </button>
+        <button id="stuTabTrack" class="student-tab" role="tab" aria-selected="false" type="button">
+          Track Recommendation &amp; Status
+        </button>
+      </div>
+
+      <div class="student-panels">
+        <!-- Send -->
+        <section id="stuPanelSend">
+          <form id="stuSendForm" class="student-card" style="padding:1rem; box-shadow:none; border:1px solid #e5e7eb;">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:.75rem;">
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Your Name</label>
+                <input id="stuName" class="filter-select" type="text" placeholder="Student full name" required />
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Your Email</label>
+                <input id="stuEmail" class="filter-select" type="email" placeholder="you@example.com" required />
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Recommender Name</label>
+                <input id="recName" class="filter-select" type="text" placeholder="Prof. Jane Smith" required />
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Recommender Email</label>
+                <input id="recEmail" class="filter-select" type="email" placeholder="jane@university.edu" required />
+              </div>
+            </div>
+            <div style="margin-top:.75rem; display:flex; gap:.5rem; justify-content:flex-end;">
+              <button type="reset" class="page-btn">Clear</button>
+              <button type="submit" class="apply-btn">Send Request</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Track -->
+        <section id="stuPanelTrack" hidden>
+          <div class="student-card" style="padding:0; overflow:hidden;">
+            <table class="table" aria-label="Recommendation requests">
+              <thead>
+                <tr>
+                  <th>Recommender</th>
+                  <th>Email</th>
+                  <th>Requested</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="stuTrackBody">
+                <!-- Populated by dashboard.js -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2025 <span style="color: #ffeb3b; font-weight: 600;">StellarRec™</span>. All rights reserved. |
+        Making recommendations stellar since 2025 🚀</p>
+    </div>
+  </footer>
+
+<!-- Vendor scripts (CDN, with cache-busting) -->
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js?v=2025-09-06" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js?v=2025-09-06" defer></script>
+
+<!-- Your app code (keep after vendors; add cache-busting too) -->
+<script src="/assets/js/dashboard.js?v=2025-09-06-1" defer></script>
+<script src="/assets/js/university-search.js?v=2025-09-06-1" defer></script>
+
+
+  <!-- View toggler & simple header behaviors (safe localStorage) -->
+  <script>
+    (function(){
+      // ---------- helpers ----------
+      function safeSet(key, val){
+        try { localStorage.setItem(key, val); } catch (e) { /* quota/private mode */ }
+      }
+      function safeGet(key, def){
+        try { return localStorage.getItem(key) ?? def; } catch (e) { return def; }
+      }
+
+      // Panels
+      const studentPanel = document.getElementById('panel-student');
+      const recPanel     = document.getElementById('panel-recommender');
+
+      // Header toggles
+      const toggles = document.querySelectorAll('.header-nav .nav-link');
+
+      // Ensure initial state: Student visible, Recommender hidden
+      if (studentPanel) studentPanel.hidden = false;
+      if (recPanel)     recPanel.hidden     = true;
+
+      function setActive(view){
+        const isStudent = (view === 'student');
+        if (studentPanel) studentPanel.hidden = !isStudent;
+        if (recPanel)     recPanel.hidden     =  isStudent;
+
+        // visual current
+        toggles.forEach(btn => {
+          const on = btn.dataset.view === view;
+          btn.setAttribute('aria-selected', on ? 'true' : 'false');
+          if (on) btn.setAttribute('aria-current','page'); else btn.removeAttribute('aria-current');
+        });
+
+        // hash (deep-link) + persist (safe)
+        history.replaceState(null, '', '#' + view);
+        safeSet('sr_current_view', view);
+      }
+
+      // Click handlers
+      toggles.forEach(btn => btn.addEventListener('click', () => setActive(btn.dataset.view)));
+
+      // Deep-link support (#student / #recommender) + saved preference
+      const fromHash = (location.hash || '').slice(1);
+      const saved = safeGet('sr_current_view', 'student');
+      const initial = (fromHash === 'recommender' || fromHash === 'student') ? fromHash : saved;
+      setActive(initial === 'recommender' ? 'recommender' : 'student');
+
+      window.addEventListener('hashchange', () => {
+        const v = (location.hash || '#student').slice(1);
+        setActive(v === 'recommender' ? 'recommender' : 'student');
+      });
+
+      // Basic user dropdown toggle (optional)
+      const avatarBtn = document.getElementById('userAvatarBtn');
+      const dropdown  = document.getElementById('userDropdown');
+      if (avatarBtn && dropdown) {
+        avatarBtn.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          const open = dropdown.classList.toggle('show');
+          avatarBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+        document.addEventListener('click', (e)=>{
+          if (!dropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
+            dropdown.classList.remove('show');
+            avatarBtn.setAttribute('aria-expanded','false');
+          }
+        });
+        document.addEventListener('keydown', (e)=>{
+          if (e.key === 'Escape') {
+            dropdown.classList.remove('show');
+            avatarBtn.setAttribute('aria-expanded','false');
+          }
+        });
+      }
+
+      // Theme toggle (very simple)
+      const themeBtn = document.getElementById('headerThemeBtn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', ()=>{
+          const root = document.documentElement;
+          const isDark = root.getAttribute('data-theme') === 'dark';
+          root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+          themeBtn.setAttribute('aria-pressed', isDark ? 'false' : 'true');
+          try { localStorage.setItem('sr_theme', isDark ? 'light' : 'dark'); } catch(e){}
+        });
+
+        // load saved theme
+        try {
+          const t = localStorage.getItem('sr_theme');
+          if (t === 'dark' || t === 'light') {
+            document.documentElement.setAttribute('data-theme', t);
+            themeBtn.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
+          }
+        } catch(e){}
+      }
+    })();
+  </script>
+  <!-- (Optional) Fallback: if vendor CDNs fail, avoid crashing -->
+  <script>
+    window.addEventListener('error', function(e){
+      if ((e.filename || '').includes('fuse.min.js') || (e.filename || '').includes('localforage.min.js')) {
+        console.warn('[SR] Vendor script load issue. Features that depend on it may be limited.');
+      }
+    });
+  </script>
+</body>
+</html>
+
+    
 
