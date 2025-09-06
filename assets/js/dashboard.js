@@ -367,39 +367,59 @@ function setupBulkImport() {
 }
 
 /* ===================== HEADER CENTER TABS (Recommender / Student) ===================== */
+/* This version binds to your existing header buttons with data-view="student|recommender" */
 (function setupHeaderViewTabs() {
-  const recBtn = document.getElementById('hdrRecTab');
-  const stuBtn = document.getElementById('hdrStuTab');
+  // Prefer explicit IDs if present; otherwise use your .header-nav buttons
+  const recBtn =
+    document.getElementById('hdrRecTab') ||
+    document.querySelector('.header-nav .nav-link[data-view="recommender"]');
+  const stuBtn =
+    document.getElementById('hdrStuTab') ||
+    document.querySelector('.header-nav .nav-link[data-view="student"]');
 
-  if (!recBtn && !stuBtn) return; // header may not include tabs on some pages
+  const recPanel = document.getElementById('panel-recommender');
+  const stuPanel = document.getElementById('panel-student');
+
+  if ((!recBtn && !stuBtn) || (!recPanel && !stuPanel)) return;
 
   function setActive(which) {
     const isRec = which === 'recommender';
+    // ARIA states
     recBtn?.setAttribute('aria-selected', isRec ? 'true' : 'false');
     stuBtn?.setAttribute('aria-selected', isRec ? 'false' : 'true');
+
+    // Show/hide panels (use [hidden] attribute, supported by your CSS)
+    if (recPanel) recPanel.hidden = !isRec;
+    if (stuPanel) stuPanel.hidden = isRec;
+
+    // Save so refresh keeps the same view
+    localStorage.setItem('sr_current_view', isRec ? 'recommender' : 'student');
   }
 
-  recBtn?.addEventListener('click', () => {
+  recBtn?.addEventListener('click', (e) => {
+    e.preventDefault?.();
     setActive('recommender');
-    document.getElementById('panel-recommender')?.style.setProperty('display', 'block');
-    document.getElementById('panel-student')?.style.setProperty('display', 'none');
-    if (typeof switchView === 'function') switchView('recommender');
+    history.replaceState(null, '', '#recommender');
   });
 
-  stuBtn?.addEventListener('click', () => {
+  stuBtn?.addEventListener('click', (e) => {
+    e.preventDefault?.();
     setActive('student');
-    document.getElementById('panel-recommender')?.style.setProperty('display', 'none');
-    document.getElementById('panel-student')?.style.setProperty('display', 'block');
-    if (typeof switchView === 'function') switchView('student');
+    history.replaceState(null, '', '#student');
   });
 
-  // on load, honor saved view if any
-  const saved = localStorage.getItem('sr_current_view');
-  if (saved === 'student') {
-    stuBtn?.click();
-  } else {
-    recBtn?.click();
-  }
+  // Initial state: use hash or last saved setting
+  const initial =
+    (location.hash && location.hash.replace('#', '')) ||
+    localStorage.getItem('sr_current_view') ||
+    'student';
+  setActive(initial === 'recommender' ? 'recommender' : 'student');
+
+  // Sync on hash change
+  window.addEventListener('hashchange', () => {
+    const v = (location.hash || '#student').slice(1);
+    setActive(v === 'recommender' ? 'recommender' : 'student');
+  });
 })();
 
 /* ===================== STUDENT VIEW (tabs + demo behavior) ===================== */
@@ -509,3 +529,4 @@ document.addEventListener('DOMContentLoaded', () => {
 window.SR = Object.assign(window.SR || {}, {
   preselectByName,
 });
+
