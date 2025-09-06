@@ -16,11 +16,10 @@
       color:var(--text,#333);
       min-height:100vh;
     }
-
     /* Header */
     .header {
       background:linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
-      color:#fff; padding:1.5rem 2rem;
+      color:#fff; padding:1.1rem 2rem; /* tighter to bring hero closer */
       box-shadow:0 4px 20px rgba(25,118,210,0.3);
     }
     .header-content {
@@ -33,7 +32,15 @@
       text-decoration:none; color:#fff; transition:.3s;
     }
     .logo:hover { opacity:.85; transform:translateY(-1px); }
-
+    /* Header nav (Student left, Recommender right) */
+    .header-nav { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex:1; margin:0 1rem; }
+    .nav-left, .nav-right { display:flex; gap:1.25rem; align-items:center; }
+    .nav-link{
+      color:#fff; text-decoration:none; font-weight:700; opacity:.95;
+      padding:.35rem .75rem; border-radius:10px; transition:opacity .15s, transform .15s;
+    }
+    .nav-link:hover{ opacity:1; transform:translateY(-1px); }
+    .nav-link[aria-current="page"]{ background:#ffffff22; }
     /* Center header tabs (A) */
     .hdr-tabs {
       display:flex; align-items:center; gap:.4rem;
@@ -50,10 +57,8 @@
       opacity:1;
     }
     .hdr-tab:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
-
     /* Right controls (theme + avatar) */
     .right-controls { display:flex; align-items:center; gap:.75rem; }
-
     /* Avatar + dropdown */
     .user-info { position:relative; display:flex; align-items:center; gap:1rem; }
     .user-avatar {
@@ -65,7 +70,6 @@
     }
     .user-avatar:hover { background:rgba(255,255,255,.3); transform:scale(1.05); border-color:rgba(255,255,255,.3); }
     .user-avatar:focus { outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.3); }
-
     .user-dropdown {
       position:absolute; top:100%; right:0; margin-top:.5rem;
       background:#fff; border-radius:12px;
@@ -94,15 +98,13 @@
     .view-label { display:flex; flex-direction:column; }
     .view-name { font-weight:600; font-size:.9rem; }
     .view-description { font-size:.8rem; color:#666; margin-top:.1rem; }
-
-    .container { max-width:1200px; margin:0 auto; padding:2rem; }
-    .hero-section { text-align:center; margin-bottom:3rem; }
-    .hero-title { font-size:2.5rem; font-weight:700; color:#1976d2; margin-bottom:1rem; }
-    .hero-subtitle { font-size:1.2rem; color:#666; margin-bottom:2rem; }
+    .container { max-width:1200px; margin:0 auto; padding:1.25rem; }
+    .hero-section { text-align:center; margin:1rem 0 1.5rem; }
+    .hero-title { font-size:2.3rem; font-weight:700; color:#1976d2; margin-bottom:.6rem; }
+    .hero-subtitle { font-size:1.1rem; color:#666; margin-bottom:1.25rem; }
     /* Two-column layout */
     .compose-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:2rem; }
     @media (max-width: 980px) { .compose-grid { grid-template-columns:1fr; } }
-
     .upload-section, .writer-section, .university-section,
     .selected-section, .progress-section {
       background:#fff; border-radius:16px; padding:2rem;
@@ -110,7 +112,6 @@
     }
     .upload-section { border:2px dashed #e0e0e0; transition:.3s; }
     .upload-section.dragover { border-color:#1976d2; background:#f3f8ff; }
-
     .upload-area { text-align:center; padding:2rem; }
     .upload-icon { font-size:4rem; color:#1976d2; margin-bottom:1rem; }
     .upload-title { font-size:1.5rem; font-weight:600; margin-bottom:.5rem; color:#333; }
@@ -136,12 +137,10 @@
       cursor:pointer; padding:.5rem; border-radius:50%; transition:.2s;
     }
     .remove-file:hover { background:rgba(244,67,54,.1); color:#f44336; }
-
     .section-title {
       font-size:1.5rem; font-weight:600; color:#333;
       margin-bottom:1rem; display:flex; align-items:center; gap:.5rem;
     }
-
     /* Writer */
     .writer-toolbar { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.75rem; align-items:center; }
     .writer-toolbar .btn {
@@ -168,7 +167,6 @@
     .filter-meta { font-size:.9rem; color:#666; margin:.25rem 0 .5rem; }
     .filter-bar { display:grid; grid-template-columns: repeat(8, minmax(140px, 1fr)); gap:.5rem; margin-bottom:.75rem; align-items:center; }
     .filter-select { width:100%; padding:.7rem .9rem; border:2px solid #e0e0e0; border-radius:12px; background:#fff; font-size:.95rem; }
-
     .university-grid {
       display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:1rem;
       max-height:480px; overflow-y:auto; padding:1rem; border:1px solid #f0f0f0; border-radius:12px;
@@ -181,19 +179,16 @@
     .university-name { font-weight:600; color:#333; }
     .university-location { color:#666; font-size:.9rem; }
     .university-pill { margin-top:.25rem; display:inline-block; font-size:.75rem; color:#555; background:#eef3ff; border:1px solid #dbe7ff; padding:.15rem .5rem; border-radius:999px; }
-
     .pagination { display:flex; justify-content:space-between; align-items:center; margin-top:.75rem; }
     .pager { display:flex; gap:.5rem; }
     .page-btn { background:#fff; border:2px solid #e0e0e0; border-radius:10px; padding:.5rem .9rem; cursor:pointer; font-weight:600; }
     .page-btn[disabled] { opacity:.5; cursor:not-allowed; }
     .page-size { margin-left:auto; display:flex; align-items:center; gap:.5rem; }
-
     .selected-count { color:#1976d2; font-weight:600; margin-bottom:1rem; }
     .selected-list { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:2rem; }
     .selected-tag { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:.5rem 1rem; border-radius:20px; font-size:.9rem; display:flex; align-items:center; gap:.5rem; }
     .remove-tag { cursor:pointer; background:rgba(255,255,255,.2); border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
     .remove-tag:hover { background:rgba(255,255,255,.3); }
-
     .send-section { text-align:center; }
     .send-btn {
       background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; padding:1.2rem 3rem; border:none; border-radius:12px;
@@ -201,7 +196,6 @@
     }
     .send-btn:disabled { background:#ccc; cursor:not-allowed; }
     .send-btn:not(:disabled):hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(76,175,80,.3); }
-
     .progress-section { display:none; }
     .progress-title { font-size:1.3rem; font-weight:600; color:#333; margin-bottom:1rem; text-align:center; }
     .progress-bar { width:100%; height:12px; background:#e0e0e0; border-radius:6px; overflow:hidden; margin-bottom:1rem; }
@@ -213,7 +207,6 @@
     .delivery-status.pending { background:#fff3e0; color:#ff9800; }
     .delivery-status.success { background:#e8f5e8; color:#4caf50; }
     .delivery-status.error { background:#ffebee; color:#f44336; }
-
     .success-section {
       display:none; background:linear-gradient(135deg,#e8f5e8,#f1f8e9);
       border:2px solid #4caf50; border-radius:16px; padding:2rem; text-align:center; box-shadow:0 8px 32px rgba(76,175,80,.2);
@@ -223,15 +216,12 @@
     .success-subtitle { color:#4caf50; margin-bottom:2rem; }
     .new-upload-btn { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:1rem 2rem; border:none; border-radius:12px; font-size:1rem; font-weight:600; cursor:pointer; transition:.2s; }
     .new-upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
-
     @keyframes flash { 0%{box-shadow:0 0 0 rgba(25,118,210,0);} 25%{box-shadow:0 0 0 6px rgba(25,118,210,.25);} 100%{box-shadow:0 0 0 rgba(25,118,210,0);} }
     .flash { animation: flash 1.2s ease; }
-
     .badge { display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; font-size:.75rem; border-radius:999px; border:1px solid; }
     .badge-student { background:#f1f8ff; color:#0d47a1; border-color:#bbdefb; }
     .badge-added   { background:#e8f5e9; color:#1b5e20; border-color:#c8e6c9; }
     .badge-removed { background:#ffebee; color:#b71c1c; border-color:#ffcdd2; }
-
     .toast-wrap { position: fixed; right: 16px; bottom: 16px; z-index: 99999; display: grid; gap: 8px; }
     .toast { min-width: 240px; max-width: 420px; padding: .75rem .9rem; border-radius: 12px;
       box-shadow: 0 8px 30px rgba(0,0,0,.15); color:#0f172a; background:#fff; border:1px solid #e5e7eb;
@@ -244,10 +234,8 @@
     .toast .x    { border:none; background:transparent; cursor:pointer; font-size:1rem; opacity:.6; }
     .toast .x:hover { opacity:.9; }
     @keyframes toast-in { from { transform: translateY(6px); opacity:0; } to { transform: translateY(0); opacity:1; } }
-
     .empty-state { display:none; background:#fff; border:1px dashed #d0d7de; border-radius:12px; padding:1.25rem; color:#445; text-align:center; }
     .empty-state .actions { margin-top:.75rem; display:flex; gap:.5rem; justify-content:center; }
-
     /* Student view (B) */
     .student-card {
       background:#fff; border-radius:16px; padding:1.25rem 1.5rem;
@@ -266,7 +254,6 @@
     }
     .student-panels > section { display:block; }
     .student-panels > section[hidden] { display:none; }
-
     .table { width:100%; border-collapse:separate; border-spacing:0; overflow:hidden;
       border:1px solid #e5e7eb; border-radius:12px; background:#fff; }
     .table th, .table td { padding:.7rem .8rem; text-align:left; border-bottom:1px solid #eef2f7; }
@@ -276,7 +263,6 @@
     .track-pill.pending { background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; }
     .track-pill.sent    { background:#ecfeff; color:#155e75; border:1px solid #a5f3fc; }
     .track-pill.received{ background:#ecfdf5; color:#166534; border:1px solid #bbf7d0; }
-
     @media (max-width:768px) {
       .container { padding:1rem; }
       .hero-title { font-size:2rem; }
@@ -284,7 +270,6 @@
       .header-content { flex-direction:column; gap:1rem; }
       .filter-bar { grid-template-columns:1fr 1fr; }
     }
-
     /* Dark theme basics (CSS side) */
     :root[data-theme="dark"] {
       --bg:#0b1220; --panel:#111a2a; --text:#e5eefc; --muted:#93a3bc; --primary:#7aa2ff; --border:#24324a;
@@ -312,7 +297,6 @@
     :root[data-theme="dark"] .table th { background:#0f1729; color:#e5eefc; }
     :root[data-theme="dark"] .student-tab { color:#c9d6ee; }
     :root[data-theme="dark"] .student-tab[aria-selected="true"] { background:#0f1729; color:#7aa2ff; }
-
     /* Footer (match header) */
     .site-footer {
       background: linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
@@ -321,7 +305,6 @@
       text-align: center;
     }
     .site-footer p { margin: 0; font-size: 0.95rem; }
-
     .theme-btn {
       display:inline-flex; align-items:center; gap:.5rem;
       padding:.55rem 1rem; border-radius:999px;
@@ -331,22 +314,12 @@
     .theme-btn:hover { transform: translateY(-1px); background:#ffffff33; border-color:#ffffff88; }
     .theme-btn:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
     .theme-btn .material-icons { font-size:18px; }
-
     /* unify apply/page buttons in student view */
     .apply-btn {
       background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none;
       padding:.6rem 1rem; border-radius:10px; font-weight:700; cursor:pointer;
     }
     .apply-btn:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(25,118,210,.25); }
-    .header-nav {
-  display: flex;
-  justify-content: space-between;
-}
-.nav-left, .nav-right {
-  display: flex;
-  gap: 1.25rem;
-}
-
   </style>
 </head>
 <body>
@@ -358,18 +331,15 @@
         <span class="material-icons">star</span>
         stellarrec
       </a>
-
-      <!-- Center: Recommender / Student tabs -->
-   <nav class="header-nav">
-  <div class="nav-left">
-    <a href="/student" class="nav-link">Student</a>
-  </div>
-  <div class="nav-right">
-    <a href="/recommender" class="nav-link">Recommender</a>
-  </div>
-</nav>
-
-
+      <!-- Center: Student / Recommender toggles -->
+      <nav class="header-nav">
+        <div class="nav-left">
+          <a href="#student" class="nav-link" data-view="student" aria-current="page">Student</a>
+        </div>
+        <div class="nav-right">
+          <a href="#recommender" class="nav-link" data-view="recommender">Recommender</a>
+        </div>
+      </nav>
       <!-- Right: Theme + Avatar -->
       <div class="right-controls">
         <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false" title="Toggle theme">
@@ -414,55 +384,13 @@
       </div><!-- /.right-controls -->
     </div><!-- /.header-content -->
   </div><!-- /.header -->
-  <!-- Contact Admin Modal (legacy modal) -->
-  <div id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactTitle"
-       style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
-    <div style="background:#fff; width:min(560px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
-      <div style="padding:1.2rem 1.4rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-        <div id="contactTitle" style="font-weight:700;">Contact Admin</div>
-        <button aria-label="Close" id="contactCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
-      </div>
-      <form id="contactForm" style="padding:1rem 1.4rem; display:grid; gap:.75rem;">
-        <label>First name
-          <input type="text" id="contactFirst" required class="filter-select" style="margin-top:.35rem;">
-        </label>
-        <label>Email address
-          <input type="email" id="contactEmail" required class="filter-select" style="margin-top:.35rem;">
-        </label>
-        <label>Query
-          <textarea id="contactQuery" rows="5" required class="filter-select" style="margin-top:.35rem;"></textarea>
-        </label>
-        <div style="display:flex; gap:.5rem; justify-content:flex-end; padding-top:.5rem;">
-          <button type="button" class="page-btn" id="contactCancelBtn">Cancel</button>
-          <button type="submit" class="apply-btn" id="contactSendBtn">Send</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MAIN — RECOMMENDER VIEW -->
-  <div class="container" id="panel-recommender">
-    <!-- Student Context Bar -->
-    <div class="student-bar" id="studentBar" style="display:flex; align-items:center; gap:.75rem; background:#fff; border:1px solid #eaeaea; border-radius:12px; padding:1rem; margin-bottom:1rem;">
-      <span class="material-icons" aria-hidden="true">account_circle</span>
-      <div style="flex:1">
-        <div id="studentTitle" style="font-weight:700;">No student loaded</div>
-        <div id="studentMeta" style="color:#666; font-size:.9rem;">Load a student to see their preselected universities.</div>
-      </div>
-      <input id="studentIdInput" class="filter-select" placeholder="Student ID or email" style="max-width:220px;" aria-label="Student identifier"/>
-      <button class="apply-btn" id="loadStudentBtn">Load student</button>
-      <label style="display:flex; align-items:center; gap:.4rem; margin-left:.5rem; font-size:.9rem;">
-        <input type="checkbox" id="allowEditsToggle"/>
-        Allow recommender edits
-      </label>
-    </div>
-
+  <!-- MAIN — RECOMMENDER VIEW (hidden by default) -->
+  <div class="container" id="panel-recommender" style="display:none;">
     <!-- Hero -->
     <div class="hero-section">
       <h1 class="hero-title">One upload. Unlimited reach.</h1>
       <p class="hero-subtitle">Upload your recommendation letter once and send it to multiple US universities instantly.</p>
     </div>
-
     <!-- Upload + Writer -->
     <div class="compose-grid">
       <!-- Upload Section -->
@@ -472,7 +400,6 @@
           <h2 class="upload-title">Upload Recommendation Letter</h2>
           <p class="upload-subtitle">Drag and drop your PDF file here, or click to browse</p>
           <div id="uploadHint" style="margin:.5rem 0 0; font-size:.9rem; color:#556;">PDF only. Recommended size ≤ 10 MB.</div>
-
           <input type="file" id="fileInput" class="file-input" accept=".pdf,.txt" />
           <button class="upload-btn" id="chooseFileBtn">
             <span class="material-icons">upload_file</span>
@@ -490,7 +417,6 @@
           </div>
         </div>
       </div>
-
       <!-- Writer -->
       <div class="writer-section" id="writerSection">
         <h2 class="section-title"><span class="material-icons">edit</span> Write Letter</h2>
@@ -520,11 +446,9 @@
         </div>
       </div>
     </div>
-
     <!-- University Selection -->
     <div class="university-section">
       <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
-
       <!-- Search + Apply + Bulk import -->
       <div class="university-search" style="position:relative; display:flex; gap:.5rem; align-items:center; margin-bottom:.5rem;">
         <input
@@ -541,12 +465,10 @@
         <button class="page-btn" id="bulkImportBtn" title="Bulk import by names" type="button">Bulk import</button>
         <div id="searchSuggest" class="suggest-popover" style="display:none;"></div>
       </div>
-
       <!-- Browse-all dropdown -->
       <select id="universitySelect" class="filter-select" title="Browse all universities" style="margin-bottom:.5rem;">
         <option value="" selected disabled>Browse all universities (6000+)</option>
       </select>
-
       <!-- Filters -->
       <div class="filter-meta" id="resultMeta" aria-live="polite">Showing 0 of 0</div>
       <div class="filter-bar">
@@ -566,30 +488,25 @@
           <option value="VT">Vermont</option><option value="VA">Virginia</option><option value="WA">Washington</option><option value="WV">West Virginia</option>
           <option value="WI">Wisconsin</option><option value="WY">Wyoming</option>
         </select>
-
         <select id="typeFilter" class="filter-select" aria-label="Filter by institution type">
           <option value="">All types</option>
           <option value="Public">Public</option>
           <option value="Private nonprofit">Private nonprofit</option>
           <option value="Private for-profit">Private for-profit</option>
         </select>
-
         <select id="levelFilter" class="filter-select" aria-label="Filter by level">
           <option value="">All levels</option>
           <option value="4-year">4-year</option>
           <option value="2-year">2-year</option>
           <option value="Less-than-2-year">Less-than-2-year</option>
         </select>
-
         <select id="sortBy" class="filter-select" aria-label="Sort results">
           <option value="name_asc">Sort: Name (A–Z)</option>
           <option value="state_asc">Sort: State (A–Z)</option>
         </select>
-
         <button class="apply-btn" id="filterApplyBtn" title="Apply filters and sort" type="button">Apply filters</button>
         <button class="apply-btn" id="resetBtn" title="Reset search and filters" type="button">Reset</button>
       </div>
-
       <!-- Empty state -->
       <div id="emptyState" class="empty-state" aria-live="polite">
         <div style="font-weight:600; margin-bottom:.25rem;">No universities match your filters</div>
@@ -599,10 +516,8 @@
           <button class="page-btn" id="retryLoadBtn" style="display:none;" type="button">Retry loading</button>
         </div>
       </div>
-
       <!-- Results grid -->
       <div class="university-grid" id="universityGrid" role="list" aria-label="Universities list"></div>
-
       <!-- Pagination -->
       <div class="pagination">
         <div class="pager">
@@ -636,7 +551,6 @@
         </button>
       </div>
     </div>
-
     <!-- Progress Section -->
     <div class="progress-section" id="progressSection">
       <h2 class="progress-title">Sending Letters...</h2>
@@ -644,7 +558,6 @@
       <div class="progress-text" id="progressText" aria-live="polite">Preparing to send...</div>
       <div class="delivery-list" id="deliveryList"></div>
     </div>
-
     <!-- Success Section -->
     <div class="success-section" id="successSection">
       <div class="success-icon"><span class="material-icons">check_circle</span></div>
@@ -655,7 +568,6 @@
         Send Another Letter
       </button>
     </div>
-
     <!-- Confirm Send Modal -->
     <div id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle"
          style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
@@ -687,7 +599,6 @@
         </div>
       </div>
     </div>
-
     <!-- Bulk Import Modal -->
     <div id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle"
          style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
@@ -709,7 +620,6 @@
         </div>
       </div>
     </div>
-
     <!-- Contact Admin Overlay -->
     <div id="contactOverlay" role="dialog" aria-modal="true" aria-labelledby="contactTitle"
          style="position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; z-index:10000;">
@@ -739,17 +649,14 @@
         </form>
       </div>
     </div>
-
     <!-- Toast container -->
     <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
   </div><!-- /.container (Recommender) -->
-
-  <!-- STUDENT VIEW -->
-  <div class="container" id="panel-student" style="display:none;">
+  <!-- STUDENT VIEW (default visible) -->
+  <div class="container" id="panel-student">
     <div class="student-card" style="margin-bottom:1rem;">
       <h1 class="hero-title" style="margin:0 0 .4rem;">Student Portal</h1>
       <p class="hero-subtitle" style="margin:0 0 .8rem;">Request recommendations and track their status.</p>
-
       <div class="student-tabs" role="tablist" aria-label="Student actions">
         <button id="stuTabSend" class="student-tab" role="tab" aria-selected="true" type="button">
           Send Recommendation Request
@@ -758,7 +665,6 @@
           Track Recommendation &amp; Status
         </button>
       </div>
-
       <div class="student-panels">
         <!-- Send -->
         <section id="stuPanelSend">
@@ -787,7 +693,6 @@
             </div>
           </form>
         </section>
-
         <!-- Track -->
         <section id="stuPanelTrack" hidden>
           <div class="student-card" style="padding:0; overflow:hidden;">
@@ -816,17 +721,47 @@
         Making recommendations stellar since 2025 🚀</p>
     </div>
   </footer>
-
   <!-- Vendor scripts (self-hosted) -->
   <script src="/assets/js/vendor/fuse.min.js" defer></script>
   <script src="/assets/js/vendor/localforage.min.js" defer></script>
-
   <!-- Your app code -->
   <script src="/assets/js/dashboard.js" defer></script>
   <script src="/assets/js/init-header.js" defer></script>
   <script src="/assets/js/university-search.js" defer></script>
+  <!-- View toggler (make Student default; remove student context bar) -->
+  <script>
+  (function(){
+    const student = document.getElementById('panel-student');
+    const rec     = document.getElementById('panel-recommender');
+    const links   = document.querySelectorAll('.header-nav .nav-link');
+    function setActive(view){
+      const isStudent = view !== 'recommender';
+      student.style.display = isStudent ? '' : 'none';
+      rec.style.display     = isStudent ? 'none' : '';
+      links.forEach(a => a.removeAttribute('aria-current'));
+      const active = document.querySelector('.nav-link[data-view="'+(isStudent?'student':'recommender')+'"]');
+      if(active) active.setAttribute('aria-current','page');
+    }
+    const initial = (location.hash || '#student').replace('#','');
+    setActive(initial);
+    links.forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const view = a.dataset.view;
+        setActive(view);
+        history.replaceState(null, '', '#'+view);
+      });
+    });
+    window.addEventListener('hashchange', () => {
+      const v = (location.hash || '#student').replace('#','');
+      setActive(v);
+    });
+  })();
+  </script>
 </body>
 </html>
+
+
 
 
 
