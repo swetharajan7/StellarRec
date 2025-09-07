@@ -388,7 +388,8 @@
     </div><!-- /.header-content -->
   </div><!-- /.header -->
   <!-- MAIN — RECOMMENDER VIEW (hidden by default) -->
-  <div class="container" id="panel-recommender" style="display:none;">
+  <<div class="container" id="panel-recommender" hidden>
+
     <!-- Hero -->
     <div class="hero-section">
       <h1 class="hero-title">One upload. Unlimited reach.</h1>
@@ -864,6 +865,58 @@
       }
     });
   </script>
+    <script>
+(function(){
+  const studentPanel = document.getElementById('panel-student');
+  const recPanel     = document.getElementById('panel-recommender');
+  const toggles      = document.querySelectorAll('.header-nav .nav-link');
+
+  if (!studentPanel || !recPanel || !toggles.length) return;
+
+  // Robust localStorage helpers (avoid quota crashes)
+  const safeLS = {
+    get(k, d){ try { return localStorage.getItem(k) ?? d; } catch(e){ return d; } },
+    set(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
+  };
+
+  function setActive(view){
+    const isStudent = (view === 'student');
+    // Remove BOTH visibility mechanisms to be safe across old markup
+    studentPanel.hidden = !isStudent;
+    recPanel.hidden     =  isStudent;
+    studentPanel.style.display = isStudent ? '' : 'none';
+    recPanel.style.display     = isStudent ? 'none' : '';
+
+    toggles.forEach(btn => {
+      const on = btn.dataset.view === view;
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      if (on) btn.setAttribute('aria-current','page'); else btn.removeAttribute('aria-current');
+    });
+
+    // Deep-link & remember (safely)
+    history.replaceState(null, '', '#' + view);
+    safeLS.set('sr_current_view', view);
+  }
+
+  // Click handlers
+  toggles.forEach(btn => btn.addEventListener('click', () => setActive(btn.dataset.view)));
+
+  // Initial state from hash or last saved (safely)
+  const fromHash = (location.hash || '').replace('#','');
+  const saved    = safeLS.get('sr_current_view', '');
+  const initial  = (fromHash === 'recommender' || fromHash === 'student') ? fromHash
+                  : (saved === 'recommender' || saved === 'student') ? saved
+                  : 'student';
+  setActive(initial);
+
+  // Keep hash in sync if user types it
+  window.addEventListener('hashchange', () => {
+    const v = (location.hash || '#student').slice(1);
+    setActive(v === 'recommender' ? 'recommender' : 'student');
+  });
+})();
+</script>
+
 </body>
 </html>
 
