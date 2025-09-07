@@ -4,8 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>StellarRec - One upload. Unlimited reach.</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
@@ -17,130 +19,79 @@
     /* Header */
     .header {
       background:linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
-      color:#fff;
-      padding:1.1rem 2rem;
+      color:#fff; padding:1.1rem 2rem; /* tighter to bring hero closer */
       box-shadow:0 4px 20px rgba(25,118,210,0.3);
     }
     .header-content {
-      max-width:1200px;
-      margin:0 auto;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:1rem;
+      max-width:1200px; margin:0 auto;
+      display:flex; justify-content:space-between; align-items:center; gap:1rem;
     }
     .logo {
-      display:flex;
-      align-items:center;
-      gap:.5rem;
-      font-size:1.8rem;
-      font-weight:700;
-      text-decoration:none;
-      color:#fff;
-      transition:.3s;
+      display:flex; align-items:center; gap:.5rem;
+      font-size:1.8rem; font-weight:700;
+      text-decoration:none; color:#fff; transition:.3s;
     }
     .logo:hover { opacity:.85; transform:translateY(-1px); }
     /* Header nav (Student left, Recommender right) */
-    .header-nav {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:1rem;
-      flex:1;
-      margin:0 1rem;
-    }
+    .header-nav { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex:1; margin:0 1rem; }
     .nav-left, .nav-right { display:flex; gap:1.25rem; align-items:center; }
-    [hidden] { display:none !important; }
+    [hidden] { display: none !important; }
+
     .nav-link{
-      color:#fff;
-      text-decoration:none;
-      font-weight:700;
-      opacity:.95;
-      padding:.35rem .75rem;
-      border-radius:10px;
-      transition:opacity .15s, transform .15s;
+      color:#fff; text-decoration:none; font-weight:700; opacity:.95;
+      padding:.35rem .75rem; border-radius:10px; transition:opacity .15s, transform .15s;
     }
     .nav-link:hover{ opacity:1; transform:translateY(-1px); }
     .nav-link[aria-current="page"]{ background:#ffffff22; }
-
     /* Center header tabs (A) */
     .hdr-tabs {
-      display:flex;
-      align-items:center;
-      gap:.4rem;
-      background:#ffffff22;
-      border:1px solid #ffffff55;
-      border-radius:999px;
-      padding:.2rem;
-      min-height:40px;
+      display:flex; align-items:center; gap:.4rem;
+      background:#ffffff22; border:1px solid #ffffff55; border-radius:999px;
+      padding:.2rem; min-height:40px;
     }
     .hdr-tab {
-      appearance:none;
-      border:0;
-      background:transparent;
-      color:#fff;
-      padding:.45rem .9rem;
-      border-radius:999px;
-      font-weight:700;
-      cursor:pointer;
-      letter-spacing:.2px;
-      font-size:.95rem;
-      opacity:.9;
+      appearance:none; border:0; background:transparent; color:#fff;
+      padding:.45rem .9rem; border-radius:999px; font-weight:700; cursor:pointer;
+      letter-spacing:.2px; font-size:.95rem; opacity:.9;
     }
     .hdr-tab[aria-selected="true"] {
-      background:#fff;
-      color:#1976d2;
-      box-shadow:0 6px 20px rgba(0,0,0,.12);
+      background:#fff; color:#1976d2; box-shadow:0 6px 20px rgba(0,0,0,.12);
       opacity:1;
     }
-    .hdr-tab:focus-visible {
-      outline:3px solid rgba(255,255,255,.5);
-      outline-offset:2px;
-    }
+    .hdr-tab:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
     /* Right controls (theme + avatar) */
     .right-controls { display:flex; align-items:center; gap:.75rem; }
     /* Avatar + dropdown */
     .user-info { position:relative; display:flex; align-items:center; gap:1rem; }
     .user-avatar {
       width:45px; height:45px;
-      background:rgba(255,255,255,.2);
-      border-radius:50%;
+      background:rgba(255,255,255,.2); border-radius:50%;
       display:flex; align-items:center; justify-content:center;
-      font-size:1.2rem;
-      cursor:pointer;
-      transition:.2s;
+      font-size:1.2rem; cursor:pointer; transition:.2s;
       border:2px solid rgba(255,255,255,0.1);
     }
     .user-avatar:hover { background:rgba(255,255,255,.3); transform:scale(1.05); border-color:rgba(255,255,255,.3); }
     .user-avatar:focus { outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.3); }
     .user-dropdown {
-      position:absolute;
-      top:100%; right:0; margin-top:.5rem;
-      background:#fff;
-      border-radius:12px;
+      position:absolute; top:100%; right:0; margin-top:.5rem;
+      background:#fff; border-radius:12px;
       box-shadow:0 8px 32px rgba(0,0,0,.15);
       min-width:260px; max-width:min(92vw,360px);
       opacity:0; visibility:hidden;
       transform:translateY(-10px) scale(.95);
-      transition:all .2s cubic-bezier(0.4,0,0.2,1);
-      z-index:1000;
+      transition:all .2s cubic-bezier(0.4,0,0.2,1); z-index:1000;
       border:1px solid rgba(0,0,0,.08);
     }
     .user-dropdown.show { opacity:1; visibility:visible; transform:translateY(0) scale(1); }
     .user-dropdown::before{
-      content:''; position:absolute; top:-8px; right:16px;
-      width:16px; height:16px;
-      background:#fff;
-      border:1px solid rgba(0,0,0,.08);
-      border-bottom:none; border-right:none;
+      content:''; position:absolute; top:-8px; right:16px; width:16px; height:16px;
+      background:#fff; border:1px solid rgba(0,0,0,.08); border-bottom:none; border-right:none;
       transform:rotate(45deg);
     }
     .dropdown-header { padding:1rem; border-bottom:1px solid #f0f0f0; color:#333; font-weight:600; font-size:.9rem; }
     .dropdown-item {
       display:flex; align-items:center; gap:.75rem;
-      padding:.75rem 1rem;
-      color:#333; cursor:pointer;
-      transition:.15s;
+      padding:.75rem 1rem; color:#333; cursor:pointer; transition:.15s;
     }
     .dropdown-item:hover, .dropdown-item:focus { background:#f8f9fa; outline:none; }
     .dropdown-item .material-icons { font-size:1.2rem; color:#666; }
@@ -149,27 +100,18 @@
     .view-label { display:flex; flex-direction:column; }
     .view-name { font-weight:600; font-size:.9rem; }
     .view-description { font-size:.8rem; color:#666; margin-top:.1rem; }
-
     .container { max-width:1200px; margin:0 auto; padding:1.25rem; }
     .hero-section { text-align:center; margin:1rem 0 1.5rem; }
     .hero-title { font-size:2.3rem; font-weight:700; color:#1976d2; margin-bottom:.6rem; }
     .hero-subtitle { font-size:1.1rem; color:#666; margin-bottom:1.25rem; }
-
     /* Two-column layout */
-    .compose-grid {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:1rem;
-      margin-bottom:2rem;
-    }
+    .compose-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:2rem; }
     @media (max-width: 980px) { .compose-grid { grid-template-columns:1fr; } }
 
-    .upload-section, .writer-section, .university-section, .selected-section, .progress-section {
-      background:#fff;
-      border-radius:16px;
-      padding:2rem;
-      box-shadow:0 8px 32px rgba(0,0,0,.1);
-      margin-bottom:0;
+    .upload-section, .writer-section, .university-section,
+    .selected-section, .progress-section {
+      background:#fff; border-radius:16px; padding:2rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.1); margin-bottom:0;
     }
     .upload-section { border:2px dashed #e0e0e0; transition:.3s; }
     .upload-section.dragover { border-color:#1976d2; background:#f3f8ff; }
@@ -179,884 +121,1104 @@
     .upload-subtitle { color:#666; margin-bottom:2rem; }
     .file-input { display:none; }
     .upload-btn {
-      background:linear-gradient(135deg,#1976d2,#7c4dff);
-      color:#fff;
-      padding:1rem 2rem;
-      border:none;
-      border-radius:12px;
-      font-size:1.1rem;
-      font-weight:600;
-      cursor:pointer;
-      transition:.3s;
-      display:inline-flex;
-      align-items:center;
-      gap:.5rem;
+      background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff;
+      padding:1rem 2rem; border:none; border-radius:12px;
+      font-size:1.1rem; font-weight:600; cursor:pointer;
+      transition:.3s; display:inline-flex; align-items:center; gap:.5rem;
     }
     .upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
     .uploaded-file {
-      display:none;
-      background:#e8f5e8;
-      border:2px solid #4caf50;
-      border-radius:12px;
-      padding:1.5rem;
-      margin-top:1rem;
+      display:none; background:#e8f5e8; border:2px solid #4caf50;
+      border-radius:12px; padding:1.5rem; margin-top:1rem;
     }
     .file-info { display:flex; align-items:center; gap:1rem; }
     .file-icon { font-size:2rem; color:#4caf50; }
     .file-details h3 { color:#2e7d32; margin-bottom:.25rem; }
     .file-details p { color:#4caf50; font-size:.9rem; }
     .remove-file {
-      margin-left:auto;
-      background:none;
-      border:none;
-      color:#666;
-      cursor:pointer;
-      padding:.5rem;
-      border-radius:50%;
-      transition:.2s;
+      margin-left:auto; background:none; border:none; color:#666;
+      cursor:pointer; padding:.5rem; border-radius:50%; transition:.2s;
     }
     .remove-file:hover { background:rgba(244,67,54,.1); color:#f44336; }
     .section-title {
-      font-size:1.5rem;
-      font-weight:600;
-      color:#333;
-      margin-bottom:1rem;
-      display:flex; align-items:center; gap:.5rem;
+      font-size:1.5rem; font-weight:600; color:#333;
+      margin-bottom:1rem; display:flex; align-items:center; gap:.5rem;
     }
-    .section-title .material-icons { color:#1976d2; }
-    .letter-writer textarea {
-      width:100%; min-height:220px;
-      padding:1.25rem;
-      border:1px solid #ddd;
-      border-radius:12px;
-      font-size:1rem;
-      line-height:1.6;
-      resize:vertical;
+    /* Writer */
+    .writer-toolbar { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.75rem; align-items:center; }
+    .writer-toolbar .btn {
+      background:#fff; border:2px solid #e5e7eb; border-radius:10px;
+      padding:.45rem .75rem; cursor:pointer; font-weight:600;
     }
-    .letter-writer textarea:focus {
-      outline:none; border-color:#1976d2;
-      box-shadow:0 0 0 3px rgba(25,118,210,.2);
+    .writer-toolbar .btn:hover { background:#f8f9fa; }
+    .writer-toolbar .meta { margin-left:auto; font-size:.9rem; color:#667; display:flex; gap:.75rem; align-items:center; }
+    .writer-title {
+      width:100%; padding:.7rem .9rem;
+      border:2px solid #e0e0e0; border-radius:12px;
+      font-size:1rem; margin-bottom:.6rem;
     }
-    .letter-writer button {
-      margin-top:1rem;
-      background:linear-gradient(135deg,#1976d2,#7c4dff);
-      color:#fff;
-      border:none;
-      padding:.9rem 1.8rem;
-      border-radius:12px;
-      font-size:1rem;
-      font-weight:600;
-      cursor:pointer;
-      transition:.3s;
+    .writer-box {
+      border:2px solid #e0e0e0; border-radius:12px;
+      min-height:280px; padding:1rem; line-height:1.55;
     }
-    .letter-writer button:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
-    .university-search { display:flex; gap:.75rem; margin-bottom:1rem; }
-    .university-search input {
-      flex:1;
-      padding:.85rem 1.2rem;
-      border:1px solid #ddd;
-      border-radius:10px;
-      font-size:1rem;
-    }
-    .university-search button {
-      padding:.75rem 1.5rem;
-      background:#1976d2;
-      color:#fff;
-      border:none;
-      border-radius:10px;
-      cursor:pointer;
-      font-weight:600;
-    }
-    .filters { display:flex; gap:.75rem; margin-bottom:1.25rem; flex-wrap:wrap; }
-    .filter-btn {
-      padding:.6rem 1.2rem;
-      border:1px solid #ddd;
-      border-radius:999px;
-      background:#fff;
-      cursor:pointer;
-      font-size:.9rem;
-      transition:.2s;
-    }
-    .filter-btn.active { background:#1976d2; color:#fff; border-color:#1976d2; }
+    .writer-box:focus { outline:none; border-color:#1976d2; }
+    .writer-actions { display:flex; gap:.5rem; margin-top:.75rem; flex-wrap:wrap; }
+    .btn-primary { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none; }
+    .btn-success { background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; border:none; }
+    .btn-danger  { background:linear-gradient(135deg,#e53935,#ef5350); color:#fff; border:none; }
+    .btn-muted   { background:#fff; color:#333; }
+    .filter-meta { font-size:.9rem; color:#666; margin:.25rem 0 .5rem; }
+    .filter-bar { display:grid; grid-template-columns: repeat(8, minmax(140px, 1fr)); gap:.5rem; margin-bottom:.75rem; align-items:center; }
+    .filter-select { width:100%; padding:.7rem .9rem; border:2px solid #e0e0e0; border-radius:12px; background:#fff; font-size:.95rem; }
     .university-grid {
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
-      gap:1rem;
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:1rem;
+      max-height:480px; overflow-y:auto; padding:1rem; border:1px solid #f0f0f0; border-radius:12px;
     }
-    .university-card {
-      background:#fff;
-      border-radius:12px;
-      box-shadow:0 4px 16px rgba(0,0,0,.08);
-      padding:1rem;
-      transition:.2s;
-      display:flex; flex-direction:column; gap:.5rem;
-    }
-    .university-card:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(0,0,0,.12); }
-    .university-card h3 { font-size:1.1rem; font-weight:600; margin-bottom:.25rem; }
-    .university-card p { font-size:.9rem; color:#555; }
-    .select-btn {
-      margin-top:auto;
-      padding:.6rem 1rem;
-      background:#7c4dff;
-      color:#fff;
-      border:none;
-      border-radius:8px;
-      cursor:pointer;
-      font-weight:600;
-      font-size:.9rem;
-    }
-    .select-btn:hover { background:#6a1b9a; }
-    .selected-list { margin-top:1rem; display:flex; flex-direction:column; gap:.75rem; }
-    .selected-item {
-      display:flex; align-items:center; gap:.75rem;
-      padding:.75rem 1rem;
-      background:#f8f9fa;
-      border-radius:10px;
-      box-shadow:0 2px 8px rgba(0,0,0,.05);
-    }
-    .selected-item .remove-btn {
-      margin-left:auto;
-      background:none;
-      border:none;
-      color:#f44336;
-      cursor:pointer;
-      font-size:1.2rem;
-    }
-    .send-section {
-      text-align:center;
-      margin-top:2rem;
-    }
+    .university-card { background:#f8f9fa; border:2px solid transparent; border-radius:12px; padding:1rem; cursor:pointer; transition:.2s; }
+    .university-card:hover { border-color:#1976d2; background:#f3f8ff; }
+    .university-card.selected { border-color:#1976d2; background:#e3f2fd; }
+    .university-header { display:flex; align-items:center; gap:1rem; margin-bottom:.5rem; }
+    .university-logo { width:40px; height:40px; background:#1976d2; color:#fff; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:600; }
+    .university-name { font-weight:600; color:#333; }
+    .university-location { color:#666; font-size:.9rem; }
+    .university-pill { margin-top:.25rem; display:inline-block; font-size:.75rem; color:#555; background:#eef3ff; border:1px solid #dbe7ff; padding:.15rem .5rem; border-radius:999px; }
+    .pagination { display:flex; justify-content:space-between; align-items:center; margin-top:.75rem; }
+    .pager { display:flex; gap:.5rem; }
+    .page-btn { background:#fff; border:2px solid #e0e0e0; border-radius:10px; padding:.5rem .9rem; cursor:pointer; font-weight:600; }
+    .page-btn[disabled] { opacity:.5; cursor:not-allowed; }
+    .page-size { margin-left:auto; display:flex; align-items:center; gap:.5rem; }
+    .selected-count { color:#1976d2; font-weight:600; margin-bottom:1rem; }
+    .selected-list { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:2rem; }
+    .selected-tag { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:.5rem 1rem; border-radius:20px; font-size:.9rem; display:flex; align-items:center; gap:.5rem; }
+    .remove-tag { cursor:pointer; background:rgba(255,255,255,.2); border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
+    .remove-tag:hover { background:rgba(255,255,255,.3); }
+    .send-section { text-align:center; }
     .send-btn {
-      background:linear-gradient(135deg,#1976d2,#7c4dff);
-      color:#fff;
-      border:none;
-      padding:1rem 2rem;
-      border-radius:12px;
-      font-size:1.1rem;
-      font-weight:600;
-      cursor:pointer;
-      transition:.3s;
+      background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; padding:1.2rem 3rem; border:none; border-radius:12px;
+      font-size:1.2rem; font-weight:600; cursor:pointer; transition:.2s; display:inline-flex; align-items:center; gap:.5rem;
     }
-    .send-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
-    .progress-tracker { margin-top:1rem; }
-    .progress-tracker table { width:100%; border-collapse:collapse; }
-    .progress-tracker th, .progress-tracker td {
-      padding:.75rem 1rem;
-      text-align:left;
-      border-bottom:1px solid #ddd;
-      font-size:.95rem;
+    .send-btn:disabled { background:#ccc; cursor:not-allowed; }
+    .send-btn:not(:disabled):hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(76,175,80,.3); }
+    .progress-section { display:none; }
+    .progress-title { font-size:1.3rem; font-weight:600; color:#333; margin-bottom:1rem; text-align:center; }
+    .progress-bar { width:100%; height:12px; background:#e0e0e0; border-radius:6px; overflow:hidden; margin-bottom:1rem; }
+    .progress-fill { height:100%; background:linear-gradient(135deg,#4caf50,#66bb6a); border-radius:6px; transition:width .5s ease; width:0%; }
+    .progress-text { text-align:center; color:#666; font-size:.9rem; }
+    .delivery-list { margin-top:1rem; }
+    .delivery-item { display:flex; align-items:center; gap:1rem; padding:.75rem; border-radius:8px; margin-bottom:.5rem; background:#f8f9fa; }
+    .delivery-status { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
+    .delivery-status.pending { background:#fff3e0; color:#ff9800; }
+    .delivery-status.success { background:#e8f5e8; color:#4caf50; }
+    .delivery-status.error { background:#ffebee; color:#f44336; }
+    .success-section {
+      display:none; background:linear-gradient(135deg,#e8f5e8,#f1f8e9);
+      border:2px solid #4caf50; border-radius:16px; padding:2rem; text-align:center; box-shadow:0 8px 32px rgba(76,175,80,.2);
     }
-    .track-pill {
-      padding:.3rem .6rem;
-      border-radius:999px;
-      font-size:.85rem;
-      font-weight:600;
+    .success-icon { font-size:4rem; color:#4caf50; margin-bottom:1rem; }
+    .success-title { font-size:1.8rem; font-weight:600; color:#2e7d32; margin-bottom:1rem; }
+    .success-subtitle { color:#4caf50; margin-bottom:2rem; }
+    .new-upload-btn { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:1rem 2rem; border:none; border-radius:12px; font-size:1rem; font-weight:600; cursor:pointer; transition:.2s; }
+    .new-upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
+    @keyframes flash { 0%{box-shadow:0 0 0 rgba(25,118,210,0);} 25%{box-shadow:0 0 0 6px rgba(25,118,210,.25);} 100%{box-shadow:0 0 0 rgba(25,118,210,0);} }
+    .flash { animation: flash 1.2s ease; }
+    .badge { display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; font-size:.75rem; border-radius:999px; border:1px solid; }
+    .badge-student { background:#f1f8ff; color:#0d47a1; border-color:#bbdefb; }
+    .badge-added   { background:#e8f5e9; color:#1b5e20; border-color:#c8e6c9; }
+    .badge-removed { background:#ffebee; color:#b71c1c; border-color:#ffcdd2; }
+    .toast-wrap { position: fixed; right: 16px; bottom: 16px; z-index: 99999; display: grid; gap: 8px; }
+    .toast { min-width: 240px; max-width: 420px; padding: .75rem .9rem; border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.15); color:#0f172a; background:#fff; border:1px solid #e5e7eb;
+      display:flex; align-items:flex-start; gap:.6rem; animation: toast-in .18s ease; }
+    .toast.success { border-color:#c8e6c9; background:#f1f8f3; }
+    .toast.error   { border-color:#ffcdd2; background:#fff2f2; }
+    .toast.info    { border-color:#bbdefb; background:#f3f8ff; }
+    .toast .icon { font-size: 1.1rem; line-height:1; margin-top:.1rem; }
+    .toast .msg  { flex:1; font-size:.95rem; }
+    .toast .x    { border:none; background:transparent; cursor:pointer; font-size:1rem; opacity:.6; }
+    .toast .x:hover { opacity:.9; }
+    @keyframes toast-in { from { transform: translateY(6px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+    .empty-state { display:none; background:#fff; border:1px dashed #d0d7de; border-radius:12px; padding:1.25rem; color:#445; text-align:center; }
+    .empty-state .actions { margin-top:.75rem; display:flex; gap:.5rem; justify-content:center; }
+    /* Student view (B) */
+    .student-card {
+      background:#fff; border-radius:16px; padding:1.25rem 1.5rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.08);
     }
-    .track-pill.pending { background:#fff3cd; color:#856404; }
-    .track-pill.sent { background:#d1ecf1; color:#0c5460; }
-    .track-pill.received { background:#d4edda; color:#155724; }
+    .student-tabs {
+      display:flex; gap:.4rem; background:#f1f5f9; border-radius:999px; padding:.2rem;
+      border:1px solid #e5e7eb; margin-bottom:.9rem;
+    }
+    .student-tab {
+      appearance:none; background:transparent; border:0; cursor:pointer;
+      padding:.5rem 1rem; border-radius:999px; font-weight:700; color:#334155;
+    }
+    .student-tab[aria-selected="true"] {
+      background:#fff; color:#0f172a; box-shadow:0 6px 18px rgba(0,0,0,.06);
+    }
+    .student-panels > section { display:block; }
+    .student-panels > section[hidden] { display:none; }
+    .table { width:100%; border-collapse:separate; border-spacing:0; overflow:hidden;
+      border:1px solid #e5e7eb; border-radius:12px; background:#fff; }
+    .table th, .table td { padding:.7rem .8rem; text-align:left; border-bottom:1px solid #eef2f7; }
+    .table th { background:#f8fafc; color:#334155; font-weight:700; }
+    .table tr:last-child td { border-bottom:none; }
+    .track-pill { display:inline-block; padding:.2rem .6rem; border-radius:999px; font-weight:700; font-size:.8rem; }
+    .track-pill.pending { background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; }
+    .track-pill.sent    { background:#ecfeff; color:#155e75; border:1px solid #a5f3fc; }
+    .track-pill.received{ background:#ecfdf5; color:#166534; border:1px solid #bbf7d0; }
+    @media (max-width:768px) {
+      .container { padding:1rem; }
+      .hero-title { font-size:2rem; }
+      .university-grid { grid-template-columns:1fr; }
+      .header-content { flex-direction:column; gap:1rem; }
+      .filter-bar { grid-template-columns:1fr 1fr; }
+    }
+    /* Dark theme basics (CSS side) */
+    :root[data-theme="dark"] {
+      --bg:#0b1220; --panel:#111a2a; --text:#e5eefc; --muted:#93a3bc; --primary:#7aa2ff; --border:#24324a;
+    }
+    :root[data-theme="dark"] body { background: linear-gradient(135deg,#0b1220 0%,#0f1729 100%); color: var(--text); }
+    :root[data-theme="dark"] .upload-section,
+    :root[data-theme="dark"] .writer-section,
+    :root[data-theme="dark"] .university-section,
+    :root[data-theme="dark"] .selected-section,
+    :root[data-theme="dark"] .progress-section { background: var(--panel); box-shadow:none; }
+    :root[data-theme="dark"] .filter-select,
+    :root[data-theme="dark"] .writer-title,
+    :root[data-theme="dark"] .writer-box,
+    :root[data-theme="dark"] .page-btn { background:#0f1729; color:var(--text); border-color: var(--border); }
+    :root[data-theme="dark"] .university-card { background:#0f1729; }
+    :root[data-theme="dark"] .university-card:hover { background:#12203a; border-color:#274780; }
+    :root[data-theme="dark"] .university-card.selected { background:#13254a; }
+    :root[data-theme="dark"] .hero-subtitle, :root[data-theme="dark"] .university-location { color: var(--muted); }
+    :root[data-theme="dark"] .hdr-tabs { background:#ffffff11; border-color:#ffffff33; }
+    :root[data-theme="dark"] .hdr-tab { color:#e5eefc; }
+    :root[data-theme="dark"] .hdr-tab[aria-selected="true"] { background:#0f1729; color:#7aa2ff; }
+    :root[data-theme="dark"] .student-card,
+    :root[data-theme="dark"] .table,
+    :root[data-theme="dark"] .student-tabs { background:#111a2a; border-color:#24324a; }
+    :root[data-theme="dark"] .table th { background:#0f1729; color:#e5eefc; }
+    :root[data-theme="dark"] .student-tab { color:#c9d6ee; }
+    :root[data-theme="dark"] .student-tab[aria-selected="true"] { background:#0f1729; color:#7aa2ff; }
+    /* Footer (match header) */
+    .site-footer {
+      background: linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
+      color: #fff;
+      padding: 1.5rem 0;
+      text-align: center;
+    }
+    .site-footer p { margin: 0; font-size: 0.95rem; }
+    .theme-btn {
+      display:inline-flex; align-items:center; gap:.5rem;
+      padding:.55rem 1rem; border-radius:999px;
+      border:1px solid #ffffff55; background:#ffffff22; color:#fff; font-weight:600;
+      cursor:pointer; transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+    }
+    .theme-btn:hover { transform: translateY(-1px); background:#ffffff33; border-color:#ffffff88; }
+    .theme-btn:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
+    .theme-btn .material-icons { font-size:18px; }
+    /* unify apply/page buttons in student view */
+    .apply-btn {
+      background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none;
+      padding:.6rem 1rem; border-radius:10px; font-weight:700; cursor:pointer;
+    }
+    .apply-btn:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(25,118,210,.25); }
+    /* Intake card (link paste) */
+.intake-card {
+  background:#fff; border-radius:16px; padding:1.25rem 1.5rem;
+  box-shadow:0 8px 32px rgba(0,0,0,.08); margin:1rem auto 1.25rem;
+  border:1px solid #e5e7eb; max-width:1200px;
+}
+.intake-row { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+.intake-title { display:flex; align-items:center; gap:.5rem; font-size:1.25rem; font-weight:700; color:#0f172a; }
+.intake-actions { display:flex; gap:.5rem; }
+.intake-sub { color:#475569; margin:.35rem 0 .75rem; }
+.intake-inputs { display:flex; gap:.5rem; align-items:center; }
+.intake-inputs .filter-select { flex:1; }
+.intake-status { margin-top:.6rem; font-size:.95rem; color:#334155; }
+.intake-details { margin-top:.5rem; }
+.intake-help { background:#f8fafc; padding:.75rem; border-radius:10px; border:1px solid #e5e7eb; color:#334155; }
+.intake-summary {
+  margin-top:.75rem; border-top:1px dashed #e5e7eb; padding-top:.6rem;
+  font-size:.95rem; color:#0f172a; display:grid; gap:.35rem;
+}
+.intake-summary .ok { color:#166534; }
+.intake-summary .warn { color:#9a3412; }
+.intake-summary .muted { color:#64748b; }
 
-    /* Toast notifications */
-    .toast-wrap {
-      position:fixed;
-      bottom:1rem; right:1rem;
-      display:flex; flex-direction:column; gap:.5rem;
-      z-index:9999;
-    }
-    .toast {
-      display:flex; align-items:center; gap:.5rem;
-      padding:.75rem 1.25rem;
-      border-radius:10px;
-      background:#333; color:#fff;
-      font-size:.9rem;
-      animation:fadeIn .3s ease;
-    }
-    .toast.success { background:#4caf50; }
-    .toast.error { background:#f44336; }
-    .toast.info { background:#1976d2; }
-    .toast .x {
-      margin-left:.5rem;
-      background:none;
-      border:none;
-      color:#fff;
-      font-size:1rem;
-      cursor:pointer;
-    }
-    @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+:root[data-theme="dark"] .intake-card { background:#111a2a; border-color:#24324a; box-shadow:none; }
+:root[data-theme="dark"] .intake-sub, 
+:root[data-theme="dark"] .intake-help { color:#c9d6ee; background:#0f1729; border-color:#24324a; }
+:root[data-theme="dark"] .intake-summary { color:#e5eefc; border-color:#24324a; }
 
-    /* Theme support */
-    :root[data-theme='dark'] {
-      --bg-grad-1:#1a1a1a;
-      --bg-grad-2:#121212;
-      --text:#f1f1f1;
-    }
-    :root[data-theme='dark'] body { background:linear-gradient(135deg,#1a1a1a,#121212); color:#f1f1f1; }
-    :root[data-theme='dark'] .upload-section,
-    :root[data-theme='dark'] .writer-section,
-    :root[data-theme='dark'] .university-section,
-    :root[data-theme='dark'] .selected-section,
-    :root[data-theme='dark'] .progress-section {
-      background:#1e1e1e; color:#f1f1f1; border:1px solid #333;
-    }
   </style>
 </head>
 <body>
-  <header class="header">
+  <!-- HEADER -->
+  <div class="header">
     <div class="header-content">
-      <a href="/" class="logo"><span class="material-icons">star</span> StellarRec</a>
-      <nav class="header-nav">
+      <!-- Left: Logo -->
+      <a href="/" class="logo" target="_self" aria-label="Go to homepage">
+        <span class="material-icons">star</span>
+        stellarrec
+      </a>
+      <!-- Center: Student / Recommender toggles -->
+      <nav class="header-nav" role="tablist" aria-label="Choose portal">
         <div class="nav-left">
-          <button id="hdrStuTab" class="hdr-tab" data-view="student" aria-selected="true">Student</button>
+          <button class="nav-link" data-view="student" role="tab" aria-selected="true" type="button">Student</button>
         </div>
         <div class="nav-right">
-          <button id="hdrRecTab" class="hdr-tab" data-view="recommender" aria-selected="false">Recommender</button>
+          <button class="nav-link" data-view="recommender" role="tab" aria-selected="false" type="button">Recommender</button>
         </div>
       </nav>
+      <!-- Right: Theme + Avatar -->
       <div class="right-controls">
-        <button id="headerThemeBtn" aria-pressed="false" class="material-icons" title="Toggle theme">brightness_6</button>
+        <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false" title="Toggle theme">
+          <span class="material-icons" aria-hidden="true">dark_mode</span>
+          Light / Dark
+        </button>
         <div class="user-info">
-          <div id="userAvatarBtn" class="user-avatar" tabindex="0" aria-expanded="false">
+          <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
             <span class="material-icons">person</span>
-          </div>
-          <div id="userDropdown" class="user-dropdown" role="menu" aria-hidden="true">
-            <div class="dropdown-header">Quick Actions</div>
-            <div class="dropdown-item" id="contactAdminItem">
-              <span class="material-icons">support_agent</span><span class="view-label"><span class="view-name">Contact Admin</span><span class="view-description">Get help with your account</span></span>
+          </button>
+          <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
+            <div class="dropdown-header">Quick actions</div>
+            <div class="dropdown-item" role="menuitem" tabindex="0">
+              <span class="material-icons">help_outline</span>
+              <div class="view-label">
+                <a href="https://stellarrec.netlify.app/portal-signin"
+                   class="view-name" style="text-decoration:none; color:inherit;" target="_self">
+                  How it works
+                </a>
+                <div class="view-description">Sign-in portal</div>
+              </div>
             </div>
-            <div class="dropdown-item" id="bulkImportBtn">
-              <span class="material-icons">file_upload</span><span class="view-label"><span class="view-name">Bulk Import</span><span class="view-description">Add many universities at once</span></span>
+            <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
+              <span class="material-icons">support_agent</span>
+              <div class="view-label">
+                <div class="view-name">Contact admin</div>
+                <div class="view-description">Send a message</div>
+              </div>
+            </div>
+            <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
+              <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
+                <span class="material-icons">build</span>
+                <div class="view-label">
+                  <div class="view-name">Use mock API</div>
+                  <div class="view-description">Toggle mock vs real backend</div>
+                </div>
+                <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
+              </label>
             </div>
           </div>
+        </div><!-- /.user-info -->
+      </div><!-- /.right-controls -->
+    </div><!-- /.header-content -->
+  </div><!-- /.header -->
+  <!-- MAIN — RECOMMENDER VIEW (hidden by default) -->
+  <<div class="container" id="panel-recommender" hidden>
+        <!-- Student Link Intake -->
+    <div class="intake-card" id="linkIntake">
+      <div class="intake-row">
+        <h2 class="intake-title">
+          <span class="material-icons" aria-hidden="true">link</span>
+          Paste student link
+        </h2>
+        <div class="intake-actions">
+          <button class="page-btn" id="linkHelpBtn" type="button" title="What does this do?">What’s this?</button>
+        </div>
+      </div>
+
+      <p class="intake-sub">Paste the link you received by email from the student. We’ll import their details and selected universities.</p>
+
+      <div class="intake-inputs">
+        <input id="linkInput" class="filter-select" type="url" placeholder="Paste the student link here… e.g. https://example.com/reco?sf=Jane&sl=Doe&se=jane@email.com&waive=1&unis=166027,110635" />
+        <button id="linkParseBtn" class="apply-btn" type="button">Import</button>
+      </div>
+
+      <div id="linkStatus" class="intake-status" aria-live="polite"></div>
+
+      <details id="linkFormatDetails" class="intake-details">
+        <summary>Expected link format (examples)</summary>
+        <div class="intake-help">
+          <div><b>With unit IDs (best):</b><br>
+            <code>?sf=Jane&sl=Doe&se=jane@email.com&sp=2065551212&waive=1&unis=166027,110635&rname=Prof%20Smith&remail=smith@uni.edu&rphone=2125559876</code>
+          </div>
+          <div><b>With names (we’ll match):</b><br>
+            <code>?sf=Jane&sl=Doe&se=jane@email.com&waive=0&unames=Harvard%20University,Stanford%20University</code>
+          </div>
+          <div style="margin-top:.35rem;">
+            <small>
+              Params: <code>sf</code>=student first, <code>sl</code>=student last, <code>se</code>=student email, <code>sp</code>=student phone,
+              <code>waive</code>=1/0, <code>unis</code>=CSV of unitids, <code>unames</code>=CSV of names,
+              <code>rname</code>=recommender name, <code>remail</code>=recommender email, <code>rphone</code>=recommender phone.
+            </small>
+          </div>
+        </div>
+      </details>
+
+      <div id="linkSummary" class="intake-summary" hidden></div>
+    </div>
+
+
+    <!-- Hero -->
+    <div class="hero-section">
+      <h1 class="hero-title">One upload. Unlimited reach.</h1>
+      <p class="hero-subtitle">Upload your recommendation letter once and send it to multiple US universities instantly.</p>
+    </div>
+
+   <div class="compose-grid">
+  <!-- (A) Upload PDF (left) -->
+  <div class="upload-section" id="uploadSection">
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon"><span class="material-icons">cloud_upload</span></div>
+      <h2 class="upload-title">Upload Recommendation Letter (PDF)</h2>
+      <p class="upload-subtitle">Drag & drop your PDF here, or click to browse</p>
+      <div id="uploadHint" style="margin:.5rem 0 0; font-size:.9rem; color:#556;">PDF only. Recommended size ≤ 10 MB.</div>
+
+      <input type="file" id="fileInput" class="file-input" accept=".pdf,application/pdf" />
+      <button class="upload-btn" id="chooseFileBtn">
+        <span class="material-icons">upload_file</span> Choose PDF
+      </button>
+    </div>
+
+    <div class="uploaded-file" id="uploadedFile">
+      <div class="file-info">
+        <div class="file-icon"><span class="material-icons">description</span></div>
+        <div class="file-details">
+          <h3 id="fileName">recommendation-letter.pdf</h3>
+          <p id="fileSize">—</p>
+        </div>
+        <button class="remove-file" id="removeFileBtn" title="Remove PDF">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- (B) Upload Video (right) -->
+  <div class="upload-section" id="videoUploadSection">
+    <div class="upload-area" id="videoUploadArea">
+      <div class="upload-icon"><span class="material-icons">videocam</span></div>
+      <h2 class="upload-title">Upload Intro/Context Video (optional)</h2>
+      <p class="upload-subtitle">Drag & drop your video here, or click to browse</p>
+      <div style="margin:.5rem 0 0; font-size:.9rem; color:#556;">
+        Supported: MP4 / MOV / WEBM. Tip: keep it short (≤ 2–3 min).
+      </div>
+
+      <input type="file" id="videoInput" class="file-input" accept="video/mp4,video/quicktime,video/webm" />
+      <button class="upload-btn" id="chooseVideoBtn">
+        <span class="material-icons">video_file</span> Choose Video
+      </button>
+    </div>
+
+    <div class="uploaded-file" id="uploadedVideo">
+      <div class="file-info" style="align-items:flex-start;">
+        <div class="file-icon"><span class="material-icons">smart_display</span></div>
+        <div class="file-details" style="flex:1;">
+          <h3 id="videoName">intro.mp4</h3>
+          <p id="videoSize">—</p>
+          <!-- Optional inline preview -->
+          <video id="videoPreview" class="video-preview" controls playsinline style="display:none; margin-top:.6rem; max-height:240px; width:100%; border-radius:10px; background:#000;"></video>
+        </div>
+        <button class="remove-file" id="removeVideoBtn" title="Remove video">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- (C) Writer (full width on a new row) -->
+  <div class="writer-section" id="writerSection" style="grid-column:1 / -1;">
+    <h2 class="section-title"><span class="material-icons">edit</span> Write Letter</h2>
+    <input id="writerTitle" class="writer-title" placeholder="Letter title (optional, e.g., 'Recommendation for Jane Doe')" />
+    <div class="writer-toolbar">
+      <button class="btn btn-muted" data-wcmd="bold" title="Bold (Ctrl/Cmd+B)"><b>B</b></button>
+      <button class="btn btn-muted" data-wcmd="italic" title="Italic (Ctrl/Cmd+I)"><i>I</i></button>
+      <button class="btn btn-muted" data-wcmd="underline" title="Underline (Ctrl/Cmd+U)"><u>U</u></button>
+      <div class="meta">
+        <span id="writerCount">0 words • 0 chars</span>
+        <span id="writerSaved">Not saved</span>
+      </div>
+    </div>
+    <div id="writerBox" class="writer-box" contenteditable="true" aria-label="Letter editor"
+         placeholder="Write your recommendation letter here..."></div>
+    <div class="writer-actions">
+      <button class="btn btn-primary" id="saveDraftBtn">Save draft</button>
+      <button class="btn btn-muted" id="restoreDraftBtn">Restore</button>
+      <button class="btn btn-danger" id="clearDraftBtn">Clear</button>
+      <button class="btn btn-muted" id="copyDraftBtn">Copy</button>
+      <button class="btn btn-muted" id="downloadDraftBtn">Download .txt</button>
+      <button class="btn btn-success" id="attachDraftBtn">Attach draft</button>
+      <label style="display:flex; align-items:center; gap:.4rem; margin-left:auto;">
+        <input type="checkbox" id="writerAutosaveToggle" checked />
+        Autosave
+      </label>
+    </div>
+  </div>
+</div>
+
+    <!-- University Selection -->
+    <div class="university-section">
+      <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
+
+      <!-- Search + Apply + Bulk import -->
+      <div class="university-search" style="position:relative; display:flex; gap:.5rem; align-items:center; margin-bottom:.5rem;">
+        <input
+          type="text"
+          class="search-input filter-select"
+          placeholder="Search universities..."
+          id="universitySearch"
+          autocomplete="off"
+          aria-autocomplete="list"
+          aria-expanded="false"
+          aria-owns="searchSuggest"
+        />
+        <button class="apply-btn" id="searchApplyBtn" title="Apply search (Enter)" type="button">Apply</button>
+        <button class="page-btn" id="bulkImportBtn" title="Bulk import by names" type="button">Bulk import</button>
+        <div id="searchSuggest" class="suggest-popover" style="display:none;"></div>
+      </div>
+
+      <!-- Browse-all dropdown -->
+      <select id="universitySelect" class="filter-select" title="Browse all universities" style="margin-bottom:.5rem;">
+        <option value="" selected disabled>Browse all universities (6000+)</option>
+      </select>
+
+      <!-- Filters -->
+      <div class="filter-meta" id="resultMeta" aria-live="polite">Showing 0 of 0</div>
+      <div class="filter-bar">
+        <select id="stateFilter" class="filter-select" aria-label="Filter by state">
+          <option value="">All states</option>
+          <option value="AL">Alabama</option><option value="AK">Alaska</option><option value="AZ">Arizona</option><option value="AR">Arkansas</option>
+          <option value="CA">California</option><option value="CO">Colorado</option><option value="CT">Connecticut</option><option value="DE">Delaware</option>
+          <option value="FL">Florida</option><option value="GA">Georgia</option><option value="HI">Hawaii</option><option value="ID">Idaho</option>
+          <option value="IL">Illinois</option><option value="IN">Indiana</option><option value="IA">Iowa</option><option value="KS">Kansas</option>
+          <option value="KY">Kentucky</option><option value="LA">Louisiana</option><option value="ME">Maine</option><option value="MD">Maryland</option>
+          <option value="MA">Massachusetts</option><option value="MI">Michigan</option><option value="MN">Minnesota</option><option value="MS">Mississippi</option>
+          <option value="MO">Missouri</option><option value="MT">Montana</option><option value="NE">Nebraska</option><option value="NV">Nevada</option>
+          <option value="NH">New Hampshire</option><option value="NJ">New Jersey</option><option value="NM">New Mexico</option><option value="NY">New York</option>
+          <option value="NC">North Carolina</option><option value="ND">North Dakota</option><option value="OH">Ohio</option><option value="OK">Oklahoma</option>
+          <option value="OR">Oregon</option><option value="PA">Pennsylvania</option><option value="RI">Rhode Island</option><option value="SC">South Carolina</option>
+          <option value="SD">South Dakota</option><option value="TN">Tennessee</option><option value="TX">Texas</option><option value="UT">Utah</option>
+          <option value="VT">Vermont</option><option value="VA">Virginia</option><option value="WA">Washington</option><option value="WV">West Virginia</option>
+          <option value="WI">Wisconsin</option><option value="WY">Wyoming</option>
+        </select>
+
+        <select id="typeFilter" class="filter-select" aria-label="Filter by institution type">
+          <option value="">All types</option>
+          <option value="Public">Public</option>
+          <option value="Private nonprofit">Private nonprofit</option>
+          <option value="Private for-profit">Private for-profit</option>
+        </select>
+
+        <select id="levelFilter" class="filter-select" aria-label="Filter by level">
+          <option value="">All levels</option>
+          <option value="4-year">4-year</option>
+          <option value="2-year">2-year</option>
+          <option value="Less-than-2-year">Less-than-2-year</option>
+        </select>
+
+        <select id="sortBy" class="filter-select" aria-label="Sort results">
+          <option value="name_asc">Sort: Name (A–Z)</option>
+          <option value="state_asc">Sort: State (A–Z)</option>
+        </select>
+
+        <button class="apply-btn" id="filterApplyBtn" title="Apply filters and sort" type="button">Apply filters</button>
+        <button class="apply-btn" id="resetBtn" title="Reset search and filters" type="button">Reset</button>
+      </div>
+
+      <!-- Empty state -->
+      <div id="emptyState" class="empty-state" aria-live="polite">
+        <div style="font-weight:600; margin-bottom:.25rem;">No universities match your filters</div>
+        <div style="font-size:.9rem; color:#667;">Try adjusting search or clearing filters.</div>
+        <div class="actions">
+          <button class="apply-btn" id="clearFiltersBtn" type="button">Clear filters</button>
+          <button class="page-btn" id="retryLoadBtn" style="display:none;" type="button">Retry loading</button>
+        </div>
+      </div>
+
+      <!-- Results grid -->
+      <div class="university-grid" id="universityGrid" role="list" aria-label="Universities list"></div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <div class="pager">
+          <button class="page-btn" id="prevPage">Prev</button>
+          <span id="pageInfo" style="font-weight:600;">Page 1 of 1</span>
+          <button class="page-btn" id="nextPage">Next</button>
+        </div>
+        <div class="page-size">
+          <label for="pageSize">Per page:</label>
+          <select id="pageSize" class="filter-select" style="width:auto;display:inline-block;">
+            <option value="20">20</option>
+            <option value="40" selected>40</option>
+            <option value="80">80</option>
+            <option value="120">120</option>
+          </select>
         </div>
       </div>
     </div>
-  </header>
-  <!-- Student Panel -->
-  <div class="container" id="panel-student">
-    <!-- Upload Section -->
-    <div class="upload-section">
-      <h2 class="section-title"><span class="material-icons">upload_file</span> Upload Your Documents</h2>
-      <div id="uploadArea" class="upload-box">
-        <p>Drag & drop your PDF here or</p>
-        <button id="chooseFileBtn">Choose File</button>
-        <input id="fileInput" type="file" accept="application/pdf" hidden />
-      </div>
-      <div id="uploadedFile" class="uploaded-file" style="display:none;">
-        <p><strong id="fileName"></strong> <span id="fileSize"></span></p>
-        <button id="removeFileBtn">Remove</button>
-      </div>
-    </div>
 
-    <!-- Video Upload Section -->
-    <div class="upload-section">
-      <h2 class="section-title"><span class="material-icons">videocam</span> Upload a Video</h2>
-      <div id="videoUploadArea" class="upload-box">
-        <p>Drag & drop your video here or</p>
-        <button id="chooseVideoBtn">Choose Video</button>
-        <input id="videoInput" type="file" accept="video/*" hidden />
-      </div>
-      <div id="uploadedVideo" class="uploaded-file" style="display:none;">
-        <p><strong id="videoName"></strong> <span id="videoSize"></span></p>
-        <button id="removeVideoBtn">Remove</button>
-      </div>
-    </div>
-
-    <!-- University Selection Section -->
-    <div class="university-section">
-      <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
-      <div class="university-search">
-        <input type="text" id="universitySearchInput" placeholder="Search universities..." />
-        <button id="searchBtn">Search</button>
-      </div>
-      <div class="filters">
-        <button class="filter-btn" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="us">U.S.</button>
-        <button class="filter-btn" data-filter="intl">International</button>
-      </div>
-      <div id="universityGrid" class="university-grid"></div>
-    </div>
-
-    <!-- Selected Universities Section -->
+    <!-- Selected Universities -->
     <div class="selected-section">
-      <h2 class="section-title"><span class="material-icons">check_circle</span> Selected Universities</h2>
-      <div id="selectedList" class="selected-list"></div>
+      <h2 class="section-title" style="display:flex;align-items:center;gap:.5rem;">
+        <span class="material-icons">check_circle</span> Selected Universities
+        <button id="copyLinkBtn" class="page-btn" title="Copy shareable link" style="margin-left:auto;">Copy link</button>
+      </h2>
+      <div class="selected-count" id="selectedCount">0 universities selected</div>
+      <div class="selected-list" id="selectedList" role="list" aria-live="polite"></div>
       <div class="send-section">
-        <button id="sendBtn" class="send-btn" disabled>Send to Recommender</button>
+        <button class="send-btn" id="sendBtn" disabled>
+          <span class="material-icons">send</span>
+          Send to Selected Universities
+        </button>
       </div>
     </div>
 
-    <!-- Track Progress Section -->
-    <div class="progress-section">
-      <h2 class="section-title"><span class="material-icons">track_changes</span> Track Progress</h2>
-      <div class="progress-tracker">
-        <table>
-          <thead>
-            <tr>
-              <th>Recommender</th>
-              <th>Email</th>
-              <th>Date</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="stuTrackBody"></tbody>
-        </table>
+    <!-- Progress Section -->
+    <div class="progress-section" id="progressSection">
+      <h2 class="progress-title">Sending Letters...</h2>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText" aria-live="polite">Preparing to send...</div>
+      <div class="delivery-list" id="deliveryList"></div>
+    </div>
+
+    <!-- Success Section -->
+    <div class="success-section" id="successSection">
+      <div class="success-icon"><span class="material-icons">check_circle</span></div>
+      <h2 class="success-title">Letters Sent Successfully!</h2>
+      <p class="success-subtitle">Your recommendation letter has been delivered to all selected universities.</p>
+      <button class="new-upload-btn" id="newUploadBtn">
+        <span class="material-icons">add</span>
+        Send Another Letter
+      </button>
+    </div>
+
+    <!-- Confirm Send Modal -->
+    <div id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle"
+         style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
+      <div style="background:#fff; width:min(720px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
+        <div style="padding:1.2rem 1.4rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+          <div id="confirmModalTitle" style="font-weight:700;">Confirm recipients</div>
+          <button aria-label="Close" id="modalCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:1.2rem 1.4rem; max-height:60vh; overflow:auto; line-height:1.45;">
+          <div id="modalSummary" style="margin-bottom:1rem;"></div>
+          <div id="modalLists" style="display:grid; gap:1rem;">
+            <div>
+              <div style="font-weight:600;">Included (<span id="modalIncludedCount">0</span>)</div>
+              <div id="modalIncluded"></div>
+            </div>
+            <div>
+              <div style="font-weight:600;">Removed vs student’s list (<span id="modalRemovedCount">0</span>)</div>
+              <div id="modalRemoved" style="color:#b00020;"></div>
+            </div>
+            <div>
+              <div style="font-weight:600;">Added by you (<span id="modalAddedCount">0</span>)</div>
+              <div id="modalAdded" style="color:#1b5e20;"></div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:1rem 1.4rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
+          <button class="page-btn" id="modalCancelBtn">Cancel</button>
+          <button class="apply-btn" id="modalConfirmBtn">Send now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Import Modal -->
+    <div id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle"
+         style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
+      <div style="background:#fff; width:min(680px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
+        <div style="padding:1rem 1.2rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+          <div id="importTitle" style="font-weight:700;">Bulk import universities</div>
+          <button aria-label="Close" id="importCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:1rem 1.2rem; display:grid; gap:.75rem;">
+          <div style="font-size:.92rem; color:#556;">
+            Paste one <b>name per line</b>. We’ll fuzzy-match against the master list.
+          </div>
+          <textarea id="importTextarea" rows="10" style="width:100%; padding:.8rem; border:1px solid #e5e7eb; border-radius:10px; font-family:inherit;"></textarea>
+          <div id="importPreview" style="font-size:.9rem; color:#667;"></div>
+        </div>
+        <div style="padding:1rem 1.2rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
+          <button class="page-btn" id="importCancelBtn">Cancel</button>
+          <button class="apply-btn" id="importConfirmBtn">Add matches</button>
+        </div>
+      </div>
+    </div>
+    <!-- Contact Admin Overlay -->
+    <div id="contactOverlay" role="dialog" aria-modal="true" aria-labelledby="contactTitle"
+         style="position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; z-index:10000;">
+      <div style="background:#fff; width:min(560px,92vw); border-radius:16px; box-shadow:0 18px 50px rgba(0,0,0,.22); overflow:hidden; transform:translateY(12px); opacity:0; transition:.18s;">
+        <div style="padding:1rem 1.25rem; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
+          <div id="contactTitle" style="font-weight:700;">Contact admin</div>
+          <button aria-label="Close" id="contactCloseBtn2" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+        <form id="contactForm2" style="padding:1rem 1.25rem; display:grid; gap:.75rem;">
+          <div>
+            <label for="cFirst2" style="display:block; font-weight:600; margin-bottom:.35rem;">First name</label>
+            <input id="cFirst2" name="first" class="filter-select" type="text" placeholder="Your first name" required />
+          </div>
+          <div>
+            <label for="cEmail2" style="display:block; font-weight:600; margin-bottom:.35rem;">Email address</label>
+            <input id="cEmail2" name="email" class="filter-select" type="email" placeholder="you@example.com" required />
+          </div>
+          <div>
+            <label for="cQuery2" style="display:block; font-weight:600; margin-bottom:.35rem;">Query</label>
+            <textarea id="cQuery2" name="query" rows="5" style="width:100%; padding:.8rem; border:1px solid #e5e7eb; border-radius:10px; font-family:inherit;" placeholder="How can we help?" required></textarea>
+          </div>
+          <div style="display:flex; gap:.5rem; justify-content:flex-end; border-top:1px solid #f1f5f9; padding-top:.75rem;">
+            <button type="button" class="page-btn" id="contactCancelBtn2">Cancel</button>
+            <button type="submit" class="apply-btn" id="contactSendBtn2">Send</button>
+          </div>
+          <input type="hidden" name="form-name" value="contact-admin">
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
+  </div><!-- /.container (Recommender) -->
+
+  <!-- STUDENT VIEW (default visible) -->
+  <div class="container" id="panel-student">
+    <div class="student-card" style="margin-bottom:1rem;">
+      <h1 class="hero-title" style="margin:0 0 .4rem;">Student Portal</h1>
+      <p class="hero-subtitle" style="margin:0 0 .8rem;">Request recommendations and track their status.</p>
+
+      <div class="student-tabs" role="tablist" aria-label="Student actions">
+        <button id="stuTabSend" class="student-tab" role="tab" aria-selected="true" type="button">
+          Send Recommendation Request
+        </button>
+        <button id="stuTabTrack" class="student-tab" role="tab" aria-selected="false" type="button">
+          Track Recommendation &amp; Status
+        </button>
+      </div>
+
+      <div class="student-panels">
+        <!-- Send -->
+        <section id="stuPanelSend">
+          <form id="stuSendForm" class="student-card" style="padding:1rem; box-shadow:none; border:1px solid #e5e7eb;">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:.75rem;">
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Your Name</label>
+                <input id="stuName" class="filter-select" type="text" placeholder="Student full name" required />
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Your Email</label>
+                <input id="stuEmail" class="filter-select" type="email" placeholder="you@example.com" required />
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Recommender Name</label>
+                <input id="recName" class="filter-select" type="text" placeholder="Prof. Jane Smith" required />
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Recommender Email</label>
+                <input id="recEmail" class="filter-select" type="email" placeholder="jane@university.edu" required />
+              </div>
+            </div>
+            <div style="margin-top:.75rem; display:flex; gap:.5rem; justify-content:flex-end;">
+              <button type="reset" class="page-btn">Clear</button>
+              <button type="submit" class="apply-btn">Send Request</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Track -->
+        <section id="stuPanelTrack" hidden>
+          <div class="student-card" style="padding:0; overflow:hidden;">
+            <table class="table" aria-label="Recommendation requests">
+              <thead>
+                <tr>
+                  <th>Recommender</th>
+                  <th>Email</th>
+                  <th>Requested</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="stuTrackBody">
+                <!-- Populated by dashboard.js -->
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
     </div>
   </div>
 
-  <!-- Recommender Panel -->
-  <div class="container" id="panel-recommender" hidden>
-    <!-- Only Selected Universities Section (no search to avoid duplicates) -->
-    <div class="selected-section">
-      <h2 class="section-title"><span class="material-icons">check_circle</span> Selected Universities</h2>
-      <div id="recSelectedList" class="selected-list"></div>
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2025 <span style="color: #ffeb3b; font-weight: 600;">StellarRec™</span>. All rights reserved. |
+        Making recommendations stellar since 2025 🚀</p>
     </div>
+  </footer>
 
-    <!-- Letter Writer Section -->
-    <div class="writer-section">
-      <h2 class="section-title"><span class="material-icons">edit</span> Write a Letter</h2>
-      <div class="letter-writer">
-        <textarea id="letterContent" placeholder="Write your recommendation letter here..."></textarea>
-        <button id="saveLetterBtn">Save Letter</button>
-      </div>
-    </div>
-  </div>
+<!-- Vendor scripts (CDN, with cache-busting) -->
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js?v=2025-09-06" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js?v=2025-09-06" defer></script>
 
-  <!-- Contact Overlay -->
-  <div id="contactOverlay" class="overlay" style="display:none;">
-    <div class="overlay-content" style="transform:translateY(50px); opacity:0; transition:.3s;">
-      <h3>Contact Admin</h3>
-      <p>If you need assistance, please write to support@stellarrec.com</p>
-      <div style="margin-top:1rem;">
-        <button id="contactCloseBtn2">Close</button>
-        <button id="contactCancelBtn2">Cancel</button>
-      </div>
-    </div>
-  </div>
+<!-- Your app code (keep after vendors; add cache-busting too) -->
+<script src="/assets/js/dashboard.js?v=2025-09-06-1" defer></script>
+<script src="/assets/js/university-search.js?v=2025-09-06-1" defer></script>
+<script>
+(function(){
+  // Helper: safe localStorage to avoid quota crashes
+  const safeLS = {
+    get(k, d){ try { return localStorage.getItem(k) ?? d; } catch(e){ return d; } },
+    set(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
+  };
+  const norm = s => (s||'').toString().trim().toLowerCase();
 
-  <!-- Bulk Import Modal -->
-  <div id="importModal" class="overlay" style="display:none;">
-    <div class="overlay-content" style="transform:translateY(50px); opacity:0; transition:.3s;">
-      <h3>Bulk Import Universities</h3>
-      <textarea id="importTextarea" placeholder="Paste university names, one per line..."></textarea>
-      <div id="importPreview" style="margin:.5rem 0; font-size:.9rem; color:#555;"></div>
-      <div style="margin-top:1rem;">
-        <button id="importConfirmBtn">Import</button>
-        <button id="importCancelBtn">Cancel</button>
-        <button id="importCloseBtn">Close</button>
-      </div>
-    </div>
-  </div>
-  <!-- Scripts -->
-  <script src="/assets/js/fuse.min.js"></script>
-  <script src="/assets/js/localforage.min.js"></script>
-  <script src="/assets/js/dashboard.js"></script>
+  const els = {
+    input:  document.getElementById('linkInput'),
+    parse:  document.getElementById('linkParseBtn'),
+    status: document.getElementById('linkStatus'),
+    sum:    document.getElementById('linkSummary'),
+    help:   document.getElementById('linkHelpBtn'),
+  };
 
-  <!-- Tab Switching Script -->
+  // Show a little explainer
+  els.help?.addEventListener('click', () => {
+    const det = document.getElementById('linkFormatDetails');
+    if (!det) return;
+    det.open = true;
+    det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  function setStatus(msg, type='info'){
+    if (!els.status) return;
+    const color = type==='error' ? '#b91c1c' : type==='success' ? '#166534' : '#334155';
+    els.status.innerHTML = `<span style="color:${color}">${msg}</span>`;
+  }
+
+  function summarize(data, matchedCount){
+    const lines = [];
+    if (data.studentFirst || data.studentLast) {
+      lines.push(`<div><b>Student</b>: ${[data.studentFirst, data.studentLast].filter(Boolean).join(' ') || '<span class="muted">—</span>'}</div>`);
+    }
+    if (data.studentEmail || data.studentPhone) {
+      lines.push(`<div><b>Contact</b>: ${[data.studentEmail, data.studentPhone].filter(Boolean).join(' • ') || '<span class="muted">—</span>'}</div>`);
+    }
+    if (typeof data.waiveAccess !== 'undefined') {
+      lines.push(`<div><b>Waive access</b>: ${data.waiveAccess ? '<span class="ok">Yes</span>' : 'No'}</div>`);
+    }
+    if (data.recommenderName || data.recommenderEmail || data.recommenderPhone) {
+      lines.push(`<div><b>Recommender</b>: ${data.recommenderName || ''} ${data.recommenderEmail ? '• ' + data.recommenderEmail : ''} ${data.recommenderPhone ? '• ' + data.recommenderPhone : ''}</div>`);
+    }
+    if (Array.isArray(data.unitids) && data.unitids.length) {
+      lines.push(`<div><b>Universities (unitids)</b>: ${data.unitids.length} ${matchedCount!=null?`<span class="${matchedCount>0?'ok':'warn'}">(matched ${matchedCount})</span>`:''}</div>`);
+    } else if (Array.isArray(data.unames) && data.unames.length) {
+      lines.push(`<div><b>Universities (by name)</b>: ${data.unames.length} (will match)</div>`);
+    }
+    els.sum.innerHTML = lines.join('') || '<div class="muted">No details found.</div>';
+    els.sum.hidden = false;
+  }
+
+  function parseLink(raw){
+    try {
+      const url = new URL(raw);
+      const q   = url.searchParams;
+
+      const data = {
+        studentFirst:   q.get('sf') || q.get('sfn') || '',
+        studentLast:    q.get('sl') || q.get('sln') || '',
+        studentEmail:   q.get('se') || q.get('semail') || '',
+        studentPhone:   q.get('sp') || q.get('sphone') || '',
+        waiveAccess:    q.get('waive') === '1' || q.get('waive') === 'true',
+        recommenderName: q.get('rname') || '',
+        recommenderEmail: q.get('remail') || '',
+        recommenderPhone: q.get('rphone') || '',
+        unitids: [],
+        unames: [],
+      };
+
+      // CSV unitids
+      const unis = q.get('unis');
+      if (unis) {
+        data.unitids = unis.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      // CSV names
+      const unames = q.get('unames');
+      if (unames) {
+        data.unames = unames.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      return data;
+    } catch(e){
+      return null;
+    }
+  }
+
+  async function applyReferralData(data){
+    // Save raw
+    safeLS.set('sr_referral_raw', JSON.stringify(data));
+
+    // Preselect universities
+    window.studentUnitIds        = new Set();   // student’s original choices
+    window.addedByRecommender    = new Set();   // explicit add by recommender
+    window.removedByRecommender  = new Set();   // explicit remove by recommender
+
+    let matchedCount = 0;
+
+    // Prefer unitids if provided
+    if (Array.isArray(data.unitids) && data.unitids.length && Array.isArray(window.universities)) {
+      const master = new Map(window.universities.map(u => [String(u.unitid), u]));
+      data.unitids.forEach(id => {
+        const uid = String(id);
+        if (master.has(uid)) {
+          window.studentUnitIds.add(uid);
+          matchedCount++;
+        }
+      });
+    }
+
+    // If no unitids or some names were provided, fuzzy-match names
+    if ((!data.unitids || !data.unitids.length) && Array.isArray(data.unames) && data.unames.length && Array.isArray(window.universities)) {
+      const names = data.unames.map(norm);
+      for (const u of window.universities) {
+        const n = norm(u.name);
+        if (names.some(q => n.includes(q))) {
+          window.studentUnitIds.add(String(u.unitid));
+          matchedCount++;
+        }
+      }
+    }
+
+    // Update UI pieces if your page exposes these helpers
+    if (typeof window.updateSelectedList === 'function') window.updateSelectedList();
+    if (typeof window.updateSendButton  === 'function') window.updateSendButton();
+
+    // Remember in storage (so refresh keeps context)
+    const save = {
+      student: { first: data.studentFirst, last: data.studentLast, email: data.studentEmail, phone: data.studentPhone, waive: !!data.waiveAccess },
+      recommender: { name: data.recommenderName, email: data.recommenderEmail, phone: data.recommenderPhone },
+      unitids: Array.from(window.studentUnitIds),
+    };
+    safeLS.set('sr_referral', JSON.stringify(save));
+
+    return matchedCount;
+  }
+
+  async function handleImport(){
+    const raw = (els.input?.value || '').trim();
+    if (!raw) {
+      setStatus('Please paste a link first.', 'error');
+      return;
+    }
+    const data = parseLink(raw);
+    if (!data) {
+      setStatus('That doesn’t look like a valid link. Make sure it includes query parameters.', 'error');
+      return;
+    }
+
+    setStatus('Parsing link and applying data…');
+    // Ensure dataset is loaded before matching (if your app has a loader)
+    if (typeof window.loadDataset === 'function' && (!Array.isArray(window.universities) || !window.universities.length)) {
+      try { await window.loadDataset(); } catch {}
+    }
+
+    const matched = await applyReferralData(data);
+    summarize(data, matched);
+
+    // Optional: craft a friendly writer title
+    const titleEl = document.getElementById('writerTitle');
+    if (titleEl) {
+      const full = [data.studentFirst, data.studentLast].filter(Boolean).join(' ');
+      if (full) titleEl.value = `Recommendation for ${full}`;
+    }
+
+    // Toast & status
+    if (window.toast) {
+      window.toast(`Imported ${matched} universit${matched===1?'y':'ies'} from the link.`, matched ? 'success' : 'info');
+    }
+    setStatus('Link imported successfully.', 'success');
+
+    // Ensure we show the Recommender panel since this is a recommender action
+    const recPanel = document.getElementById('panel-recommender');
+    const stuPanel = document.getElementById('panel-student');
+    if (recPanel && stuPanel) {
+      stuPanel.hidden = true; recPanel.hidden = false;
+      recPanel.style.display = ''; stuPanel.style.display = 'none';
+      // Mark header toggle if present
+      const toggles = document.querySelectorAll('.header-nav .nav-link');
+      toggles.forEach(b=>{
+        const on = b.dataset.view === 'recommender';
+        b.setAttribute('aria-selected', on?'true':'false');
+        if (on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+      });
+      history.replaceState(null,'','#recommender');
+      safeLS.set('sr_current_view','recommender');
+    }
+  }
+
+  // Wire up
+  els.parse?.addEventListener('click', handleImport);
+  els.input?.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); handleImport(); } });
+
+})();
+</script>
+
+
+  <!-- View toggler & simple header behaviors (safe localStorage) -->
   <script>
     (function(){
+      // ---------- helpers ----------
+      function safeSet(key, val){
+        try { localStorage.setItem(key, val); } catch (e) { /* quota/private mode */ }
+      }
+      function safeGet(key, def){
+        try { return localStorage.getItem(key) ?? def; } catch (e) { return def; }
+      }
+
+      // Panels
       const studentPanel = document.getElementById('panel-student');
       const recPanel     = document.getElementById('panel-recommender');
-      const toggles      = document.querySelectorAll('.header-nav .nav-link');
 
-      if (!studentPanel || !recPanel || !toggles.length) return;
+      // Header toggles
+      const toggles = document.querySelectorAll('.header-nav .nav-link');
 
-      // Safe localStorage helpers
-      const safeLS = {
-        get(k, d){ try { return localStorage.getItem(k) ?? d; } catch(e){ return d; } },
-        set(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
-      };
+      // Ensure initial state: Student visible, Recommender hidden
+      if (studentPanel) studentPanel.hidden = false;
+      if (recPanel)     recPanel.hidden     = true;
 
       function setActive(view){
         const isStudent = (view === 'student');
-        studentPanel.hidden = !isStudent;
-        recPanel.hidden     =  isStudent;
-        studentPanel.style.display = isStudent ? '' : 'none';
-        recPanel.style.display     = isStudent ? 'none' : '';
+        if (studentPanel) studentPanel.hidden = !isStudent;
+        if (recPanel)     recPanel.hidden     =  isStudent;
 
+        // visual current
         toggles.forEach(btn => {
           const on = btn.dataset.view === view;
           btn.setAttribute('aria-selected', on ? 'true' : 'false');
-          if (on) btn.setAttribute('aria-current','page');
-          else btn.removeAttribute('aria-current');
+          if (on) btn.setAttribute('aria-current','page'); else btn.removeAttribute('aria-current');
         });
 
+        // hash (deep-link) + persist (safe)
         history.replaceState(null, '', '#' + view);
-        safeLS.set('sr_current_view', view);
+        safeSet('sr_current_view', view);
       }
 
       // Click handlers
       toggles.forEach(btn => btn.addEventListener('click', () => setActive(btn.dataset.view)));
 
-      // Initial state
-      const fromHash = (location.hash || '').replace('#','');
-      const saved    = safeLS.get('sr_current_view', '');
-      const initial  = (fromHash === 'recommender' || fromHash === 'student') ? fromHash
-                      : (saved === 'recommender' || saved === 'student') ? saved
-                      : 'student';
-      setActive(initial);
+      // Deep-link support (#student / #recommender) + saved preference
+      const fromHash = (location.hash || '').slice(1);
+      const saved = safeGet('sr_current_view', 'student');
+      const initial = (fromHash === 'recommender' || fromHash === 'student') ? fromHash : saved;
+      setActive(initial === 'recommender' ? 'recommender' : 'student');
 
-      // Sync with hash
       window.addEventListener('hashchange', () => {
         const v = (location.hash || '#student').slice(1);
         setActive(v === 'recommender' ? 'recommender' : 'student');
       });
-    })();
-  </script>
 
-  <!-- Sanity checks + header interactions -->
-  <script>
-    (function(){
-      if (typeof Fuse !== 'function') console.warn('[SR] Fuse.js not loaded');
-      if (typeof localforage === 'undefined') console.warn('[SR] localForage not loaded');
-      else localforage.config({ name: 'StellarRec' });
-
-      // Avatar dropdown toggling
-      const btn = document.getElementById('userAvatarBtn');
-      const dd  = document.getElementById('userDropdown');
-      function closeDD(e){
-        if (!dd) return;
-        if (e && (dd.contains(e.target) || btn.contains(e.target))) return;
-        dd.classList.remove('show');
-        btn?.setAttribute('aria-expanded','false');
-        document.removeEventListener('click', closeDD);
-      }
-      btn?.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        dd?.classList.toggle('show');
-        btn.setAttribute('aria-expanded', dd?.classList.contains('show') ? 'true' : 'false');
-        if (dd?.classList.contains('show')) setTimeout(()=>document.addEventListener('click', closeDD), 0);
-      });
-
-      // Theme button fallback
-      document.getElementById('headerThemeBtn')?.addEventListener('click', ()=>{
-        const root = document.documentElement;
-        const isDark = root.getAttribute('data-theme') === 'dark';
-        root.setAttribute('data-theme', isDark ? 'light' : 'dark');
-      });
-    })();
-  </script>
-  <!-- Link Intake Parser (Recommender) -->
-  <script>
-    (function () {
-      const els = {
-        input:  document.getElementById('linkInput'),
-        parse:  document.getElementById('linkParseBtn'),
-        status: document.getElementById('linkStatus'),
-        sum:    document.getElementById('linkSummary'),
-        help:   document.getElementById('linkHelpBtn'),
-      };
-
-      // Safe localStorage helpers
-      const safeLS = {
-        get(k, d){ try { return localStorage.getItem(k) ?? d; } catch(e){ return d; } },
-        set(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
-      };
-
-      const norm = s => (s||'').toString().trim().toLowerCase();
-
-      // Help button opens the details
-      els.help?.addEventListener('click', () => {
-        const det = document.getElementById('linkFormatDetails');
-        if (!det) return;
-        det.open = true;
-        det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      });
-
-      function setStatus(msg, type='info'){
-        if (!els.status) return;
-        const color = type==='error' ? '#b91c1c' : type==='success' ? '#166534' : '#334155';
-        els.status.innerHTML = `<span style="color:${color}">${msg}</span>`;
-      }
-
-      function summarize(data, matchedCount){
-        const lines = [];
-        if (data.studentFirst || data.studentLast) {
-          lines.push(
-            `<div><b>Student</b>: ${
-              [data.studentFirst, data.studentLast].filter(Boolean).join(' ') || '<span class="muted">—</span>'
-            }</div>`
-          );
-        }
-        if (data.studentEmail || data.studentPhone) {
-          lines.push(
-            `<div><b>Contact</b>: ${
-              [data.studentEmail, data.studentPhone].filter(Boolean).join(' • ') || '<span class="muted">—</span>'
-            }</div>`
-          );
-        }
-        if (typeof data.waiveAccess !== 'undefined') {
-          lines.push(`<div><b>Waive access</b>: ${data.waiveAccess ? '<span class="ok">Yes</span>' : 'No'}</div>`);
-        }
-        if (data.recommenderName || data.recommenderEmail || data.recommenderPhone) {
-          lines.push(
-            `<div><b>Recommender</b>: ${data.recommenderName || ''}${
-              data.recommenderEmail ? ' • ' + data.recommenderEmail : ''
-            }${data.recommenderPhone ? ' • ' + data.recommenderPhone : ''}</div>`
-          );
-        }
-        if (Array.isArray(data.unitids) && data.unitids.length) {
-          lines.push(
-            `<div><b>Universities (unitids)</b>: ${data.unitids.length} ${
-              matchedCount != null
-                ? `<span class="${matchedCount>0?'ok':'warn'}">(matched ${matchedCount})</span>`
-                : ''
-            }</div>`
-          );
-        } else if (Array.isArray(data.unames) && data.unames.length) {
-          lines.push(`<div><b>Universities (by name)</b>: ${data.unames.length} (will match)</div>`);
-        }
-        els.sum.innerHTML = lines.join('') || '<div class="muted">No details found.</div>';
-        els.sum.hidden = false;
-      }
-
-      function parseLink(raw){
-        try {
-          const url = new URL(raw);
-          const q   = url.searchParams;
-          const data = {
-            studentFirst:    q.get('sf') || q.get('sfn') || '',
-            studentLast:     q.get('sl') || q.get('sln') || '',
-            studentEmail:    q.get('se') || q.get('semail') || '',
-            studentPhone:    q.get('sp') || q.get('sphone') || '',
-            waiveAccess:     q.get('waive') === '1' || q.get('waive') === 'true',
-            recommenderName: q.get('rname') || '',
-            recommenderEmail:q.get('remail') || '',
-            recommenderPhone:q.get('rphone') || '',
-            unitids: [],
-            unames:  [],
-          };
-          const unis = q.get('unis');
-          if (unis) data.unitids = unis.split(',').map(s => s.trim()).filter(Boolean);
-          const unames = q.get('unames');
-          if (unames) data.unames = unames.split(',').map(s => s.trim()).filter(Boolean);
-          return data;
-        } catch {
-          return null;
-        }
-      }
-
-      async function applyReferralData(data){
-        // Save raw
-        safeLS.set('sr_referral_raw', JSON.stringify(data));
-
-        // Preselect sets (globals consumed by dashboard.js)
-        window.studentUnitIds       = new Set();
-        window.addedByRecommender   = new Set();
-        window.removedByRecommender = new Set();
-
-        let matchedCount = 0;
-
-        // Prefer unitids if provided
-        if (Array.isArray(data.unitids) && data.unitids.length && Array.isArray(window.universities)) {
-          const master = new Map(window.universities.map(u => [String(u.unitid), u]));
-          data.unitids.forEach(id => {
-            const uid = String(id);
-            if (master.has(uid)) {
-              window.studentUnitIds.add(uid);
-              matchedCount++;
-            }
-          });
-        }
-
-        // Fuzzy-match by names if needed
-        if ((!data.unitids || !data.unitids.length) && Array.isArray(data.unames) && data.unames.length && Array.isArray(window.universities)) {
-          const names = data.unames.map(norm);
-          for (const u of window.universities) {
-            const n = norm(u.name);
-            if (names.some(q => n.includes(q))) {
-              window.studentUnitIds.add(String(u.unitid));
-              matchedCount++;
-            }
+      // Basic user dropdown toggle (optional)
+      const avatarBtn = document.getElementById('userAvatarBtn');
+      const dropdown  = document.getElementById('userDropdown');
+      if (avatarBtn && dropdown) {
+        avatarBtn.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          const open = dropdown.classList.toggle('show');
+          avatarBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+        document.addEventListener('click', (e)=>{
+          if (!dropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
+            dropdown.classList.remove('show');
+            avatarBtn.setAttribute('aria-expanded','false');
           }
-        }
-
-        // Update UI if helpers exist (provided by dashboard.js)
-        if (typeof window.updateSelectedList === 'function') window.updateSelectedList();
-        if (typeof window.updateSendButton  === 'function') window.updateSendButton();
-
-        // Persist normalized summary for refresh durability
-        const save = {
-          student: {
-            first: data.studentFirst, last: data.studentLast,
-            email: data.studentEmail, phone: data.studentPhone,
-            waive: !!data.waiveAccess
-          },
-          recommender: {
-            name: data.recommenderName, email: data.recommenderEmail, phone: data.recommenderPhone
-          },
-          unitids: Array.from(window.studentUnitIds),
-        };
-        safeLS.set('sr_referral', JSON.stringify(save));
-
-        return matchedCount;
+        });
+        document.addEventListener('keydown', (e)=>{
+          if (e.key === 'Escape') {
+            dropdown.classList.remove('show');
+            avatarBtn.setAttribute('aria-expanded','false');
+          }
+        });
       }
 
-      async function handleImport(){
-        const raw = (els.input?.value || '').trim();
-        if (!raw) {
-          setStatus('Please paste a link first.', 'error');
-          return;
-        }
-        const data = parseLink(raw);
-        if (!data) {
-          setStatus('That doesn’t look like a valid link. Make sure it includes query parameters.', 'error');
-          return;
-        }
+      // Theme toggle (very simple)
+      const themeBtn = document.getElementById('headerThemeBtn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', ()=>{
+          const root = document.documentElement;
+          const isDark = root.getAttribute('data-theme') === 'dark';
+          root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+          themeBtn.setAttribute('aria-pressed', isDark ? 'false' : 'true');
+          try { localStorage.setItem('sr_theme', isDark ? 'light' : 'dark'); } catch(e){}
+        });
 
-        setStatus('Parsing link and applying data…');
-
-        // Ensure dataset present before matching (dashboard.js exposes loadDataset)
-        if (typeof window.loadDataset === 'function' && (!Array.isArray(window.universities) || !window.universities.length)) {
-          try { await window.loadDataset(); } catch {}
-        }
-
-        const matched = await applyReferralData(data);
-        summarize(data, matched);
-
-        // Auto-fill letter title
-        const titleEl = document.getElementById('writerTitle');
-        if (titleEl) {
-          const full = [data.studentFirst, data.studentLast].filter(Boolean).join(' ');
-          if (full) titleEl.value = `Recommendation for ${full}`;
-        }
-
-        // Notify
-        if (window.toast) {
-          window.toast(`Imported ${matched} universit${matched===1?'y':'ies'} from the link.`, matched ? 'success' : 'info');
-        }
-        setStatus('Link imported successfully.', 'success');
-
-        // Switch to Recommender view (if not already there)
-        const recPanel = document.getElementById('panel-recommender');
-        const stuPanel = document.getElementById('panel-student');
-        if (recPanel && stuPanel) {
-          stuPanel.hidden = true;
-          recPanel.hidden = false;
-          recPanel.style.display = '';
-          stuPanel.style.display = 'none';
-
-          const toggles = document.querySelectorAll('.header-nav .nav-link');
-          toggles.forEach(b=>{
-            const on = b.dataset.view === 'recommender';
-            b.setAttribute('aria-selected', on ? 'true' : 'false');
-            if (on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
-          });
-
-          try { localStorage.setItem('sr_current_view','recommender'); } catch {}
-          history.replaceState(null,'','#recommender');
-        }
+        // load saved theme
+        try {
+          const t = localStorage.getItem('sr_theme');
+          if (t === 'dark' || t === 'light') {
+            document.documentElement.setAttribute('data-theme', t);
+            themeBtn.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
+          }
+        } catch(e){}
       }
-
-      els.parse?.addEventListener('click', handleImport);
-      els.input?.addEventListener('keydown', (e)=>{
-        if (e.key === 'Enter') { e.preventDefault(); handleImport(); }
-      });
     })();
   </script>
-
-  <!-- Minimal toast utility (used by parser if dashboard.js toast not yet used) -->
+  <!-- (Optional) Fallback: if vendor CDNs fail, avoid crashing -->
   <script>
-    (function(){
-      if (window.toast) return;
-      const wrap = document.getElementById('toastWrap') || (() => {
-        const d = document.createElement('div');
-        d.id = 'toastWrap'; d.className = 'toast-wrap';
-        document.body.appendChild(d);
-        return d;
-      })();
-      window.toast = function(msg, type='info'){
-        const el = document.createElement('div');
-        el.className = `toast ${type}`;
-        el.innerHTML = `
-          <div class="icon">${type==='success'?'✅':type==='error'?'⛔':'ℹ️'}</div>
-          <div class="msg">${msg}</div>
-          <button class="x" aria-label="Dismiss">✕</button>
-        `;
-        wrap.appendChild(el);
-        const remove = ()=> { el.style.opacity='0'; setTimeout(()=>el.remove(), 180); };
-        el.querySelector('.x').addEventListener('click', remove);
-        setTimeout(remove, 3500);
-      };
-    })();
+    window.addEventListener('error', function(e){
+      if ((e.filename || '').includes('fuse.min.js') || (e.filename || '').includes('localforage.min.js')) {
+        console.warn('[SR] Vendor script load issue. Features that depend on it may be limited.');
+      }
+    });
   </script>
+    <script>
+(function(){
+  const studentPanel = document.getElementById('panel-student');
+  const recPanel     = document.getElementById('panel-recommender');
+  const toggles      = document.querySelectorAll('.header-nav .nav-link');
 
-  <!-- Inline handlers for PDF/Video uploads & writer autosave (complements dashboard.js) -->
-  <script>
-    (function(){
-      // PDF
-      const fileInput      = document.getElementById('fileInput');
-      const chooseFileBtn  = document.getElementById('chooseFileBtn');
-      const uploadedFile   = document.getElementById('uploadedFile');
-      const fileNameEl     = document.getElementById('fileName');
-      const fileSizeEl     = document.getElementById('fileSize');
-      const removeFileBtn  = document.getElementById('removeFileBtn');
-      const uploadArea     = document.getElementById('uploadArea');
+  if (!studentPanel || !recPanel || !toggles.length) return;
 
-      function humanSize(b){
-        if (!b && b!==0) return '—';
-        const u = ['B','KB','MB','GB']; let i=0, n=b;
-        while (n>=1024 && i<u.length-1){ n/=1024; i++; }
-        return `${n.toFixed(1)} ${u[i]}`;
-        }
+  // Robust localStorage helpers (avoid quota crashes)
+  const safeLS = {
+    get(k, d){ try { return localStorage.getItem(k) ?? d; } catch(e){ return d; } },
+    set(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
+  };
 
-      function showPDF(file){
-        if (!file) return;
-        fileNameEl.textContent = file.name;
-        fileSizeEl.textContent = humanSize(file.size);
-        uploadedFile.style.display = 'block';
-        window.toast?.('PDF attached.', 'success');
-      }
+  function setActive(view){
+    const isStudent = (view === 'student');
+    // Remove BOTH visibility mechanisms to be safe across old markup
+    studentPanel.hidden = !isStudent;
+    recPanel.hidden     =  isStudent;
+    studentPanel.style.display = isStudent ? '' : 'none';
+    recPanel.style.display     = isStudent ? 'none' : '';
 
-      chooseFileBtn?.addEventListener('click', ()=> fileInput?.click());
-      fileInput?.addEventListener('change', (e)=>{
-        const f = e.target.files?.[0];
-        if (f && (f.type==='application/pdf' || /\.pdf$/i.test(f.name))) showPDF(f);
-        else window.toast?.('Please select a PDF file.', 'error');
-      });
+    toggles.forEach(btn => {
+      const on = btn.dataset.view === view;
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      if (on) btn.setAttribute('aria-current','page'); else btn.removeAttribute('aria-current');
+    });
 
-      removeFileBtn?.addEventListener('click', ()=>{
-        if (fileInput) fileInput.value = '';
-        uploadedFile.style.display = 'none';
-      });
+    // Deep-link & remember (safely)
+    history.replaceState(null, '', '#' + view);
+    safeLS.set('sr_current_view', view);
+  }
 
-      // Drag & drop for PDF
-      ['dragenter','dragover'].forEach(evt =>
-        uploadArea?.addEventListener(evt, e=>{ e.preventDefault(); e.stopPropagation(); uploadArea.classList.add('dragover'); })
-      );
-      ['dragleave','drop'].forEach(evt =>
-        uploadArea?.addEventListener(evt, e=>{ e.preventDefault(); e.stopPropagation(); uploadArea.classList.remove('dragover'); })
-      );
-      uploadArea?.addEventListener('drop', (e)=>{
-        const f = e.dataTransfer?.files?.[0];
-        if (f && (f.type==='application/pdf' || /\.pdf$/i.test(f.name))) showPDF(f);
-        else window.toast?.('Please drop a PDF file.', 'error');
-      });
+  // Click handlers
+  toggles.forEach(btn => btn.addEventListener('click', () => setActive(btn.dataset.view)));
 
-      // Video
-      const videoInput     = document.getElementById('videoInput');
-      const chooseVideoBtn = document.getElementById('chooseVideoBtn');
-      const uploadedVideo  = document.getElementById('uploadedVideo');
-      const videoNameEl    = document.getElementById('videoName');
-      const videoSizeEl    = document.getElementById('videoSize');
-      const removeVideoBtn = document.getElementById('removeVideoBtn');
-      const videoArea      = document.getElementById('videoUploadArea');
-      const videoPreview   = document.getElementById('videoPreview');
+  // Initial state from hash or last saved (safely)
+  const fromHash = (location.hash || '').replace('#','');
+  const saved    = safeLS.get('sr_current_view', '');
+  const initial  = (fromHash === 'recommender' || fromHash === 'student') ? fromHash
+                  : (saved === 'recommender' || saved === 'student') ? saved
+                  : 'student';
+  setActive(initial);
 
-      function showVideo(file){
-        if (!file) return;
-        videoNameEl.textContent = file.name;
-        videoSizeEl.textContent = humanSize(file.size);
-        uploadedVideo.style.display = 'block';
-        if (videoPreview) {
-          const url = URL.createObjectURL(file);
-          videoPreview.src = url;
-          videoPreview.style.display = 'block';
-        }
-        window.toast?.('Video attached.', 'success');
-      }
-
-      chooseVideoBtn?.addEventListener('click', ()=> videoInput?.click());
-      videoInput?.addEventListener('change', (e)=>{
-        const f = e.target.files?.[0];
-        if (f && /video\/(mp4|quicktime|webm)/.test(f.type)) showVideo(f);
-        else window.toast?.('Please select a valid video (MP4/MOV/WEBM).', 'error');
-      });
-
-      removeVideoBtn?.addEventListener('click', ()=>{
-        if (videoInput) videoInput.value = '';
-        if (videoPreview) { videoPreview.pause(); videoPreview.removeAttribute('src'); videoPreview.load(); videoPreview.style.display='none'; }
-        uploadedVideo.style.display = 'none';
-      });
-
-      // Simple writer autosave
-      const writerBox   = document.getElementById('writerBox');
-      const writerTitle = document.getElementById('writerTitle');
-      const writerCount = document.getElementById('writerCount');
-      const writerSaved = document.getElementById('writerSaved');
-      const autosaveTgl = document.getElementById('writerAutosaveToggle');
-
-      function updateCount(){
-        const text = (writerBox?.innerText || '').trim();
-        const words = text ? text.split(/\s+/).length : 0;
-        const chars = text.length;
-        if (writerCount) writerCount.textContent = `${words} words • ${chars} chars`;
-      }
-
-      const saveDraftBtn   = document.getElementById('saveDraftBtn');
-      const restoreDraftBtn= document.getElementById('restoreDraftBtn');
-      const clearDraftBtn  = document.getElementById('clearDraftBtn');
-      const copyDraftBtn   = document.getElementById('copyDraftBtn');
-      const downloadBtn    = document.getElementById('downloadDraftBtn');
-      const attachDraftBtn = document.getElementById('attachDraftBtn');
-
-      function saveDraft(){
-        try {
-          localStorage.setItem('sr_writer_title', writerTitle?.value || '');
-          localStorage.setItem('sr_writer_body',  writerBox?.innerHTML || '');
-          if (writerSaved) writerSaved.textContent = 'Saved ✓';
-          window.toast?.('Draft saved.', 'success');
-        } catch { /* ignore */ }
-      }
-      function restoreDraft(){
-        try {
-          const t = localStorage.getItem('sr_writer_title') || '';
-          const b = localStorage.getItem('sr_writer_body')  || '';
-          if (writerTitle) writerTitle.value = t;
-          if (writerBox)   writerBox.innerHTML = b;
-          updateCount();
-          if (writerSaved) writerSaved.textContent = 'Restored';
-          window.toast?.('Draft restored.', 'info');
-        } catch { /* ignore */ }
-      }
-
-      saveDraftBtn?.addEventListener('click', saveDraft);
-      restoreDraftBtn?.addEventListener('click', restoreDraft);
-      clearDraftBtn?.addEventListener('click', ()=>{
-        if (writerTitle) writerTitle.value = '';
-        if (writerBox)   writerBox.innerHTML = '';
-        updateCount();
-        window.toast?.('Draft cleared.', 'info');
-      });
-      copyDraftBtn?.addEventListener('click', async ()=>{
-        try {
-          const plain = writerBox?.innerText || '';
-          await navigator.clipboard.writeText(plain);
-          window.toast?.('Copied to clipboard.', 'success');
-        } catch { window.toast?.('Copy failed.', 'error'); }
-      });
-      downloadBtn?.addEventListener('click', ()=>{
-        const title = (writerTitle?.value || 'recommendation').replace(/[^\w\- ]+/g,'').trim() || 'recommendation';
-        const blob  = new Blob([writerBox?.innerText || ''], { type: 'text/plain' });
-        const url   = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = `${title}.txt`; a.click();
-        setTimeout(()=>URL.revokeObjectURL(url), 0);
-      });
-      attachDraftBtn?.addEventListener('click', ()=>{
-        window.toast?.('Draft attached to submission (local demo).', 'success');
-      });
-
-      writerBox?.addEventListener('input', ()=>{
-        updateCount();
-        if (autosaveTgl?.checked) saveDraft();
-      });
-      writerTitle?.addEventListener('input', ()=>{
-        if (autosaveTgl?.checked) saveDraft();
-      });
-
-      // Init counts & maybe restore on load
-      updateCount();
-      try {
-        const autoRestore = localStorage.getItem('sr_autorestored_once') !== '1';
-        if (autoRestore) {
-          restoreDraft();
-          localStorage.setItem('sr_autorestored_once','1');
-        }
-      } catch { /* ignore */ }
-    })();
-  </script>
+  // Keep hash in sync if user types it
+  window.addEventListener('hashchange', () => {
+    const v = (location.hash || '#student').slice(1);
+    setActive(v === 'recommender' ? 'recommender' : 'student');
+  });
+})();
+</script>
 
 </body>
 </html>
 
+    
