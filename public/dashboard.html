@@ -323,6 +323,34 @@
       padding:.6rem 1rem; border-radius:10px; font-weight:700; cursor:pointer;
     }
     .apply-btn:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(25,118,210,.25); }
+    /* Intake card (link paste) */
+.intake-card {
+  background:#fff; border-radius:16px; padding:1.25rem 1.5rem;
+  box-shadow:0 8px 32px rgba(0,0,0,.08); margin:1rem auto 1.25rem;
+  border:1px solid #e5e7eb; max-width:1200px;
+}
+.intake-row { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+.intake-title { display:flex; align-items:center; gap:.5rem; font-size:1.25rem; font-weight:700; color:#0f172a; }
+.intake-actions { display:flex; gap:.5rem; }
+.intake-sub { color:#475569; margin:.35rem 0 .75rem; }
+.intake-inputs { display:flex; gap:.5rem; align-items:center; }
+.intake-inputs .filter-select { flex:1; }
+.intake-status { margin-top:.6rem; font-size:.95rem; color:#334155; }
+.intake-details { margin-top:.5rem; }
+.intake-help { background:#f8fafc; padding:.75rem; border-radius:10px; border:1px solid #e5e7eb; color:#334155; }
+.intake-summary {
+  margin-top:.75rem; border-top:1px dashed #e5e7eb; padding-top:.6rem;
+  font-size:.95rem; color:#0f172a; display:grid; gap:.35rem;
+}
+.intake-summary .ok { color:#166534; }
+.intake-summary .warn { color:#9a3412; }
+.intake-summary .muted { color:#64748b; }
+
+:root[data-theme="dark"] .intake-card { background:#111a2a; border-color:#24324a; box-shadow:none; }
+:root[data-theme="dark"] .intake-sub, 
+:root[data-theme="dark"] .intake-help { color:#c9d6ee; background:#0f1729; border-color:#24324a; }
+:root[data-theme="dark"] .intake-summary { color:#e5eefc; border-color:#24324a; }
+
   </style>
 </head>
 <body>
@@ -389,6 +417,49 @@
   </div><!-- /.header -->
   <!-- MAIN — RECOMMENDER VIEW (hidden by default) -->
   <<div class="container" id="panel-recommender" hidden>
+        <!-- Student Link Intake -->
+    <div class="intake-card" id="linkIntake">
+      <div class="intake-row">
+        <h2 class="intake-title">
+          <span class="material-icons" aria-hidden="true">link</span>
+          Paste student link
+        </h2>
+        <div class="intake-actions">
+          <button class="page-btn" id="linkHelpBtn" type="button" title="What does this do?">What’s this?</button>
+        </div>
+      </div>
+
+      <p class="intake-sub">Paste the link you received by email from the student. We’ll import their details and selected universities.</p>
+
+      <div class="intake-inputs">
+        <input id="linkInput" class="filter-select" type="url" placeholder="Paste the student link here… e.g. https://example.com/reco?sf=Jane&sl=Doe&se=jane@email.com&waive=1&unis=166027,110635" />
+        <button id="linkParseBtn" class="apply-btn" type="button">Import</button>
+      </div>
+
+      <div id="linkStatus" class="intake-status" aria-live="polite"></div>
+
+      <details id="linkFormatDetails" class="intake-details">
+        <summary>Expected link format (examples)</summary>
+        <div class="intake-help">
+          <div><b>With unit IDs (best):</b><br>
+            <code>?sf=Jane&sl=Doe&se=jane@email.com&sp=2065551212&waive=1&unis=166027,110635&rname=Prof%20Smith&remail=smith@uni.edu&rphone=2125559876</code>
+          </div>
+          <div><b>With names (we’ll match):</b><br>
+            <code>?sf=Jane&sl=Doe&se=jane@email.com&waive=0&unames=Harvard%20University,Stanford%20University</code>
+          </div>
+          <div style="margin-top:.35rem;">
+            <small>
+              Params: <code>sf</code>=student first, <code>sl</code>=student last, <code>se</code>=student email, <code>sp</code>=student phone,
+              <code>waive</code>=1/0, <code>unis</code>=CSV of unitids, <code>unames</code>=CSV of names,
+              <code>rname</code>=recommender name, <code>remail</code>=recommender email, <code>rphone</code>=recommender phone.
+            </small>
+          </div>
+        </div>
+      </details>
+
+      <div id="linkSummary" class="intake-summary" hidden></div>
+    </div>
+
 
     <!-- Hero -->
     <div class="hero-section">
@@ -791,6 +862,202 @@
 <!-- Your app code (keep after vendors; add cache-busting too) -->
 <script src="/assets/js/dashboard.js?v=2025-09-06-1" defer></script>
 <script src="/assets/js/university-search.js?v=2025-09-06-1" defer></script>
+<script>
+(function(){
+  // Helper: safe localStorage to avoid quota crashes
+  const safeLS = {
+    get(k, d){ try { return localStorage.getItem(k) ?? d; } catch(e){ return d; } },
+    set(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
+  };
+  const norm = s => (s||'').toString().trim().toLowerCase();
+
+  const els = {
+    input:  document.getElementById('linkInput'),
+    parse:  document.getElementById('linkParseBtn'),
+    status: document.getElementById('linkStatus'),
+    sum:    document.getElementById('linkSummary'),
+    help:   document.getElementById('linkHelpBtn'),
+  };
+
+  // Show a little explainer
+  els.help?.addEventListener('click', () => {
+    const det = document.getElementById('linkFormatDetails');
+    if (!det) return;
+    det.open = true;
+    det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  function setStatus(msg, type='info'){
+    if (!els.status) return;
+    const color = type==='error' ? '#b91c1c' : type==='success' ? '#166534' : '#334155';
+    els.status.innerHTML = `<span style="color:${color}">${msg}</span>`;
+  }
+
+  function summarize(data, matchedCount){
+    const lines = [];
+    if (data.studentFirst || data.studentLast) {
+      lines.push(`<div><b>Student</b>: ${[data.studentFirst, data.studentLast].filter(Boolean).join(' ') || '<span class="muted">—</span>'}</div>`);
+    }
+    if (data.studentEmail || data.studentPhone) {
+      lines.push(`<div><b>Contact</b>: ${[data.studentEmail, data.studentPhone].filter(Boolean).join(' • ') || '<span class="muted">—</span>'}</div>`);
+    }
+    if (typeof data.waiveAccess !== 'undefined') {
+      lines.push(`<div><b>Waive access</b>: ${data.waiveAccess ? '<span class="ok">Yes</span>' : 'No'}</div>`);
+    }
+    if (data.recommenderName || data.recommenderEmail || data.recommenderPhone) {
+      lines.push(`<div><b>Recommender</b>: ${data.recommenderName || ''} ${data.recommenderEmail ? '• ' + data.recommenderEmail : ''} ${data.recommenderPhone ? '• ' + data.recommenderPhone : ''}</div>`);
+    }
+    if (Array.isArray(data.unitids) && data.unitids.length) {
+      lines.push(`<div><b>Universities (unitids)</b>: ${data.unitids.length} ${matchedCount!=null?`<span class="${matchedCount>0?'ok':'warn'}">(matched ${matchedCount})</span>`:''}</div>`);
+    } else if (Array.isArray(data.unames) && data.unames.length) {
+      lines.push(`<div><b>Universities (by name)</b>: ${data.unames.length} (will match)</div>`);
+    }
+    els.sum.innerHTML = lines.join('') || '<div class="muted">No details found.</div>';
+    els.sum.hidden = false;
+  }
+
+  function parseLink(raw){
+    try {
+      const url = new URL(raw);
+      const q   = url.searchParams;
+
+      const data = {
+        studentFirst:   q.get('sf') || q.get('sfn') || '',
+        studentLast:    q.get('sl') || q.get('sln') || '',
+        studentEmail:   q.get('se') || q.get('semail') || '',
+        studentPhone:   q.get('sp') || q.get('sphone') || '',
+        waiveAccess:    q.get('waive') === '1' || q.get('waive') === 'true',
+        recommenderName: q.get('rname') || '',
+        recommenderEmail: q.get('remail') || '',
+        recommenderPhone: q.get('rphone') || '',
+        unitids: [],
+        unames: [],
+      };
+
+      // CSV unitids
+      const unis = q.get('unis');
+      if (unis) {
+        data.unitids = unis.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      // CSV names
+      const unames = q.get('unames');
+      if (unames) {
+        data.unames = unames.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      return data;
+    } catch(e){
+      return null;
+    }
+  }
+
+  async function applyReferralData(data){
+    // Save raw
+    safeLS.set('sr_referral_raw', JSON.stringify(data));
+
+    // Preselect universities
+    window.studentUnitIds        = new Set();   // student’s original choices
+    window.addedByRecommender    = new Set();   // explicit add by recommender
+    window.removedByRecommender  = new Set();   // explicit remove by recommender
+
+    let matchedCount = 0;
+
+    // Prefer unitids if provided
+    if (Array.isArray(data.unitids) && data.unitids.length && Array.isArray(window.universities)) {
+      const master = new Map(window.universities.map(u => [String(u.unitid), u]));
+      data.unitids.forEach(id => {
+        const uid = String(id);
+        if (master.has(uid)) {
+          window.studentUnitIds.add(uid);
+          matchedCount++;
+        }
+      });
+    }
+
+    // If no unitids or some names were provided, fuzzy-match names
+    if ((!data.unitids || !data.unitids.length) && Array.isArray(data.unames) && data.unames.length && Array.isArray(window.universities)) {
+      const names = data.unames.map(norm);
+      for (const u of window.universities) {
+        const n = norm(u.name);
+        if (names.some(q => n.includes(q))) {
+          window.studentUnitIds.add(String(u.unitid));
+          matchedCount++;
+        }
+      }
+    }
+
+    // Update UI pieces if your page exposes these helpers
+    if (typeof window.updateSelectedList === 'function') window.updateSelectedList();
+    if (typeof window.updateSendButton  === 'function') window.updateSendButton();
+
+    // Remember in storage (so refresh keeps context)
+    const save = {
+      student: { first: data.studentFirst, last: data.studentLast, email: data.studentEmail, phone: data.studentPhone, waive: !!data.waiveAccess },
+      recommender: { name: data.recommenderName, email: data.recommenderEmail, phone: data.recommenderPhone },
+      unitids: Array.from(window.studentUnitIds),
+    };
+    safeLS.set('sr_referral', JSON.stringify(save));
+
+    return matchedCount;
+  }
+
+  async function handleImport(){
+    const raw = (els.input?.value || '').trim();
+    if (!raw) {
+      setStatus('Please paste a link first.', 'error');
+      return;
+    }
+    const data = parseLink(raw);
+    if (!data) {
+      setStatus('That doesn’t look like a valid link. Make sure it includes query parameters.', 'error');
+      return;
+    }
+
+    setStatus('Parsing link and applying data…');
+    // Ensure dataset is loaded before matching (if your app has a loader)
+    if (typeof window.loadDataset === 'function' && (!Array.isArray(window.universities) || !window.universities.length)) {
+      try { await window.loadDataset(); } catch {}
+    }
+
+    const matched = await applyReferralData(data);
+    summarize(data, matched);
+
+    // Optional: craft a friendly writer title
+    const titleEl = document.getElementById('writerTitle');
+    if (titleEl) {
+      const full = [data.studentFirst, data.studentLast].filter(Boolean).join(' ');
+      if (full) titleEl.value = `Recommendation for ${full}`;
+    }
+
+    // Toast & status
+    if (window.toast) {
+      window.toast(`Imported ${matched} universit${matched===1?'y':'ies'} from the link.`, matched ? 'success' : 'info');
+    }
+    setStatus('Link imported successfully.', 'success');
+
+    // Ensure we show the Recommender panel since this is a recommender action
+    const recPanel = document.getElementById('panel-recommender');
+    const stuPanel = document.getElementById('panel-student');
+    if (recPanel && stuPanel) {
+      stuPanel.hidden = true; recPanel.hidden = false;
+      recPanel.style.display = ''; stuPanel.style.display = 'none';
+      // Mark header toggle if present
+      const toggles = document.querySelectorAll('.header-nav .nav-link');
+      toggles.forEach(b=>{
+        const on = b.dataset.view === 'recommender';
+        b.setAttribute('aria-selected', on?'true':'false');
+        if (on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+      });
+      history.replaceState(null,'','#recommender');
+      safeLS.set('sr_current_view','recommender');
+    }
+  }
+
+  // Wire up
+  els.parse?.addEventListener('click', handleImport);
+  els.input?.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); handleImport(); } });
+
+})();
+</script>
 
 
   <!-- View toggler & simple header behaviors (safe localStorage) -->
