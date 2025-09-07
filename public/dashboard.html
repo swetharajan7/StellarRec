@@ -396,62 +396,96 @@
       <p class="hero-subtitle">Upload your recommendation letter once and send it to multiple US universities instantly.</p>
     </div>
 
-    <!-- Upload + Writer -->
-    <div class="compose-grid">
-      <!-- Upload Section -->
-      <div class="upload-section" id="uploadSection">
-        <div class="upload-area" id="uploadArea">
-          <div class="upload-icon"><span class="material-icons">cloud_upload</span></div>
-          <h2 class="upload-title">Upload Recommendation Letter</h2>
-          <p class="upload-subtitle">Drag and drop your PDF file here, or click to browse</p>
-          <div id="uploadHint" style="margin:.5rem 0 0; font-size:.9rem; color:#556;">PDF only. Recommended size ≤ 10 MB.</div>
-          <input type="file" id="fileInput" class="file-input" accept=".pdf,.txt" />
-          <button class="upload-btn" id="chooseFileBtn">
-            <span class="material-icons">upload_file</span>
-            Choose File
-          </button>
-        </div>
-        <div class="uploaded-file" id="uploadedFile">
-          <div class="file-info">
-            <div class="file-icon"><span class="material-icons">description</span></div>
-            <div class="file-details">
-              <h3 id="fileName">recommendation-letter.pdf</h3>
-              <p id="fileSize">2.4 MB • Uploaded successfully</p>
-            </div>
-            <button class="remove-file" id="removeFileBtn"><span class="material-icons">close</span></button>
-          </div>
-        </div>
-      </div>
+   <div class="compose-grid">
+  <!-- (A) Upload PDF (left) -->
+  <div class="upload-section" id="uploadSection">
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon"><span class="material-icons">cloud_upload</span></div>
+      <h2 class="upload-title">Upload Recommendation Letter (PDF)</h2>
+      <p class="upload-subtitle">Drag & drop your PDF here, or click to browse</p>
+      <div id="uploadHint" style="margin:.5rem 0 0; font-size:.9rem; color:#556;">PDF only. Recommended size ≤ 10 MB.</div>
 
-      <!-- Writer -->
-      <div class="writer-section" id="writerSection">
-        <h2 class="section-title"><span class="material-icons">edit</span> Write Letter</h2>
-        <input id="writerTitle" class="writer-title" placeholder="Letter title (optional, e.g., 'Recommendation for Jane Doe')" />
-        <div class="writer-toolbar">
-          <button class="btn btn-muted" data-wcmd="bold" title="Bold (Ctrl/Cmd+B)"><b>B</b></button>
-          <button class="btn btn-muted" data-wcmd="italic" title="Italic (Ctrl/Cmd+I)"><i>I</i></button>
-          <button class="btn btn-muted" data-wcmd="underline" title="Underline (Ctrl/Cmd+U)"><u>U</u></button>
-          <div class="meta">
-            <span id="writerCount">0 words • 0 chars</span>
-            <span id="writerSaved">Not saved</span>
-          </div>
+      <input type="file" id="fileInput" class="file-input" accept=".pdf,application/pdf" />
+      <button class="upload-btn" id="chooseFileBtn">
+        <span class="material-icons">upload_file</span> Choose PDF
+      </button>
+    </div>
+
+    <div class="uploaded-file" id="uploadedFile">
+      <div class="file-info">
+        <div class="file-icon"><span class="material-icons">description</span></div>
+        <div class="file-details">
+          <h3 id="fileName">recommendation-letter.pdf</h3>
+          <p id="fileSize">—</p>
         </div>
-        <div id="writerBox" class="writer-box" contenteditable="true" aria-label="Letter editor"
-             placeholder="Write your recommendation letter here..."></div>
-        <div class="writer-actions">
-          <button class="btn btn-primary" id="saveDraftBtn">Save draft</button>
-          <button class="btn btn-muted" id="restoreDraftBtn">Restore</button>
-          <button class="btn btn-danger" id="clearDraftBtn">Clear</button>
-          <button class="btn btn-muted" id="copyDraftBtn">Copy</button>
-          <button class="btn btn-muted" id="downloadDraftBtn">Download .txt</button>
-          <button class="btn btn-success" id="attachDraftBtn">Attach draft</button>
-          <label style="display:flex; align-items:center; gap:.4rem; margin-left:auto;">
-            <input type="checkbox" id="writerAutosaveToggle" checked />
-            Autosave
-          </label>
-        </div>
+        <button class="remove-file" id="removeFileBtn" title="Remove PDF">
+          <span class="material-icons">close</span>
+        </button>
       </div>
     </div>
+  </div>
+
+  <!-- (B) Upload Video (right) -->
+  <div class="upload-section" id="videoUploadSection">
+    <div class="upload-area" id="videoUploadArea">
+      <div class="upload-icon"><span class="material-icons">videocam</span></div>
+      <h2 class="upload-title">Upload Intro/Context Video (optional)</h2>
+      <p class="upload-subtitle">Drag & drop your video here, or click to browse</p>
+      <div style="margin:.5rem 0 0; font-size:.9rem; color:#556;">
+        Supported: MP4 / MOV / WEBM. Tip: keep it short (≤ 2–3 min).
+      </div>
+
+      <input type="file" id="videoInput" class="file-input" accept="video/mp4,video/quicktime,video/webm" />
+      <button class="upload-btn" id="chooseVideoBtn">
+        <span class="material-icons">video_file</span> Choose Video
+      </button>
+    </div>
+
+    <div class="uploaded-file" id="uploadedVideo">
+      <div class="file-info" style="align-items:flex-start;">
+        <div class="file-icon"><span class="material-icons">smart_display</span></div>
+        <div class="file-details" style="flex:1;">
+          <h3 id="videoName">intro.mp4</h3>
+          <p id="videoSize">—</p>
+          <!-- Optional inline preview -->
+          <video id="videoPreview" class="video-preview" controls playsinline style="display:none; margin-top:.6rem; max-height:240px; width:100%; border-radius:10px; background:#000;"></video>
+        </div>
+        <button class="remove-file" id="removeVideoBtn" title="Remove video">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- (C) Writer (full width on a new row) -->
+  <div class="writer-section" id="writerSection" style="grid-column:1 / -1;">
+    <h2 class="section-title"><span class="material-icons">edit</span> Write Letter</h2>
+    <input id="writerTitle" class="writer-title" placeholder="Letter title (optional, e.g., 'Recommendation for Jane Doe')" />
+    <div class="writer-toolbar">
+      <button class="btn btn-muted" data-wcmd="bold" title="Bold (Ctrl/Cmd+B)"><b>B</b></button>
+      <button class="btn btn-muted" data-wcmd="italic" title="Italic (Ctrl/Cmd+I)"><i>I</i></button>
+      <button class="btn btn-muted" data-wcmd="underline" title="Underline (Ctrl/Cmd+U)"><u>U</u></button>
+      <div class="meta">
+        <span id="writerCount">0 words • 0 chars</span>
+        <span id="writerSaved">Not saved</span>
+      </div>
+    </div>
+    <div id="writerBox" class="writer-box" contenteditable="true" aria-label="Letter editor"
+         placeholder="Write your recommendation letter here..."></div>
+    <div class="writer-actions">
+      <button class="btn btn-primary" id="saveDraftBtn">Save draft</button>
+      <button class="btn btn-muted" id="restoreDraftBtn">Restore</button>
+      <button class="btn btn-danger" id="clearDraftBtn">Clear</button>
+      <button class="btn btn-muted" id="copyDraftBtn">Copy</button>
+      <button class="btn btn-muted" id="downloadDraftBtn">Download .txt</button>
+      <button class="btn btn-success" id="attachDraftBtn">Attach draft</button>
+      <label style="display:flex; align-items:center; gap:.4rem; margin-left:auto;">
+        <input type="checkbox" id="writerAutosaveToggle" checked />
+        Autosave
+      </label>
+    </div>
+  </div>
+</div>
 
     <!-- University Selection -->
     <div class="university-section">
