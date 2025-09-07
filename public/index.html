@@ -101,7 +101,6 @@
       background-clip: text; text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
     .hero-tagline { font-size: 2rem; font-weight: 600; color: rgba(255, 255, 255, 0.95); text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7); margin-top: 1rem; letter-spacing: 0.5px; }
-
     /* Floating stars */
     .floating-elements { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
     .floating-star { position: absolute; font-size: 1.5rem; opacity: 0.85; animation: floatStar 8s ease-in-out infinite; mix-blend-mode: screen; text-shadow: 0 0 12px rgba(255, 255, 255, 0.8); }
@@ -175,17 +174,17 @@
         stellarrec
       </a>
       <nav class="header-nav">
-  <a href="/dashboard" class="nav-link" target="_self">Dashboard</a>
-  <a href="/portal-signin" class="nav-link" target="_self">Demo</a>
-</nav>
-
+        <a href="/dashboard" class="nav-link" target="_self">Dashboard</a>
+        <a href="/portal-signin" class="nav-link" target="_self">Demo</a>
+      </nav>
     </div>
   </div>
 
   <!-- Hero Section -->
   <section class="hero">
     <video class="hero-video" autoplay muted loop playsinline preload="auto">
-      <source src="/assets/videos/iStock-720p.mp4" type="video/mp4">
+      <source src="/assets/videos/istock-720p.mp4" type="video/mp4">
+      Your browser does not support the video tag.
     </video>
     <div class="hero-gradient-overlay"></div>
     <div class="hero-image-overlay"></div>
@@ -221,12 +220,22 @@
     <div class="tp-header">
       <span class="tp-logo"><span class="material-icons">grade</span>Trustpilot</span>
       <div>
-        <div class="tp-stars"><span class="material-icons">grade</span><span class="material-icons">grade</span><span class="material-icons">grade</span><span class="material-icons">grade</span><span class="material-icons" style="opacity:.6">grade</span></div>
+        <div class="tp-stars">
+          <span class="material-icons">grade</span>
+          <span class="material-icons">grade</span>
+          <span class="material-icons">grade</span>
+          <span class="material-icons">grade</span>
+          <span class="material-icons" style="opacity:.6">grade</span>
+        </div>
         <div class="tp-meta">Rated <strong>Excellent</strong> • 4.9 out of 5 • Based on 123 reviews</div>
       </div>
     </div>
-    <div style="margin-top:.75rem; color:#334155;">“Super smooth — uploaded once and sent everywhere.” — <em>Advisor, CA</em></div>
-    <div class="tp-actions"><a href="https://www.trustpilot.com/review/YOUR-DOMAIN-HERE" target="_blank">Read reviews on Trustpilot</a></div>
+    <div style="margin-top:.75rem; color:#334155;">
+      “Super smooth — uploaded once and sent everywhere.” — <em>Advisor, CA</em>
+    </div>
+    <div class="tp-actions">
+      <a href="https://www.trustpilot.com/review/YOUR-DOMAIN-HERE" target="_blank">Read reviews on Trustpilot</a>
+    </div>
   </section>
 
   <!-- Trusted Universities -->
@@ -236,10 +245,30 @@
       <div class="university-carousel">
         <div class="university-track">
           <!-- Example universities -->
-          <div class="university-item"><div class="university-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Harvard_University_coat_of_arms.svg"></div><div class="university-name">Harvard University</div></div>
-          <div class="university-item"><div class="university-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Seal_of_Leland_Stanford_Junior_University.svg"></div><div class="university-name">Stanford University</div></div>
-          <div class="university-item"><div class="university-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/MIT_logo.svg"></div><div class="university-name">MIT</div></div>
-          <div class="university-item"><div class="university-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/0/07/Yale_University_Shield_1.svg"></div><div class="university-name">Yale University</div></div>
+          <div class="university-item">
+            <div class="university-logo">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Harvard_University_coat_of_arms.svg">
+            </div>
+            <div class="university-name">Harvard University</div>
+          </div>
+          <div class="university-item">
+            <div class="university-logo">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Seal_of_Leland_Stanford_Junior_University.svg">
+            </div>
+            <div class="university-name">Stanford University</div>
+          </div>
+          <div class="university-item">
+            <div class="university-logo">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/MIT_logo.svg">
+            </div>
+            <div class="university-name">MIT</div>
+          </div>
+          <div class="university-item">
+            <div class="university-logo">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/0/07/Yale_University_Shield_1.svg">
+            </div>
+            <div class="university-name">Yale University</div>
+          </div>
         </div>
       </div>
     </div>
@@ -248,9 +277,12 @@
   <!-- Footer -->
   <footer class="site-footer">
     <div class="container">
-      <p>&copy; 2025 <span style="color: #ffeb3b; font-weight: 600;">StellarRec™</span>. All rights reserved. | Making recommendations stellar since 2025 🚀</p>
+      <p>&copy; 2025 <span style="color: #ffeb3b; font-weight: 600;">StellarRec™</span>.
+        All rights reserved. | Making recommendations stellar since 2025 🚀
+      </p>
     </div>
   </footer>
 </body>
 </html>
+
 
