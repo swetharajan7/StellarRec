@@ -111,4 +111,88 @@
     });
   });
 })();
+<script>
+(function(){
+  const sendBtn = document.getElementById('sendBtn');
+
+  // CHANGE THIS to your mock site page path
+  const MOCK_INBOX_URL = 'https://mockuniversity.netlify.app/inbox.html';
+
+  function buildDemoPdfUrl(){
+    // Option 1: static demo file
+    return 'https://stellarrec.netlify.app/assets/mock/reco-demo.pdf';
+
+    // Option 2 (optional): if you actually attached a PDF and
+    // upload it to some storage, return that URL instead.
+  }
+
+  function getSelectedUnitIds(){
+    // These are maintained by your existing code.
+    // Fall back to studentUnitIds set if present.
+    const s = (window.studentUnitIds && [...window.studentUnitIds]) || [];
+    return s;
+  }
+
+  function getStudentMeta(){
+    // Pull from your referral/local form; use empty defaults if not available
+    try {
+      const saved = JSON.parse(localStorage.getItem('sr_referral')||'{}');
+      const s = saved.student || {};
+      return {
+        studentFirst: s.first || '',
+        studentLast:  s.last  || '',
+        studentEmail: s.email || '',
+        waive:        !!s.waive
+      };
+    } catch { return { studentFirst:'', studentLast:'', studentEmail:'', waive:false }; }
+  }
+
+  function getRecommenderMeta(){
+    try {
+      const saved = JSON.parse(localStorage.getItem('sr_referral')||'{}');
+      const r = saved.recommender || {};
+      return {
+        recommenderName:  r.name  || '',
+        recommenderEmail: r.email || ''
+      };
+    } catch { return { recommenderName:'', recommenderEmail:'' }; }
+  }
+
+  function goToMockInbox(){
+    const pdfUrl = buildDemoPdfUrl();
+
+    const stu  = getStudentMeta();
+    const rec  = getRecommenderMeta();
+    const list = getSelectedUnitIds(); // array of unitids (strings)
+
+    const params = new URLSearchParams({
+      sf: stu.studentFirst,
+      sl: stu.studentLast,
+      se: stu.studentEmail,
+      waive: stu.waive ? '1' : '0',
+      rname: rec.recommenderName,
+      remail: rec.recommenderEmail,
+      pdf: pdfUrl
+    });
+
+    // include selected universities (CSV of unitids)
+    if (list.length) params.set('unis', list.join(','));
+
+    // OPTIONAL: include your own demo “letter title”
+    const titleEl = document.getElementById('writerTitle');
+    if (titleEl && titleEl.value.trim()) params.set('title', titleEl.value.trim());
+
+    // Navigate to Mock University inbox page
+    window.location.href = `${MOCK_INBOX_URL}?${params.toString()}`;
+  }
+
+  // Wire the real send button
+  sendBtn?.addEventListener('click', (e)=>{
+    e.preventDefault();
+    // If you show a confirm modal, call goToMockInbox() after confirm.
+    // For demo: jump immediately
+    goToMockInbox();
+  });
+})();
+</script>
 
