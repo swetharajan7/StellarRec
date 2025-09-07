@@ -4,12 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>StellarRec - One upload. Unlimited reach.</title>
-
-  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-  <!-- Styles -->
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
@@ -18,208 +14,701 @@
       color:var(--text,#333);
       min-height:100vh;
     }
-    /* Header */
+
+    /* ================= HEADER ================= */
     .header {
       background:linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
-      color:#fff; padding:1.1rem 2rem;
+      color:#fff;
+      padding:1.1rem 2rem;
       box-shadow:0 4px 20px rgba(25,118,210,0.3);
     }
     .header-content {
-      max-width:1200px; margin:0 auto;
-      display:flex; justify-content:space-between; align-items:center; gap:1rem;
+      max-width:1200px;
+      margin:0 auto;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:1rem;
     }
     .logo {
-      display:flex; align-items:center; gap:.5rem;
-      font-size:1.8rem; font-weight:700;
-      text-decoration:none; color:#fff; transition:.3s;
+      display:flex;
+      align-items:center;
+      gap:.5rem;
+      font-size:1.8rem;
+      font-weight:700;
+      text-decoration:none;
+      color:#fff;
+      transition:.3s;
     }
     .logo:hover { opacity:.85; transform:translateY(-1px); }
+
     /* Header nav */
-    .header-nav { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex:1; margin:0 1rem; }
-    .nav-left, .nav-right { display:flex; gap:1.25rem; align-items:center; }
-    [hidden] { display:none!important; }
-    /* Tabs */
-    .header-nav .nav-link {
-      cursor:pointer; padding:.5rem 1rem; border-radius:6px;
-      text-decoration:none; color:#fff; font-weight:500;
-      transition:background .2s;
+    .header-nav {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:1rem;
+      flex:1;
+      margin:0 1rem;
     }
-    .header-nav .nav-link[aria-selected="true"] { background:rgba(255,255,255,0.2); }
-    .header-nav .nav-link:hover { background:rgba(255,255,255,0.15); }
-    /* Sections */
-    .section-title {
-      font-size:1.4rem; font-weight:600; margin-bottom:.75rem;
-      display:flex; align-items:center; gap:.5rem; color:#333;
+    .nav-left, .nav-right {
+      display:flex;
+      gap:1.25rem;
+      align-items:center;
     }
-    .section-title .material-icons { font-size:1.4rem; color:#1976d2; }
+    [hidden] { display: none !important; }
+    .nav-link {
+      color:#fff;
+      text-decoration:none;
+      font-weight:700;
+      opacity:.95;
+      padding:.35rem .75rem;
+      border-radius:10px;
+      transition:opacity .15s, transform .15s;
+    }
+    .nav-link:hover{ opacity:1; transform:translateY(-1px); }
+    .nav-link[aria-current="page"]{ background:#ffffff22; }
 
-    .container { max-width:1200px; margin:1rem auto; padding:0 1rem; }
+    /* Header tabs center style */
+    .hdr-tabs {
+      display:flex;
+      align-items:center;
+      gap:.4rem;
+      background:#ffffff22;
+      border:1px solid #ffffff55;
+      border-radius:999px;
+      padding:.2rem;
+      min-height:40px;
+    }
+    .hdr-tab {
+      appearance:none;
+      border:0;
+      background:transparent;
+      color:#fff;
+      padding:.45rem .9rem;
+      border-radius:999px;
+      font-weight:700;
+      cursor:pointer;
+      letter-spacing:.2px;
+      font-size:.95rem;
+      opacity:.9;
+    }
+    .hdr-tab[aria-selected="true"] {
+      background:#fff;
+      color:#1976d2;
+      box-shadow:0 6px 20px rgba(0,0,0,.12);
+      opacity:1;
+    }
 
-    /* Upload + Video grid */
+    /* Right controls */
+    .right-controls { display:flex; align-items:center; gap:.75rem; }
+
+    /* Avatar dropdown */
+    .user-info { position:relative; display:flex; align-items:center; gap:1rem; }
+    .user-avatar {
+      width:45px;
+      height:45px;
+      background:rgba(255,255,255,.2);
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.2rem;
+      cursor:pointer;
+      transition:.2s;
+      border:2px solid rgba(255,255,255,0.1);
+    }
+    .user-avatar:hover {
+      background:rgba(255,255,255,.3);
+      transform:scale(1.05);
+      border-color:rgba(255,255,255,.3);
+    }
+    .user-dropdown {
+      position:absolute;
+      top:100%; right:0;
+      margin-top:.5rem;
+      background:#fff;
+      border-radius:12px;
+      box-shadow:0 8px 32px rgba(0,0,0,.15);
+      min-width:260px;
+      max-width:min(92vw,360px);
+      opacity:0;
+      visibility:hidden;
+      transform:translateY(-10px) scale(.95);
+      transition:all .2s cubic-bezier(0.4,0,0.2,1);
+      z-index:1000;
+      border:1px solid rgba(0,0,0,.08);
+    }
+    .user-dropdown.show { opacity:1; visibility:visible; transform:translateY(0) scale(1); }
+    .user-dropdown::before{
+      content:''; position:absolute; top:-8px; right:16px;
+      width:16px; height:16px; background:#fff;
+      border:1px solid rgba(0,0,0,.08);
+      border-bottom:none; border-right:none;
+      transform:rotate(45deg);
+    }
+    .dropdown-header { padding:1rem; border-bottom:1px solid #f0f0f0; font-weight:600; }
+    .dropdown-item {
+      display:flex; align-items:center; gap:.75rem;
+      padding:.75rem 1rem;
+      color:#333; cursor:pointer;
+      transition:.15s;
+    }
+    .dropdown-item:hover { background:#f8f9fa; }
+    .dropdown-item .material-icons { font-size:1.2rem; color:#666; }
+    .view-label { display:flex; flex-direction:column; }
+    .view-name { font-weight:600; font-size:.9rem; }
+    .view-description { font-size:.8rem; color:#666; margin-top:.1rem; }
+
+    /* Containers */
+    .container { max-width:1200px; margin:0 auto; padding:1.25rem; }
+
+    /* Hero */
+    .hero-section { text-align:center; margin:1rem 0 1.5rem; }
+    .hero-title { font-size:2.3rem; font-weight:700; color:#1976d2; margin-bottom:.6rem; }
+    .hero-subtitle { font-size:1.1rem; color:#666; margin-bottom:1.25rem; }
+
+    /* Layout grid */
     .compose-grid {
       display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-      gap:1.5rem;
+      grid-template-columns:1fr 1fr;
+      gap:1rem;
+      margin-bottom:2rem;
+    }
+    @media (max-width: 980px) {
+      .compose-grid { grid-template-columns:1fr; }
     }
 
-    .upload-section, .video-section, .writer-section, .selected-section {
-      background:#fff; border-radius:12px; padding:1.25rem;
-      box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    /* Section panels */
+    .upload-section, .writer-section,
+    .university-section, .selected-section,
+    .progress-section {
+      background:#fff;
+      border-radius:16px;
+      padding:2rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.1);
+      margin-bottom:0;
+    }
+    .upload-section { border:2px dashed #e0e0e0; transition:.3s; }
+    .upload-section.dragover { border-color:#1976d2; background:#f3f8ff; }
+
+    .upload-area { text-align:center; padding:2rem; }
+    .upload-icon { font-size:4rem; color:#1976d2; margin-bottom:1rem; }
+    .upload-title { font-size:1.5rem; font-weight:600; margin-bottom:.5rem; color:#333; }
+    .upload-subtitle { color:#666; margin-bottom:2rem; }
+    .file-input { display:none; }
+    .upload-btn {
+      background:linear-gradient(135deg,#1976d2,#7c4dff);
+      color:#fff; padding:1rem 2rem;
+      border:none; border-radius:12px;
+      font-size:1.1rem; font-weight:600;
+      cursor:pointer;
+      transition:.3s;
+      display:inline-flex; align-items:center; gap:.5rem;
+    }
+    .upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
+
+    .uploaded-file {
+      display:none; background:#e8f5e8;
+      border:2px solid #4caf50;
+      border-radius:12px; padding:1.5rem;
+      margin-top:1rem;
+    }
+    .file-info { display:flex; align-items:center; gap:1rem; }
+    .file-icon { font-size:2rem; color:#4caf50; }
+    .file-details h3 { color:#2e7d32; margin-bottom:.25rem; }
+    .file-details p { color:#4caf50; font-size:.9rem; }
+    .remove-file {
+      margin-left:auto; background:none; border:none; color:#666;
+      cursor:pointer; padding:.5rem; border-radius:50%;
+      transition:.2s;
+    }
+    .remove-file:hover { background:rgba(244,67,54,.1); color:#f44336; }
+
+    .section-title {
+      font-size:1.5rem; font-weight:600; color:#333;
+      margin-bottom:1rem; display:flex; align-items:center; gap:.5rem;
     }
 
-    .writer-section { grid-column:1 / -1; }
-
-    /* File upload */
-    .upload-box {
-      border:2px dashed #ccc; border-radius:12px;
-      padding:1rem; text-align:center; cursor:pointer;
-      transition:border-color .3s, background .3s;
+    /* Writer styles */
+    .writer-toolbar { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.75rem; align-items:center; }
+    .writer-toolbar .btn {
+      background:#fff; border:2px solid #e5e7eb;
+      border-radius:10px; padding:.45rem .75rem;
+      cursor:pointer; font-weight:600;
     }
-    .upload-box.dragover { border-color:#1976d2; background:rgba(25,118,210,.05); }
-    .upload-box input { display:none; }
-    .uploaded-file { display:none; margin-top:1rem; font-size:.9rem; color:#555; }
+    .writer-toolbar .btn:hover { background:#f8f9fa; }
+    .writer-toolbar .meta { margin-left:auto; font-size:.9rem; color:#667; display:flex; gap:.75rem; align-items:center; }
 
-    /* Video upload */
-    .video-upload { text-align:center; }
-    .video-upload input { margin-top:.5rem; }
-
-    /* Selected Universities */
-    .selected-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:.5rem; }
-    .selected-item {
-      display:flex; justify-content:space-between; align-items:center;
-      background:#f1f5f9; padding:.5rem .75rem; border-radius:8px;
-      font-size:.95rem;
+    .writer-title {
+      width:100%; padding:.7rem .9rem;
+      border:2px solid #e0e0e0; border-radius:12px;
+      font-size:1rem; margin-bottom:.6rem;
     }
-    .remove-btn {
-      background:none; border:none; color:#e11d48; font-size:1.2rem; cursor:pointer;
+    .writer-box {
+      border:2px solid #e0e0e0; border-radius:12px;
+      min-height:280px; padding:1rem;
+      line-height:1.55;
     }
+    .writer-box:focus { outline:none; border-color:#1976d2; }
 
-    /* Student + Recommender Panels */
-    #panel-recommender, #panel-student { margin-top:1rem; }
+    .writer-actions { display:flex; gap:.5rem; margin-top:.75rem; flex-wrap:wrap; }
+    .btn-primary { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none; }
+    .btn-success { background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; border:none; }
+    .btn-danger { background:linear-gradient(135deg,#e53935,#ef5350); color:#fff; border:none; }
+    .btn-muted { background:#fff; color:#333; }
   </style>
 </head>
 <body>
-  <!-- Header -->
+  <!-- ================= HEADER ================= -->
   <div class="header">
     <div class="header-content">
-      <a href="/" class="logo"><span class="material-icons">star</span>StellarRec</a>
-      <nav class="header-nav">
+      <!-- Logo -->
+      <a href="/" class="logo" target="_self" aria-label="Go to homepage">
+        <span class="material-icons">star</span> stellarrec
+      </a>
+      <!-- Tabs -->
+      <nav class="header-nav" role="tablist" aria-label="Choose portal">
         <div class="nav-left">
-          <a href="#student" class="nav-link" data-view="student" id="hdrStuTab">Student</a>
+          <button class="nav-link" data-view="student" role="tab" aria-selected="true" type="button">Student</button>
         </div>
         <div class="nav-right">
-          <a href="#recommender" class="nav-link" data-view="recommender" id="hdrRecTab">Recommender</a>
+          <button class="nav-link" data-view="recommender" role="tab" aria-selected="false" type="button">Recommender</button>
         </div>
       </nav>
-      <button id="headerThemeBtn" class="material-icons">brightness_6</button>
+      <!-- Controls -->
+      <div class="right-controls">
+        <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false">
+          <span class="material-icons" aria-hidden="true">dark_mode</span> Light / Dark
+        </button>
+        <div class="user-info">
+          <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
+            <span class="material-icons">person</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
+            <div class="dropdown-header">Quick actions</div>
+            <div class="dropdown-item" role="menuitem" tabindex="0">
+              <span class="material-icons">help_outline</span>
+              <div class="view-label">
+                <a href="https://stellarrec.netlify.app/portal-signin" class="view-name" style="text-decoration:none; color:inherit;" target="_self">How it works</a>
+                <div class="view-description">Sign-in portal</div>
+              </div>
+            </div>
+            <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
+              <span class="material-icons">support_agent</span>
+              <div class="view-label">
+                <div class="view-name">Contact admin</div>
+                <div class="view-description">Send a message</div>
+              </div>
+            </div>
+          </div>
+        </div><!-- user-info -->
+      </div><!-- right-controls -->
+    </div><!-- header-content -->
+  </div><!-- header -->
+      background:#0f1729; 
+      color:var(--text); 
+      border-color: var(--border); 
+    } 
+    :root[data-theme="dark"] .university-card { 
+      background:#0f1729; 
+    } 
+    :root[data-theme="dark"] .university-card:hover { 
+      background:#12203a; 
+      border-color:#274780; 
+    } 
+    :root[data-theme="dark"] .university-card.selected { 
+      background:#13254a; 
+    } 
+    :root[data-theme="dark"] .hero-subtitle, 
+    :root[data-theme="dark"] .university-location { 
+      color: var(--muted); 
+    } 
+    :root[data-theme="dark"] .hdr-tabs { 
+      background:#ffffff11; 
+      border-color:#ffffff33; 
+    } 
+    :root[data-theme="dark"] .hdr-tab { 
+      color:#e5eefc; 
+    } 
+    :root[data-theme="dark"] .hdr-tab[aria-selected="true"] { 
+      background:#0f1729; 
+      color:#7aa2ff; 
+    } 
+    :root[data-theme="dark"] .student-card, 
+    :root[data-theme="dark"] .table, 
+    :root[data-theme="dark"] .student-tabs { 
+      background:#111a2a; 
+      border-color:#24324a; 
+    } 
+    :root[data-theme="dark"] .table th { 
+      background:#0f1729; 
+      color:#e5eefc; 
+    } 
+    :root[data-theme="dark"] .student-tab { 
+      color:#c9d6ee; 
+    } 
+    :root[data-theme="dark"] .student-tab[aria-selected="true"] { 
+      background:#0f1729; 
+      color:#7aa2ff; 
+    } 
+    /* Footer (match header) */ 
+    .site-footer { 
+      background: linear-gradient(135deg,#1976d2 0%,#7c4dff 100%); 
+      color: #fff; 
+      padding: 1.5rem 0; 
+      text-align: center; 
+    } 
+    .site-footer p { 
+      margin: 0; 
+      font-size: 0.95rem; 
+    } 
+    .theme-btn { 
+      display:inline-flex; 
+      align-items:center; 
+      gap:.5rem; 
+      padding:.55rem 1rem; 
+      border-radius:999px; 
+      border:1px solid #ffffff55; 
+      background:#ffffff22; 
+      color:#fff; 
+      font-weight:600; 
+      cursor:pointer; 
+      transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease; 
+    } 
+    .theme-btn:hover { 
+      transform: translateY(-1px); 
+      background:#ffffff33; 
+      border-color:#ffffff88; 
+    } 
+    .theme-btn:focus-visible { 
+      outline:3px solid rgba(255,255,255,.5); 
+      outline-offset:2px; 
+    } 
+    .theme-btn .material-icons { font-size:18px; } 
+    /* unify apply/page buttons in student view */ 
+    .apply-btn { 
+      background:linear-gradient(135deg,#1976d2,#7c4dff); 
+      color:#fff; 
+      border:none; 
+      padding:.6rem 1rem; 
+      border-radius:10px; 
+      font-weight:700; 
+      cursor:pointer; 
+    } 
+    .apply-btn:hover { 
+      transform:translateY(-1px); 
+      box-shadow:0 8px 20px rgba(25,118,210,.25); 
+    } 
+    /* Intake card (link paste) */ 
+    .intake-card { 
+      background:#fff; 
+      border-radius:16px; 
+      padding:1.25rem 1.5rem; 
+      box-shadow:0 8px 32px rgba(0,0,0,.08); 
+      margin:1rem auto 1.25rem; 
+      border:1px solid #e5e7eb; 
+      max-width:1200px; 
+    } 
+    .intake-row { display:flex; align-items:center; justify-content:space-between; gap:.75rem; } 
+    .intake-title { display:flex; align-items:center; gap:.5rem; font-size:1.25rem; font-weight:700; color:#0f172a; } 
+    .intake-actions { display:flex; gap:.5rem; } 
+    .intake-sub { color:#475569; margin:.35rem 0 .75rem; } 
+    .intake-inputs { display:flex; gap:.5rem; align-items:center; } 
+    .intake-inputs .filter-select { flex:1; } 
+    .intake-status { margin-top:.6rem; font-size:.95rem; color:#334155; } 
+    .intake-details { margin-top:.5rem; } 
+    .intake-help { background:#f8fafc; padding:.75rem; border-radius:10px; border:1px solid #e5e7eb; color:#334155; } 
+    .intake-summary { 
+      margin-top:.75rem; 
+      border-top:1px dashed #e5e7eb; 
+      padding-top:.6rem; 
+      font-size:.95rem; 
+      color:#0f172a; 
+      display:grid; 
+      gap:.35rem; 
+    } 
+    .intake-summary .ok { color:#166534; } 
+    .intake-summary .warn { color:#9a3412; } 
+    .intake-summary .muted { color:#64748b; } 
+    :root[data-theme="dark"] .intake-card { 
+      background:#111a2a; 
+      border-color:#24324a; 
+      box-shadow:none; 
+    } 
+    :root[data-theme="dark"] .intake-sub, 
+    :root[data-theme="dark"] .intake-help { 
+      color:#c9d6ee; 
+      background:#0f1729; 
+      border-color:#24324a; 
+    } 
+    :root[data-theme="dark"] .intake-summary { 
+      color:#e5eefc; 
+      border-color:#24324a; 
+    } 
+  </style> 
+</head> 
+<body> 
+  <!-- HEADER --> 
+  <div class="header"> 
+    <div class="header-content"> 
+      <!-- Left: Logo --> 
+      <a href="/" class="logo" target="_self" aria-label="Go to homepage"> 
+        <span class="material-icons">star</span> stellarrec 
+      </a> 
+      <!-- Center: Student / Recommender toggles --> 
+      <nav class="header-nav" role="tablist" aria-label="Choose portal"> 
+        <div class="nav-left"> 
+          <button class="nav-link" data-view="student" role="tab" aria-selected="true" type="button">Student</button> 
+        </div> 
+        <div class="nav-right"> 
+          <button class="nav-link" data-view="recommender" role="tab" aria-selected="false" type="button">Recommender</button> 
+        </div> 
+      </nav> 
+      <!-- Right: Theme + Avatar --> 
+      <div class="right-controls"> 
+        <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false" title="Toggle theme"> 
+          <span class="material-icons" aria-hidden="true">dark_mode</span> Light / Dark 
+        </button> 
+        <div class="user-info"> 
+          <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button"> 
+            <span class="material-icons">person</span> 
+          </button> 
+          <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true"> 
+            <div class="dropdown-header">Quick actions</div> 
+            <div class="dropdown-item" role="menuitem" tabindex="0"> 
+              <span class="material-icons">help_outline</span> 
+              <div class="view-label"> 
+                <a href="https://stellarrec.netlify.app/portal-signin" class="view-name" style="text-decoration:none; color:inherit;" target="_self"> How it works </a> 
+                <div class="view-description">Sign-in portal</div> 
+              </div> 
+            </div> 
+            <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0"> 
+              <span class="material-icons">support_agent</span> 
+              <div class="view-label"> 
+                <div class="view-name">Contact admin</div> 
+                <div class="view-description">Send a message</div> 
+              </div> 
+            </div> 
+            <div class="dropdown-item" style="border-top:1px solid #f0f0f0;"> 
+              <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;"> 
+                <span class="material-icons">build</span> 
+                <div class="view-label"> 
+                  <div class="view-name">Use mock API</div> 
+                  <div class="view-description">Toggle mock vs real backend</div> 
+                </div> 
+                <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" /> 
+              </label> 
+            </div> 
+          </div> 
+        </div><!-- /.user-info --> 
+      </div><!-- /.right-controls --> 
+    </div><!-- /.header-content --> 
+  </div><!-- /.header --> 
+
+  <!-- MAIN — RECOMMENDER VIEW (hidden by default) --> 
+  <div class="container" id="panel-recommender" hidden> 
+    <!-- Student Link Intake --> 
+    <div class="intake-card" id="linkIntake"> 
+      <div class="intake-row"> 
+        <h2 class="intake-title"> 
+          <span class="material-icons" aria-hidden="true">link</span> Paste student link 
+        </h2> 
+        <div class="intake-actions"> 
+          <button class="page-btn" id="linkHelpBtn" type="button" title="What does this do?">What’s this?</button> 
+        </div> 
+      </div> 
+      <p class="intake-sub">Paste the link you received by email from the student. We’ll import their details and selected universities.</p> 
+      <div class="intake-inputs"> 
+        <input id="linkInput" class="filter-select" type="url" placeholder="Paste the student link here…" /> 
+        <button id="linkParseBtn" class="apply-btn" type="button">Import</button> 
+      </div> 
+      <div id="linkStatus" class="intake-status" aria-live="polite"></div> 
+      <details id="linkFormatDetails" class="intake-details"> 
+        <summary>Expected link format (examples)</summary> 
+        <div class="intake-help"> 
+          <div><b>With unit IDs (best):</b><br> 
+            <code>?sf=Jane&sl=Doe&se=jane@email.com&sp=2065551212&waive=1&unis=166027,110635&rname=Prof%20Smith&remail=smith@uni.edu&rphone=2125559876</code> 
+          </div> 
+          <div><b>With names (we’ll match):</b><br> 
+            <code>?sf=Jane&sl=Doe&se=jane@email.com&waive=0&unames=Harvard%20University,Stanford%20University</code> 
+          </div> 
+          <div style="margin-top:.35rem;"> 
+            <small> Params: <code>sf</code>=student first, <code>sl</code>=student last, <code>se</code>=student email, <code>sp</code>=student phone, <code>waive</code>=1/0, <code>unis</code>=CSV of unitids, <code>unames</code>=CSV of names, <code>rname</code>=recommender name, <code>remail</code>=recommender email, <code>rphone</code>=recommender phone. </small> 
+          </div> 
+        </div> 
+      </details> 
+      <div id="linkSummary" class="intake-summary" hidden></div> 
+    </div> 
+    <!-- Selected Universities --> 
+    <div class="selected-section"> 
+      <h2 class="section-title"> 
+        <span class="material-icons" aria-hidden="true">done_all</span> Selected Universities 
+      </h2> 
+      <div id="selectedList" class="selected-list"> 
+        <!-- populated by JS --> 
+      </div> 
+    </div> 
+
+    <!-- Upload PDF + Video --> 
+    <div class="upload-section"> 
+      <h2 class="section-title"> 
+        <span class="material-icons" aria-hidden="true">upload_file</span> Upload recommendation 
+      </h2> 
+      <div id="uploadArea" class="upload-box" aria-label="Upload area"> 
+        <p>Drag & drop PDF here or</p> 
+        <button id="chooseFileBtn" class="page-btn" type="button">Choose file</button> 
+        <input type="file" id="fileInput" accept="application/pdf" hidden> 
+      </div> 
+      <div id="uploadedFile" class="uploaded-file" style="display:none;"> 
+        <p id="fileName"></p> 
+        <p id="fileSize"></p> 
+        <button id="removeFileBtn" class="page-btn" type="button">Remove</button> 
+      </div> 
+      <!-- NEW: Video upload --> 
+      <div class="upload-box" style="margin-top:1rem;"> 
+        <p>Optionally upload a video message</p> 
+        <input type="file" id="videoInput" accept="video/*"> 
+      </div> 
+    </div> 
+
+    <!-- Write Letter Section (moved below uploads) --> 
+    <div class="letter-section"> 
+      <h2 class="section-title"> 
+        <span class="material-icons" aria-hidden="true">edit</span> Write letter 
+      </h2> 
+      <textarea id="letterText" rows="6" placeholder="Type or paste your recommendation letter here…" style="width:100%; padding:.75rem; border-radius:10px; border:1px solid #ccc;"></textarea> 
+    </div> 
+
+    <!-- Progress Section --> 
+    <div class="progress-section"> 
+      <h2 class="section-title"> 
+        <span class="material-icons" aria-hidden="true">hourglass_bottom</span> Progress 
+      </h2> 
+      <div id="progressList" class="progress-list"> 
+        <!-- demo rows inserted via JS --> 
+      </div> 
+    </div> 
+
+    <button id="sendBtn" class="apply-btn" type="button" disabled>Send Recommendation</button> 
+  </div><!-- /#panel-recommender --> 
+
+  <!-- MAIN — STUDENT VIEW (default) --> 
+  <div class="container" id="panel-student"> 
+    <!-- University Select Section --> 
+    <div class="university-section"> 
+      <h2 class="section-title"> 
+        <span class="material-icons" aria-hidden="true">school</span> Select Universities 
+      </h2> 
+      <div class="filters"> 
+        <input type="text" id="searchBox" placeholder="Search universities…" class="filter-select"> 
+        <select id="stateFilter" class="filter-select"> 
+          <option value="">All States</option> 
+        </select> 
+        <select id="ownershipFilter" class="filter-select"> 
+          <option value="">All Types</option> 
+          <option value="1">Public</option> 
+          <option value="2">Private nonprofit</option> 
+          <option value="3">Private for-profit</option> 
+        </select> 
+        <button id="bulkImportBtn" class="page-btn" type="button">Bulk Import</button> 
+      </div> 
+      <div class="university-list" id="universityList"> 
+        <!-- populated by JS --> 
+      </div> 
+    </div> 
+
+    <!-- Student Tabs --> 
+    <div class="student-tabs" role="tablist" aria-label="Student actions"> 
+      <button id="stuTabSend" class="student-tab" role="tab" aria-selected="true">Send Request</button> 
+      <button id="stuTabTrack" class="student-tab" role="tab" aria-selected="false">Track Progress</button> 
+    </div> 
+
+    <!-- Send Request Panel --> 
+    <div id="stuPanelSend" role="tabpanel"> 
+      <form id="stuSendForm" class="student-card"> 
+        <label for="stuName">Your Name</label> 
+        <input id="stuName" type="text" placeholder="Enter your full name" required> 
+
+        <label for="stuEmail">Your Email</label> 
+        <input id="stuEmail" type="email" placeholder="Enter your email" required> 
+
+        <label for="recName">Recommender Name</label> 
+        <input id="recName" type="text" placeholder="Professor Jane Smith" required> 
+
+        <label for="recEmail">Recommender Email</label> 
+        <input id="recEmail" type="email" placeholder="prof@example.edu" required> 
+
+        <button class="apply-btn" type="submit">Send Request</button> 
+      </form> 
+    </div> 
+
+    <!-- Track Progress Panel --> 
+    <div id="stuPanelTrack" role="tabpanel" hidden> 
+      <div class="student-card"> 
+        <table class="table"> 
+          <thead> 
+            <tr> 
+              <th>Recommender</th> 
+              <th>Email</th> 
+              <th>Date</th> 
+              <th>Status</th> 
+            </tr> 
+          </thead> 
+          <tbody id="stuTrackBody"> 
+            <!-- JS inserts rows --> 
+          </tbody> 
+        </table> 
+      </div> 
+    </div> 
+  </div><!-- /#panel-student --> 
+  <!-- Import Modal (Bulk Import) -->
+  <div id="importModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span id="importCloseBtn" class="close">&times;</span>
+      <h3>Bulk Import Universities</h3>
+      <textarea id="importTextarea" rows="6" placeholder="Paste one university per line"></textarea>
+      <div id="importPreview" style="margin-top:.5rem; font-size:.9rem; color:#555;"></div>
+      <div style="margin-top:1rem; display:flex; justify-content:flex-end; gap:.5rem;">
+        <button id="importCancelBtn" class="page-btn" type="button">Cancel</button>
+        <button id="importConfirmBtn" class="apply-btn" type="button">Import</button>
+      </div>
     </div>
   </div>
-  <!-- ================= Recommender Panel ================= -->
-  <div class="container" id="panel-recommender" hidden>
-    <h2 class="section-title"><span class="material-icons">school</span> Recommender View</h2>
 
-    <div class="compose-grid">
-      <!-- Upload PDF -->
-      <div class="upload-section">
-        <h3 class="section-title"><span class="material-icons">upload_file</span> Upload Recommendation PDF</h3>
-        <div id="uploadArea" class="upload-box">
-          <p>Drag & drop a PDF here or <button id="chooseFileBtn">Choose File</button></p>
-          <input type="file" id="fileInput" accept="application/pdf"/>
-        </div>
-        <div class="uploaded-file" id="uploadedFile">
-          <p><strong>File:</strong> <span id="fileName"></span></p>
-          <p><span id="fileSize"></span></p>
-          <button id="removeFileBtn">Remove</button>
-        </div>
+  <!-- Contact Overlay -->
+  <div id="contactOverlay" class="overlay" style="display:none;">
+    <div style="background:#fff; padding:2rem; border-radius:10px; max-width:500px; width:100%; transform:translateY(40px); opacity:0; transition:all .3s ease;">
+      <h3>Contact Admin</h3>
+      <p>If you need help, please reach out to our support team.</p>
+      <div style="margin-top:1rem; display:flex; justify-content:flex-end; gap:.5rem;">
+        <button id="contactCancelBtn2" class="page-btn" type="button">Cancel</button>
+        <button id="contactCloseBtn2" class="apply-btn" type="button">Close</button>
       </div>
-
-      <!-- Upload Video -->
-      <div class="video-section">
-        <h3 class="section-title"><span class="material-icons">videocam</span> Upload Video</h3>
-        <div class="video-upload">
-          <input type="file" id="videoInput" accept="video/*"/>
-          <p style="font-size:.9rem; color:#555;">(Optional) Attach a short intro video.</p>
-        </div>
-      </div>
-
-      <!-- Write Letter -->
-      <div class="writer-section" id="writerSection" style="grid-column:1 / -1;">
-        <h3 class="section-title"><span class="material-icons">edit</span> Write Letter</h3>
-        <textarea id="letterText" rows="6" style="width:100%; padding:.5rem; border-radius:8px; border:1px solid #ccc;"></textarea>
-        <button id="sendBtn" style="margin-top:.75rem; padding:.6rem 1.2rem; background:#1976d2; color:#fff; border:none; border-radius:8px; cursor:pointer;">Send</button>
-      </div>
-    </div>
-
-    <!-- Selected Universities (ONLY in Recommender view now) -->
-    <div class="selected-section">
-      <h3 class="section-title"><span class="material-icons">check_circle</span> Selected Universities</h3>
-      <ul class="selected-list" id="selectedList"></ul>
     </div>
   </div>
-  <!-- ================= Student Panel ================= -->
-  <div class="container" id="panel-student">
-    <h2 class="section-title"><span class="material-icons">person</span> Student View</h2>
 
-    <!-- Tabs for Student -->
-    <nav class="header-nav" style="margin:1rem 0;">
-      <a href="#send" class="nav-link" id="stuTabSend" aria-selected="true">Send Request</a>
-      <a href="#track" class="nav-link" id="stuTabTrack" aria-selected="false">Track Requests</a>
-    </nav>
-
-    <!-- Send Request Form -->
-    <div id="stuPanelSend">
-      <form id="stuSendForm">
-        <div style="display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
-          <div>
-            <label>Student Name</label>
-            <input id="stuName" type="text" required style="width:100%; padding:.5rem; border:1px solid #ccc; border-radius:6px;"/>
-          </div>
-          <div>
-            <label>Student Email</label>
-            <input id="stuEmail" type="email" required style="width:100%; padding:.5rem; border:1px solid #ccc; border-radius:6px;"/>
-          </div>
-          <div>
-            <label>Recommender Name</label>
-            <input id="recName" type="text" required style="width:100%; padding:.5rem; border:1px solid #ccc; border-radius:6px;"/>
-          </div>
-          <div>
-            <label>Recommender Email</label>
-            <input id="recEmail" type="email" required style="width:100%; padding:.5rem; border:1px solid #ccc; border-radius:6px;"/>
-          </div>
-        </div>
-        <button type="submit" style="margin-top:1rem; padding:.6rem 1.2rem; background:#1976d2; color:#fff; border:none; border-radius:8px; cursor:pointer;">Send Request</button>
-      </form>
-    </div>
-
-    <!-- Track Requests -->
-    <div id="stuPanelTrack" hidden>
-      <h3 class="section-title"><span class="material-icons">timeline</span> Track Requests</h3>
-      <table style="width:100%; border-collapse:collapse; margin-top:1rem;">
-        <thead>
-          <tr style="background:#f1f5f9; text-align:left;">
-            <th style="padding:.5rem;">Recommender</th>
-            <th style="padding:.5rem;">Email</th>
-            <th style="padding:.5rem;">Date</th>
-            <th style="padding:.5rem;">Status</th>
-          </tr>
-        </thead>
-        <tbody id="stuTrackBody"></tbody>
-      </table>
-    </div>
-
-    <!-- Select Universities (moved here from Recommender) -->
-    <div class="selected-section" style="margin-top:2rem;">
-      <h3 class="section-title"><span class="material-icons">school</span> Select Universities</h3>
-      <input type="text" id="searchBox" placeholder="Search universities..." style="width:100%; padding:.5rem; border:1px solid #ccc; border-radius:6px;"/>
-      <ul class="selected-list" id="searchResults"></ul>
+  <!-- Legacy Contact Modal (for fallback) -->
+  <div id="contactModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span id="contactCloseBtn" class="close">&times;</span>
+      <h3>Contact Admin</h3>
+      <p>Please email support@stellarrec.com for assistance.</p>
+      <div style="margin-top:1rem; display:flex; justify-content:flex-end; gap:.5rem;">
+        <button id="contactCancelBtn" class="page-btn" type="button">Cancel</button>
+      </div>
     </div>
   </div>
-  <!-- ================= Scripts ================= -->
+
+  <!-- Toast Container -->
+  <div id="toastWrap" class="toast-wrap"></div>
+
+  <!-- Scripts -->
   <script src="assets/js/fuse.min.js"></script>
   <script src="assets/js/localforage.min.js"></script>
   <script src="assets/js/dashboard.js"></script>
 
-  <!-- View Switcher (Student <-> Recommender) -->
+  <!-- Tab Switcher -->
   <script>
   (function(){
     const studentPanel = document.getElementById('panel-student');
@@ -228,7 +717,7 @@
 
     if (!studentPanel || !recPanel || !toggles.length) return;
 
-    // Safe localStorage helpers
+    // Safe localStorage
     const safeLS = {
       get(k, d){ try { return localStorage.getItem(k) ?? d; } catch(e){ return d; } },
       set(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
@@ -266,8 +755,38 @@
     });
   })();
   </script>
+  <!-- Init / Header Interactions -->
+  <script>
+    (function(){
+      if (typeof Fuse !== 'function') console.warn('[SR] Fuse.js not loaded');
+      if (typeof localforage === 'undefined') console.warn('[SR] localForage not loaded');
+      else localforage.config({ name: 'StellarRec' });
+
+      // Avatar dropdown toggling
+      const btn = document.getElementById('userAvatarBtn');
+      const dd  = document.getElementById('userDropdown');
+      function closeDD(e){
+        if (!dd) return;
+        if (e && (dd.contains(e.target) || btn.contains(e.target))) return;
+        dd.classList.remove('show');
+        btn?.setAttribute('aria-expanded','false');
+        document.removeEventListener('click', closeDD);
+      }
+      btn?.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        dd?.classList.toggle('show');
+        btn.setAttribute('aria-expanded', dd?.classList.contains('show') ? 'true' : 'false');
+        if (dd?.classList.contains('show')) setTimeout(()=>document.addEventListener('click', closeDD), 0);
+      });
+
+      // Theme button fallback
+      document.getElementById('headerThemeBtn')?.addEventListener('click', ()=>{
+        const root = document.documentElement;
+        const isDark = root.getAttribute('data-theme') === 'dark';
+        root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      });
+    })();
+  </script>
+
 </body>
 </html>
-
-
-
