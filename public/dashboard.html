@@ -247,6 +247,8 @@
     .student-tabs {
       display:flex; gap:.4rem; background:#f1f5f9; border-radius:999px; padding:.2rem;
       border:1px solid #e5e7eb; margin-bottom:.9rem;
+      justify-content: space-between; /* NEW: positions left / center / right */
+      width: 100%;                    /* ensure full row width */
     }
     .student-tab {
       appearance:none; background:transparent; border:0; cursor:pointer;
@@ -520,7 +522,7 @@
               <!-- Optional inline preview -->
               <video id="videoPreview" class="video-preview" controls playsinline style="display:none; margin-top:.6rem; max-height:240px; width:100%; border-radius:10px; background:#000;"></video>
             </div>
-            <button class="remove-file" id="removeVideoBtn" title="Remove video">
+            <button class="remove-video" id="removeVideoBtn" title="Remove video" style="background:none;border:none;color:#666;cursor:pointer;padding:.5rem;border-radius:50%;transition:.2s;">
               <span class="material-icons">close</span>
             </button>
           </div>
@@ -596,7 +598,7 @@
     <div id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle"
          style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
       <div style="background:#fff; width:min(720px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
-        <div style="padding:1.2rem 1.4rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+        <div style="padding:1.2rem 1.4rem; border-bottom:1px solid:#eee; display:flex; justify-content:space-between; align-items:center;">
           <div id="confirmModalTitle" style="font-weight:700;">Confirm recipients</div>
           <button aria-label="Close" id="modalCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
         </div>
@@ -617,7 +619,7 @@
             </div>
           </div>
         </div>
-        <div style="padding:1rem 1.4rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
+        <div style="padding:1rem 1.4rem; border-top:1px solid:#eee; display:flex; gap:.5rem; justify-content:flex-end;">
           <button class="page-btn" id="modalCancelBtn">Cancel</button>
           <button class="apply-btn" id="modalConfirmBtn">Send now</button>
         </div>
@@ -628,7 +630,7 @@
     <div id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle"
          style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
       <div style="background:#fff; width:min(680px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
-        <div style="padding:1rem 1.2rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+        <div style="padding:1rem 1.2rem; border-bottom:1px solid:#eee; display:flex; justify-content:space-between; align-items:center;">
           <div id="importTitle" style="font-weight:700;">Bulk import universities</div>
           <button aria-label="Close" id="importCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
         </div>
@@ -639,7 +641,7 @@
           <textarea id="importTextarea" rows="10" style="width:100%; padding:.8rem; border:1px solid #e5e7eb; border-radius:10px; font-family:inherit;"></textarea>
           <div id="importPreview" style="font-size:.9rem; color:#667;"></div>
         </div>
-        <div style="padding:1rem 1.2rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
+        <div style="padding:1rem 1.2rem; border-top:1px solid:#eee; display:flex; gap:.5rem; justify-content:flex-end;">
           <button class="page-btn" id="importCancelBtn">Cancel</button>
           <button class="apply-btn" id="importConfirmBtn">Add matches</button>
         </div>
@@ -685,11 +687,12 @@
       <p class="hero-subtitle" style="margin:0 0 .8rem;">Request recommendations and track their status.</p>
 
       <div class="student-tabs" role="tablist" aria-label="Student actions">
-        <button id="stuTabSend" class="student-tab" role="tab" aria-selected="true" type="button">
-          Send Recommendation Request
-        </button>
+        <!-- REORDERED: Select (left), Send (center), Track (right) -->
         <button id="stuTabSelect" class="student-tab" role="tab" aria-selected="false" type="button">
           Select Universities
+        </button>
+        <button id="stuTabSend" class="student-tab" role="tab" aria-selected="true" type="button">
+          Send Recommendation Request
         </button>
         <button id="stuTabTrack" class="student-tab" role="tab" aria-selected="false" type="button">
           Track Recommendation &amp; Status
@@ -725,7 +728,7 @@
           </form>
         </section>
 
-        <!-- Select (moved from Recommender) -->
+        <!-- Select (moved to left tab, content unchanged) -->
         <section id="stuPanelSelect" hidden>
           <div class="university-section">
             <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
@@ -1267,4 +1270,3 @@
 
 </body>
 </html>
-
