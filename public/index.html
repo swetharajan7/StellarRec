@@ -133,7 +133,7 @@
       font-size: 1.8rem; font-weight: 700;
       color: #fff; text-decoration: none;
     }
-    .header-nav { display: flex; gap: 1.5rem; align-items: center; }
+    .header-nav { display: flex; gap: 4rem; align-items: center; } /* increased gap */
     .header-nav .nav-link {
       color: #fff; text-decoration: none; font-weight: 500;
       transition: opacity .2s, transform .2s;
@@ -151,8 +151,16 @@
     .tp-stars .material-icons { font-size: 20px; color: #00b67a; }
     .tp-meta { color: #475569; font-size: .9rem; }
     .tp-actions { margin-top: .75rem; }
-    .tp-actions a { background: #00b67a; color: #fff; padding: .6rem 1rem; border-radius: 10px; font-weight: 600; text-decoration: none; }
-    .tp-actions a:hover { filter: brightness(0.95); }
+    .tp-disabled-btn {
+      display:inline-block;
+      background:#9ca3af;
+      color:#fff;
+      padding:.6rem 1rem;
+      border-radius:10px;
+      font-weight:600;
+      opacity:.7;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -165,7 +173,6 @@
       </a>
       <nav class="header-nav">
         <a href="/dashboard" class="nav-link" target="_self">Dashboard</a>
-        <a href="/portal-signin" class="nav-link" target="_self">Demo</a>
       </nav>
     </div>
   </div>
@@ -224,11 +231,11 @@
       “Super smooth — uploaded once and sent everywhere.” — <em>Advisor, CA</em>
     </div>
     <div class="tp-actions">
-      <a href="https://www.trustpilot.com/review/YOUR-DOMAIN-HERE" target="_blank">Read reviews on Trustpilot</a>
+      <span class="tp-disabled-btn">Read reviews on Trustpilot</span>
     </div>
   </section>
 
-  <!-- Footer (moved up; carousel removed) -->
+  <!-- Footer -->
   <footer class="site-footer">
     <div class="container">
       <p>&copy; 2025 <span style="color: #ffeb3b; font-weight: 600;">StellarRec™</span>.
