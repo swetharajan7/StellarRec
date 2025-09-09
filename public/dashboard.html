@@ -1608,6 +1608,262 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
 })();
 </script>
+  <script>
+(function(){
+  if (window.__srRecommenderPatch__) return; // idempotent
+  window.__srRecommenderPatch__ = true;
+
+  const $  = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+
+  /* ---------------- Toast helper (keep your existing if present) ---------------- */
+  (function ensureToast(){
+    if (typeof window.toast === 'function') return;
+    const wrap = document.getElementById('toastWrap');
+    window.toast = function(msg, type='info'){
+      if(!wrap) { alert(msg); return; }
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerHTML = `<span class="icon material-icons">${type==='success'?'check_circle':type==='error'?'error':'info'}</span>
+                      <div class="msg">${msg}</div><button class="x" aria-label="Dismiss">✕</button>`;
+      el.querySelector('.x').onclick = ()=> el.remove();
+      wrap.appendChild(el);
+      setTimeout(()=> el.remove(), 3200);
+    };
+  })();
+
+  /* ---------------- Avatar → Contact admin: open, scroll, click works ----------- */
+  (function bindContactAdminFlow(){
+    const avatar   = $('#userAvatarBtn');
+    const dropdown = $('#userDropdown');
+    const item     = $('#contactAdminItem');
+    const overlay  = $('#contactOverlay');
+    const close1   = $('#contactCloseBtn2');
+    const close2   = $('#contactCancelBtn2');
+
+    function openDropdown(){
+      if (!dropdown) return;
+      dropdown.classList.add('show');
+      avatar?.setAttribute('aria-expanded','true');
+    }
+    function openOverlay(){
+      if (!overlay) return;
+      overlay.style.display = 'flex';
+      const panel = overlay.querySelector('div[style*="transition"]') || overlay.firstElementChild;
+      if (panel) panel.style.opacity = 1;
+    }
+    function closeOverlay(){ if (overlay) overlay.style.display='none'; }
+
+    // Click avatar: open dropdown and auto-scroll the "Contact admin" item into view
+    avatar?.addEventListener('click', ()=>{
+      openDropdown();
+      if (dropdown && item){
+        dropdown.classList.add('sr-highlight');
+        setTimeout(()=> dropdown.classList.remove('sr-highlight'), 900);
+        item.scrollIntoView({ behavior:'smooth', block:'center' });
+      }
+    });
+
+    // Clicking Contact admin: open overlay
+    item?.addEventListener('click', (e)=>{ e.preventDefault(); openOverlay(); });
+
+    // Overlay close behaviors
+    close1?.addEventListener('click', closeOverlay);
+    close2?.addEventListener('click', closeOverlay);
+    overlay?.addEventListener('click', (e)=>{ if (e.target===overlay) closeOverlay(); });
+    document.addEventListener('keydown', (e)=>{ if (e.key==='Escape' && overlay?.style.display==='flex') closeOverlay(); });
+  })();
+
+  /* ---------------- Write a Letter: full toolbar + persistence ------------------ */
+  (function bindWriter(){
+    const box      = $('#writerBox');
+    const title    = $('#writerTitle');
+    const savedEl  = $('#writerSaved');
+    const LSKEY    = 'sr_writer_draft_v2';
+
+    if (!box) return;
+
+    // Guidance card (disappears when content present)
+    (function mountGuide(){
+      if ($('#writerGuide')) return;
+      const guide = document.createElement('div');
+      guide.id = 'writerGuide';
+      guide.className = 'writer-guide';
+      guide.innerHTML = `
+        <b>Prompt guidance (please include specific examples & anecdotes):</b>
+        <ul>
+          <li><b>Your relationship</b> with the applicant (capacity, duration, context).</li>
+          <li><b>Strengths & weaknesses</b> with concrete cases that illustrate both.</li>
+          <li><b>Performance vs. peers</b> (quantify if possible; top % or comparative outcomes).</li>
+          <li><b>Potential for growth</b> and readiness for the program’s rigor.</li>
+          <li><b>Qualities as a person</b> (integrity, leadership, resilience, collaboration), with stories.</li>
+        </ul>
+      `;
+      // Insert after the editor box
+      const writerSection = $('#writerSection') || box.parentElement;
+      writerSection?.insertBefore(guide, writerSection.querySelector('.writer-actions') || box.nextSibling);
+
+      const toggleGuide = ()=>{
+        const hasText = (box.innerText || '').trim().length > 0 || (box.querySelector('img,table,ul,ol,blockquote,pre'));
+        guide.style.display = hasText ? 'none' : 'block';
+      };
+      ['input','keyup','paste','cut','blur','DOMSubtreeModified'].forEach(ev=> box.addEventListener(ev, toggleGuide));
+      toggleGuide();
+    })();
+
+    // execCommand bindings (bold/italic/underline buttons already in DOM)
+    function exec(cmd){ box.focus({preventScroll:true}); document.execCommand(cmd, false, null); refreshMeta(); }
+    $$('[data-wcmd]').forEach(btn=>{
+      if (btn.__srExecBound) return;
+      btn.__srExecBound = true;
+      btn.addEventListener('click', ()=> exec(btn.getAttribute('data-wcmd')));
+    });
+
+    // word / char count
+    function refreshMeta(){
+      const text = box.innerText || '';
+      const words = (text.trim().match(/\S+/g)||[]).length;
+      const chars = text.length;
+      const meta = $('#writerCount');
+      if (meta) meta.textContent = `${words} words • ${chars} chars`;
+    }
+    ['input','keyup','paste','cut'].forEach(ev=> box.addEventListener(ev, refreshMeta));
+    refreshMeta();
+
+    // Save / Restore / Clear / Copy / Download / Attach
+    const setSaved = (s)=> savedEl && (savedEl.textContent = s);
+
+    $('#saveDraftBtn')?.addEventListener('click', ()=>{
+      try{
+        const payload = { title: title?.value || '', html: box.innerHTML };
+        localStorage.setItem(LSKEY, JSON.stringify(payload));
+        setSaved('Saved');
+        toast('Draft saved.','success');
+      }catch(e){ toast('Could not save locally.','error'); }
+    });
+
+    $('#restoreDraftBtn')?.addEventListener('click', ()=>{
+      try{
+        const raw = localStorage.getItem(LSKEY);
+        if (!raw){ toast('No saved draft found.','info'); return; }
+        const data = JSON.parse(raw);
+        if (title) title.value = data.title || '';
+        box.innerHTML = data.html || '';
+        setSaved('Restored');
+        refreshMeta();
+      }catch(e){ toast('Could not restore draft.','error'); }
+    });
+
+    $('#clearDraftBtn')?.addEventListener('click', ()=>{
+      box.innerHTML = '';
+      refreshMeta();
+      setSaved('Cleared');
+    });
+
+    $('#copyDraftBtn')?.addEventListener('click', async ()=>{
+      try{
+        const tmp = document.createElement('div'); tmp.innerHTML = box.innerHTML;
+        await navigator.clipboard.writeText(tmp.innerText);
+        setSaved('Copied');
+        toast('Plain text copied.','success');
+      }catch(e){ toast('Copy failed.','error'); }
+    });
+
+    $('#downloadDraftBtn')?.addEventListener('click', ()=>{
+      const a = document.createElement('a');
+      const text = (title?.value ? (title.value + '\n\n') : '') + (box.innerText||'');
+      a.href = URL.createObjectURL(new Blob([text], {type:'text/plain'}));
+      a.download = 'recommendation-letter.txt';
+      a.click();
+      setSaved('Downloaded');
+    });
+
+    $('#attachDraftBtn')?.addEventListener('click', ()=>{
+      // “Attach” means: mark the current draft as the letter to send alongside uploads.
+      // We store into localStorage so the send flow can read it.
+      try{
+        const payload = { title: title?.value || '', html: box.innerHTML, ts: Date.now() };
+        localStorage.setItem('sr_attached_draft', JSON.stringify(payload));
+        setSaved('Attached');
+        toast('Draft attached to this send session.','success');
+      }catch(e){ toast('Attach failed.','error'); }
+    });
+  })();
+
+  /* ---------------- Ensure Mock University is pre-selected ---------------------- */
+  (function ensureMockSelected(){
+    const tryOnce = ()=>{
+      // Attempt to use SR (from our integrated code), else derive from DOM
+      const hasSR = window.SR && Array.isArray(SR.universities);
+      if (!hasSR) return false;
+
+      // Find Mock uni by id or name
+      let mock = SR.universities.find(u=>u.unitid==='MOCK-0000')
+              || SR.universities.find(u=>String(u.name).toLowerCase()==='mock university');
+
+      if (!mock){
+        mock = { unitid:'MOCK-0000', name:'Mock University', state:'CA', type:'Private nonprofit', level:'4-year' };
+        SR.universities.unshift(mock);
+      }
+      const before = SR.selected ? SR.selected.size : 0;
+      if (!SR.selected) SR.selected = new Set();
+      SR.selected.add(mock.unitid);
+
+      // Update the UI if helpers exist
+      if (typeof window.updateSelectedList === 'function') updateSelectedList();
+      if (typeof window.updateSendButton === 'function')  updateSendButton();
+
+      // Persist if our persist helper exists
+      try {
+        const saved = JSON.parse(localStorage.getItem('sr_state_v1')||'{}');
+        saved.selectedIds = Array.from(SR.selected);
+        localStorage.setItem('sr_state_v1', JSON.stringify(saved));
+      } catch {}
+
+      // Trigger send button pulse if we changed selection
+      if (SR.selected.size > before) pulseSendBtn(true);
+      return true;
+    };
+
+    // Try now; if SR not ready yet, retry a few times
+    if (!tryOnce()){
+      let tries = 0;
+      const t = setInterval(()=>{ tries++; if (tryOnce() || tries>20) clearInterval(t); }, 150);
+    }
+  })();
+
+  /* ---------------- Animate "Send to Selected Universities" --------------------- */
+  function pulseSendBtn(flash=false){
+    const btn = $('#sendBtn'); if (!btn) return;
+    btn.classList.remove('sr-flash', 'sr-pulse');
+    if (!btn.disabled) {
+      if (flash) btn.classList.add('sr-flash');
+      btn.classList.add('sr-pulse');
+    }
+  }
+  (function bindSendPulse(){
+    const btn = $('#sendBtn');
+    if (!btn) return;
+    // initial state
+    setTimeout(()=> pulseSendBtn(false), 50);
+
+    // Re-pulse after selections via delegation on grid "Apply" buttons
+    const grid = $('#universityGrid');
+    grid?.addEventListener('click', (e)=>{
+      const t = e.target;
+      if (t && t.classList.contains('apply-btn')){
+        setTimeout(()=> pulseSendBtn(true), 120);
+      }
+    });
+
+    // Also observe attribute changes to disabled
+    const obs = new MutationObserver(()=> pulseSendBtn(true));
+    obs.observe(btn, { attributes:true, attributeFilter:['disabled'] });
+  })();
+
+})();
+</script>
+
 
 </body>
 </html>
