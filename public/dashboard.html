@@ -366,6 +366,37 @@
 :root[data-theme="dark"] .suggest-popover{ background:#0f1729; border-color:#24324a; }
 :root[data-theme="dark"] .suggest-item:hover{ background:#111f38; }
   </style>
+  <style id="sr-recommender-patch-css">
+/* Writer guidance card */
+.writer-guide {
+  border: 1px dashed #cbd5e1; background:#f8fafc;
+  color:#0f172a; border-radius:12px; padding:1rem; margin:.6rem 0 0;
+  font-size:.95rem; line-height:1.45;
+}
+.writer-guide b { color:#0b4fb1; }
+.writer-guide ul { margin:.4rem 0 0 1.2rem; }
+.writer-guide li { margin:.25rem 0; }
+
+/* dark mode harmony */
+:root[data-theme="dark"] .writer-guide {
+  background:#0f1729; border-color:#24324a; color:#e5eefc;
+}
+
+/* Send button pulse (enabled only) */
+@keyframes srPulse {
+  0% { transform: translateY(0) scale(1); box-shadow: 0 0 0 rgba(76,175,80,0); }
+  50%{ transform: translateY(-1px) scale(1.01); box-shadow: 0 8px 20px rgba(76,175,80,.25); }
+  100%{ transform: translateY(0) scale(1); box-shadow: 0 0 0 rgba(76,175,80,0); }
+}
+.send-btn.sr-pulse:not(:disabled) { animation: srPulse 1.6s ease-in-out infinite; }
+
+/* tiny nudge when newly enabled */
+.send-btn.sr-flash { animation: srPulse .9s ease-in-out 1; }
+
+/* make dropdown scrolling obvious when auto-scrolling to Contact admin */
+.user-dropdown.sr-highlight { outline: 2px solid #1976d2; outline-offset: 2px; }
+</style>
+
 </head>
 <body>
   <!-- HEADER -->
