@@ -1325,6 +1325,258 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   $('#contactForm2')?.addEventListener('submit', (e)=>{ e.preventDefault(); overlay.style.display='none'; toast('Message sent to admin.','success'); });
 })();
 </script>
+<script>
+(function(){
+  // tiny helpers (no conflicts)
+  const $  = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+
+  // Guard to avoid double-binding
+  if (window.__sr_hotfix_bound__) return;
+  window.__sr_hotfix_bound__ = true;
+
+  // --- STUDENT TABS ---------------------------------------------------------
+  (function bindStudentTabs(){
+    const tabs = {
+      send:   $('#stuTabSend'),
+      select: $('#stuTabSelect'),
+      track:  $('#stuTabTrack'),
+    };
+    const panels = {
+      send:   $('#stuPanelSend'),
+      select: $('#stuPanelSelect'),
+      track:  $('#stuPanelTrack'),
+    };
+    if (!tabs.send || !tabs.select || !tabs.track) return;
+
+    const activate = (which)=>{
+      Object.entries(tabs).forEach(([k,btn])=>{
+        if (!btn) return;
+        btn.setAttribute('aria-selected', k===which ? 'true':'false');
+      });
+      Object.entries(panels).forEach(([k,sec])=>{
+        if (!sec) return;
+        sec.hidden = (k!==which);
+      });
+      // optional: render track rows if you have data
+      if (which==='track' && typeof window.renderStudentTrack === 'function'){
+        window.renderStudentTrack();
+      }
+    };
+
+    if (!tabs.send.__sr_bound){
+      tabs.send .addEventListener('click', ()=>activate('send'));
+      tabs.select.addEventListener('click', ()=>activate('select'));
+      tabs.track .addEventListener('click', ()=>activate('track'));
+      tabs.send.__sr_bound = tabs.select.__sr_bound = tabs.track.__sr_bound = true;
+      // default to the tab that is marked selected in DOM; fallback to "send"
+      const defaultTab = Object.entries(tabs).find(([,btn])=>btn.getAttribute('aria-selected')==='true')?.[0] || 'send';
+      activate(defaultTab);
+    }
+  })();
+
+  // --- HEADER: CONTACT ADMIN -----------------------------------------------
+  (function bindContactAdmin(){
+    const btn = $('#contactAdminItem');
+    if (!btn || btn.__sr_bound) return;
+    btn.__sr_bound = true;
+
+    // If you have an overlay modal, show it; else, scroll to any contact section; else, open mail.
+    const overlay = $('#contactOverlay');
+    const openOverlay = ()=>{
+      overlay.style.display = 'flex';
+      // little fade-in
+      const panel = overlay.querySelector('div[style*="opacity"]') || overlay.firstElementChild;
+      if (panel){ panel.style.opacity = 1; }
+    };
+
+    btn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      if (overlay){ openOverlay(); return; }
+
+      const section = document.getElementById('contact'); // if you have a section
+      if (section){ section.scrollIntoView({behavior:'smooth', block:'start'}); return; }
+
+      // last resort: mailto
+      window.location.href = 'mailto:support@stellarrec.com?subject=StellarRec%20support';
+    });
+  })();
+
+  // --- UPLOAD: PDF & VIDEO --------------------------------------------------
+  (function bindUploads(){
+    // PDF
+    const chooseBtn = $('#chooseFileBtn');
+    const fileInput = $('#fileInput');
+    const card      = $('#uploadedFile');
+    const nameEl    = $('#fileName');
+    const sizeEl    = $('#fileSize');
+    const rmBtn     = $('#removeFileBtn');
+
+    if (chooseBtn && fileInput && !chooseBtn.__sr_bound){
+      chooseBtn.__sr_bound = true;
+      chooseBtn.addEventListener('click', ()=> fileInput.click());
+    }
+    if (fileInput && !fileInput.__sr_bound){
+      fileInput.__sr_bound = true;
+      fileInput.addEventListener('change', ()=>{
+        const f = fileInput.files && fileInput.files[0];
+        if (!f) return;
+        if (nameEl) nameEl.textContent = f.name;
+        if (sizeEl) sizeEl.textContent = `${(f.size/1024/1024).toFixed(2)} MB`;
+        if (card) card.style.display = 'block';
+      });
+    }
+    if (rmBtn && !rmBtn.__sr_bound){
+      rmBtn.__sr_bound = true;
+      rmBtn.addEventListener('click', ()=>{
+        if (fileInput) fileInput.value = '';
+        if (card) card.style.display = 'none';
+      });
+    }
+
+    // VIDEO
+    const chooseV = $('#chooseVideoBtn');
+    const inputV  = $('#videoInput');
+    const cardV   = $('#uploadedVideo');
+    const nameV   = $('#videoName');
+    const sizeV   = $('#videoSize');
+    const rmV     = $('#removeVideoBtn');
+    const prevV   = $('#videoPreview');
+
+    if (chooseV && inputV && !chooseV.__sr_bound){
+      chooseV.__sr_bound = true;
+      chooseV.addEventListener('click', ()=> inputV.click());
+    }
+    if (inputV && !inputV.__sr_bound){
+      inputV.__sr_bound = true;
+      inputV.addEventListener('change', ()=>{
+        const f = inputV.files && inputV.files[0];
+        if (!f) return;
+        if (nameV) nameV.textContent = f.name;
+        if (sizeV) sizeV.textContent = `${(f.size/1024/1024).toFixed(2)} MB`;
+        if (cardV) cardV.style.display = 'block';
+        if (prevV){
+          try { prevV.src = URL.createObjectURL(f); prevV.style.display='block'; } catch(_){}
+        }
+      });
+    }
+    if (rmV && !rmV.__sr_bound){
+      rmV.__sr_bound = true;
+      rmV.addEventListener('click', ()=>{
+        if (inputV) inputV.value = '';
+        if (cardV) cardV.style.display = 'none';
+        if (prevV){ prevV.removeAttribute('src'); prevV.style.display = 'none'; }
+      });
+    }
+  })();
+
+  // --- WRITER TOOLBAR (bold/italic/underline + meta) -----------------------
+  (function bindWriter(){
+    const box   = $('#writerBox');
+    const title = $('#writerTitle');
+    if (!box) return;
+
+    // enable focus to exec commands
+    function exec(cmd){
+      box.focus({ preventScroll:true });
+      document.execCommand(cmd, false, null);
+      refreshMeta();
+    }
+
+    $$('[data-wcmd]').forEach(btn=>{
+      if (btn.__sr_bound) return;
+      btn.__sr_bound = true;
+      btn.addEventListener('click', ()=>{
+        const cmd = btn.getAttribute('data-wcmd');
+        if (cmd) exec(cmd);
+      });
+    });
+
+    function refreshMeta(){
+      const text = box.innerText || '';
+      const words = (text.trim().match(/\S+/g)||[]).length;
+      const chars = text.length;
+      const meta = $('#writerCount');
+      if (meta) meta.textContent = `${words} words • ${chars} chars`;
+    }
+
+    // autosave / restore / clear / copy / download / attach — light stubs
+    const LSKEY = 'sr_writer_draft';
+    const savedEl = $('#writerSaved');
+
+    function setSaved(label){
+      if (savedEl){ savedEl.textContent = label; }
+    }
+
+    $('#saveDraftBtn')   ?.addEventListener('click', ()=>{
+      const payload = { title: title?.value || '', html: box.innerHTML };
+      try { localStorage.setItem(LSKEY, JSON.stringify(payload)); setSaved('Saved'); } catch(_){}
+    });
+    $('#restoreDraftBtn')?.addEventListener('click', ()=>{
+      try {
+        const raw = localStorage.getItem(LSKEY);
+        if (raw){
+          const data = JSON.parse(raw);
+          if (title && data.title) title.value = data.title;
+          box.innerHTML = data.html || '';
+          setSaved('Restored');
+          refreshMeta();
+        }
+      } catch(_){}
+    });
+    $('#clearDraftBtn')  ?.addEventListener('click', ()=>{
+      box.innerHTML = ''; refreshMeta(); setSaved('Cleared');
+    });
+    $('#copyDraftBtn')   ?.addEventListener('click', async ()=>{
+      try {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = box.innerHTML;
+        await navigator.clipboard.writeText(tmp.innerText);
+        setSaved('Copied');
+      } catch(_){}
+    });
+    $('#downloadDraftBtn')?.addEventListener('click', ()=>{
+      const a = document.createElement('a');
+      const text = (title?.value ? title.value+'\n\n' : '') + (box.innerText||'');
+      const blob = new Blob([text], {type:'text/plain'});
+      a.href = URL.createObjectURL(blob);
+      a.download = 'recommendation-letter.txt';
+      a.click();
+      setSaved('Downloaded');
+    });
+    $('#attachDraftBtn')?.addEventListener('click', ()=>{
+      setSaved('Attached (stub)');
+    });
+
+    // autosave toggle
+    const autos = $('#writerAutosaveToggle');
+    if (autos && !autos.__sr_bound){
+      autos.__sr_bound = true;
+      autos.addEventListener('change', ()=>{
+        // no-op stub; kept for parity
+      });
+    }
+
+    // count updates
+    ['keyup','input','paste','cut'].forEach(ev=> box.addEventListener(ev, refreshMeta));
+    refreshMeta();
+  })();
+
+  // --- SAFETY: If a suggestion popover exists, close on outside click -------
+  (function closeSuggestOnOutside(){
+    const pop = $('#searchSuggest');
+    const input = $('#universitySearch');
+    if (!pop || !input || pop.__sr_bound) return;
+    pop.__sr_bound = true;
+    document.addEventListener('click', (e)=>{
+      if (!pop.contains(e.target) && !input.contains(e.target)){
+        pop.style.display = 'none';
+      }
+    });
+  })();
+
+})();
+</script>
 
 </body>
 </html>
