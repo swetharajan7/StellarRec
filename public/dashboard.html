@@ -1,505 +1,811 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>StellarRec — Dashboard (Student & Recommender)</title>
+  <title>StellarRec - One upload. Unlimited reach.</title>
 
-  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <style>
-    /* ============ RESET & BASE ============ */
     * { margin:0; padding:0; box-sizing:border-box; }
-    html, body { height:100%; }
     body {
       font-family:'Roboto',sans-serif;
-      background:linear-gradient(135deg,#f7f9fc 0%,#edf2f7 100%);
-      color:#0f172a;
+      background:linear-gradient(135deg,var(--bg-grad-1,#f8f9fa) 0%,var(--bg-grad-2,#e9ecef) 100%);
+      color:var(--text,#333);
+      min-height:100vh;
     }
-    :root{
-      --brand-1:#1976d2;
-      --brand-2:#7c4dff;
-      --ok:#16a34a;
-      --warn:#f59e0b;
-      --err:#e11d48;
-      --ink:#0f172a;
-      --muted:#64748b;
-      --line:#e5e7eb;
-      --panel:#ffffff;
-    }
-    a { color:inherit; }
-
-    /* ============ HEADER ============ */
+    /* Header */
     .header {
-      background:linear-gradient(135deg,var(--brand-1) 0%,var(--brand-2) 100%);
-      color:#fff; padding:1.1rem 2rem; position:sticky; top:0; z-index:1000;
-      box-shadow:0 4px 22px rgba(25,118,210,.3);
+      background:linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
+      color:#fff; padding:1.1rem 2rem; /* tighter to bring hero closer */
+      box-shadow:0 4px 20px rgba(25,118,210,0.3);
     }
     .header-content {
       max-width:1200px; margin:0 auto;
-      display:flex; align-items:center; justify-content:space-between; gap:1rem;
+      display:flex; justify-content:space-between; align-items:center; gap:1rem;
     }
     .logo {
       display:flex; align-items:center; gap:.5rem;
-      text-decoration:none; color:#fff; font-weight:800; font-size:1.6rem;
+      font-size:1.8rem; font-weight:700;
+      text-decoration:none; color:#fff; transition:.3s;
     }
-    .logo .material-icons { filter:drop-shadow(0 2px 6px rgba(0,0,0,.18)); }
-    .header-nav {
-      display:flex; justify-content:center; align-items:center; gap:.75rem; flex:1;
-    }
+    .logo:hover { opacity:.85; transform:translateY(-1px); }
+    /* Header nav (Student left, Recommender right) */
+    .header-nav { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex:1; margin:0 1rem; }
+    .nav-left, .nav-right { display:flex; gap:1.25rem; align-items:center; }
+    [hidden] { display: none !important; }
+
     .nav-link{
-      color:#fff; text-decoration:none; font-weight:800; opacity:.95;
-      padding:.42rem .9rem; border-radius:999px; transition:opacity .15s, transform .15s;
-      border:1px solid #ffffff33; background:#ffffff22;
+      color:#fff; text-decoration:none; font-weight:700; opacity:.95;
+      padding:.35rem .75rem; border-radius:10px; transition:opacity .15s, transform .15s;
     }
     .nav-link:hover{ opacity:1; transform:translateY(-1px); }
-    .nav-link[aria-current="page"]{ background:#fff; color:#1d4ed8; border-color:#ffffff66; }
+    .nav-link[aria-current="page"]{ background:#ffffff22; }
+    /* Center header tabs (A) */
+    .hdr-tabs {
+      display:flex; align-items:center; gap:.4rem;
+      background:#ffffff22; border:1px solid #ffffff55; border-radius:999px;
+      padding:.2rem; min-height:40px;
+    }
+    .hdr-tab {
+      appearance:none; border:0; background:transparent; color:#fff;
+      padding:.45rem .9rem; border-radius:999px; font-weight:700; cursor:pointer;
+      letter-spacing:.2px; font-size:.95rem; opacity:.9;
+    }
+    .hdr-tab[aria-selected="true"] {
+      background:#fff; color:#1976d2; box-shadow:0 6px 20px rgba(0,0,0,.12);
+      opacity:1;
+    }
+    .hdr-tab:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
+    /* Right controls (theme + avatar) */
     .right-controls { display:flex; align-items:center; gap:.75rem; }
-    .user-info { position:relative; }
+    /* Avatar + dropdown */
+    .user-info { position:relative; display:flex; align-items:center; gap:1rem; }
     .user-avatar {
-      width:42px; height:42px; border-radius:50%;
-      border:2px solid rgba(255,255,255,.25);
-      background:rgba(255,255,255,.18);
-      display:grid; place-items:center; cursor:pointer; transition:.18s;
+      width:45px; height:45px;
+      background:rgba(255,255,255,.2); border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.2rem; cursor:pointer; transition:.2s;
+      border:2px solid rgba(255,255,255,0.1);
     }
-    .user-avatar:hover{ transform:translateY(-1px); background:rgba(255,255,255,.28); }
+    .user-avatar:hover { background:rgba(255,255,255,.3); transform:scale(1.05); border-color:rgba(255,255,255,.3); }
+    .user-avatar:focus { outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.3); }
     .user-dropdown {
-      position:absolute; top:calc(100% + .5rem); right:0; min-width:300px; max-width:min(92vw,360px);
-      background:#fff; color:#0f172a; border-radius:12px; border:1px solid #e5e7eb;
-      box-shadow:0 16px 40px rgba(0,0,0,.16); padding:.25rem 0; display:none; z-index:1001;
+      position:absolute; top:100%; right:0; margin-top:.5rem;
+      background:#fff; border-radius:12px;
+      box-shadow:0 8px 32px rgba(0,0,0,.15);
+      min-width:260px; max-width:min(92vw,360px);
+      opacity:0; visibility:hidden;
+      transform:translateY(-10px) scale(.95);
+      transition:all .2s cubic-bezier(0.4,0,0.2,1); z-index:1000;
+      border:1px solid rgba(0,0,0,.08);
     }
-    .user-dropdown.show { display:block; }
-    .dropdown-item { display:flex; align-items:center; gap:.75rem; padding:.75rem 1rem; cursor:pointer; }
-    .dropdown-item:hover { background:#f8fafc; }
-    .dropdown-item .material-icons { color:#64748b; font-size:20px; }
-
-    /* ============ LAYOUT WRAPPERS ============ */
-    .container { max-width:1200px; margin:1.25rem auto; padding:0 1rem; }
-    .section-card {
-      background:var(--panel); border:1px solid var(--line); border-radius:16px; box-shadow:0 8px 28px rgba(0,0,0,.06);
-      margin-bottom:1rem; overflow:hidden;
+    .user-dropdown.show { opacity:1; visibility:visible; transform:translateY(0) scale(1); }
+    .user-dropdown::before{
+      content:''; position:absolute; top:-8px; right:16px; width:16px; height:16px;
+      background:#fff; border:1px solid rgba(0,0,0,.08); border-bottom:none; border-right:none;
+      transform:rotate(45deg);
     }
-    .card-hd { padding:1rem 1.25rem; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; }
-    .card-hd h2 { font-size:1.15rem; }
-    .card-bd { padding:1.25rem; }
-    .card-ft { padding:1rem 1.25rem; border-top:1px solid var(--line); }
-
-    /* ============ BUTTONS ============ */
-    .btn {
-      display:inline-flex; align-items:center; gap:.5rem; cursor:pointer;
-      border-radius:10px; border:1px solid var(--line); background:#fff;
-      padding:.6rem 1rem; font-weight:800; color:#0f172a;
-      transition:.16s transform ease, .16s box-shadow ease, .16s background ease;
+    .dropdown-header { padding:1rem; border-bottom:1px solid #f0f0f0; color:#333; font-weight:600; font-size:.9rem; }
+    .dropdown-item {
+      display:flex; align-items:center; gap:.75rem;
+      padding:.75rem 1rem; color:#333; cursor:pointer; transition:.15s;
     }
-    .btn:hover{ transform:translateY(-1px); box-shadow:0 8px 20px rgba(0,0,0,.08); }
-    .btn-primary{
-      background:linear-gradient(135deg,var(--brand-1),var(--brand-2)); color:#fff; border:none;
+    .dropdown-item:hover, .dropdown-item:focus { background:#f8f9fa; outline:none; }
+    .dropdown-item .material-icons { font-size:1.2rem; color:#666; }
+    .dropdown-item.active { background:#e3f2fd; color:#1976d2; }
+    .dropdown-item.active .material-icons { color:#1976d2; }
+    .view-label { display:flex; flex-direction:column; }
+    .view-name { font-weight:600; font-size:.9rem; }
+    .view-description { font-size:.8rem; color:#666; margin-top:.1rem; }
+    .container { max-width:1200px; margin:0 auto; padding:1.25rem; }
+    .hero-section { text-align:center; margin:1rem 0 1.5rem; }
+    .hero-title { font-size:2.3rem; font-weight:700; color:#1976d2; margin-bottom:.6rem; }
+    .hero-subtitle { font-size:1.1rem; color:#666; margin-bottom:1.25rem; }
+    /* Two-column layout */
+    .compose-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:2rem; }
+    @media (max-width: 980px) { .compose-grid { grid-template-columns:1fr; } }
+
+    .upload-section, .writer-section, .university-section,
+    .selected-section, .progress-section {
+      background:#fff; border-radius:16px; padding:2rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.1); margin-bottom:0;
     }
-    .btn-muted{ background:#f8fafc; }
-    .btn-danger{ background:#fee2e2; color:#991b1b; border-color:#fecaca; }
-    .btn-link{ background:transparent; border:none; color:#1d4ed8; padding:0; }
-
-    /* ============ TOASTS ============ */
-    .toast-wrap { position:fixed; right:16px; bottom:16px; z-index:1400; display:grid; gap:8px; }
-    .toast { min-width:260px; max-width:440px; background:#fff; border:1px solid #e5e7eb; border-radius:12px;
-      padding:.75rem .9rem; box-shadow:0 10px 28px rgba(0,0,0,.15); display:flex; gap:.55rem; }
-    .toast .icon{ color:#1976d2; }
-    .toast.success{ border-color:#c8e6c9; background:#f1f8f3; }
-    .toast.error{ border-color:#ffcdd2; background:#fff2f2; }
-    .toast .x{ margin-left:auto; border:none; background:transparent; cursor:pointer; }
-
-    /* ============ GRID UTILS ============ */
-    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-    .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
-    @media (max-width: 980px){ .grid-2, .grid-3 { grid-template-columns:1fr; } }
-
-    /* ============ UPLOAD CARDS ============ */
-    .drop { border:2px dashed #d0d7de; border-radius:16px; padding:2rem; text-align:center; transition:.2s; }
-    .drop.dragover { background:#f3f8ff; border-color:#1976d2; }
-    .drop .material-icons { font-size:44px; color:#1976d2; }
+    .upload-section { border:2px dashed #e0e0e0; transition:.3s; }
+    .upload-section.dragover { border-color:#1976d2; background:#f3f8ff; }
+    .upload-area { text-align:center; padding:2rem; }
+    .upload-icon { font-size:4rem; color:#1976d2; margin-bottom:1rem; }
+    .upload-title { font-size:1.5rem; font-weight:600; margin-bottom:.5rem; color:#333; }
+    .upload-subtitle { color:#666; margin-bottom:2rem; }
     .file-input { display:none; }
-    .file-pill {
-      display:flex; align-items:center; gap:1rem; background:#eef7ee; border:1px solid #cfe8d1;
-      padding:1rem; border-radius:12px; margin-top:1rem;
+    .upload-btn {
+      background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff;
+      padding:1rem 2rem; border:none; border-radius:12px;
+      font-size:1.1rem; font-weight:600; cursor:pointer;
+      transition:.3s; display:inline-flex; align-items:center; gap:.5rem;
     }
-    .file-pill .material-icons { color:#2e7d32; }
-
-    /* ============ WRITER ============ */
-    .writer-title, .writer-box {
-      width:100%; padding:.7rem .9rem; border:2px solid #e5e7eb; border-radius:12px; font:inherit;
+    .upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
+    .uploaded-file {
+      display:none; background:#e8f5e8; border:2px solid #4caf50;
+      border-radius:12px; padding:1.5rem; margin-top:1rem;
     }
-    .writer-box { min-height:240px; margin-top:.5rem; line-height:1.55; }
+    .file-info { display:flex; align-items:center; gap:1rem; }
+    .file-icon { font-size:2rem; color:#4caf50; }
+    .file-details h3 { color:#2e7d32; margin-bottom:.25rem; }
+    .file-details p { color:#4caf50; font-size:.9rem; }
+    .remove-file {
+      margin-left:auto; background:none; border:none; color:#666;
+      cursor:pointer; padding:.5rem; border-radius:50%; transition:.2s;
+    }
+    .remove-file:hover { background:rgba(244,67,54,.1); color:#f44336; }
+    .section-title {
+      font-size:1.5rem; font-weight:600; color:#333;
+      margin-bottom:1rem; display:flex; align-items:center; gap:.5rem;
+    }
+    /* Writer */
+    .writer-toolbar { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.75rem; align-items:center; }
+    .writer-toolbar .btn {
+      background:#fff; border:2px solid #e5e7eb; border-radius:10px;
+      padding:.45rem .75rem; cursor:pointer; font-weight:600;
+    }
+    .writer-toolbar .btn:hover { background:#f8f9fa; }
+    .writer-toolbar .meta { margin-left:auto; font-size:.9rem; color:#667; display:flex; gap:.75rem; align-items:center; }
+    .writer-title {
+      width:100%; padding:.7rem .9rem;
+      border:2px solid #e0e0e0; border-radius:12px;
+      font-size:1rem; margin-bottom:.6rem;
+    }
+    .writer-box {
+      border:2px solid #e0e0e0; border-radius:12px;
+      min-height:280px; padding:1rem; line-height:1.55;
+    }
     .writer-box:focus { outline:none; border-color:#1976d2; }
-    .toolbar { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
-    .toolbar .btn { border:2px solid #e5e7eb; }
-    .meta { margin-left:auto; color:#64748b; font-size:.9rem; display:flex; gap:.75rem; align-items:center; }
-
-    /* ============ UNIVERSITY LIST ============ */
-    .section-title { font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:.5rem; }
-    .filter-select, .search-input {
-      width:100%; padding:.7rem .9rem; border:2px solid #e5e7eb; border-radius:12px; background:#fff; font-size:.95rem;
-    }
+    .writer-actions { display:flex; gap:.5rem; margin-top:.75rem; flex-wrap:wrap; }
+    .btn-primary { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none; }
+    .btn-success { background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; border:none; }
+    .btn-danger  { background:linear-gradient(135deg,#e53935,#ef5350); color:#fff; border:none; }
+    .btn-muted   { background:#fff; color:#333; }
+    .filter-meta { font-size:.9rem; color:#666; margin:.25rem 0 .5rem; }
+    .filter-bar { display:grid; grid-template-columns: repeat(8, minmax(140px, 1fr)); gap:.5rem; margin-bottom:.75rem; align-items:center; }
+    .filter-select { width:100%; padding:.7rem .9rem; border:2px solid #e0e0e0; border-radius:12px; background:#fff; font-size:.95rem; }
     .university-grid {
       display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:1rem;
-      max-height:560px; overflow:auto; padding:.25rem;
+      max-height:480px; overflow-y:auto; padding:1rem; border:1px solid #f0f0f0; border-radius:12px;
     }
-    .university-card {
-      background:#f8fafc; border:2px solid transparent; border-radius:12px; padding:1rem; cursor:pointer; transition:.18s;
-    }
+    .university-card { background:#f8f9fa; border:2px solid transparent; border-radius:12px; padding:1rem; cursor:pointer; transition:.2s; }
     .university-card:hover { border-color:#1976d2; background:#f3f8ff; }
     .university-card.selected { border-color:#1976d2; background:#e3f2fd; }
-    .university-header { display:flex; align-items:center; gap:1rem; margin-bottom:.35rem; }
-    .university-logo {
-      width:40px; height:40px; background:#1976d2; color:#fff; border-radius:8px;
-      display:flex; align-items:center; justify-content:center; font-weight:800;
-      box-shadow:inset 0 0 0 2px rgba(255,255,255,.25);
-    }
-    .university-name { font-weight:800; color:#0f172a; }
-    .university-location { color:#475569; font-size:.9rem; }
+    .university-header { display:flex; align-items:center; gap:1rem; margin-bottom:.5rem; }
+    .university-logo { width:40px; height:40px; background:#1976d2; color:#fff; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:600; }
+    .university-name { font-weight:600; color:#333; }
+    .university-location { color:#666; font-size:.9rem; }
     .university-pill { margin-top:.25rem; display:inline-block; font-size:.75rem; color:#555; background:#eef3ff; border:1px solid #dbe7ff; padding:.15rem .5rem; border-radius:999px; }
-
-    .selected-count { color:#1976d2; font-weight:800; margin:.5rem 0 1rem; }
-    .selected-list { display:flex; flex-wrap:wrap; gap:.5rem; }
-    .tag { display:inline-flex; align-items:center; gap:.4rem; background:#eef2ff; color:#1e40af;
-      border:1px solid #c7d2fe; padding:.35rem .7rem; border-radius:999px; font-weight:800; font-size:.85rem; }
-    .remove-tag { cursor:pointer; background:rgba(255,255,255,.2); border-radius:50%; width:18px; height:18px; display:grid; place-items:center; font-size:.85rem; }
-
-    /* ============ TABLE (track) ============ */
+    .pagination { display:flex; justify-content:space-between; align-items:center; margin-top:.75rem; }
+    .pager { display:flex; gap:.5rem; }
+    .page-btn { background:#fff; border:2px solid #e0e0e0; border-radius:10px; padding:.5rem .9rem; cursor:pointer; font-weight:600; }
+    .page-btn[disabled] { opacity:.5; cursor:not-allowed; }
+    .page-size { margin-left:auto; display:flex; align-items:center; gap:.5rem; }
+    .selected-count { color:#1976d2; font-weight:600; margin-bottom:1rem; }
+    .selected-list { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:2rem; }
+    .selected-tag { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:.5rem 1rem; border-radius:20px; font-size:.9rem; display:flex; align-items:center; gap:.5rem; }
+    .remove-tag { cursor:pointer; background:rgba(255,255,255,.2); border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
+    .remove-tag:hover { background:rgba(255,255,255,.3); }
+    .send-section { text-align:center; }
+    .send-btn {
+      background:linear-gradient(135deg,#4caf50,#66bb6a); color:#fff; padding:1.2rem 3rem; border:none; border-radius:12px;
+      font-size:1.2rem; font-weight:600; cursor:pointer; transition:.2s; display:inline-flex; align-items:center; gap:.5rem;
+    }
+    .send-btn:disabled { background:#ccc; cursor:not-allowed; }
+    .send-btn:not(:disabled):hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(76,175,80,.3); }
+    .progress-section { display:none; }
+    .progress-title { font-size:1.3rem; font-weight:600; color:#333; margin-bottom:1rem; text-align:center; }
+    .progress-bar { width:100%; height:12px; background:#e0e0e0; border-radius:6px; overflow:hidden; margin-bottom:1rem; }
+    .progress-fill { height:100%; background:linear-gradient(135deg,#4caf50,#66bb6a); border-radius:6px; transition:width .5s ease; width:0%; }
+    .progress-text { text-align:center; color:#666; font-size:.9rem; }
+    .delivery-list { margin-top:1rem; }
+    .delivery-item { display:flex; align-items:center; gap:1rem; padding:.75rem; border-radius:8px; margin-bottom:.5rem; background:#f8f9fa; }
+    .delivery-status { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
+    .delivery-status.pending { background:#fff3e0; color:#ff9800; }
+    .delivery-status.success { background:#e8f5e8; color:#4caf50; }
+    .delivery-status.error { background:#ffebee; color:#f44336; }
+    .success-section {
+      display:none; background:linear-gradient(135deg,#e8f5e8,#f1f8e9);
+      border:2px solid #4caf50; border-radius:16px; padding:2rem; text-align:center; box-shadow:0 8px 32px rgba(76,175,80,.2);
+    }
+    .success-icon { font-size:4rem; color:#4caf50; margin-bottom:1rem; }
+    .success-title { font-size:1.8rem; font-weight:600; color:#2e7d32; margin-bottom:1rem; }
+    .success-subtitle { color:#4caf50; margin-bottom:2rem; }
+    .new-upload-btn { background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; padding:1rem 2rem; border:none; border-radius:12px; font-size:1rem; font-weight:600; cursor:pointer; transition:.2s; }
+    .new-upload-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(25,118,210,.3); }
+    @keyframes flash { 0%{box-shadow:0 0 0 rgba(25,118,210,0);} 25%{box-shadow:0 0 0 6px rgba(25,118,210,.25);} 100%{box-shadow:0 0 0 rgba(25,118,210,0);} }
+    .flash { animation: flash 1.2s ease; }
+    .badge { display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; font-size:.75rem; border-radius:999px; border:1px solid; }
+    .badge-student { background:#f1f8ff; color:#0d47a1; border-color:#bbdefb; }
+    .badge-added   { background:#e8f5e9; color:#1b5e20; border-color:#c8e6c9; }
+    .badge-removed { background:#ffebee; color:#b71c1c; border-color:#ffcdd2; }
+    .toast-wrap { position: fixed; right: 16px; bottom: 16px; z-index: 99999; display: grid; gap: 8px; }
+    .toast { min-width: 240px; max-width: 420px; padding: .75rem .9rem; border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.15); color:#0f172a; background:#fff; border:1px solid #e5e7eb;
+      display:flex; align-items:flex-start; gap:.6rem; animation: toast-in .18s ease; }
+    .toast.success { border-color:#c8e6c9; background:#f1f8f3; }
+    .toast.error   { border-color:#ffcdd2; background:#fff2f2; }
+    .toast.info    { border-color:#bbdefb; background:#f3f8ff; }
+    .toast .icon { font-size: 1.1rem; line-height:1; margin-top:.1rem; }
+    .toast .msg  { flex:1; font-size:.95rem; }
+    .toast .x    { border:none; background:transparent; cursor:pointer; font-size:1rem; opacity:.6; }
+    .toast .x:hover { opacity:.9; }
+    @keyframes toast-in { from { transform: translateY(6px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+    .empty-state { display:none; background:#fff; border:1px dashed #d0d7de; border-radius:12px; padding:1.25rem; color:#445; text-align:center; }
+    .empty-state .actions { margin-top:.75rem; display:flex; gap:.5rem; justify-content:center; }
+    /* Student view (B) */
+    .student-card {
+      background:#fff; border-radius:16px; padding:1.25rem 1.5rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.08);
+    }
+    .student-tabs {
+      display:flex; gap:.4rem; background:#f1f5f9; border-radius:999px; padding:.2rem;
+      border:1px solid #e5e7eb; margin-bottom:.9rem;
+      justify-content: space-between; /* NEW: positions left / center / right */
+      width: 100%;                    /* ensure full row width */
+    }
+    .student-tab {
+      appearance:none; background:transparent; border:0; cursor:pointer;
+      padding:.5rem 1rem; border-radius:999px; font-weight:700; color:#334155;
+    }
+    .student-tab[aria-selected="true"] {
+      background:#fff; color:#0f172a; box-shadow:0 6px 18px rgba(0,0,0,.06);
+    }
+    .student-panels > section { display:block; }
+    .student-panels > section[hidden] { display:none; }
     .table { width:100%; border-collapse:separate; border-spacing:0; overflow:hidden;
-      border:1px solid var(--line); border-radius:12px; background:#fff; }
+      border:1px solid #e5e7eb; border-radius:12px; background:#fff; }
     .table th, .table td { padding:.7rem .8rem; text-align:left; border-bottom:1px solid #eef2f7; }
-    .table th { background:#f8fafc; color:#334155; font-weight:800; }
+    .table th { background:#f8fafc; color:#334155; font-weight:700; }
     .table tr:last-child td { border-bottom:none; }
-    .track-pill { display:inline-block; padding:.2rem .6rem; border-radius:999px; font-weight:800; font-size:.8rem; }
+    .track-pill { display:inline-block; padding:.2rem .6rem; border-radius:999px; font-weight:700; font-size:.8rem; }
     .track-pill.pending { background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; }
     .track-pill.sent    { background:#ecfeff; color:#155e75; border:1px solid #a5f3fc; }
     .track-pill.received{ background:#ecfdf5; color:#166534; border:1px solid #bbf7d0; }
+    @media (max-width:768px) {
+      .container { padding:1rem; }
+      .hero-title { font-size:2rem; }
+      .university-grid { grid-template-columns:1fr; }
+      .header-content { flex-direction:column; gap:1rem; }
+      .filter-bar { grid-template-columns:1fr 1fr; }
+    }
+    /* Dark theme basics (CSS side) */
+    :root[data-theme="dark"] {
+      --bg:#0b1220; --panel:#111a2a; --text:#e5eefc; --muted:#93a3bc; --primary:#7aa2ff; --border:#24324a;
+    }
+    :root[data-theme="dark"] body { background: linear-gradient(135deg,#0b1220 0%,#0f1729 100%); color: var(--text); }
+    :root[data-theme="dark"] .upload-section,
+    :root[data-theme="dark"] .writer-section,
+    :root[data-theme="dark"] .university-section,
+    :root[data-theme="dark"] .selected-section,
+    :root[data-theme="dark"] .progress-section { background: var(--panel); box-shadow:none; }
+    :root[data-theme="dark"] .filter-select,
+    :root[data-theme="dark"] .writer-title,
+    :root[data-theme="dark"] .writer-box,
+    :root[data-theme="dark"] .page-btn { background:#0f1729; color:var(--text); border-color: var(--border); }
+    :root[data-theme="dark"] .university-card { background:#0f1729; }
+    :root[data-theme="dark"] .university-card:hover { background:#12203a; border-color:#274780; }
+    :root[data-theme="dark"] .university-card.selected { background:#13254a; }
+    :root[data-theme="dark"] .hero-subtitle, :root[data-theme="dark"] .university-location { color: var(--muted); }
+    :root[data-theme="dark"] .hdr-tabs { background:#ffffff11; border-color:#ffffff33; }
+    :root[data-theme="dark"] .hdr-tab { color:#e5eefc; }
+    :root[data-theme="dark"] .hdr-tab[aria-selected="true"] { background:#0f1729; color:#7aa2ff; }
+    :root[data-theme="dark"] .student-card,
+    :root[data-theme="dark"] .table,
+    :root[data-theme="dark"] .student-tabs { background:#111a2a; border-color:#24324a; }
+    :root[data-theme="dark"] .table th { background:#0f1729; color:#e5eefc; }
+    :root[data-theme="dark"] .student-tab { color:#c9d6ee; }
+    :root[data-theme="dark"] .student-tab[aria-selected="true"] { background:#0f1729; color:#7aa2ff; }
+    /* Footer (match header) */
+    .site-footer {
+      background: linear-gradient(135deg,#1976d2 0%,#7c4dff 100%);
+      color: #fff;
+      padding: 1.5rem 0;
+      text-align: center;
+    }
+    .site-footer p { margin: 0; font-size: 0.95rem; }
+    .theme-btn {
+      display:inline-flex; align-items:center; gap:.5rem;
+      padding:.55rem 1rem; border-radius:999px;
+      border:1px solid #ffffff55; background:#ffffff22; color:#fff; font-weight:600;
+      cursor:pointer; transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+    }
+    .theme-btn:hover { transform: translateY(-1px); background:#ffffff33; border-color:#ffffff88; }
+    .theme-btn:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
+    .theme-btn .material-icons { font-size:18px; }
+    /* unify apply/page buttons in student view */
+    .apply-btn {
+      background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none;
+      padding:.6rem 1rem; border-radius:10px; font-weight:700; cursor:pointer;
+    }
+    .apply-btn:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(25,118,210,.25); }
+    /* Intake card (link paste) */
+.intake-card {
+  background:#fff; border-radius:16px; padding:1.25rem 1.5rem;
+  box-shadow:0 8px 32px rgba(0,0,0,.08); margin:1rem auto 1.25rem;
+  border:1px solid #e5e7eb; max-width:1200px;
+}
+.intake-row { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+.intake-title { display:flex; align-items:center; gap:.5rem; font-size:1.25rem; font-weight:700; color:#0f172a; }
+.intake-actions { display:flex; gap:.5rem; }
+.intake-sub { color:#475569; margin:.35rem 0 .75rem; }
+.intake-inputs { display:flex; gap:.5rem; align-items:center; }
+.intake-inputs .filter-select { flex:1; }
+.intake-status { margin-top:.6rem; font-size:.95rem; color:#334155; }
+.intake-details { margin-top:.5rem; }
+.intake-help { background:#f8fafc; padding:.75rem; border-radius:10px; border:1px solid #e5e7eb; color:#334155; }
+.intake-summary {
+  margin-top:.75rem; border-top:1px dashed #e5e7eb; padding-top:.6rem;
+  font-size:.95rem; color:#0f172a; display:grid; gap:.35rem;
+}
+.intake-summary .ok { color:#166534; }
+.intake-summary .warn { color:#9a3412; }
+.intake-summary .muted { color:#64748b; }
 
-    /* ============ PAGINATION ============ */
-    .pagination { display:flex; justify-content:space-between; align-items:center; margin-top:.75rem; }
-    .pager { display:flex; gap:.5rem; }
-    .page-btn { background:#fff; border:2px solid #e5e7eb; border-radius:10px; padding:.5rem .9rem; cursor:pointer; font-weight:800; }
-    .page-btn[disabled] { opacity:.5; cursor:not-allowed; }
+:root[data-theme="dark"] .intake-card { background:#111a2a; border-color:#24324a; box-shadow:none; }
+:root[data-theme="dark"] .intake-sub, 
+:root[data-theme="dark"] .intake-help { color:#c9d6ee; background:#0f1729; border-color:#24324a; }
+:root[data-theme="dark"] .intake-summary { color:#e5eefc; border-color:#24324a; }
 
-    /* ============ OVERLAYS & MODALS ============ */
-    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; z-index:2000; }
-    .overlay.show { display:flex; }
-    .modal { width:min(760px,92vw); background:#fff; border-radius:16px; border:1px solid #e5e7eb; box-shadow:0 18px 60px rgba(0,0,0,.25); overflow:hidden; }
-    .modal-hd { padding:1rem 1.25rem; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; }
-    .modal-bd { padding:1rem 1.25rem; max-height:62vh; overflow:auto; }
-    .modal-ft { padding:1rem 1.25rem; border-top:1px solid #e5e7eb; display:flex; gap:.5rem; justify-content:flex-end; }
-
-    /* ============ SMALL HELPERS ============ */
-    .muted { color:var(--muted); }
-    .help  { font-size:.9rem; color:#475569; }
-    .hidden { display:none !important; }
   </style>
 </head>
 <body>
-  <!-- =================== HEADER =================== -->
-  <header class="header">
+  <!-- HEADER -->
+  <div class="header">
     <div class="header-content">
-      <a href="/" class="logo" aria-label="Go to homepage">
-        <span class="material-icons" aria-hidden="true">star</span>
+      <!-- Left: Logo -->
+      <a href="/" class="logo" target="_self" aria-label="Go to homepage">
+        <span class="material-icons">star</span>
         stellarrec
       </a>
-
-      <!-- Center: View toggles -->
+      <!-- Center: Student / Recommender toggles -->
       <nav class="header-nav" role="tablist" aria-label="Choose portal">
-        <button class="nav-link" data-view="student" role="tab" aria-selected="true" aria-current="page" type="button">Student</button>
-        <button class="nav-link" data-view="recommender" role="tab" aria-selected="false" type="button">Recommender</button>
+        <div class="nav-left">
+          <button class="nav-link" data-view="student" role="tab" aria-selected="true" type="button">Student</button>
+        </div>
+        <div class="nav-right">
+          <button class="nav-link" data-view="recommender" role="tab" aria-selected="false" type="button">Recommender</button>
+        </div>
       </nav>
-
-      <!-- Right: Avatar (Contact admin only) -->
+      <!-- Right: Theme + Avatar -->
       <div class="right-controls">
+        <button id="headerThemeBtn" class="theme-btn" type="button" aria-pressed="false" title="Toggle theme">
+          <span class="material-icons" aria-hidden="true">dark_mode</span>
+          Light / Dark
+        </button>
         <div class="user-info">
-          <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button" title="Account">
+          <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
             <span class="material-icons">person</span>
           </button>
           <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
-            <!-- ONLY Contact admin (per request) -->
-            <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
-              <span class="material-icons" aria-hidden="true">support_agent</span>
-              <div>
-                <div style="font-weight:800;">Contact admin</div>
-                <div class="muted" style="font-size:.85rem;">Send a message</div>
+            <div class="dropdown-header">Quick actions</div>
+            <div class="dropdown-item" role="menuitem" tabindex="0">
+              <span class="material-icons">help_outline</span>
+              <div class="view-label">
+                <a href="https://stellarrec.netlify.app/portal-signin"
+                   class="view-name" style="text-decoration:none; color:inherit;" target="_self">
+                  How it works
+                </a>
+                <div class="view-description">Sign-in portal</div>
               </div>
             </div>
+            <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
+              <span class="material-icons">support_agent</span>
+              <div class="view-label">
+                <div class="view-name">Contact admin</div>
+                <div class="view-description">Send a message</div>
+              </div>
+            </div>
+            <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
+              <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
+                <span class="material-icons">build</span>
+                <div class="view-label">
+                  <div class="view-name">Use mock API</div>
+                  <div class="view-description">Toggle mock vs real backend</div>
+                </div>
+                <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
+              </label>
+            </div>
           </div>
-        </div>
+        </div><!-- /.user-info -->
       </div><!-- /.right-controls -->
+    </div><!-- /.header-content -->
+  </div><!-- /.header -->
+    <!-- MAIN — RECOMMENDER VIEW (hidden by default) -->
+  <div class="container" id="panel-recommender" hidden>
+    <!-- Student Link Intake -->
+    <div class="intake-card" id="linkIntake">
+      <div class="intake-row">
+        <h2 class="intake-title">
+          <span class="material-icons" aria-hidden="true">link</span>
+          Paste student link
+        </h2>
+        <div class="intake-actions">
+          <button class="page-btn" id="linkHelpBtn" type="button" title="What does this do?">What’s this?</button>
+        </div>
+      </div>
+
+      <p class="intake-sub">Paste the link you received by email from the student. We’ll import their details and selected universities.</p>
+
+      <div class="intake-inputs">
+        <input id="linkInput" class="filter-select" type="url" placeholder="Paste the student link here… e.g. https://example.com/reco?sf=Jane&sl=Doe&se=jane@email.com&waive=1&unis=166027,110635" />
+        <button id="linkParseBtn" class="apply-btn" type="button">Import</button>
+      </div>
+
+      <div id="linkStatus" class="intake-status" aria-live="polite"></div>
+
+      <details id="linkFormatDetails" class="intake-details">
+        <summary>Expected link format (examples)</summary>
+        <div class="intake-help">
+          <div><b>With unit IDs (best):</b><br>
+            <code>?sf=Jane&sl=Doe&se=jane@email.com&sp=2065551212&waive=1&unis=166027,110635&rname=Prof%20Smith&remail=smith@uni.edu&rphone=2125559876</code>
+          </div>
+          <div><b>With names (we’ll match):</b><br>
+            <code>?sf=Jane&sl=Doe&se=jane@email.com&waive=0&unames=Harvard%20University,Stanford%20University</code>
+          </div>
+          <div style="margin-top:.35rem;">
+            <small>
+              Params: <code>sf</code>=student first, <code>sl</code>=student last, <code>se</code>=student email, <code>sp</code>=student phone,
+              <code>waive</code>=1/0, <code>unis</code>=CSV of unitids, <code>unames</code>=CSV of names,
+              <code>rname</code>=recommender name, <code>remail</code>=recommender email, <code>rphone</code>=recommender phone.
+            </small>
+          </div>
+        </div>
+      </details>
+
+      <div id="linkSummary" class="intake-summary" hidden></div>
     </div>
-  </header>
 
-  <!-- =================== MAIN: RECOMMENDER VIEW =================== -->
-  <main class="container" id="panel-recommender" hidden>
-    <!-- Link Intake (optional for recommenders who got a link) -->
-    <section class="section-card" id="linkIntakeCard">
-      <div class="card-hd">
-        <h2 class="section-title"><span class="material-icons" aria-hidden="true">link</span> Paste student link</h2>
-        <div>
-          <button class="btn" id="linkHelpBtn" type="button" title="What does this do?">What’s this?</button>
+    <!-- Hero -->
+    <div class="hero-section">
+      <h1 class="hero-title">One upload. Unlimited reach.</h1>
+      <p class="hero-subtitle">Upload your recommendation letter once and send it to multiple US universities instantly.</p>
+    </div>
+
+    <div class="compose-grid">
+      <!-- (A) Upload PDF (left) -->
+      <div class="upload-section" id="uploadSection">
+        <div class="upload-area" id="uploadArea">
+          <div class="upload-icon"><span class="material-icons">cloud_upload</span></div>
+          <h2 class="upload-title">Upload Recommendation Letter (PDF)</h2>
+          <p class="upload-subtitle">Drag & drop your PDF here, or click to browse</p>
+          <div id="uploadHint" style="margin:.5rem 0 0; font-size:.9rem; color:#556;">PDF only. Recommended size ≤ 10 MB.</div>
+
+          <input type="file" id="fileInput" class="file-input" accept=".pdf,application/pdf" />
+          <button class="upload-btn" id="chooseFileBtn">
+            <span class="material-icons">upload_file</span> Choose PDF
+          </button>
+        </div>
+
+        <div class="uploaded-file" id="uploadedFile">
+          <div class="file-info">
+            <div class="file-icon"><span class="material-icons">description</span></div>
+            <div class="file-details">
+              <h3 id="fileName">recommendation-letter.pdf</h3>
+              <p id="fileSize">—</p>
+            </div>
+            <button class="remove-file" id="removeFileBtn" title="Remove PDF">
+              <span class="material-icons">close</span>
+            </button>
+          </div>
         </div>
       </div>
-      <div class="card-bd">
-        <p class="help">Paste the link you received by email from the student. We’ll import their details and selected universities.</p>
-        <div style="display:flex; gap:.5rem; align-items:center; margin-top:.6rem;">
-          <input id="linkInput" class="filter-select" type="url" placeholder="Paste the student link here… e.g. https://example.com/reco?sf=Jane&sl=Doe&se=jane@email.com&waive=1&unis=166027,110635" />
-          <button id="linkParseBtn" class="btn btn-primary" type="button">Import</button>
-        </div>
-        <div id="linkStatus" style="margin-top:.6rem;" aria-live="polite"></div>
-        <details id="linkFormatDetails" style="margin-top:.6rem;">
-          <summary>Expected link format (examples)</summary>
-          <div class="help" style="margin-top:.4rem;">
-            <div><b>With unit IDs (best):</b><br>
-              <code>?sf=Jane&sl=Doe&se=jane@email.com&sp=2065551212&waive=1&unis=166027,110635&rname=Prof%20Smith&remail=smith@uni.edu&rphone=2125559876</code>
-            </div>
-            <div style="margin-top:.35rem;"><b>With names (we’ll match):</b><br>
-              <code>?sf=Jane&sl=Doe&se=jane@email.com&waive=0&unames=Harvard%20University,Stanford%20University</code>
-            </div>
-            <div style="margin-top:.35rem;">
-              <small>
-                Params: <code>sf</code>=student first, <code>sl</code>=student last, <code>se</code>=student email, <code>sp</code>=student phone,
-                <code>waive</code>=1/0, <code>unis</code>=CSV of unitids, <code>unames</code>=CSV of names,
-                <code>rname</code>=recommender name, <code>remail</code>=recommender email, <code>rphone</code>=recommender phone.
-              </small>
-            </div>
-          </div>
-        </details>
 
-        <div id="linkSummary" class="help" style="margin-top:.6rem; display:none;"></div>
-      </div>
-    </section>
-
-    <!-- Upload grid -->
-    <section class="grid-2">
-      <!-- Upload PDF -->
-      <section class="section-card">
-        <div class="card-hd">
-          <h2>Upload Recommendation Letter (PDF)</h2>
-          <div></div>
-        </div>
-        <div class="card-bd">
-          <div id="pdfDrop" class="drop" aria-label="PDF drop zone">
-            <div class="material-icons" aria-hidden="true">cloud_upload</div>
-            <div style="margin:.35rem 0 .15rem; font-weight:800;">Drag & drop your PDF here</div>
-            <div class="muted" style="font-size:.95rem;">or</div>
-            <button id="choosePdfBtn" class="btn btn-primary" type="button">
-              <span class="material-icons" aria-hidden="true">upload_file</span> Choose PDF
-            </button>
-            <input id="pdfInput" class="file-input" type="file" accept=".pdf,application/pdf" />
-            <div class="muted" style="margin-top:.5rem; font-size:.9rem;">PDF only • Recommended ≤ 10 MB</div>
+      <!-- (B) Upload Video (right) -->
+      <div class="upload-section" id="videoUploadSection">
+        <div class="upload-area" id="videoUploadArea">
+          <div class="upload-icon"><span class="material-icons">videocam</span></div>
+          <h2 class="upload-title">Upload Intro/Context Video (optional)</h2>
+          <p class="upload-subtitle">Drag & drop your video here, or click to browse</p>
+          <div style="margin:.5rem 0 0; font-size:.9rem; color:#556;">
+            Supported: MP4 / MOV / WEBM. Tip: keep it short (≤ 2–3 min).
           </div>
 
-          <div id="pdfPill" class="file-pill hidden">
-            <span class="material-icons" aria-hidden="true">description</span>
-            <div>
-              <div id="pdfName" style="font-weight:800;">letter.pdf</div>
-              <div id="pdfSize" class="muted" style="font-size:.9rem;">—</div>
+          <input type="file" id="videoInput" class="file-input" accept="video/mp4,video/quicktime,video/webm" />
+          <button class="upload-btn" id="chooseVideoBtn">
+            <span class="material-icons">video_file</span> Choose Video
+          </button>
+        </div>
+
+        <div class="uploaded-file" id="uploadedVideo">
+          <div class="file-info" style="align-items:flex-start;">
+            <div class="file-icon"><span class="material-icons">smart_display</span></div>
+            <div class="file-details" style="flex:1;">
+              <h3 id="videoName">intro.mp4</h3>
+              <p id="videoSize">—</p>
+              <!-- Optional inline preview -->
+              <video id="videoPreview" class="video-preview" controls playsinline style="display:none; margin-top:.6rem; max-height:240px; width:100%; border-radius:10px; background:#000;"></video>
             </div>
-            <button id="removePdfBtn" class="btn btn-danger" type="button">
-              <span class="material-icons" aria-hidden="true">close</span> Remove
+            <button class="remove-video" id="removeVideoBtn" title="Remove video" style="background:none;border:none;color:#666;cursor:pointer;padding:.5rem;border-radius:50%;transition:.2s;">
+              <span class="material-icons">close</span>
             </button>
           </div>
-        </div>
-      </section>
-
-      <!-- Upload Video -->
-      <section class="section-card">
-        <div class="card-hd">
-          <h2>Upload Intro/Context Video (optional)</h2>
-          <div></div>
-        </div>
-        <div class="card-bd">
-          <div id="vidDrop" class="drop" aria-label="Video drop zone">
-            <div class="material-icons" aria-hidden="true">videocam</div>
-            <div style="margin:.35rem 0 .15rem; font-weight:800;">Drag & drop your video here</div>
-            <div class="muted" style="font-size:.95rem;">or</div>
-            <button id="chooseVidBtn" class="btn btn-primary" type="button">
-              <span class="material-icons" aria-hidden="true">video_file</span> Choose Video
-            </button>
-            <input id="vidInput" class="file-input" type="file" accept="video/mp4,video/quicktime,video/webm" />
-            <div class="muted" style="margin-top:.5rem; font-size:.9rem;">MP4 / MOV / WEBM • ≤ 2–3 min recommended</div>
-          </div>
-
-          <div id="vidPill" class="file-pill hidden" style="align-items:flex-start;">
-            <span class="material-icons" aria-hidden="true">smart_display</span>
-            <div style="flex:1;">
-              <div id="vidName" style="font-weight:800;">intro.mp4</div>
-              <div id="vidSize" class="muted" style="font-size:.9rem;">—</div>
-              <video id="vidPreview" controls playsinline style="display:none; margin-top:.6rem; width:100%; max-height:240px; border-radius:10px; background:#000;"></video>
-            </div>
-            <button id="removeVidBtn" class="btn btn-danger" type="button">
-              <span class="material-icons" aria-hidden="true">close</span> Remove
-            </button>
-          </div>
-        </div>
-      </section>
-    </section>
-
-    <!-- Writer -->
-    <section class="section-card">
-      <div class="card-hd">
-        <h2>Write Letter</h2>
-        <div class="meta">
-          <span id="writerCount">0 words • 0 chars</span>
-          <span id="writerSaved">Not saved</span>
         </div>
       </div>
-      <div class="card-bd">
+
+      <!-- (C) Writer (full width on a new row) -->
+      <div class="writer-section" id="writerSection" style="grid-column:1 / -1;">
+        <h2 class="section-title"><span class="material-icons">edit</span> Write Letter</h2>
         <input id="writerTitle" class="writer-title" placeholder="Letter title (optional, e.g., 'Recommendation for Jane Doe')" />
-        <div class="toolbar" style="margin:.6rem 0 .5rem;">
-          <button class="btn btn-muted" data-cmd="bold" title="Bold (Ctrl/Cmd+B)"><b>B</b></button>
-          <button class="btn btn-muted" data-cmd="italic" title="Italic (Ctrl/Cmd+I)"><i>I</i></button>
-          <button class="btn btn-muted" data-cmd="underline" title="Underline (Ctrl/Cmd+U)"><u>U</u></button>
-          <div style="flex:1;"></div>
-          <button id="saveDraftBtn" class="btn btn-primary" type="button">Save draft</button>
-          <button id="restoreDraftBtn" class="btn" type="button">Restore</button>
-          <button id="clearDraftBtn" class="btn btn-danger" type="button">Clear</button>
-          <button id="copyDraftBtn" class="btn" type="button">Copy</button>
-          <button id="downloadDraftBtn" class="btn" type="button">Download .txt</button>
-          <button id="attachDraftBtn" class="btn btn-muted" type="button">Attach draft</button>
+        <div class="writer-toolbar">
+          <button class="btn btn-muted" data-wcmd="bold" title="Bold (Ctrl/Cmd+B)"><b>B</b></button>
+          <button class="btn btn-muted" data-wcmd="italic" title="Italic (Ctrl/Cmd+I)"><i>I</i></button>
+          <button class="btn btn-muted" data-wcmd="underline" title="Underline (Ctrl/Cmd+U)"><u>U</u></button>
+          <div class="meta">
+            <span id="writerCount">0 words • 0 chars</span>
+            <span id="writerSaved">Not saved</span>
+          </div>
         </div>
         <div id="writerBox" class="writer-box" contenteditable="true" aria-label="Letter editor"
              placeholder="Write your recommendation letter here..."></div>
-      </div>
-    </section>
-
-    <!-- Selected Universities -->
-    <section class="section-card">
-      <div class="card-hd">
-        <h2>Selected Universities</h2>
-        <div>
-          <button class="btn" id="copyLinkBtn" type="button" title="Copy shareable link">
-            <span class="material-icons" aria-hidden="true">link</span> Copy link
-          </button>
+        <div class="writer-actions">
+          <button class="btn btn-primary" id="saveDraftBtn">Save draft</button>
+          <button class="btn btn-muted" id="restoreDraftBtn">Restore</button>
+          <button class="btn btn-danger" id="clearDraftBtn">Clear</button>
+          <button class="btn btn-muted" id="copyDraftBtn">Copy</button>
+          <button class="btn btn-muted" id="downloadDraftBtn">Download .txt</button>
+          <button class="btn btn-success" id="attachDraftBtn">Attach draft</button>
+          <label style="display:flex; align-items:center; gap:.4rem; margin-left:auto;">
+            <input type="checkbox" id="writerAutosaveToggle" checked />
+            Autosave
+          </label>
         </div>
-      </div>
-      <div class="card-bd">
-        <div id="selectedCountRec" class="selected-count">0 universities selected</div>
-        <div id="selectedListRec" class="selected-list" role="list" aria-live="polite"></div>
-      </div>
-      <div class="card-ft" style="display:flex; justify-content:flex-end; gap:.5rem;">
-        <button class="btn btn-primary" id="sendBtn" type="button" disabled>
-          <span class="material-icons" aria-hidden="true">send</span> Send to Selected Universities
-        </button>
-      </div>
-    </section>
-
-    <!-- Progress -->
-    <section id="progressCard" class="section-card hidden">
-      <div class="card-hd">
-        <h2>Sending Letters...</h2>
-        <div></div>
-      </div>
-      <div class="card-bd">
-        <div class="progress" aria-label="Overall progress" style="height:12px; background:#e5e7eb; border-radius:999px; overflow:hidden;">
-          <div id="progressFill" style="height:100%; width:0%; background:linear-gradient(135deg,#4caf50,#66bb6a); transition:width .4s ease;"></div>
-        </div>
-        <div id="progressText" class="muted" style="margin-top:.6rem; font-size:.95rem;">Preparing to send...</div>
-        <div id="deliveryList" style="margin-top:.75rem; display:grid; gap:.5rem;"></div>
-      </div>
-    </section>
-
-    <!-- Success -->
-    <section id="successCard" class="section-card hidden" style="border-color:#a7f3d0;">
-      <div class="card-bd" style="text-align:center;">
-        <div class="material-icons" style="font-size:48px; color:#16a34a;">check_circle</div>
-        <h3 style="margin:.5rem 0 0; color:#166534;">Letters Sent Successfully!</h3>
-        <p class="muted">Your recommendation letter has been delivered to all selected universities.</p>
-        <button id="newUploadBtn" class="btn btn-primary" type="button">
-          <span class="material-icons" aria-hidden="true">add</span> Send Another Letter
-        </button>
-      </div>
-    </section>
-  </main>
-
-  <!-- =================== MAIN: STUDENT VIEW =================== -->
-  <section class="container" id="panel-student">
-    <div class="section-card" style="margin-bottom:1rem;">
-      <div class="card-bd">
-        <h1 style="font-size:1.6rem; color:#1976d2; margin-bottom:.3rem;">Student Portal</h1>
-        <p class="muted">Request recommendations, select universities, and track status.</p>
       </div>
     </div>
 
-    <!-- Student Tabs: Select (left), Send (center), Track (right) -->
-    <div class="section-card">
-      <div class="card-bd">
-        <div class="student-tabs" role="tablist" aria-label="Student actions" style="display:flex; gap:.4rem; background:#f1f5f9; border-radius:999px; padding:.2rem; border:1px solid #e5e7eb; margin-bottom:.9rem;">
-          <button id="stuTabSelect" class="btn" role="tab" aria-selected="true" type="button" style="border-radius:999px;">Select Universities</button>
-          <button id="stuTabSend"   class="btn" role="tab" aria-selected="false" type="button" style="border-radius:999px;">Send Recommendation Request</button>
-          <button id="stuTabTrack"  class="btn" role="tab" aria-selected="false" type="button" style="border-radius:999px;">Track Recommendation &amp; Status</button>
-        </div>
+    <!-- Selected Universities (KEEP in Recommender) -->
+    <div class="selected-section">
+      <h2 class="section-title" style="display:flex;align-items:center;gap:.5rem;">
+        <span class="material-icons">check_circle</span> Selected Universities
+        <button id="copyLinkBtn" class="page-btn" title="Copy shareable link" style="margin-left:auto;">Copy link</button>
+      </h2>
+      <div class="selected-count" id="selectedCount">0 universities selected</div>
+      <div class="selected-list" id="selectedList" role="list" aria-live="polite"></div>
+      <div class="send-section">
+        <button class="send-btn" id="sendBtn" disabled>
+          <span class="material-icons">send</span>
+          Send to Selected Universities
+        </button>
+      </div>
+    </div>
 
-        <div class="student-panels">
-          <!-- (A) SELECT UNIVERSITIES -->
-          <section id="stuPanelSelect">
-            <div class="section-title" style="margin-bottom:.6rem;">
-              <span class="material-icons" aria-hidden="true">school</span> Select Universities
+    <!-- Progress Section -->
+    <div class="progress-section" id="progressSection">
+      <h2 class="progress-title">Sending Letters...</h2>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText" aria-live="polite">Preparing to send...</div>
+      <div class="delivery-list" id="deliveryList"></div>
+    </div>
+
+    <!-- Success Section -->
+    <div class="success-section" id="successSection">
+      <div class="success-icon"><span class="material-icons">check_circle</span></div>
+      <h2 class="success-title">Letters Sent Successfully!</h2>
+      <p class="success-subtitle">Your recommendation letter has been delivered to all selected universities.</p>
+      <button class="new-upload-btn" id="newUploadBtn">
+        <span class="material-icons">add</span>
+        Send Another Letter
+      </button>
+    </div>
+
+    <!-- Confirm Send Modal -->
+    <div id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle"
+         style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
+      <div style="background:#fff; width:min(720px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
+        <div style="padding:1.2rem 1.4rem; border-bottom:1px solid:#eee; display:flex; justify-content:space-between; align-items:center;">
+          <div id="confirmModalTitle" style="font-weight:700;">Confirm recipients</div>
+          <button aria-label="Close" id="modalCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:1.2rem 1.4rem; max-height:60vh; overflow:auto; line-height:1.45;">
+          <div id="modalSummary" style="margin-bottom:1rem;"></div>
+          <div id="modalLists" style="display:grid; gap:1rem;">
+            <div>
+              <div style="font-weight:600;">Included (<span id="modalIncludedCount">0</span>)</div>
+              <div id="modalIncluded"></div>
             </div>
+            <div>
+              <div style="font-weight:600;">Removed vs student’s list (<span id="modalRemovedCount">0</span>)</div>
+              <div id="modalRemoved" style="color:#b00020;"></div>
+            </div>
+            <div>
+              <div style="font-weight:600;">Added by you (<span id="modalAddedCount">0</span>)</div>
+              <div id="modalAdded" style="color:#1b5e20;"></div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:1rem 1.4rem; border-top:1px solid:#eee; display:flex; gap:.5rem; justify-content:flex-end;">
+          <button class="page-btn" id="modalCancelBtn">Cancel</button>
+          <button class="apply-btn" id="modalConfirmBtn">Send now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Import Modal -->
+    <div id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle"
+         style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
+      <div style="background:#fff; width:min(680px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
+        <div style="padding:1rem 1.2rem; border-bottom:1px solid:#eee; display:flex; justify-content:space-between; align-items:center;">
+          <div id="importTitle" style="font-weight:700;">Bulk import universities</div>
+          <button aria-label="Close" id="importCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:1rem 1.2rem; display:grid; gap:.75rem;">
+          <div style="font-size:.92rem; color:#556;">
+            Paste one <b>name per line</b>. We’ll fuzzy-match against the master list.
+          </div>
+          <textarea id="importTextarea" rows="10" style="width:100%; padding:.8rem; border:1px solid #e5e7eb; border-radius:10px; font-family:inherit;"></textarea>
+          <div id="importPreview" style="font-size:.9rem; color:#667;"></div>
+        </div>
+        <div style="padding:1rem 1.2rem; border-top:1px solid:#eee; display:flex; gap:.5rem; justify-content:flex-end;">
+          <button class="page-btn" id="importCancelBtn">Cancel</button>
+          <button class="apply-btn" id="importConfirmBtn">Add matches</button>
+        </div>
+      </div>
+    </div>
+    <!-- Contact Admin Overlay -->
+    <div id="contactOverlay" role="dialog" aria-modal="true" aria-labelledby="contactTitle"
+         style="position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; z-index:10000;">
+      <div style="background:#fff; width:min(560px,92vw); border-radius:16px; box-shadow:0 18px 50px rgba(0,0,0,.22); overflow:hidden; transform:translateY(12px); opacity:0; transition:.18s;">
+        <div style="padding:1rem 1.25rem; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
+          <div id="contactTitle" style="font-weight:700;">Contact admin</div>
+          <button aria-label="Close" id="contactCloseBtn2" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+        <form id="contactForm2" style="padding:1rem 1.25rem; display:grid; gap:.75rem;">
+          <div>
+            <label for="cFirst2" style="display:block; font-weight:600; margin-bottom:.35rem;">First name</label>
+            <input id="cFirst2" name="first" class="filter-select" type="text" placeholder="Your first name" required />
+          </div>
+          <div>
+            <label for="cEmail2" style="display:block; font-weight:600; margin-bottom:.35rem;">Email address</label>
+            <input id="cEmail2" name="email" class="filter-select" type="email" placeholder="you@example.com" required />
+          </div>
+          <div>
+            <label for="cQuery2" style="display:block; font-weight:600; margin-bottom:.35rem;">Query</label>
+            <textarea id="cQuery2" name="query" rows="5" style="width:100%; padding:.8rem; border:1px solid #e5e7eb; border-radius:10px; font-family:inherit;" placeholder="How can we help?" required></textarea>
+          </div>
+          <div style="display:flex; gap:.5rem; justify-content:flex-end; border-top:1px solid #f1f5f9; padding-top:.75rem;">
+            <button type="button" class="page-btn" id="contactCancelBtn2">Cancel</button>
+            <button type="submit" class="apply-btn" id="contactSendBtn2">Send</button>
+          </div>
+          <input type="hidden" name="form-name" value="contact-admin">
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
+  </div><!-- /.container (Recommender) -->
+  <!-- STUDENT VIEW (default visible) -->
+  <div class="container" id="panel-student">
+    <div class="student-card" style="margin-bottom:1rem;">
+      <h1 class="hero-title" style="margin:0 0 .4rem;">Student Portal</h1>
+      <p class="hero-subtitle" style="margin:0 0 .8rem;">Request recommendations and track their status.</p>
+
+      <div class="student-tabs" role="tablist" aria-label="Student actions">
+        <!-- REORDERED: Select (left), Send (center), Track (right) -->
+        <button id="stuTabSelect" class="student-tab" role="tab" aria-selected="false" type="button">
+          Select Universities
+        </button>
+        <button id="stuTabSend" class="student-tab" role="tab" aria-selected="true" type="button">
+          Send Recommendation Request
+        </button>
+        <button id="stuTabTrack" class="student-tab" role="tab" aria-selected="false" type="button">
+          Track Recommendation &amp; Status
+        </button>
+      </div>
+
+      <div class="student-panels">
+        <!-- Send -->
+        <section id="stuPanelSend">
+          <form id="stuSendForm" class="student-card" style="padding:1rem; box-shadow:none; border:1px solid #e5e7eb;">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:.75rem;">
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Your Name</label>
+                <input id="stuName" class="filter-select" type="text" placeholder="Student full name" required />
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Your Email</label>
+                <input id="stuEmail" class="filter-select" type="email" placeholder="you@example.com" required />
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Recommender Name</label>
+                <input id="recName" class="filter-select" type="text" placeholder="Prof. Jane Smith" required />
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Recommender Email</label>
+                <input id="recEmail" class="filter-select" type="email" placeholder="jane@university.edu" required />
+              </div>
+            </div>
+            <div style="margin-top:.75rem; display:flex; gap:.5rem; justify-content:flex-end;">
+              <button type="reset" class="page-btn">Clear</button>
+              <button type="submit" class="apply-btn">Send Request</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Select (moved to left tab, content unchanged) -->
+        <section id="stuPanelSelect" hidden>
+          <div class="university-section">
+            <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
 
             <!-- Search + Apply + Bulk import -->
-            <div class="university-search" style="position:relative; display:flex; gap:.5rem; align-items:center; margin-bottom:.6rem;">
-              <input type="text" class="search-input" placeholder="Search universities..." id="universitySearch" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-owns="searchSuggest"/>
-              <button class="btn btn-primary" id="searchApplyBtn" title="Apply search (Enter)" type="button">Apply</button>
-              <button class="btn" id="bulkImportBtn" title="Bulk import by names" type="button">Bulk import</button>
-              <div id="searchSuggest" style="display:none; position:absolute; top:110%; left:0; right:0; background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 16px 40px rgba(0,0,0,.16); z-index:5; padding:.4rem;"></div>
+            <div class="university-search" style="position:relative; display:flex; gap:.5rem; align-items:center; margin-bottom:.5rem;">
+              <input
+                type="text"
+                class="search-input filter-select"
+                placeholder="Search universities..."
+                id="universitySearch"
+                autocomplete="off"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-owns="searchSuggest"
+              />
+              <button class="apply-btn" id="searchApplyBtn" title="Apply search (Enter)" type="button">Apply</button>
+              <button class="page-btn" id="bulkImportBtn" title="Bulk import by names" type="button">Bulk import</button>
+              <div id="searchSuggest" class="suggest-popover" style="display:none;"></div>
             </div>
 
             <!-- Browse-all dropdown -->
             <select id="universitySelect" class="filter-select" title="Browse all universities" style="margin-bottom:.5rem;">
-              <option value="" selected disabled>Browse all universities</option>
+              <option value="" selected disabled>Browse all universities (6000+)</option>
             </select>
 
             <!-- Filters -->
-            <div class="muted" id="resultMeta" aria-live="polite" style="margin:.25rem 0 .5rem;">Showing 0 of 0</div>
-            <div class="grid-3" style="align-items:end; margin-bottom:.6rem;">
-              <div>
-                <label for="stateFilter" style="display:block; font-weight:800; margin-bottom:.25rem;">State</label>
-                <select id="stateFilter" class="filter-select" aria-label="Filter by state">
-                  <option value="">All states</option>
-                </select>
-              </div>
-              <div>
-                <label for="typeFilter" style="display:block; font-weight:800; margin-bottom:.25rem;">Institution Type</label>
-                <select id="typeFilter" class="filter-select" aria-label="Filter by institution type">
-                  <option value="">All types</option>
-                  <option value="Public">Public</option>
-                  <option value="Private nonprofit">Private nonprofit</option>
-                  <option value="Private for-profit">Private for-profit</option>
-                </select>
-              </div>
-              <div>
-                <label for="levelFilter" style="display:block; font-weight:800; margin-bottom:.25rem;">Level</label>
-                <select id="levelFilter" class="filter-select" aria-label="Filter by level">
-                  <option value="">All levels</option>
-                  <option value="4-year">4-year</option>
-                  <option value="2-year">2-year</option>
-                  <option value="Less-than-2-year">Less-than-2-year</option>
-                </select>
-              </div>
-            </div>
+            <div class="filter-meta" id="resultMeta" aria-live="polite">Showing 0 of 0</div>
+            <div class="filter-bar">
+              <select id="stateFilter" class="filter-select" aria-label="Filter by state">
+                <option value="">All states</option>
+                <option value="AL">Alabama</option><option value="AK">Alaska</option><option value="AZ">Arizona</option><option value="AR">Arkansas</option>
+                <option value="CA">California</option><option value="CO">Colorado</option><option value="CT">Connecticut</option><option value="DE">Delaware</option>
+                <option value="FL">Florida</option><option value="GA">Georgia</option><option value="HI">Hawaii</option><option value="ID">Idaho</option>
+                <option value="IL">Illinois</option><option value="IN">Indiana</option><option value="IA">Iowa</option><option value="KS">Kansas</option>
+                <option value="KY">Kentucky</option><option value="LA">Louisiana</option><option value="ME">Maine</option><option value="MD">Maryland</option>
+                <option value="MA">Massachusetts</option><option value="MI">Michigan</option><option value="MN">Minnesota</option><option value="MS">Mississippi</option>
+                <option value="MO">Missouri</option><option value="MT">Montana</option><option value="NE">Nebraska</option><option value="NV">Nevada</option>
+                <option value="NH">New Hampshire</option><option value="NJ">New Jersey</option><option value="NM">New Mexico</option><option value="NY">New York</option>
+                <option value="NC">North Carolina</option><option value="ND">North Dakota</option><option value="OH">Ohio</option><option value="OK">Oklahoma</option>
+                <option value="OR">Oregon</option><option value="PA">Pennsylvania</option><option value="RI">Rhode Island</option><option value="SC">South Carolina</option>
+                <option value="SD">South Dakota</option><option value="TN">Tennessee</option><option value="TX">Texas</option><option value="UT">Utah</option>
+                <option value="VT">Vermont</option><option value="VA">Virginia</option><option value="WA">Washington</option><option value="WV">West Virginia</option>
+                <option value="WI">Wisconsin</option><option value="WY">Wyoming</option>
+              </select>
 
-            <div style="display:flex; gap:.5rem; align-items:center; margin-bottom:.5rem;">
-              <div style="flex:1;"></div>
-              <select id="sortBy" class="filter-select" aria-label="Sort results" style="max-width:260px;">
+              <select id="typeFilter" class="filter-select" aria-label="Filter by institution type">
+                <option value="">All types</option>
+                <option value="Public">Public</option>
+                <option value="Private nonprofit">Private nonprofit</option>
+                <option value="Private for-profit">Private for-profit</option>
+              </select>
+
+              <select id="levelFilter" class="filter-select" aria-label="Filter by level">
+                <option value="">All levels</option>
+                <option value="4-year">4-year</option>
+                <option value="2-year">2-year</option>
+                <option value="Less-than-2-year">Less-than-2-year</option>
+              </select>
+
+              <select id="sortBy" class="filter-select" aria-label="Sort results">
                 <option value="name_asc">Sort: Name (A–Z)</option>
                 <option value="state_asc">Sort: State (A–Z)</option>
               </select>
-              <button class="btn btn-primary" id="filterApplyBtn" title="Apply filters and sort" type="button">Apply filters</button>
-              <button class="btn" id="resetBtn" title="Reset search and filters" type="button">Reset</button>
+
+              <button class="apply-btn" id="filterApplyBtn" title="Apply filters and sort" type="button">Apply filters</button>
+              <button class="apply-btn" id="resetBtn" title="Reset search and filters" type="button">Reset</button>
             </div>
 
             <!-- Empty state -->
-            <div id="emptyState" class="hidden" aria-live="polite" style="background:#fff; border:1px dashed #d0d7de; border-radius:12px; padding:1rem;">
-              <div style="font-weight:800; margin-bottom:.25rem;">No universities match your filters</div>
-              <div class="muted" style="font-size:.95rem;">Try adjusting search or clearing filters.</div>
-              <div style="margin-top:.6rem; display:flex; gap:.5rem;">
-                <button class="btn btn-primary" id="clearFiltersBtn" type="button">Clear filters</button>
-                <button class="btn hidden" id="retryLoadBtn" type="button">Retry loading</button>
+            <div id="emptyState" class="empty-state" aria-live="polite">
+              <div style="font-weight:600; margin-bottom:.25rem;">No universities match your filters</div>
+              <div style="font-size:.9rem; color:#667;">Try adjusting search or clearing filters.</div>
+              <div class="actions">
+                <button class="apply-btn" id="clearFiltersBtn" type="button">Clear filters</button>
+                <button class="page-btn" id="retryLoadBtn" style="display:none;" type="button">Retry loading</button>
               </div>
             </div>
 
@@ -510,12 +816,12 @@
             <div class="pagination">
               <div class="pager">
                 <button class="page-btn" id="prevPage">Prev</button>
-                <span id="pageInfo" style="font-weight:800;">Page 1 of 1</span>
+                <span id="pageInfo" style="font-weight:600;">Page 1 of 1</span>
                 <button class="page-btn" id="nextPage">Next</button>
               </div>
-              <div class="page-size" style="display:flex; align-items:center; gap:.5rem;">
+              <div class="page-size">
                 <label for="pageSize">Per page:</label>
-                <select id="pageSize" class="filter-select" style="width:auto;">
+                <select id="pageSize" class="filter-select" style="width:auto;display:inline-block;">
                   <option value="20">20</option>
                   <option value="40" selected>40</option>
                   <option value="80">80</option>
@@ -523,174 +829,263 @@
                 </select>
               </div>
             </div>
+          </div>
 
-            <!-- Selected (read-only for Student within this tab) -->
-            <div class="section-card" style="margin-top:1rem;">
-              <div class="card-bd">
-                <div class="section-title" style="margin-bottom:.35rem;">
-                  <span class="material-icons" aria-hidden="true">check_circle</span> Selected Universities
-                </div>
-                <div class="selected-count" id="selectedCountStu">0 universities selected</div>
-                <div class="selected-list" id="selectedListStu" role="list" aria-live="polite"></div>
-              </div>
-            </div>
-          </section>
+          <!-- Selected Universities (read-only for Student) -->
+          <div class="selected-section">
+            <h2 class="section-title" style="display:flex;align-items:center;gap:.5rem;">
+              <span class="material-icons">check_circle</span> Selected Universities
+            </h2>
+            <div class="selected-count" id="selectedCountStu">0 universities selected</div>
+            <div class="selected-list" id="selectedListStu" role="list" aria-live="polite"></div>
+          </div>
+        </section>
 
-          <!-- (B) SEND REQUEST -->
-          <section id="stuPanelSend" class="hidden">
-            <form id="stuSendForm" class="section-card" style="box-shadow:none; border:1px solid var(--line);">
-              <div class="card-bd">
-                <div class="grid-2">
-                  <div>
-                    <label style="font-weight:800; display:block; margin-bottom:.25rem;">Your Name</label>
-                    <input id="stuName" class="filter-select" type="text" placeholder="Student full name" required />
-                  </div>
-                  <div>
-                    <label style="font-weight:800; display:block; margin-bottom:.25rem;">Your Email</label>
-                    <input id="stuEmail" class="filter-select" type="email" placeholder="you@example.com" required />
-                  </div>
-                  <div>
-                    <label style="font-weight:800; display:block; margin-bottom:.25rem;">Recommender Name</label>
-                    <input id="recName" class="filter-select" type="text" placeholder="Prof. Jane Smith" required />
-                  </div>
-                  <div>
-                    <label style="font-weight:800; display:block; margin-bottom:.25rem;">Recommender Email</label>
-                    <input id="recEmail" class="filter-select" type="email" placeholder="jane@university.edu" required />
-                  </div>
-                </div>
-
-                <div style="margin-top:.75rem;">
-                  <div style="font-weight:800; margin-bottom:.25rem;">Buckley Amendment Waiver</div>
-                  <label style="display:inline-flex; align-items:center; gap:.4rem; margin-right:1rem;">
-                    <input type="radio" name="waiver" value="waive" required /> I waive my right to access this report
-                  </label>
-                  <label style="display:inline-flex; align-items:center; gap:.4rem;">
-                    <input type="radio" name="waiver" value="no-waive" /> I do not waive my right to access this report
-                  </label>
-                </div>
-
-                <div style="margin-top:1rem; display:flex; gap:.5rem; justify-content:flex-end;">
-                  <button type="reset" class="btn">Clear</button>
-                  <button type="submit" class="btn btn-primary">Send Request</button>
-                </div>
-                <div class="help" style="margin-top:.6rem;">Tip: First select universities in the <b>Select</b> tab so your recommender sees your list immediately.</div>
-              </div>
-            </form>
-          </section>
-
-          <!-- (C) TRACK -->
-          <section id="stuPanelTrack" class="hidden">
-            <div class="section-card" style="padding:0; overflow:hidden;">
-              <table class="table" aria-label="Recommendation requests">
-                <thead>
-                  <tr>
-                    <th>Recommender</th>
-                    <th>Email</th>
-                    <th>Requested</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="stuTrackBody">
-                  <!-- populated by JS -->
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </div><!-- /.student-panels -->
+        <!-- Track -->
+        <section id="stuPanelTrack" hidden>
+          <div class="student-card" style="padding:0; overflow:hidden;">
+            <table class="table" aria-label="Recommendation requests">
+              <thead>
+                <tr>
+                  <th>Recommender</th>
+                  <th>Email</th>
+                  <th>Requested</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="stuTrackBody">
+                <!-- Populated by dashboard.js -->
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- =================== FOOTER =================== -->
-  <footer style="margin:2rem 0 1rem; text-align:center; color:#64748b;">
-    &copy; 2025 <b>StellarRec™</b>. All rights reserved.
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2025 <span style="color: #ffeb3b; font-weight: 600;">StellarRec™</span>. All rights reserved. |
+        Making recommendations stellar since 2025 🚀</p>
+    </div>
   </footer>
 
-  <!-- =================== CONFIRM MODAL (RECOMMENDER SEND) =================== -->
-  <div id="confirmOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
-    <div class="modal">
-      <div class="modal-hd">
-        <div id="confirmTitle" style="font-weight:800;">Confirm recipients</div>
-        <button id="confirmClose" class="btn" type="button" aria-label="Close">✕</button>
-      </div>
-      <div class="modal-bd">
-        <div id="confirmSummary" style="margin-bottom:1rem;"></div>
-        <div style="display:grid; gap:1rem;">
-          <div>
-            <div style="font-weight:800;">Included (<span id="incCount">0</span>)</div>
-            <div id="incList" style="margin-top:.35rem;"></div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-ft">
-        <button id="confirmCancel" class="btn" type="button">Cancel</button>
-        <button id="confirmSend" class="btn btn-primary" type="button">Send now</button>
-      </div>
-    </div>
-  </div>
+<!-- Vendor scripts (CDN, with cache-busting) -->
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js?v=2025-09-06" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js?v=2025-09-06" defer></script>
 
-  <!-- =================== CONTACT ADMIN MODAL =================== -->
-  <div id="contactOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="contactTitle">
-    <div class="modal" style="width:min(560px,92vw);">
-      <div class="modal-hd">
-        <div id="contactTitle" style="font-weight:800;">Contact admin</div>
-        <button id="contactClose" class="btn" type="button" aria-label="Close">✕</button>
-      </div>
-      <form id="contactForm" class="modal-bd" style="display:grid; gap:.75rem;">
-        <div>
-          <label for="cFirst" style="display:block; font-weight:800; margin-bottom:.25rem;">First name</label>
-          <input id="cFirst" name="first" class="filter-select" type="text" required placeholder="Your first name" />
-        </div>
-        <div>
-          <label for="cEmail" style="display:block; font-weight:800; margin-bottom:.25rem;">Email</label>
-          <input id="cEmail" name="email" class="filter-select" type="email" required placeholder="you@example.com" />
-        </div>
-        <div>
-          <label for="cQuery" style="display:block; font-weight:800; margin-bottom:.25rem;">Query</label>
-          <textarea id="cQuery" name="query" class="writer-box" style="min-height:120px;" required placeholder="How can we help?"></textarea>
-        </div>
-      </form>
-      <div class="modal-ft">
-        <button id="contactCancel" class="btn" type="button">Cancel</button>
-        <button id="contactSend" class="btn btn-primary" type="button">Send</button>
-      </div>
-    </div>
-  </div>
+<!-- Your app code (keep after vendors; add cache-busting too) -->
+<script src="/assets/js/dashboard.js?v=2025-09-06-1" defer></script>
+<script src="/assets/js/university-search.js?v=2025-09-06-1" defer></script>
+<script>
+(function(){
+  // Helper: safe localStorage to avoid quota crashes
+  const safeLS = {
+    get(k, d){ try { return localStorage.getItem(k) ?? d; } catch(e){ return d; } },
+    set(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
+  };
+  const norm = s => (s||'').toString().trim().toLowerCase();
 
-  <!-- =================== TOAST CONTAINER =================== -->
-  <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
+  const els = {
+    input:  document.getElementById('linkInput'),
+    parse:  document.getElementById('linkParseBtn'),
+    status: document.getElementById('linkStatus'),
+    sum:    document.getElementById('linkSummary'),
+    help:   document.getElementById('linkHelpBtn'),
+  };
 
-  <!-- =================== VENDOR (optional) =================== -->
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js" defer></script>
+  // Show a little explainer
+  els.help?.addEventListener('click', () => {
+    const det = document.getElementById('linkFormatDetails');
+    if (!det) return;
+    det.open = true;
+    det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
 
-  <!-- =================== APP SCRIPT =================== -->
-  <script>
-    /* ----------------- Tiny toast ----------------- */
-    (function(){
-      const wrap = document.getElementById('toastWrap');
-      window.toast = function(msg, type='info'){
-        const el = document.createElement('div');
-        el.className = 'toast ' + (type==='success'?'success':type==='error'?'error':'');
-        el.innerHTML = '<span class="material-icons icon" aria-hidden="true">'
-          + (type==='success'?'check_circle':type==='error'?'error':'info') +
-          '</span><div class="msg">'+msg+'</div><button class="x" aria-label="Dismiss">✕</button>';
-        wrap.appendChild(el);
-        const onClose = ()=> el.remove();
-        el.querySelector('.x').addEventListener('click', onClose);
-        setTimeout(onClose, 3600);
+  function setStatus(msg, type='info'){
+    if (!els.status) return;
+    const color = type==='error' ? '#b91c1c' : type==='success' ? '#166534' : '#334155';
+    els.status.innerHTML = `<span style="color:${color}">${msg}</span>`;
+  }
+
+  function summarize(data, matchedCount){
+    const lines = [];
+    if (data.studentFirst || data.studentLast) {
+      lines.push(`<div><b>Student</b>: ${[data.studentFirst, data.studentLast].filter(Boolean).join(' ') || '<span class="muted">—</span>'}</div>`);
+    }
+    if (data.studentEmail || data.studentPhone) {
+      lines.push(`<div><b>Contact</b>: ${[data.studentEmail, data.studentPhone].filter(Boolean).join(' • ') || '<span class="muted">—</span>'}</div>`);
+    }
+    if (typeof data.waiveAccess !== 'undefined') {
+      lines.push(`<div><b>Waive access</b>: ${data.waiveAccess ? '<span class="ok">Yes</span>' : 'No'}</div>`);
+    }
+    if (data.recommenderName || data.recommenderEmail || data.recommenderPhone) {
+      lines.push(`<div><b>Recommender</b>: ${data.recommenderName || ''} ${data.recommenderEmail ? '• ' + data.recommenderEmail : ''} ${data.recommenderPhone ? '• ' + data.recommenderPhone : ''}</div>`);
+    }
+    if (Array.isArray(data.unitids) && data.unitids.length) {
+      lines.push(`<div><b>Universities (unitids)</b>: ${data.unitids.length} ${matchedCount!=null?`<span class="${matchedCount>0?'ok':'warn'}">(matched ${matchedCount})</span>`:''}</div>`);
+    } else if (Array.isArray(data.unames) && data.unames.length) {
+      lines.push(`<div><b>Universities (by name)</b>: ${data.unames.length} (will match)</div>`);
+    }
+    els.sum.innerHTML = lines.join('') || '<div class="muted">No details found.</div>';
+    els.sum.hidden = false;
+  }
+
+  function parseLink(raw){
+    try {
+      const url = new URL(raw);
+      const q   = url.searchParams;
+
+      const data = {
+        studentFirst:   q.get('sf') || q.get('sfn') || '',
+        studentLast:    q.get('sl') || q.get('sln') || '',
+        studentEmail:   q.get('se') || q.get('semail') || '',
+        studentPhone:   q.get('sp') || q.get('sphone') || '',
+        waiveAccess:    q.get('waive') === '1' || q.get('waive') === 'true',
+        recommenderName: q.get('rname') || '',
+        recommenderEmail: q.get('remail') || '',
+        recommenderPhone: q.get('rphone') || '',
+        unitids: [],
+        unames: [],
       };
-    })();
 
-    /* ----------------- Safe localStorage ----------------- */
-    const safeLS = {
-      get(k, d){ try { return localStorage.getItem(k) ?? d; } catch { return d; } },
-      set(k, v){ try { localStorage.setItem(k, v); } catch {} },
-      del(k){ try { localStorage.removeItem(k); } catch {} }
+      // CSV unitids
+      const unis = q.get('unis');
+      if (unis) {
+        data.unitids = unis.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      // CSV names
+      const unames = q.get('unames');
+      if (unames) {
+        data.unames = unames.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      return data;
+    } catch(e){
+      return null;
+    }
+  }
+
+  async function applyReferralData(data){
+    // Save raw
+    safeLS.set('sr_referral_raw', JSON.stringify(data));
+
+    // Preselect universities
+    window.studentUnitIds        = new Set();   // student’s original choices
+    window.addedByRecommender    = new Set();   // explicit add by recommender
+    window.removedByRecommender  = new Set();   // explicit remove by recommender
+
+    let matchedCount = 0;
+
+    // Prefer unitids if provided
+    if (Array.isArray(data.unitids) && data.unitids.length && Array.isArray(window.universities)) {
+      const master = new Map(window.universities.map(u => [String(u.unitid), u]));
+      data.unitids.forEach(id => {
+        const uid = String(id);
+        if (master.has(uid)) {
+          window.studentUnitIds.add(uid);
+          matchedCount++;
+        }
+      });
+    }
+
+    // If no unitids or some names were provided, fuzzy-match names
+    if ((!data.unitids || !data.unitids.length) && Array.isArray(data.unames) && data.unames.length && Array.isArray(window.universities)) {
+      const names = data.unames.map(norm);
+      for (const u of window.universities) {
+        const n = norm(u.name);
+        if (names.some(q => n.includes(q))) {
+          window.studentUnitIds.add(String(u.unitid));
+          matchedCount++;
+        }
+      }
+    }
+
+    // Update UI pieces if your page exposes these helpers
+    if (typeof window.updateSelectedList === 'function') window.updateSelectedList();
+    if (typeof window.updateSendButton  === 'function') window.updateSendButton();
+
+    // Remember in storage (so refresh keeps context)
+    const save = {
+      student: { first: data.studentFirst, last: data.studentLast, email: data.studentEmail, phone: data.studentPhone, waive: !!data.waiveAccess },
+      recommender: { name: data.recommenderName, email: data.recommenderEmail, phone: data.recommenderPhone },
+      unitids: Array.from(window.studentUnitIds),
     };
+    safeLS.set('sr_referral', JSON.stringify(save));
 
-    /* ----------------- Header: view toggles + avatar menu ----------------- */
+    return matchedCount;
+  }
+
+  async function handleImport(){
+    const raw = (els.input?.value || '').trim();
+    if (!raw) {
+      setStatus('Please paste a link first.', 'error');
+      return;
+    }
+    const data = parseLink(raw);
+    if (!data) {
+      setStatus('That doesn’t look like a valid link. Make sure it includes query parameters.', 'error');
+      return;
+    }
+
+    setStatus('Parsing link and applying data…');
+    // Ensure dataset is loaded before matching (if your app has a loader)
+    if (typeof window.loadDataset === 'function' && (!Array.isArray(window.universities) || !window.universities.length)) {
+      try { await window.loadDataset(); } catch {}
+    }
+
+    const matched = await applyReferralData(data);
+    summarize(data, matched);
+
+    // Optional: craft a friendly writer title
+    const titleEl = document.getElementById('writerTitle');
+    if (titleEl) {
+      const full = [data.studentFirst, data.studentLast].filter(Boolean).join(' ');
+      if (full) titleEl.value = `Recommendation for ${full}`;
+    }
+
+    // Toast & status
+    if (window.toast) {
+      window.toast(`Imported ${matched} universit${matched===1?'y':'ies'} from the link.`, matched ? 'success' : 'info');
+    }
+    setStatus('Link imported successfully.', 'success');
+
+    // Ensure we show the Recommender panel since this is a recommender action
+    const recPanel = document.getElementById('panel-recommender');
+    const stuPanel = document.getElementById('panel-student');
+    if (recPanel && stuPanel) {
+      stuPanel.hidden = true; recPanel.hidden = false;
+      recPanel.style.display = ''; stuPanel.style.display = 'none';
+      // Mark header toggle if present
+      const toggles = document.querySelectorAll('.header-nav .nav-link');
+      toggles.forEach(b=>{
+        const on = b.dataset.view === 'recommender';
+        b.setAttribute('aria-selected', on?'true':'false');
+        if (on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+      });
+      history.replaceState(null,'','#recommender');
+      safeLS.set('sr_current_view','recommender');
+    }
+  }
+
+  // Wire up
+  els.parse?.addEventListener('click', handleImport);
+  els.input?.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); handleImport(); } });
+
+})();
+</script>
+
+  <!-- View toggler & simple header behaviors (safe localStorage) -->
+  <script>
     (function(){
+      // ---------- helpers ----------
+      function safeSet(key, val){
+        try { localStorage.setItem(key, val); } catch (e) { /* quota/private mode */ }
+      }
+      function safeGet(key, def){
+        try { return localStorage.getItem(key) ?? def; } catch (e) { return def; }
+      }
+
       // Panels
       const studentPanel = document.getElementById('panel-student');
       const recPanel     = document.getElementById('panel-recommender');
@@ -698,880 +1093,181 @@
       // Header toggles
       const toggles = document.querySelectorAll('.header-nav .nav-link');
 
+      // Ensure initial state: Student visible, Recommender hidden
+      if (studentPanel) studentPanel.hidden = false;
+      if (recPanel)     recPanel.hidden     = true;
+
       function setActive(view){
         const isStudent = (view === 'student');
-        studentPanel.hidden = !isStudent;
-        recPanel.hidden     =  isStudent;
+        if (studentPanel) studentPanel.hidden = !isStudent;
+        if (recPanel)     recPanel.hidden     =  isStudent;
 
+        // visual current
         toggles.forEach(btn => {
           const on = btn.dataset.view === view;
           btn.setAttribute('aria-selected', on ? 'true' : 'false');
           if (on) btn.setAttribute('aria-current','page'); else btn.removeAttribute('aria-current');
         });
 
+        // hash (deep-link) + persist (safe)
         history.replaceState(null, '', '#' + view);
-        safeLS.set('sr_current_view', view);
-
-        // When we enter Recommender, refresh selected list
-        if (!isStudent && typeof window.refreshSelectedForRecommender === 'function') {
-          window.refreshSelectedForRecommender();
-        }
+        safeSet('sr_current_view', view);
       }
 
       // Click handlers
       toggles.forEach(btn => btn.addEventListener('click', () => setActive(btn.dataset.view)));
 
-      // Initial state from hash or last saved
-      const fromHash = (location.hash || '').replace('#','');
-      const saved    = safeLS.get('sr_current_view', '');
-      const initial  = (fromHash === 'recommender' || fromHash === 'student') ? fromHash
-                      : (saved === 'recommender' || saved === 'student') ? saved
-                      : 'student';
-      setActive(initial);
+      // Deep-link support (#student / #recommender) + saved preference
+      const fromHash = (location.hash || '').slice(1);
+      const saved = safeGet('sr_current_view', 'student');
+      const initial = (fromHash === 'recommender' || fromHash === 'student') ? fromHash : saved;
+      setActive(initial === 'recommender' ? 'recommender' : 'student');
 
       window.addEventListener('hashchange', () => {
         const v = (location.hash || '#student').slice(1);
         setActive(v === 'recommender' ? 'recommender' : 'student');
       });
 
-      // Avatar menu (Contact admin only)
-      const btn = document.getElementById('userAvatarBtn');
-      const dd  = document.getElementById('userDropdown');
-      const toggle = (open)=> {
-        dd.classList.toggle('show', open);
-        btn.setAttribute('aria-expanded', open ? 'true':'false');
-        dd.setAttribute('aria-hidden', open ? 'false':'true');
-      };
-      btn?.addEventListener('click', (e)=>{ e.stopPropagation(); toggle(!dd.classList.contains('show')); });
-      document.addEventListener('click', (e)=>{ if(!dd.contains(e.target) && !btn.contains(e.target)) toggle(false); });
-      document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') toggle(false); });
-
-      const contactItem = document.getElementById('contactAdminItem');
-      const cOv = document.getElementById('contactOverlay');
-      contactItem?.addEventListener('click', ()=>{ toggle(false); cOv.classList.add('show'); });
-      document.getElementById('contactClose')?.addEventListener('click', ()=> cOv.classList.remove('show'));
-      document.getElementById('contactCancel')?.addEventListener('click', ()=> cOv.classList.remove('show'));
-      document.getElementById('contactSend')?.addEventListener('click', ()=>{
-        const first = document.getElementById('cFirst').value.trim();
-        const email = document.getElementById('cEmail').value.trim();
-        const query = document.getElementById('cQuery').value.trim();
-        if(!first || !email || !query){ toast('Please complete all fields.', 'error'); return; }
-        toast('Message sent. We\'ll get back to you shortly.', 'success');
-        cOv.classList.remove('show');
-        document.getElementById('contactForm').reset();
-      });
-    })();
-
-    /* ----------------- Dataset loader (universities) ----------------- */
-    ;(function(){
-      // We try to fetch a dataset if available; otherwise seed a small inline set.
-      const seed = [
-        { unitid: "166027", name: "Harvard University", state: "MA", type: "Private nonprofit", level: "4-year" },
-        { unitid: "110635", name: "Stanford University", state: "CA", type: "Private nonprofit", level: "4-year" },
-        { unitid: "243744", name: "Massachusetts Institute of Technology", state: "MA", type: "Private nonprofit", level: "4-year" },
-        { unitid: "240444", name: "University of California, Berkeley", state: "CA", type: "Public", level: "4-year" },
-        { unitid: "215293", name: "Columbia University in the City of New York", state: "NY", type: "Private nonprofit", level: "4-year" },
-        { unitid: "186380", name: "Carnegie Mellon University", state: "PA", type: "Private nonprofit", level: "4-year" },
-        { unitid: "228778", name: "Princeton University", state: "NJ", type: "Private nonprofit", level: "4-year" },
-        { unitid: "198419", name: "Georgia Institute of Technology", state: "GA", type: "Public", level: "4-year" },
-        { unitid: "190150", name: "Duke University", state: "NC", type: "Private nonprofit", level: "4-year" },
-        { unitid: "243780", name: "Northeastern University", state: "MA", type: "Private nonprofit", level: "4-year" },
-      ];
-
-      async function load(){
-        // If a global was already set, respect it
-        if (Array.isArray(window.universities) && window.universities.length) return;
-        try {
-          // Attempt to load a bigger dataset if present at this path:
-          // (You can replace with your own path; failure falls back silently.)
-          const res = await fetch('/assets/data/universities.min.json', { cache:'no-store' });
-          if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data) && data.length) {
-              window.universities = data;
-              return;
-            }
+      // Basic user dropdown toggle (optional)
+      const avatarBtn = document.getElementById('userAvatarBtn');
+      const dropdown  = document.getElementById('userDropdown');
+      if (avatarBtn && dropdown) {
+        avatarBtn.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          const open = dropdown.classList.toggle('show');
+          avatarBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+        document.addEventListener('click', (e)=>{
+          if (!dropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
+            dropdown.classList.remove('show');
+            avatarBtn.setAttribute('aria-expanded','false');
           }
-          // Fallback to seed
-          window.universities = seed;
-        } catch {
-          window.universities = seed;
-        }
-      }
-      window.loadDataset = load;
-    })();
-
-    /* ----------------- Student View logic ----------------- */
-    ;(function(){
-      // Tab wiring (Select left, Send center, Track right)
-      const tabs = {
-        select: document.getElementById('stuTabSelect'),
-        send:   document.getElementById('stuTabSend'),
-        track:  document.getElementById('stuTabTrack'),
-      };
-      const panels = {
-        select: document.getElementById('stuPanelSelect'),
-        send:   document.getElementById('stuPanelSend'),
-        track:  document.getElementById('stuPanelTrack'),
-      };
-      function activate(which){
-        Object.entries(tabs).forEach(([k, btn])=>{
-          const on = (k===which); btn.setAttribute('aria-selected', on?'true':'false');
-          if (on) btn.classList.add('btn-primary'); else btn.classList.remove('btn-primary');
         });
-        Object.entries(panels).forEach(([k, sec])=> sec.classList.toggle('hidden', k!==which) );
-      }
-      tabs.select?.addEventListener('click', ()=> activate('select'));
-      tabs.send  ?.addEventListener('click', ()=> activate('send'));
-      tabs.track ?.addEventListener('click', ()=> activate('track'));
-      activate('select');
-
-      // Data structures for selection
-      window.studentUnitIds        = new Set();   // student's current choices
-      window.addedByRecommender    = new Set();   // recommender add (reconciling in recommender view)
-      window.removedByRecommender  = new Set();   // recommender remove
-
-      // Controls
-      const searchInput = document.getElementById('universitySearch');
-      const searchApplyBtn = document.getElementById('searchApplyBtn');
-      const suggest = document.getElementById('searchSuggest');
-      const uniSelect = document.getElementById('universitySelect');
-      const stateSel = document.getElementById('stateFilter');
-      const typeSel  = document.getElementById('typeFilter');
-      const levelSel = document.getElementById('levelFilter');
-      const sortSel  = document.getElementById('sortBy');
-      const resetBtn = document.getElementById('resetBtn');
-      const filterApplyBtn = document.getElementById('filterApplyBtn');
-      const clearFiltersBtn= document.getElementById('clearFiltersBtn');
-      const retryLoadBtn   = document.getElementById('retryLoadBtn');
-      const grid = document.getElementById('universityGrid');
-      const emptyState = document.getElementById('emptyState');
-      const resultMeta = document.getElementById('resultMeta');
-      const pageInfo = document.getElementById('pageInfo');
-      const prevPage = document.getElementById('prevPage');
-      const nextPage = document.getElementById('nextPage');
-      const pageSize = document.getElementById('pageSize');
-      const selectedCountStu = document.getElementById('selectedCountStu');
-      const selectedListStu  = document.getElementById('selectedListStu');
-
-      // Pagination state
-      let currPage = 1;
-      let totalPages = 1;
-
-      // Working arrays
-      let filtered = [];
-
-      // Helpers
-      const norm = s => (s||'').toString().trim().toLowerCase();
-
-      // Load dataset and init UI
-      async function init(){
-        await window.loadDataset?.();
-        buildStateOptions();
-        buildBrowseDropdown();
-        restoreStudentSelection();
-        applyFilters(true);
-      }
-
-      function buildStateOptions(){
-        const set = new Set();
-        (window.universities||[]).forEach(u=> u.state && set.add(u.state));
-        const arr = Array.from(set).sort();
-        arr.forEach(st=>{
-          const opt = document.createElement('option');
-          opt.value = st; opt.textContent = st;
-          stateSel.appendChild(opt);
-        });
-      }
-
-      function buildBrowseDropdown(){
-        uniSelect.innerHTML = '<option value="" selected disabled>Browse all universities</option>';
-        (window.universities||[]).slice(0, 2000).forEach(u=>{
-          const opt = document.createElement('option');
-          opt.value = String(u.unitid);
-          opt.textContent = `${u.name} ${u.state?`(${u.state})`:''}`;
-          uniSelect.appendChild(opt);
-        });
-        uniSelect.addEventListener('change', ()=>{
-          const id = uniSelect.value;
-          if (id) toggleSelect(id);
-        });
-      }
-
-      function calcFiltered(){
-        const q = norm(searchInput.value);
-        filtered = (window.universities||[]).filter(u=>{
-          if (stateSel.value && u.state !== stateSel.value) return false;
-          if (typeSel.value  && u.type  !== typeSel.value)  return false;
-          if (levelSel.value && u.level !== levelSel.value) return false;
-          if (q && !(norm(u.name).includes(q) || String(u.unitid).includes(q))) return false;
-          return true;
-        });
-        // sorting
-        if (sortSel.value === 'name_asc') filtered.sort((a,b)=> a.name.localeCompare(b.name));
-        else if (sortSel.value === 'state_asc') filtered.sort((a,b)=> (a.state||'').localeCompare(b.state||'') || a.name.localeCompare(b.name));
-      }
-
-      function renderPage(){
-        const size = parseInt(pageSize.value,10) || 40;
-        totalPages = Math.max(1, Math.ceil(filtered.length / size));
-        currPage = Math.min(currPage, totalPages);
-
-        const start = (currPage-1)*size;
-        const pageSlice = filtered.slice(start, start+size);
-
-        grid.innerHTML = '';
-        pageSlice.forEach(u=>{
-          const card = document.createElement('div');
-          card.className = 'university-card';
-          if (window.studentUnitIds.has(String(u.unitid))) card.classList.add('selected');
-          card.innerHTML = `
-            <div class="university-header">
-              <div class="university-logo">${(u.name||'?').slice(0,2).toUpperCase()}</div>
-              <div>
-                <div class="university-name">${u.name}</div>
-                <div class="university-location">${u.state||''}</div>
-              </div>
-            </div>
-            <div class="university-pill">${u.type||'—'} • ${u.level||'—'}</div>
-          `;
-          card.addEventListener('click', ()=> toggleSelect(String(u.unitid)));
-          grid.appendChild(card);
-        });
-
-        pageInfo.textContent = `Page ${currPage} of ${totalPages}`;
-        prevPage.disabled = (currPage<=1);
-        nextPage.disabled = (currPage>=totalPages);
-        resultMeta.textContent = `Showing ${pageSlice.length} of ${filtered.length}`;
-        emptyState.classList.toggle('hidden', filtered.length>0);
-      }
-
-      function toggleSelect(id){
-        if (window.studentUnitIds.has(id)) window.studentUnitIds.delete(id);
-        else window.studentUnitIds.add(id);
-        persistStudentSelection();
-        updateSelectedListStu();
-        renderPage();
-      }
-
-      function persistStudentSelection(){
-        // store lightweight list for recommender & persistence
-        const unitids = Array.from(window.studentUnitIds);
-        // Keep sr_referral object shape so the recommender view can read it
-        const raw = safeLS.get('sr_referral','{}');
-        let obj = {};
-        try { obj = JSON.parse(raw||'{}'); } catch { obj = {}; }
-        obj.unitids = unitids;
-        // Keep any previously stored student/recommender details intact
-        safeLS.set('sr_referral', JSON.stringify(obj));
-      }
-
-      function restoreStudentSelection(){
-        // From sr_referral.unitids, then from legacy keys if needed
-        try {
-          const raw = safeLS.get('sr_referral','');
-          if (raw) {
-            const o = JSON.parse(raw);
-            if (Array.isArray(o.unitids)) o.unitids.forEach(id=> window.studentUnitIds.add(String(id)));
+        document.addEventListener('keydown', (e)=>{
+          if (e.key === 'Escape') {
+            dropdown.classList.remove('show');
+            avatarBtn.setAttribute('aria-expanded','false');
           }
-        } catch {}
-      }
-
-      function updateSelectedListStu(){
-        const ids = Array.from(window.studentUnitIds);
-        selectedListStu.innerHTML = '';
-        ids.forEach(id=>{
-          const u = (window.universities||[]).find(x => String(x.unitid)===String(id));
-          const tag = document.createElement('span');
-          tag.className = 'tag';
-          tag.innerHTML = `${u ? u.name : 'UnitID '+id} <span class="remove-tag" title="Remove" aria-label="Remove">&times;</span>`;
-          tag.querySelector('.remove-tag').addEventListener('click', (e)=>{
-            e.stopPropagation();
-            window.studentUnitIds.delete(id);
-            persistStudentSelection();
-            updateSelectedListStu();
-            renderPage();
-          });
-          selectedListStu.appendChild(tag);
-        });
-        selectedCountStu.textContent = `${ids.length} ${ids.length===1?'university':'universities'} selected`;
-      }
-
-      function applyFilters(resetPage){
-        calcFiltered();
-        if (resetPage) currPage = 1;
-        renderPage();
-        updateSelectedListStu();
-      }
-
-      // Suggestion popover (lightweight)
-      let suggestTimer=null;
-      searchInput?.addEventListener('input', ()=>{
-        clearTimeout(suggestTimer);
-        const q = searchInput.value.trim();
-        if (!q){ suggest.style.display='none'; return; }
-        suggestTimer = setTimeout(()=>{
-          const items = (window.universities||[])
-            .filter(u => u.name.toLowerCase().includes(q.toLowerCase()))
-            .slice(0, 8);
-          if (!items.length) { suggest.style.display='none'; return; }
-          suggest.innerHTML = items.map(u => `<div data-id="${u.unitid}" style="padding:.5rem .6rem; border-radius:8px; cursor:pointer;">${u.name} ${u.state?`(${u.state})`:''}</div>`).join('');
-          Array.from(suggest.children).forEach(el=>{
-            el.addEventListener('mouseenter', ()=> el.style.background='#f8fafc');
-            el.addEventListener('mouseleave', ()=> el.style.background='transparent');
-            el.addEventListener('click', ()=>{
-              toggleSelect(String(el.getAttribute('data-id')));
-              suggest.style.display='none';
-            });
-          });
-          suggest.style.display='block';
-        }, 120);
-      });
-      searchInput?.addEventListener('blur', ()=> setTimeout(()=> suggest.style.display='none', 150));
-      searchApplyBtn?.addEventListener('click', ()=> applyFilters(true));
-      filterApplyBtn?.addEventListener('click', ()=> applyFilters(true));
-      resetBtn?.addEventListener('click', ()=>{
-        searchInput.value=''; stateSel.value=''; typeSel.value=''; levelSel.value=''; sortSel.value='name_asc';
-        applyFilters(true);
-      });
-      clearFiltersBtn?.addEventListener('click', ()=>{
-        stateSel.value=''; typeSel.value=''; levelSel.value=''; sortSel.value='name_asc';
-        applyFilters(true);
-      });
-      prevPage?.addEventListener('click', ()=>{ if (currPage>1){ currPage--; renderPage(); }});
-      nextPage?.addEventListener('click', ()=>{ if (currPage<totalPages){ currPage++; renderPage(); }});
-      pageSize?.addEventListener('change', ()=>{ currPage=1; renderPage(); });
-
-      retryLoadBtn?.addEventListener('click', async ()=>{
-        try { await window.loadDataset?.(); applyFilters(true); } catch {}
-      });
-
-      // SEND REQUEST form (student)
-      const sendForm = document.getElementById('stuSendForm');
-      sendForm?.addEventListener('submit', (e)=>{
-        e.preventDefault();
-        const name = document.getElementById('stuName').value.trim();
-        const email= document.getElementById('stuEmail').value.trim();
-        const rname= document.getElementById('recName').value.trim();
-        const remail=document.getElementById('recEmail').value.trim();
-        const waive = (sendForm.querySelector('input[name="waiver"]:checked')?.value === 'waive');
-
-        if(!name || !email || !rname || !remail){
-          toast('Please complete all fields.', 'error'); return;
-        }
-
-        // Parse name -> first/last (simple split)
-        const [first, ...rest] = name.split(/\s+/);
-        const last = rest.join(' ');
-
-        // Persist sr_referral for recommender view
-        const unitids = Array.from(window.studentUnitIds);
-        const save = {
-          student: { first, last, email, waive },
-          recommender: { name: rname, email: remail },
-          unitids
-        };
-        safeLS.set('sr_referral', JSON.stringify(save));
-        safeLS.set('sr_referral_raw', JSON.stringify({
-          studentFirst:first, studentLast:last, studentEmail:email, waiveAccess:waive,
-          recommenderName:rname, recommenderEmail:remail, unitids
-        }));
-
-        // Track table entry
-        const reqs = JSON.parse(safeLS.get('sr_requests','[]') || '[]');
-        reqs.unshift({ rname, remail, date: new Date().toISOString(), status: 'Sent' });
-        safeLS.set('sr_requests', JSON.stringify(reqs));
-
-        updateTrackTable();
-        toast('Request sent to recommender.', 'success');
-      });
-
-      function updateTrackTable(){
-        const body = document.getElementById('stuTrackBody');
-        body.innerHTML = '';
-        const rows = JSON.parse(safeLS.get('sr_requests','[]')||'[]');
-        rows.forEach(r=>{
-          const tr = document.createElement('tr');
-          const d = new Date(r.date);
-          tr.innerHTML = `
-            <td>${r.rname||'—'}</td>
-            <td>${r.remail||'—'}</td>
-            <td>${d.toLocaleDateString()} ${d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</td>
-            <td><span class="track-pill ${r.status==='Received'?'received':r.status==='Sent'?'sent':'pending'}">${r.status||'Pending'}</span></td>
-          `;
-          body.appendChild(tr);
         });
       }
 
-      // Initialize now
-      init().then(updateTrackTable);
-    })();
+      // Theme toggle (very simple)
+      const themeBtn = document.getElementById('headerThemeBtn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', ()=>{
+          const root = document.documentElement;
+          const isDark = root.getAttribute('data-theme') === 'dark';
+          root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+          themeBtn.setAttribute('aria-pressed', isDark ? 'false' : 'true');
+          try { localStorage.setItem('sr_theme', isDark ? 'light' : 'dark'); } catch(e){}
+        });
 
-    /* ----------------- Recommender View: Link intake + Uploads + Writer + Selected + Send ----------------- */
-    ;(function(){
-      /* Link intake */
-      const els = {
-        input:  document.getElementById('linkInput'),
-        parse:  document.getElementById('linkParseBtn'),
-        status: document.getElementById('linkStatus'),
-        sum:    document.getElementById('linkSummary'),
-        help:   document.getElementById('linkHelpBtn'),
-      };
-      els.help?.addEventListener('click', () => {
-        const det = document.getElementById('linkFormatDetails');
-        if (!det) return;
-        det.open = true;
-        det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      });
-      function setStatus(msg, type='info'){
-        if (!els.status) return;
-        const color = type==='error' ? '#b91c1c' : type==='success' ? '#166534' : '#334155';
-        els.status.innerHTML = `<span style="color:${color}">${msg}</span>`;
-      }
-      function parseLink(raw){
+        // load saved theme
         try {
-          const url = new URL(raw);
-          const q   = url.searchParams;
-          const data = {
-            studentFirst:   q.get('sf') || q.get('sfn') || '',
-            studentLast:    q.get('sl') || q.get('sln') || '',
-            studentEmail:   q.get('se') || q.get('semail') || '',
-            studentPhone:   q.get('sp') || q.get('sphone') || '',
-            waiveAccess:    q.get('waive') === '1' || q.get('waive') === 'true',
-            recommenderName: q.get('rname') || '',
-            recommenderEmail: q.get('remail') || '',
-            recommenderPhone: q.get('rphone') || '',
-            unitids: [],
-            unames: [],
-          };
-          const unis = q.get('unis'); if (unis) data.unitids = unis.split(',').map(s => s.trim()).filter(Boolean);
-          const unames = q.get('unames'); if (unames) data.unames = unames.split(',').map(s => s.trim()).filter(Boolean);
-          return data;
-        } catch { return null; }
-      }
-      function summarize(data, matchedCount){
-        const lines = [];
-        if (data.studentFirst || data.studentLast) {
-          lines.push(`<div><b>Student</b>: ${[data.studentFirst, data.studentLast].filter(Boolean).join(' ') || '<span class="muted">—</span>'}</div>`);
-        }
-        if (data.studentEmail || data.studentPhone) {
-          lines.push(`<div><b>Contact</b>: ${[data.studentEmail, data.studentPhone].filter(Boolean).join(' • ') || '<span class="muted">—</span>'}</div>`);
-        }
-        if (typeof data.waiveAccess !== 'undefined') {
-          lines.push(`<div><b>Waive access</b>: ${data.waiveAccess ? '<span style="color:#166534;font-weight:800;">Yes</span>' : 'No'}</div>`);
-        }
-        if (data.recommenderName || data.recommenderEmail || data.recommenderPhone) {
-          lines.push(`<div><b>Recommender</b>: ${data.recommenderName || ''} ${data.recommenderEmail ? '• ' + data.recommenderEmail : ''} ${data.recommenderPhone ? '• ' + data.recommenderPhone : ''}</div>`);
-        }
-        if (Array.isArray(data.unitids) && data.unitids.length) {
-          lines.push(`<div><b>Universities (unitids)</b>: ${data.unitids.length} ${matchedCount!=null?`<span class="${matchedCount>0?'ok':'warn'}">(matched ${matchedCount})</span>`:''}</div>`);
-        } else if (Array.isArray(data.unames) && data.unames.length) {
-          lines.push(`<div><b>Universities (by name)</b>: ${data.unames.length} (will match)</div>`);
-        }
-        els.sum.innerHTML = lines.join('') || '<div class="muted">No details found.</div>';
-        els.sum.style.display = 'block';
-      }
-      async function applyReferralData(data){
-        // Save raw info
-        safeLS.set('sr_referral_raw', JSON.stringify(data));
-
-        // Keep studentUnitIds as the ground truth for selections
-        window.studentUnitIds = new Set();
-
-        let matchedCount = 0;
-        await window.loadDataset?.();
-
-        if (Array.isArray(data.unitids) && data.unitids.length && Array.isArray(window.universities)) {
-          const master = new Map(window.universities.map(u => [String(u.unitid), u]));
-          data.unitids.forEach(id => {
-            const uid = String(id);
-            if (master.has(uid)) {
-              window.studentUnitIds.add(uid);
-              matchedCount++;
-            }
-          });
-        }
-        if ((!data.unitids || !data.unitids.length) && Array.isArray(data.unames) && data.unames.length && Array.isArray(window.universities)) {
-          const names = data.unames.map(s => (s||'').toString().trim().toLowerCase());
-          for (const u of window.universities) {
-            const n = (u.name||'').toLowerCase();
-            if (names.some(q => n.includes(q))) {
-              window.studentUnitIds.add(String(u.unitid));
-              matchedCount++;
-            }
+          const t = localStorage.getItem('sr_theme');
+          if (t === 'dark' || t === 'light') {
+            document.documentElement.setAttribute('data-theme', t);
+            themeBtn.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
           }
-        }
-
-        const save = {
-          student: { first: data.studentFirst, last: data.studentLast, email: data.studentEmail, phone: data.studentPhone, waive: !!data.waiveAccess },
-          recommender: { name: data.recommenderName, email: data.recommenderEmail, phone: data.recommenderPhone },
-          unitids: Array.from(window.studentUnitIds),
-        };
-        safeLS.set('sr_referral', JSON.stringify(save));
-
-        if (typeof window.refreshSelectedForRecommender === 'function') window.refreshSelectedForRecommender();
-
-        return matchedCount;
+        } catch(e){}
       }
-      async function handleImport(){
-        const raw = (els.input?.value || '').trim();
-        if (!raw) { setStatus('Please paste a link first.', 'error'); return; }
-        const data = parseLink(raw);
-        if (!data) { setStatus('That doesn’t look like a valid link. Make sure it includes query parameters.', 'error'); return; }
-        setStatus('Parsing link and applying data…');
-        const matched = await applyReferralData(data);
-        summarize(data, matched);
-        const titleEl = document.getElementById('writerTitle');
-        const full = [data.studentFirst, data.studentLast].filter(Boolean).join(' ');
-        if (titleEl && full) titleEl.value = `Recommendation for ${full}`;
-        toast(`Imported ${matched} universit${matched===1?'y':'ies'} from the link.`, matched ? 'success' : 'info');
-        setStatus('Link imported successfully.', 'success');
-      }
-      els.parse?.addEventListener('click', handleImport);
-      els.input?.addEventListener('keydown', (e)=>{ if (e.key === 'Enter'){ e.preventDefault(); handleImport(); } });
-
-      /* Uploads (PDF + Video) */
-      function fmt(bytes){
-        if(!bytes && bytes!==0) return '—';
-        const k=1024, sizes=['B','KB','MB','GB']; let i = Math.floor(Math.log(bytes)/Math.log(k));
-        return (bytes/Math.pow(k,i)).toFixed(i?1:0)+' '+sizes[i];
-      }
-      // PDF
-      const pdfDrop = document.getElementById('pdfDrop');
-      const pdfInput= document.getElementById('pdfInput');
-      const choosePdfBtn = document.getElementById('choosePdfBtn');
-      const pdfPill = document.getElementById('pdfPill');
-      const pdfName = document.getElementById('pdfName');
-      const pdfSize = document.getElementById('pdfSize');
-      const removePdfBtn = document.getElementById('removePdfBtn');
-      function acceptPdf(file){
-        if(!file) return;
-        if(file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')){
-          toast('Please upload a PDF file.', 'error'); return;
-        }
-        pdfName.textContent = file.name;
-        pdfSize.textContent = fmt(file.size);
-        pdfPill.classList.remove('hidden');
-        safeLS.set('sr_pdf_name', file.name);
-        safeLS.set('sr_pdf_size', String(file.size||0));
-        toast('PDF attached.', 'success');
-      }
-      choosePdfBtn?.addEventListener('click', ()=> pdfInput.click());
-      pdfInput?.addEventListener('change', (e)=> acceptPdf(e.target.files?.[0]));
-      ['dragenter','dragover'].forEach(ev => pdfDrop?.addEventListener(ev, e=>{ e.preventDefault(); pdfDrop.classList.add('dragover'); }));
-      ['dragleave','drop'].forEach(ev => pdfDrop?.addEventListener(ev, e=>{ e.preventDefault(); pdfDrop.classList.remove('dragover'); }));
-      pdfDrop?.addEventListener('drop', (e)=> acceptPdf(e.dataTransfer?.files?.[0]));
-      removePdfBtn?.addEventListener('click', ()=>{
-        pdfPill.classList.add('hidden'); pdfInput.value='';
-        safeLS.del('sr_pdf_name'); safeLS.del('sr_pdf_size');
-        toast('PDF removed.', 'info');
-      });
-
-      // Video
-      const vidDrop = document.getElementById('vidDrop');
-      const vidInput= document.getElementById('vidInput');
-      const chooseVidBtn = document.getElementById('chooseVidBtn');
-      const vidPill = document.getElementById('vidPill');
-      const vidName = document.getElementById('vidName');
-      const vidSize = document.getElementById('vidSize');
-      const removeVidBtn = document.getElementById('removeVidBtn');
-      const vidPreview = document.getElementById('vidPreview');
-      function acceptVideo(file){
-        if(!file) return;
-        const ok = /video\/(mp4|quicktime|webm)/.test(file.type) || /\.(mp4|mov|webm)$/i.test(file.name);
-        if(!ok){ toast('Unsupported video type. Use MP4 / MOV / WEBM.', 'error'); return; }
-        vidName.textContent = file.name;
-        vidSize.textContent = fmt(file.size);
-        vidPill.classList.remove('hidden');
-        const url = URL.createObjectURL(file);
-        vidPreview.src = url; vidPreview.style.display = 'block';
-        safeLS.set('sr_video_name', file.name);
-        safeLS.set('sr_video_size', String(file.size||0));
-        toast('Video attached.', 'success');
-      }
-      chooseVidBtn?.addEventListener('click', ()=> vidInput.click());
-      vidInput?.addEventListener('change', (e)=> acceptVideo(e.target.files?.[0]));
-      ['dragenter','dragover'].forEach(ev => vidDrop?.addEventListener(ev, e=>{ e.preventDefault(); vidDrop.classList.add('dragover'); }));
-      ['dragleave','drop'].forEach(ev => vidDrop?.addEventListener(ev, e=>{ e.preventDefault(); vidDrop.classList.remove('dragover'); }));
-      vidDrop?.addEventListener('drop', (e)=> acceptVideo(e.dataTransfer?.files?.[0]));
-      removeVidBtn?.addEventListener('click', ()=>{
-        vidPill.classList.add('hidden'); vidInput.value=''; vidPreview.removeAttribute('src'); vidPreview.style.display='none';
-        safeLS.del('sr_video_name'); safeLS.del('sr_video_size');
-        toast('Video removed.', 'info');
-      });
-
-      // Restore from saved metadata (after refresh)
-      (function restoreAttached(){
-        const pn = safeLS.get('sr_pdf_name',''); const ps = Number(safeLS.get('sr_pdf_size',''));
-        if(pn){ pdfName.textContent = pn; pdfSize.textContent = fmt(ps); pdfPill.classList.remove('hidden'); }
-        const vn = safeLS.get('sr_video_name',''); const vs = Number(safeLS.get('sr_video_size',''));
-        if(vn){ vidName.textContent = vn; vidSize.textContent = fmt(vs); vidPill.classList.remove('hidden'); }
-      })();
-
-      /* Writer actions */
-      const box = document.getElementById('writerBox');
-      const title = document.getElementById('writerTitle');
-      const savedEl = document.getElementById('writerSaved');
-      const countEl = document.getElementById('writerCount');
-
-      function updateCount(){
-        const text = box.innerText || '';
-        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-        countEl.textContent = words + ' words • ' + text.length + ' chars';
-      }
-      box.addEventListener('input', ()=>{ updateCount(); savedEl.textContent='Unsaved'; });
-
-      document.querySelectorAll('.toolbar [data-cmd]').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          const cmd = btn.getAttribute('data-cmd');
-          document.execCommand(cmd, false, null);
-          box.focus();
-        });
-      });
-
-      function draftKey(){ return 'sr_writer_draft'; }
-      function saveDraft(){
-        const data = { title: title.value || '', html: box.innerHTML || '' };
-        safeLS.set(draftKey(), JSON.stringify(data));
-        savedEl.textContent = 'Saved';
-        toast('Draft saved.', 'success');
-      }
-      function restoreDraft(){
-        try {
-          const raw = safeLS.get(draftKey(), '');
-          if(!raw){ toast('No saved draft found.', 'error'); return; }
-          const data = JSON.parse(raw);
-          title.value = data.title || '';
-          box.innerHTML = data.html || '';
-          updateCount();
-          savedEl.textContent = 'Restored';
-          toast('Draft restored.', 'success');
-        } catch { toast('Could not restore draft.', 'error'); }
-      }
-      function clearDraft(){
-        box.innerHTML = ''; title.value = '';
-        updateCount();
-        savedEl.textContent = 'Cleared';
-      }
-      function copyDraft(){
-        const text = (title.value ? (title.value+'\n\n') : '') + (box.innerText || '');
-        navigator.clipboard.writeText(text).then(()=> toast('Copied to clipboard.', 'success'), ()=> toast('Copy failed.', 'error'));
-      }
-      function downloadDraft(){
-        const text = (title.value ? (title.value+'\n\n') : '') + (box.innerText || '');
-        const blob = new Blob([text], {type:'text/plain'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = (title.value ? title.value.replace(/[^\w\-]+/g,'_') : 'recommendation') + '.txt';
-        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-      }
-      function attachDraft(){
-        // If no PDF chosen yet, attach the draft as a .txt “letter attachment”
-        if(!safeLS.get('sr_pdf_name','')){
-          const name = (title.value ? title.value.replace(/[^\w\-]+/g,'_') : 'recommendation') + '.txt';
-          const text = (title.value ? (title.value+'\n\n') : '') + (box.innerText || '');
-          safeLS.set('sr_pdf_name', name);
-          safeLS.set('sr_pdf_size', String(text.length));
-          // reflect in UI
-          const pdfName = document.getElementById('pdfName');
-          const pdfSize = document.getElementById('pdfSize');
-          const pdfPill = document.getElementById('pdfPill');
-          pdfName.textContent = name;
-          pdfSize.textContent = text.length + ' bytes (draft)';
-          pdfPill.classList.remove('hidden');
-          toast('Draft attached as text file.', 'success');
-        } else {
-          toast('A PDF is already attached. Remove it first to attach draft text.', 'info');
-        }
-      }
-
-      document.getElementById('saveDraftBtn')?.addEventListener('click', saveDraft);
-      document.getElementById('restoreDraftBtn')?.addEventListener('click', restoreDraft);
-      document.getElementById('clearDraftBtn')?.addEventListener('click', clearDraft);
-      document.getElementById('copyDraftBtn')?.addEventListener('click', copyDraft);
-      document.getElementById('downloadDraftBtn')?.addEventListener('click', downloadDraft);
-      document.getElementById('attachDraftBtn')?.addEventListener('click', attachDraft);
-
-      try {
-        const raw = safeLS.get('sr_writer_draft','');
-        if(raw){ const d=JSON.parse(raw); title.value=d.title||''; box.innerHTML=d.html||''; updateCount(); savedEl.textContent='Restored'; }
-      } catch {}
-      updateCount();
-
-      /* Selected Universities (Recommender View) */
-      const listEl  = document.getElementById('selectedListRec');
-      const countEl = document.getElementById('selectedCountRec');
-      const sendBtn = document.getElementById('sendBtn');
-
-      function getSelectedIds(){
-        try {
-          const raw = safeLS.get('sr_referral','');
-          if(raw){
-            const data = JSON.parse(raw);
-            if(Array.isArray(data.unitids) && data.unitids.length) return data.unitids.map(String);
-          }
-        } catch {}
-        if (window.studentUnitIds && window.studentUnitIds.size) return Array.from(window.studentUnitIds).map(String);
-        return [];
-      }
-      function idToName(id){
-        if(Array.isArray(window.universities)){
-          const hit = window.universities.find(u => String(u.unitid)===String(id));
-          if(hit) return hit.name + (hit.state ? ` (${hit.state})` : '');
-        }
-        return `UnitID ${id}`;
-      }
-      function renderSelected(){
-        const ids = getSelectedIds();
-        listEl.innerHTML='';
-        ids.forEach(id=>{
-          const tag = document.createElement('span');
-          tag.className = 'tag';
-          tag.textContent = idToName(id);
-          listEl.appendChild(tag);
-        });
-        countEl.textContent = ids.length + ' ' + (ids.length===1?'university selected':'universities selected');
-        sendBtn.disabled = ids.length === 0;
-      }
-      window.refreshSelectedForRecommender = renderSelected;
-      renderSelected();
-
-      // Copy shareable link (if sr_referral_raw exists)
-      document.getElementById('copyLinkBtn')?.addEventListener('click', ()=>{
-        try {
-          const raw = safeLS.get('sr_referral_raw','');
-          const base = location.origin + location.pathname;
-          if(raw){
-            const obj = JSON.parse(raw);
-            const q = new URLSearchParams();
-            if(obj.studentFirst) q.set('sf', obj.studentFirst);
-            if(obj.studentLast)  q.set('sl', obj.studentLast);
-            if(obj.studentEmail) q.set('se', obj.studentEmail);
-            if(obj.waiveAccess!=null) q.set('waive', obj.waiveAccess ? '1':'0');
-            const ids = getSelectedIds();
-            if(ids.length) q.set('unis', ids.join(','));
-            const share = base + '?' + q.toString();
-            navigator.clipboard.writeText(share).then(()=> toast('Link copied.', 'success'));
-          } else {
-            toast('No student link data available to copy.', 'error');
-          }
-        } catch { toast('Could not copy link.', 'error'); }
-      });
-
-      /* Send flow: confirm -> progress -> success */
-      const overlay = document.getElementById('confirmOverlay');
-      const closeBtn= document.getElementById('confirmClose');
-      const cancel  = document.getElementById('confirmCancel');
-      const confirm = document.getElementById('confirmSend');
-      const incList = document.getElementById('incList');
-      const incCount= document.getElementById('incCount');
-      const summary = document.getElementById('confirmSummary');
-
-      const progressCard = document.getElementById('progressCard');
-      const successCard  = document.getElementById('successCard');
-      const progressFill = document.getElementById('progressFill');
-      const progressText = document.getElementById('progressText');
-      const deliveryList = document.getElementById('deliveryList');
-      const newUploadBtn = document.getElementById('newUploadBtn');
-
-      function openConfirm(){
-        const ids = getSelectedIds();
-        if (!ids.length){ toast('No universities selected.', 'error'); return; }
-
-        incList.innerHTML = '';
-        ids.forEach(id=>{
-          const row = document.createElement('div');
-          row.textContent = idToName(id);
-          incList.appendChild(row);
-        });
-        incCount.textContent = String(ids.length);
-
-        let stu = {}, rec = {};
-        try { const o = JSON.parse(safeLS.get('sr_referral','{}')); stu=o.student||{}; rec=o.recommender||{}; } catch {}
-        const title = document.getElementById('writerTitle')?.value?.trim() || '';
-        summary.innerHTML = `
-          <div><b>Letter</b>: ${title || '<em>Untitled</em>'}</div>
-          <div><b>Student</b>: ${(stu.first||'') + ' ' + (stu.last||'') || '<em>—</em>'} ${stu.email?('• '+stu.email):''}</div>
-          <div><b>Recommender</b>: ${rec.name||'<em>—</em>'} ${rec.email?('• '+rec.email):''}</div>
-          <div class="muted" style="margin-top:.25rem;">Ready to send to ${ids.length} destination${ids.length>1?'s':''}.</div>
-        `;
-        overlay.classList.add('show');
-      }
-      function closeConfirm(){ overlay.classList.remove('show'); }
-
-      sendBtn?.addEventListener('click', openConfirm);
-      closeBtn?.addEventListener('click', closeConfirm);
-      cancel  ?.addEventListener('click', closeConfirm);
-
-      confirm?.addEventListener('click', ()=>{
-        closeConfirm();
-
-        // Optionally enforce an attachment
-        if (!safeLS.get('sr_pdf_name','')){
-          toast('No letter attached. Attach a PDF or use “Attach draft”.', 'error');
-          return;
-        }
-
-        progressCard.classList.remove('hidden');
-        successCard.classList.add('hidden');
-        deliveryList.innerHTML='';
-        progressFill.style.width='0%';
-        progressText.textContent='Starting deliveries...';
-
-        const ids = getSelectedIds();
-        const rows = ids.map(id=>{
-          const el = document.createElement('div');
-          el.style.cssText = 'display:flex; align-items:center; gap:.6rem; background:#f8fafc; border:1px solid #e5e7eb; border-radius:10px; padding:.6rem .8rem;';
-          el.innerHTML = `<span class="status pending" aria-hidden="true" style="width:18px; height:18px; border-radius:50%; background:#ffedd5;"></span>
-                          <div style="flex:1">${idToName(id)}</div>
-                          <div class="state" style="font-weight:800; color:#9a3412;">Pending</div>`;
-          deliveryList.appendChild(el);
-          return el;
-        });
-
-        // Simulate send
-        let done = 0;
-        function step(i){
-          if(i>=rows.length){
-            progressFill.style.width='100%';
-            progressText.textContent='All deliveries completed.';
-            setTimeout(()=>{
-              progressCard.classList.add('hidden');
-              successCard.classList.remove('hidden');
-            }, 350);
-            return;
-          }
-          progressText.textContent=`Sending to ${idToName(ids[i])}...`;
-          setTimeout(()=>{
-            const row = rows[i];
-            row.querySelector('.status').style.background = '#dcfce7';
-            const st = row.querySelector('.state');
-            st.textContent = 'Delivered';
-            st.style.color = '#166534';
-            done++;
-            progressFill.style.width = Math.round(done/rows.length*100)+'%';
-            step(i+1);
-          }, 550 + Math.random()*450);
-        }
-        setTimeout(()=> step(0), 250);
-      });
-
-      newUploadBtn?.addEventListener('click', ()=>{
-        successCard.classList.add('hidden');
-        // Reset attachments but keep selections
-        try {
-          safeLS.del('sr_pdf_name'); safeLS.del('sr_pdf_size');
-          document.getElementById('pdfPill').classList.add('hidden');
-          document.getElementById('pdfInput').value='';
-          safeLS.del('sr_video_name'); safeLS.del('sr_video_size');
-          document.getElementById('vidPill').classList.add('hidden');
-          const v = document.getElementById('vidPreview'); v.removeAttribute('src'); v.style.display='none';
-        } catch {}
-        toast('You can upload a new letter now.', 'info');
-        window.scrollTo({top:0, behavior:'smooth'});
-      });
     })();
   </script>
+  <!-- (Optional) Fallback: if vendor CDNs fail, avoid crashing -->
+  <script>
+    window.addEventListener('error', function(e){
+      if ((e.filename || '').includes('fuse.min.js') || (e.filename || '').includes('localforage.min.js')) {
+        console.warn('[SR] Vendor script load issue. Features that depend on it may be limited.');
+      }
+    });
+  </script>
+<!-- Three-tab Student panel controller -->
+<script>
+(function(){
+  const tabs = {
+    send:   document.getElementById('stuTabSend'),
+    select: document.getElementById('stuTabSelect'),
+    track:  document.getElementById('stuTabTrack'),
+  };
+  const panels = {
+    send:   document.getElementById('stuPanelSend'),
+    select: document.getElementById('stuPanelSelect'),
+    track:  document.getElementById('stuPanelTrack'),
+  };
+
+  function activate(which){
+    Object.entries(tabs).forEach(([k, btn])=>{
+      if (!btn) return;
+      const on = (k === which);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    Object.entries(panels).forEach(([k, sec])=>{
+      if (!sec) return;
+      sec.hidden = (k !== which);
+    });
+  }
+
+  tabs.send  ?.addEventListener('click', ()=>activate('send'));
+  tabs.select?.addEventListener('click', ()=>activate('select'));
+  tabs.track ?.addEventListener('click', ()=>activate('track'));
+
+  // default stays on "send"
+  activate('send');
+})();
+</script>
+
+<!-- Robust toggler duplicate (ensures no stale hidden/display mismatch) -->
+<script>
+(function(){
+  const studentPanel = document.getElementById('panel-student');
+  const recPanel     = document.getElementById('panel-recommender');
+  const toggles      = document.querySelectorAll('.header-nav .nav-link');
+
+  if (!studentPanel || !recPanel || !toggles.length) return;
+
+  // Robust localStorage helpers (avoid quota crashes)
+  const safeLS = {
+    get(k, d){ try { return localStorage.getItem(k) ?? d; } catch(e){ return d; } },
+    set(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
+  };
+
+  function setActive(view){
+    const isStudent = (view === 'student');
+    // Remove BOTH visibility mechanisms to be safe across old markup
+    studentPanel.hidden = !isStudent;
+    recPanel.hidden     =  isStudent;
+    studentPanel.style.display = isStudent ? '' : 'none';
+    recPanel.style.display     = isStudent ? 'none' : '';
+
+    toggles.forEach(btn => {
+      const on = btn.dataset.view === view;
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      if (on) btn.setAttribute('aria-current','page'); else btn.removeAttribute('aria-current');
+    });
+
+    // Deep-link & remember (safely)
+    history.replaceState(null, '', '#' + view);
+    safeLS.set('sr_current_view', view);
+  }
+
+  // Click handlers
+  toggles.forEach(btn => btn.addEventListener('click', () => setActive(btn.dataset.view)));
+
+  // Initial state from hash or last saved (safely)
+  const fromHash = (location.hash || '').replace('#','');
+  const saved    = safeLS.get('sr_current_view', '');
+  const initial  = (fromHash === 'recommender' || fromHash === 'student') ? fromHash
+                  : (saved === 'recommender' || saved === 'student') ? saved
+                  : 'student';
+  setActive(initial);
+
+  // Keep hash in sync if user types it
+  window.addEventListener('hashchange', () => {
+    const v = (location.hash || '#student').slice(1);
+    setActive(v === 'recommender' ? 'recommender' : 'student');
+  });
+})();
+</script>
+
 </body>
 </html>
