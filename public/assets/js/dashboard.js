@@ -53,7 +53,7 @@
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && overlay?.classList.contains('show')) close(); });
 })();
 
-// Form validation + “send” simulation
+// Form validation + “send” with MockAPI integration
 (function(){
   const form = document.getElementById('addRecForm');
   const sendBtn = document.getElementById('sendToRecBtn');
@@ -64,17 +64,72 @@
   function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').toLowerCase()); }
   function showErr(id, show){ const el = f(id); if(el) el.style.display = show ? 'block' : 'none'; }
 
-  sendBtn?.addEventListener('click', ()=>{
+  // ---------- CONFIG ----------
+  const STUDENT_NAME  = 'Test Applicant';
+  const STUDENT_EMAIL = 'applicant@test.com';
+  const API_URL = 'https://68bfba1a9c70953d96f04ea0.mockapi.io/api/recs';
+
+  async function createRecommendation({ studentName, studentEmail, recommenderName, recommenderEmail }){
+    const externalId = 'sr_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+    const payload = {
+      external_id:       externalId,
+      student_name:      studentName,
+      student_email:     (studentEmail||'').toLowerCase(),
+      recommender_name:  recommenderName,
+      recommender_email: (recommenderEmail||'').toLowerCase(),
+      status:            'Pending',
+      created_at:        new Date().toISOString()
+    };
+
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Create failed: ' + res.status);
+    const data = await res.json();
+
+    localStorage.setItem('sr_last_external_id', externalId);
+    localStorage.setItem('sr_last_mock_id', String(data.id));
+
+    return data;
+  }
+
+  async function markRecommendationSent(recordId){
+    const res = await fetch(`${API_URL}/${recordId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({ status: 'Sent' })
+    });
+    if (!res.ok) throw new Error('Update failed: ' + res.status);
+    return res.json();
+  }
+
+  sendBtn?.addEventListener('click', async ()=>{
     let ok = true;
     if(!first.value.trim()){ showErr('firstErr', true); ok=false; } else showErr('firstErr', false);
     if(!last.value.trim()){ showErr('lastErr', true);  ok=false; } else showErr('lastErr', false);
     if(!validEmail(email.value)){ showErr('emailErr', true); ok=false; } else showErr('emailErr', false);
     if(!ok){ toast('Please fix the highlighted fields.', 'error'); return; }
 
-    // Demo: pretend we sent the request and the recommender uploaded.
-    toast('Request sent to recommender.', 'success');
+    const recommenderFullName = `${first.value.trim()} ${last.value.trim()}`.replace(/\s+/g,' ').trim();
+    const recommenderEmail = email.value.trim();
 
-    // Add a line item in the Recommendations panel
+    let created;
+    try {
+      created = await createRecommendation({
+        studentName: STUDENT_NAME,
+        studentEmail: STUDENT_EMAIL,
+        recommenderName: recommenderFullName,
+        recommenderEmail
+      });
+      toast('Request sent to recommender (created in portal).', 'success');
+    } catch(err){
+      console.error(err);
+      toast('Could not create the recommendation in the portal. Please try again.', 'error');
+      return;
+    }
+
     const list = document.getElementById('recList');
     if (list) {
       const row = document.createElement('div');
@@ -82,27 +137,42 @@
       row.innerHTML = `
         <span class="material-icons" aria-hidden="true" style="color:#1976d2">person</span>
         <div style="flex:1">
-          <div style="font-weight:700">${first.value} ${last.value}</div>
-          <div style="font-size:.9rem;color:#667">${email.value}</div>
+          <div style="font-weight:700">${recommenderFullName}</div>
+          <div style="font-size:.9rem;color:#667">${recommenderEmail}</div>
         </div>
-        <span class="ok"><span class="material-icons" aria-hidden="true">check_circle</span> Uploaded</span>
+        <span class="track-pill pending">Pending</span>
       `;
       list.prepend(row);
     }
 
-    // Flip tabs state: show success pill + success block in Application panel
     document.getElementById('recStatusPill')?.style.setProperty('display','inline-flex');
     const okBlock = document.getElementById('recUploadOk');
     const pending = document.getElementById('recUploadPending');
     if (okBlock) okBlock.style.display = 'flex';
     if (pending) pending.style.display = 'none';
 
-    // Close modal & reset
     document.getElementById('cancelRecBtn')?.click();
     form?.reset();
+
+    // Update to Sent after 2s (simulating recommender upload)
+    const id = String(created.id);
+    setTimeout(async ()=>{
+      try {
+        await markRecommendationSent(id);
+        toast('Recommender upload received — status marked Sent.', 'success');
+        const firstPill = document.querySelector('#recList .track-pill.pending');
+        if (firstPill) {
+          firstPill.classList.remove('pending');
+          firstPill.classList.add('sent');
+          firstPill.textContent = 'Sent';
+        }
+      } catch (err){
+        console.error(err);
+        toast('Update failed while marking Sent.', 'error');
+      }
+    }, 2000);
   });
 
-  // Hide errors on input
   [first,last,email].forEach(inp=>{
     inp?.addEventListener('input', ()=>{
       if(inp===first) showErr('firstErr', false);
@@ -111,30 +181,20 @@
     });
   });
 })();
-<script>
+
+// Extra script to demo "Send to Universities" redirect
 (function(){
   const sendBtn = document.getElementById('sendBtn');
 
-  // CHANGE THIS to your mock site page path
-  const MOCK_INBOX_URL = 'https://mockuniversity.netlify.app/inbox.html';
-
   function buildDemoPdfUrl(){
-    // Option 1: static demo file
     return 'https://stellarrec.netlify.app/assets/mock/reco-demo.pdf';
-
-    // Option 2 (optional): if you actually attached a PDF and
-    // upload it to some storage, return that URL instead.
   }
 
   function getSelectedUnitIds(){
-    // These are maintained by your existing code.
-    // Fall back to studentUnitIds set if present.
-    const s = (window.studentUnitIds && [...window.studentUnitIds]) || [];
-    return s;
+    return (window.studentUnitIds && [...window.studentUnitIds]) || [];
   }
 
   function getStudentMeta(){
-    // Pull from your referral/local form; use empty defaults if not available
     try {
       const saved = JSON.parse(localStorage.getItem('sr_referral')||'{}');
       const s = saved.student || {};
@@ -160,10 +220,9 @@
 
   function goToMockInbox(){
     const pdfUrl = buildDemoPdfUrl();
-
     const stu  = getStudentMeta();
     const rec  = getRecommenderMeta();
-    const list = getSelectedUnitIds(); // array of unitids (strings)
+    const list = getSelectedUnitIds();
 
     const params = new URLSearchParams({
       sf: stu.studentFirst,
@@ -175,24 +234,17 @@
       pdf: pdfUrl
     });
 
-    // include selected universities (CSV of unitids)
     if (list.length) params.set('unis', list.join(','));
-
-    // OPTIONAL: include your own demo “letter title”
     const titleEl = document.getElementById('writerTitle');
     if (titleEl && titleEl.value.trim()) params.set('title', titleEl.value.trim());
 
-    // Navigate to Mock University inbox page
+    // CHANGE THIS to your mock university inbox page
+    const MOCK_INBOX_URL = 'https://mockuniversity.netlify.app/apply';
     window.location.href = `${MOCK_INBOX_URL}?${params.toString()}`;
   }
 
-  // Wire the real send button
   sendBtn?.addEventListener('click', (e)=>{
     e.preventDefault();
-    // If you show a confirm modal, call goToMockInbox() after confirm.
-    // For demo: jump immediately
     goToMockInbox();
   });
 })();
-</script>
-
