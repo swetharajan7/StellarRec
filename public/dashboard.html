@@ -258,7 +258,9 @@
       background:#fff; color:#0f172a; box-shadow:0 6px 18px rgba(0,0,0,.06);
     }
     .student-panels > section { display:block; }
-    .student-panels > section[hidden] { display:none; }
+  
+    .student-panels > section[hidden] { display: none !important; }
+
     .table { width:100%; border-collapse:separate; border-spacing:0; overflow:hidden;
       border:1px solid #e5e7eb; border-radius:12px; background:#fff; }
     .table th, .table td { padding:.7rem .8rem; text-align:left; border-bottom:1px solid #eef2f7; }
@@ -1898,6 +1900,92 @@ window.__srAnalytics = {
     try{
       navigator.serviceWorker.register('/sw.js');
     }catch(_){}
+  }
+})();
+</script>
+<script>
+/**
+ * Robust Student Tabs Controller
+ * - Runs after DOM is ready
+ * - Prevents double-binding
+ * - Syncs hash (#send | #select | #track) <-> UI
+ * - Survives DOM re-renders via a tiny retry loop
+ */
+(function(){
+  function bindStudentTabs(attempt=0){
+    if (window.__srStudentTabsBound__) return;
+    const tSend   = document.getElementById('stuTabSend');
+    const tSelect = document.getElementById('stuTabSelect');
+    const tTrack  = document.getElementById('stuTabTrack');
+    const pSend   = document.getElementById('stuPanelSend');
+    const pSelect = document.getElementById('stuPanelSelect');
+    const pTrack  = document.getElementById('stuPanelTrack');
+    const allTabs   = [tSend, tSelect, tTrack];
+    const allPanels = { send:pSend, select:pSelect, track:pTrack };
+
+    // If the nodes aren’t in the DOM yet, retry shortly (handles late mounts)
+    if (!tSend || !tSelect || !tTrack || !pSend || !pSelect || !pTrack) {
+      if (attempt < 20) return setTimeout(()=>bindStudentTabs(attempt+1), 100);
+      return; // give up silently after ~2s
+    }
+
+    function activate(which){
+      // aria-selected on tabs
+      [['send',tSend],['select',tSelect],['track',tTrack]].forEach(([k,btn])=>{
+        if (!btn) return;
+        btn.setAttribute('aria-selected', k===which ? 'true':'false');
+      });
+      // hide/show panels
+      Object.entries(allPanels).forEach(([k,sec])=>{
+        if (!sec) return;
+        sec.hidden = (k!==which);
+      });
+      // reflect in hash for deep-linking
+      try { history.replaceState(null,'', '#'+which); } catch(_){}
+      // if you have a renderer for Track, call it
+      if (which==='track' && typeof window.renderStudentTrack==='function') {
+        window.renderStudentTrack();
+      }
+    }
+
+    // Ensure buttons aren’t accidental submits inside forms
+    allTabs.forEach(b=>{ if (b) b.type = 'button'; });
+
+    // Bind once
+    if (!tSend.__bound){
+      tSend  .addEventListener('click', ()=>activate('send'));
+      tSelect.addEventListener('click', ()=>activate('select'));
+      tTrack .addEventListener('click', ()=>activate('track'));
+      tSend.__bound = tSelect.__bound = tTrack.__bound = true;
+    }
+
+    // Choose initial tab:
+    // 1) URL hash (#select/#track/#send) wins
+    // 2) Otherwise, whichever tab has aria-selected="true"
+    // 3) Fallback to "send"
+    const hash = (location.hash||'').replace('#','').toLowerCase();
+    const fromHash = (hash==='select'||hash==='track'||hash==='send') ? hash : null;
+    const fromAria =
+      (tSelect.getAttribute('aria-selected')==='true' && 'select') ||
+      (tTrack .getAttribute('aria-selected')==='true' && 'track')  ||
+      (tSend  .getAttribute('aria-selected')==='true' && 'send')   ||
+      null;
+    activate(fromHash || fromAria || 'send');
+
+    // Also listen to hash changes (deep-link from elsewhere)
+    window.addEventListener('hashchange', ()=>{
+      const h = (location.hash||'').replace('#','').toLowerCase();
+      if (h==='select'||h==='track'||h==='send') activate(h);
+    });
+
+    window.__srStudentTabsBound__ = true;
+  }
+
+  // Run ASAP (covers both inline and deferred script orders)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ()=>bindStudentTabs());
+  } else {
+    bindStudentTabs();
   }
 })();
 </script>
