@@ -1989,6 +1989,266 @@ window.__srAnalytics = {
   }
 })();
 </script>
+  <script>
+(function(){
+  if (window.__sr_uni_loader__) return; window.__sr_uni_loader__ = true;
+
+  // Global app state (reuse if present)
+  window.SR = window.SR || {
+    universities: [],
+    filtered: [],
+    q: '',
+    page: 1,
+    perPage: 40,
+    filters: { state:'', type:'', level:'', sort:'name_asc' },
+    selected: new Set(['MOCK-0000']),
+    fuse: null
+  };
+
+  function normalize(arr){
+    return arr.map(u=>({
+      unitid: String(u.unitid ?? u.UnitID ?? u.id ?? u.code ?? Math.random().toString(36).slice(2,9)),
+      name:   String(u.name ?? u.InstitutionName ?? u.inst_name ?? u.title ?? 'Unnamed Institution'),
+      state:  String(u.state ?? u.State ?? u.province ?? u.region ?? ''),
+      type:   String(u.type  ?? u.Sector ?? u.Control ?? 'Public'),
+      level:  String(u.level ?? u.Level ?? u.inst_level ?? '4-year')
+    }));
+  }
+
+  async function loadFromPublicJSON(){
+    // Try the path you mentioned
+    const tryUrls = [
+      'public/assets/us_institutions_by_state_2023.json',
+      '/public/assets/us_institutions_by_state_2023.json',
+      '/assets/us_institutions_by_state_2023.json' // fallback if deployed without /public prefix
+    ];
+    let raw;
+    for (const url of tryUrls){
+      try{
+        const res = await fetch(url, { cache:'force-cache' });
+        if (!res.ok) continue;
+        raw = await res.json();
+        break;
+      }catch(_){}
+    }
+    if (!raw) throw new Error('Could not fetch universities JSON.');
+
+    let flat = [];
+    if (Array.isArray(raw)) flat = raw;
+    else if (raw && typeof raw==='object'){
+      for (const [state, list] of Object.entries(raw)){
+        if (Array.isArray(list)) list.forEach(d => flat.push({ ...d, state: d.state ?? d.State ?? state }));
+      }
+    }
+    if (flat.length < 1000) throw new Error('Dataset looks too small; is the correct JSON deployed?');
+    return normalize(flat);
+  }
+
+  async function ensureDataset(){
+    if (window.SR && SR.universities && SR.universities.length) return;
+
+    SR.universities = await loadFromPublicJSON();
+
+    // Ensure Mock University exists and stays selected
+    if (!SR.universities.find(u=>u.unitid==='MOCK-0000')){
+      SR.universities.unshift({ unitid:'MOCK-0000', name:'Mock University', state:'CA', type:'Private nonprofit', level:'4-year' });
+    }
+    SR.selected = new Set([...(SR.selected||[]), 'MOCK-0000']);
+
+    // Build Fuse index for fast autosuggest
+    SR.fuse = new Fuse(SR.universities, {
+      keys: ['name'],
+      includeScore: true,
+      threshold: 0.3,
+      minMatchCharLength: 2
+    });
+  }
+
+  // Expose (used by later snippets)
+  window.srEnsureDataset = ensureDataset;
+})();
+</script>
+<script>
+(function(){
+  if (window.__sr_browse_bind__) return; window.__sr_browse_bind__ = true;
+
+  async function populateBrowseDropdown(){
+    const sel = document.getElementById('universitySelect');
+    if (!sel) return;
+    sel.length = 0;
+    const opt0 = document.createElement('option');
+    opt0.value = ''; opt0.disabled = true; opt0.selected = true;
+    opt0.textContent = 'Browse all universities (6000+)';
+    sel.appendChild(opt0);
+
+    // Sort by name A–Z for a nice dropdown
+    const list = SR.universities.slice().sort((a,b)=> a.name.localeCompare(b.name));
+    for (const u of list){
+      const opt = document.createElement('option');
+      opt.value = u.unitid;
+      opt.textContent = `${u.name} (${u.state})`;
+      sel.appendChild(opt);
+    }
+
+    sel.addEventListener('change', ()=>{
+      const id = sel.value;
+      if (!id) return;
+      SR.selected.add(id);
+      updateSelectedList();
+      toast('Added to your selection.','success');
+      // reset dropdown so user can pick another
+      sel.value = '';
+    });
+  }
+
+  // Minimal selected list updater (works for both student & recommender panels)
+  window.updateSelectedList = window.updateSelectedList || function(){
+    const ids = Array.from(SR.selected||[]);
+    const map = new Map(SR.universities.map(u=>[u.unitid, u]));
+    const items = ids.map(id=> map.get(id)).filter(Boolean);
+
+    const fill = (listEl, countEl)=>{
+      if (!listEl || !countEl) return;
+      listEl.innerHTML = '';
+      items.forEach(u=>{
+        const tag = document.createElement('div');
+        tag.className = 'selected-tag';
+        tag.innerHTML = `<span class="material-icons" aria-hidden="true">school</span>${u.name} <span class="remove-tag" role="button" title="Remove" data-id="${u.unitid}">✕</span>`;
+        listEl.appendChild(tag);
+      });
+      countEl.textContent = `${items.length} universit${items.length===1?'y':'ies'} selected`;
+      listEl.querySelectorAll('.remove-tag').forEach(x=>{
+        x.addEventListener('click', ()=>{ SR.selected.delete(x.dataset.id); updateSelectedList(); });
+      });
+      // keep send button state fresh if it exists
+      if (typeof updateSendButton === 'function') updateSendButton();
+    };
+
+    fill(document.getElementById('selectedList'),    document.getElementById('selectedCount'));
+    fill(document.getElementById('selectedListStu'), document.getElementById('selectedCountStu'));
+  };
+
+  // Call after dataset is ready
+  (async()=>{ await window.srEnsureDataset?.(); await populateBrowseDropdown(); updateSelectedList(); })();
+})();
+</script>
+<script>
+(function(){
+  if (window.__sr_autosuggest__) return; window.__sr_autosuggest__ = true;
+
+  const input   = document.getElementById('universitySearch');
+  const popover = document.getElementById('searchSuggest');
+
+  if (!input || !popover) return;
+
+  function hide(){ popover.style.display='none'; input.setAttribute('aria-expanded','false'); }
+  function show(){ popover.style.display='block'; input.setAttribute('aria-expanded','true'); }
+
+  function renderSuggestions(q){
+    if (!q || q.trim().length < 2) { hide(); return; }
+    const results = SR.fuse ? SR.fuse.search(q).slice(0, 10).map(r=>r.item) : [];
+    if (!results.length){ hide(); return; }
+
+    popover.innerHTML = '';
+    results.forEach(u=>{
+      const row = document.createElement('div');
+      row.className = 'suggest-item';
+      row.setAttribute('role','option');
+      row.innerHTML = `<span>${u.name}</span><small style="opacity:.7;">${u.state}</small>`;
+      row.addEventListener('click', ()=>{
+        SR.selected.add(u.unitid);
+        updateSelectedList();
+        toast(`Added: ${u.name}`,'success');
+        hide();
+        input.value = '';
+      });
+      popover.appendChild(row);
+    });
+    show();
+  }
+
+  // Debounce input
+  let t;
+  input.addEventListener('input', ()=>{
+    clearTimeout(t);
+    const q = input.value;
+    t = setTimeout(()=> renderSuggestions(q), 140);
+  });
+
+  // Apply button (Search) acts like pressing Enter -> render suggestions
+  document.getElementById('searchApplyBtn')?.addEventListener('click', ()=>{
+    renderSuggestions(input.value);
+  });
+
+  // Keyboard + outside click handling
+  document.addEventListener('click', (e)=>{
+    if (!popover.contains(e.target) && !input.contains(e.target)) hide();
+  });
+  input.addEventListener('keydown', (e)=>{
+    if (e.key==='Escape'){ hide(); input.blur(); }
+    if (e.key==='Enter'){ e.preventDefault(); renderSuggestions(input.value); }
+  });
+})();
+</script>
+<script>
+(function(){
+  if (window.__sr_bulk__) return; window.__sr_bulk__ = true;
+  const openBtn = document.getElementById('bulkImportBtn');
+  const modal   = document.getElementById('importModal');
+  const ta      = document.getElementById('importTextarea');
+  const prev    = document.getElementById('importPreview');
+  const addBtn  = document.getElementById('importConfirmBtn');
+  const cancel1 = document.getElementById('importCancelBtn');
+  const closeX  = document.getElementById('importCloseBtn');
+
+  if (!openBtn || !modal || !ta || !prev || !addBtn) return;
+
+  let lastMatches = [];
+
+  function open(){ modal.style.display='flex'; ta.focus(); ta.value = ta.value || ''; renderPreview(); }
+  function close(){ modal.style.display='none'; }
+
+  function renderPreview(){
+    const lines = ta.value.split('\n').map(s=>s.trim()).filter(Boolean);
+    const uniq = Array.from(new Set(lines));
+    const matches = [];
+    uniq.forEach(name=>{
+      // best match via Fuse: search top1
+      const res = SR.fuse ? SR.fuse.search(name, { limit: 1 }) : [];
+      if (res && res[0]) matches.push({ input:name, uni: res[0].item });
+      else matches.push({ input:name, uni:null });
+    });
+    lastMatches = matches;
+
+    const found = matches.filter(m=>m.uni).length;
+    const miss  = matches.length - found;
+    prev.innerHTML = `
+      <div><b>Preview:</b> ${found} matched, ${miss} not matched.</div>
+      <ul style="margin:.4rem 0 0 1rem;">
+        ${matches.slice(0,15).map(m=>`<li>${m.input} ${m.uni?`→ <span style="color:#166534">${m.uni.name} (${m.uni.state})</span>`:`<span style="color:#b91c1c">(no match)</span>`}</li>`).join('')}
+        ${matches.length>15?`<li>…and ${matches.length-15} more</li>`:''}
+      </ul>
+    `;
+  }
+
+  ta.addEventListener('input', renderPreview);
+  openBtn.addEventListener('click', open);
+  cancel1?.addEventListener('click', close);
+  closeX ?.addEventListener('click', close);
+  modal.addEventListener('click', (e)=>{ if (e.target===modal) close(); });
+
+  addBtn.addEventListener('click', ()=>{
+    let added = 0;
+    lastMatches.forEach(m=>{
+      if (m.uni) { SR.selected.add(m.uni.unitid); added++; }
+    });
+    updateSelectedList();
+    toast(`Added ${added} universit${added===1?'y':'ies'} from bulk import.`, added? 'success':'info');
+    close();
+  });
+})();
+</script>
+
 
 <!-- End of page -->
 </body>
@@ -2255,6 +2515,160 @@ window.SR_API = {
   }
 })();
 </script>
+<script>
+(function(){
+  if (window.__sr_filter_page__) return; window.__sr_filter_page__ = true;
+
+  const els = {
+    grid:   document.getElementById('universityGrid'),
+    meta:   document.getElementById('resultMeta'),
+    empty:  document.getElementById('emptyState'),
+    pageInfo: document.getElementById('pageInfo'),
+    prev:   document.getElementById('prevPage'),
+    next:   document.getElementById('nextPage'),
+    pageSize: document.getElementById('pageSize'),
+    state:  document.getElementById('stateFilter'),
+    type:   document.getElementById('typeFilter'),
+    level:  document.getElementById('levelFilter'),
+    sort:   document.getElementById('sortBy'),
+    apply:  document.getElementById('filterApplyBtn'),
+    reset:  document.getElementById('resetBtn'),
+    clearFilters: document.getElementById('clearFiltersBtn')
+  };
+
+  function applyFilters(){
+    const {state,type,level,sort} = SR.filters;
+    let list = SR.universities.slice();
+
+    if (state) list = list.filter(u=>u.state===state);
+    if (type)  list = list.filter(u=>u.type===type);
+    if (level) list = list.filter(u=>u.level===level);
+
+    // sorting
+    if (sort==='name_asc')  list.sort((a,b)=> a.name.localeCompare(b.name));
+    if (sort==='state_asc') list.sort((a,b)=> a.state.localeCompare(b.state) || a.name.localeCompare(b.name));
+
+    SR.filtered = list;
+    SR.page = 1;
+    renderGrid();
+  }
+
+  function renderGrid(){
+    const grid = els.grid; if (!grid) return;
+    const total = SR.filtered.length;
+    const per   = SR.perPage;
+    const pages = Math.max(1, Math.ceil(total / per));
+    if (SR.page > pages) SR.page = pages;
+    const start = (SR.page - 1) * per;
+    const part  = SR.filtered.slice(start, start+per);
+
+    grid.innerHTML = '';
+    part.forEach(u=>{
+      const card = document.createElement('div');
+      const isSel = SR.selected.has(u.unitid);
+      card.className = 'university-card' + (isSel?' selected':'');
+      card.setAttribute('role','listitem');
+      card.innerHTML = `
+        <div class="university-header">
+          <div class="university-logo" aria-hidden="true">${(u.name[0]||'?').toUpperCase()}</div>
+          <div>
+            <div class="university-name">${u.name}</div>
+            <div class="university-location">${u.state} • ${u.type}</div>
+            <span class="university-pill">${u.level}</span>
+          </div>
+        </div>
+        <button class="apply-btn" type="button" data-id="${u.unitid}">${isSel?'Remove':'Select'}</button>
+      `;
+      // Toggle on card click (not the button to avoid double-trigger)
+      card.addEventListener('click', (e)=>{
+        if (e.target.closest('button')) return; // button handles itself
+        toggleSelect(u.unitid);
+      });
+      // Toggle via button
+      card.querySelector('button').addEventListener('click', ()=>{
+        toggleSelect(u.unitid);
+      });
+      grid.appendChild(card);
+    });
+
+    // meta + empty state
+    if (els.meta) els.meta.textContent = `Showing ${Math.min(per, total - start)} of ${total}`;
+    if (els.empty) els.empty.style.display = total ? 'none' : 'block';
+
+    // pager
+    els.pageInfo && (els.pageInfo.textContent = `Page ${SR.page} of ${Math.max(1, Math.ceil(total/per))}`);
+    els.prev && (els.prev.disabled = SR.page<=1);
+    els.next && (els.next.disabled = SR.page>=Math.ceil(total/per));
+  }
+
+  function toggleSelect(id){
+    if (SR.selected.has(id)) SR.selected.delete(id);
+    else SR.selected.add(id);
+    updateSelectedList();
+    renderGrid(); // refresh select/remove labels + selected class
+  }
+
+  // Bind controls
+  function bindFilterEvents(){
+    if (els.apply && !els.apply.__bound){
+      els.apply.__bound = true;
+      els.apply.addEventListener('click', ()=>{
+        SR.filters.state = els.state?.value || '';
+        SR.filters.type  = els.type?.value  || '';
+        SR.filters.level = els.level?.value || '';
+        SR.filters.sort  = els.sort?.value  || 'name_asc';
+        applyFilters();
+      });
+    }
+    if (els.reset && !els.reset.__bound){
+      els.reset.__bound = true;
+      els.reset.addEventListener('click', ()=>{
+        if (els.state) els.state.value = '';
+        if (els.type)  els.type.value  = '';
+        if (els.level) els.level.value = '';
+        if (els.sort)  els.sort.value  = 'name_asc';
+        SR.filters = { state:'', type:'', level:'', sort:'name_asc' };
+        applyFilters();
+      });
+    }
+    if (els.clearFilters && !els.clearFilters.__bound){
+      els.clearFilters.__bound = true;
+      els.clearFilters.addEventListener('click', ()=>{
+        if (els.state) els.state.value = '';
+        if (els.type)  els.type.value  = '';
+        if (els.level) els.level.value = '';
+        if (els.sort)  els.sort.value  = 'name_asc';
+        SR.filters = { state:'', type:'', level:'', sort:'name_asc' };
+        applyFilters();
+      });
+    }
+    if (els.prev && !els.prev.__bound){
+      els.prev.__bound = true;
+      els.prev.addEventListener('click', ()=>{ if (SR.page>1){ SR.page--; renderGrid(); }});
+    }
+    if (els.next && !els.next.__bound){
+      els.next.__bound = true;
+      els.next.addEventListener('click', ()=>{ SR.page++; renderGrid(); });
+    }
+    if (els.pageSize && !els.pageSize.__bound){
+      els.pageSize.__bound = true;
+      els.pageSize.addEventListener('change', ()=>{
+        const n = parseInt(els.pageSize.value,10);
+        SR.perPage = Number.isFinite(n) && n>0 ? n : 40;
+        SR.page = 1;
+        renderGrid();
+      });
+    }
+  }
+
+  (async()=>{
+    await window.srEnsureDataset?.();
+    bindFilterEvents();
+    applyFilters();
+  })();
+})();
+</script>
+
 
 <!-- (Optional) ensure dropdown hides when clicking outside -->
 <script>
