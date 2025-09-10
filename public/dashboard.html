@@ -73,7 +73,7 @@
     .user-avatar:hover { background:rgba(255,255,255,.3); transform:scale(1.05); border-color:rgba(255,255,255,.3); }
     .user-avatar:focus { outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.3); }
     .user-dropdown {
-      position:absolute; top:100%; right:0; margin-top;.5rem;
+      position:absolute; top:100%; right:0; margin-top:.5rem;
       background:#fff; border-radius:12px;
       box-shadow:0 8px 32px rgba(0,0,0,.15);
       min-width:260px; max-width:min(92vw,360px);
@@ -247,8 +247,8 @@
     .student-tabs {
       display:flex; gap:.4rem; background:#f1f5f9; border-radius:999px; padding:.2rem;
       border:1px solid #e5e7eb; margin-bottom:.9rem;
-      justify-content: space-between; /* NEW: positions left / center / right */
-      width: 100%;                    /* ensure full row width */
+      justify-content: space-between;
+      width: 100%;
     }
     .student-tab {
       appearance:none; background:transparent; border:0; cursor:pointer;
@@ -319,113 +319,79 @@
     .theme-btn:hover { transform: translateY(-1px); background:#ffffff33; border-color:#ffffff88; }
     .theme-btn:focus-visible { outline:3px solid rgba(255,255,255,.5); outline-offset:2px; }
     .theme-btn .material-icons { font-size:18px; }
-    /* unify apply/page buttons in student view */
     .apply-btn {
       background:linear-gradient(135deg,#1976d2,#7c4dff); color:#fff; border:none;
       padding:.6rem 1rem; border-radius:10px; font-weight:700; cursor:pointer;
     }
     .apply-btn:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(25,118,210,.25); }
     /* Intake card (link paste) */
-.intake-card {
-  background:#fff; border-radius:16px; padding:1.25rem 1.5rem;
-  box-shadow:0 8px 32px rgba(0,0,0,.08); margin:1rem auto 1.25rem;
-  border:1px solid #e5e7eb; max-width:1200px;
-}
-.intake-row { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
-.intake-title { display:flex; align-items:center; gap:.5rem; font-size:1.25rem; font-weight:700; color:#0f172a; }
-.intake-actions { display:flex; gap:.5rem; }
-.intake-sub { color:#475569; margin:.35rem 0 .75rem; }
-.intake-inputs { display:flex; gap:.5rem; align-items:center; }
-.intake-inputs .filter-select { flex:1; }
-.intake-status { margin-top:.6rem; font-size:.95rem; color:#334155; }
-.intake-details { margin-top:.5rem; }
-.intake-help { background:#f8fafc; padding:.75rem; border-radius:10px; border:1px solid #e5e7eb; color:#334155; }
-.intake-summary {
-  margin-top:.75rem; border-top:1px dashed #e5e7eb; padding-top:.6rem;
-  font-size:.95rem; color:#0f172a; display:grid; gap:.35rem;
-}
-.intake-summary .ok { color:#166534; }
-.intake-summary .warn { color:#9a3412; }
-.intake-summary .muted { color:#64748b; }
+    .intake-card {
+      background:#fff; border-radius:16px; padding:1.25rem 1.5rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.08); margin:1rem auto 1.25rem;
+      border:1px solid #e5e7eb; max-width:1200px;
+    }
+    .intake-row { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+    .intake-title { display:flex; align-items:center; gap:.5rem; font-size:1.25rem; font-weight:700; color:#0f172a; }
+    .intake-actions { display:flex; gap:.5rem; }
+    .intake-sub { color:#475569; margin:.35rem 0 .75rem; }
+    .intake-inputs { display:flex; gap:.5rem; align-items:center; }
+    .intake-inputs .filter-select { flex:1; }
+    .intake-status { margin-top:.6rem; font-size:.95rem; color:#334155; }
+    .intake-details { margin-top:.5rem; }
+    .intake-help { background:#f8fafc; padding:.75rem; border-radius:10px; border:1px solid #e5e7eb; color:#334155; }
+    .intake-summary {
+      margin-top:.75rem; border-top:1px dashed #e5e7eb; padding-top:.6rem;
+      font-size:.95rem; color:#0f172a; display:grid; gap:.35rem;
+    }
+    .intake-summary .ok { color:#166534; }
+    .intake-summary .warn { color:#9a3412; }
+    .intake-summary .muted { color:#64748b; }
 
-:root[data-theme="dark"] .intake-card { background:#111a2a; border-color:#24324a; box-shadow:none; }
-:root[data-theme="dark"] .intake-sub, 
-:root[data-theme="dark"] .intake-help { color:#c9d6ee; background:#0f1729; border-color:#24324a; }
-:root[data-theme="dark"] .intake-summary { color:#e5eefc; border-color:#24324a; }
+    :root[data-theme="dark"] .intake-card { background:#111a2a; border-color:#24324a; box-shadow:none; }
+    :root[data-theme="dark"] .intake-sub, 
+    :root[data-theme="dark"] .intake-help { color:#c9d6ee; background:#0f1729; border-color:#24324a; }
+    :root[data-theme="dark"] .intake-summary { color:#e5eefc; border-color:#24324a; }
 
-/* NEW: autosuggest popover styling (kept minimal) */
-.suggest-popover{
-  position:absolute; top:100%; left:0; right:0; z-index:50; margin-top:.25rem;
-  background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 12px 24px rgba(0,0,0,.08);
-  max-height:320px; overflow:auto; padding:.25rem;
-}
-.suggest-item{
-  padding:.5rem .6rem; border-radius:10px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;
-}
-.suggest-item:hover{ background:#f8fafc; }
-:root[data-theme="dark"] .suggest-popover{ background:#0f1729; border-color:#24324a; }
-:root[data-theme="dark"] .suggest-item:hover{ background:#111f38; }
+    /* NEW: autosuggest popover styling */
+    .suggest-popover{
+      position:absolute; top:100%; left:0; right:0; z-index:50; margin-top:.25rem;
+      background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 12px 24px rgba(0,0,0,.08);
+      max-height:320px; overflow:auto; padding:.25rem;
+    }
+    .suggest-item{
+      padding:.5rem .6rem; border-radius:10px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;
+    }
+    .suggest-item:hover{ background:#f8fafc; }
+    :root[data-theme="dark"] .suggest-popover{ background:#0f1729; border-color:#24324a; }
+    :root[data-theme="dark"] .suggest-item:hover{ background:#111f38; }
   </style>
+
   <style id="sr-recommender-patch-css">
-/* Writer guidance card */
-.writer-guide {
-  border: 1px dashed #cbd5e1; background:#f8fafc;
-  color:#0f172a; border-radius:12px; padding:1rem; margin:.6rem 0 0;
-  font-size:.95rem; line-height:1.45;
-}
-.writer-guide b { color:#0b4fb1; }
-.writer-guide ul { margin:.4rem 0 0 1.2rem; }
-.writer-guide li { margin:.25rem 0; }
-
-/* dark mode harmony */
-:root[data-theme="dark"] .writer-guide {
-  background:#0f1729; border-color:#24324a; color:#e5eefc;
-}
-
-/* Send button pulse (enabled only) */
-@keyframes srPulse {
-  0% { transform: translateY(0) scale(1); box-shadow: 0 0 0 rgba(76,175,80,0); }
-  50%{ transform: translateY(-1px) scale(1.01); box-shadow: 0 8px 20px rgba(76,175,80,.25); }
-  100%{ transform: translateY(0) scale(1); box-shadow: 0 0 0 rgba(76,175,80,0); }
-}
-.send-btn.sr-pulse:not(:disabled) { animation: srPulse 1.6s ease-in-out infinite; }
-
-/* tiny nudge when newly enabled */
-.send-btn.sr-flash { animation: srPulse .9s ease-in-out 1; }
-
-/* make dropdown scrolling obvious when auto-scrolling to Contact admin */
-.user-dropdown.sr-highlight { outline: 2px solid #1976d2; outline-offset: 2px; }
-</style>
-  <style id="sr-recommender-patch-css">
-/* Writer guidance card */
-.writer-guide {
-  border: 1px dashed #cbd5e1; background:#f8fafc;
-  color:#0f172a; border-radius:12px; padding:1rem; margin:.6rem 0 0;
-  font-size:.95rem; line-height:1.45;
-}
-.writer-guide b { color:#0b4fb1; }
-.writer-guide ul { margin:.4rem 0 0 1.2rem; }
-.writer-guide li { margin:.25rem 0; }
-
-/* dark mode harmony */
-:root[data-theme="dark"] .writer-guide {
-  background:#0f1729; border-color:#24324a; color:#e5eefc;
-}
-
-/* Send button pulse (enabled only) */
-@keyframes srPulse {
-  0% { transform: translateY(0) scale(1); box-shadow: 0 0 0 rgba(76,175,80,0); }
-  50%{ transform: translateY(-1px) scale(1.01); box-shadow: 0 8px 20px rgba(76,175,80,.25); }
-  100%{ transform: translateY(0) scale(1); box-shadow: 0 0 0 rgba(76,175,80,0); }
-}
-.send-btn.sr-pulse:not(:disabled) { animation: srPulse 1.6s ease-in-out infinite; }
-
-/* tiny nudge when newly enabled */
-.send-btn.sr-flash { animation: srPulse .9s ease-in-out 1; }
-
-/* make dropdown scrolling obvious when auto-scrolling to Contact admin */
-.user-dropdown.sr-highlight { outline: 2px solid #1976d2; outline-offset: 2px; }
-</style>
+    /* Writer guidance card */
+    .writer-guide {
+      border: 1px dashed #cbd5e1; background:#f8fafc;
+      color:#0f172a; border-radius:12px; padding:1rem; margin:.6rem 0 0;
+      font-size:.95rem; line-height:1.45;
+    }
+    .writer-guide b { color:#0b4fb1; }
+    .writer-guide ul { margin:.4rem 0 0 1.2rem; }
+    .writer-guide li { margin:.25rem 0; }
+    /* dark mode harmony */
+    :root[data-theme="dark"] .writer-guide {
+      background:#0f1729; border-color:#24324a; color:#e5eefc;
+    }
+    /* Send button pulse (enabled only) */
+    @keyframes srPulse {
+      0% { transform: translateY(0) scale(1); box-shadow: 0 0 0 rgba(76,175,80,0); }
+      50%{ transform: translateY(-1px) scale(1.01); box-shadow: 0 8px 20px rgba(76,175,80,.25); }
+      100%{ transform: translateY(0) scale(1); box-shadow: 0 0 0 rgba(76,175,80,0); }
+    }
+    .send-btn.sr-pulse:not(:disabled) { animation: srPulse 1.6s ease-in-out infinite; }
+    /* tiny nudge when newly enabled */
+    .send-btn.sr-flash { animation: srPulse .9s ease-in-out 1; }
+    /* make dropdown scrolling obvious when auto-scrolling to Contact admin */
+    .user-dropdown.sr-highlight { outline: 2px solid #1976d2; outline-offset: 2px; }
+  </style>
 </head>
 <body>
   <!-- HEADER -->
@@ -489,7 +455,7 @@
       </div><!-- /.right-controls -->
     </div><!-- /.header-content -->
   </div><!-- /.header -->
-    <!-- MAIN — RECOMMENDER VIEW (hidden by default) -->
+  <!-- MAIN — RECOMMENDER VIEW (hidden by default) -->
   <div class="container" id="panel-recommender" hidden>
     <!-- Student Link Intake -->
     <div class="intake-card" id="linkIntake">
@@ -691,7 +657,7 @@
             </div>
           </div>
         </div>
-        <div style="padding:1rem 1.4rem; border-top:1px solid:#eee; display:flex; gap:.5rem; justify-content:flex-end;">
+        <div style="padding:1rem 1.4rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
           <button class="page-btn" id="modalCancelBtn">Cancel</button>
           <button class="apply-btn" id="modalConfirmBtn">Send now</button>
         </div>
@@ -702,7 +668,7 @@
     <div id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle"
          style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
       <div style="background:#fff; width:min(680px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
-        <div style="padding:1rem 1.2rem; border-bottom:1px solid:#eee; display:flex; justify-content:space-between; align-items:center;">
+        <div style="padding:1rem 1.2rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
           <div id="importTitle" style="font-weight:700;">Bulk import universities</div>
           <button aria-label="Close" id="importCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
         </div>
@@ -713,7 +679,7 @@
           <textarea id="importTextarea" rows="10" style="width:100%; padding:.8rem; border:1px solid #e5e7eb; border-radius:10px; font-family:inherit;"></textarea>
           <div id="importPreview" style="font-size:.9rem; color:#667;"></div>
         </div>
-        <div style="padding:1rem 1.2rem; border-top:1px solid:#eee; display:flex; gap:.5rem; justify-content:flex-end;">
+        <div style="padding:1rem 1.2rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
           <button class="page-btn" id="importCancelBtn">Cancel</button>
           <button class="apply-btn" id="importConfirmBtn">Add matches</button>
         </div>
@@ -799,7 +765,7 @@
           </form>
         </section>
 
-        <!-- Select (moved to left tab, content unchanged) -->
+        <!-- Select -->
         <section id="stuPanelSelect" hidden>
           <div class="university-section">
             <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
@@ -924,7 +890,7 @@
                 </tr>
               </thead>
               <tbody id="stuTrackBody">
-                <!-- Populated by dashboard.js -->
+                <!-- Populated by code -->
               </tbody>
             </table>
           </div>
@@ -940,789 +906,703 @@
         Making recommendations stellar since 2025 🚀</p>
     </div>
   </footer>
-
 <!-- Vendor scripts (CDN, with cache-busting) -->
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js?v=2025-09-06" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js?v=2025-09-06" defer></script>
 
-<!-- Your app code (keep after vendors; add cache-busting too) -->
+<!-- Optional: your app shell files (kept in case you use them) -->
 <script src="/assets/js/dashboard.js?v=2025-09-06-1" defer></script>
 <script src="/assets/js/university-search.js?v=2025-09-06-1" defer></script>
-<script>
-/* ==== Core state (kept tiny; persists) ==== */
-const SR_LS_KEY = 'sr_state_v1';
-const srSafe = {
-  get(){ try { return JSON.parse(localStorage.getItem(SR_LS_KEY)||'{}'); } catch(e){ return {}; } },
-  set(data){ try { localStorage.setItem(SR_LS_KEY, JSON.stringify(data)); } catch(e){} }
-};
-const SR = {
-  universities: [],         // full master (6000+)
-  filtered: [],             // after search/filters
-  page: 1,
-  perPage: 40,
-  q: '',
-  filters: { state:'', type:'', level:'', sort:'name_asc' },
-  selected: new Set(),      // unitid strings
-  requests: [],             // {id, unitid, uniName, who, email, ts, status}
-  studentTrack: [],         // mirrors requests for Student view
-  mockPinned: 'MOCK-0000',  // Mock University id
-  fuse: null
-};
 
-<script>
-/* ==== Core state (kept tiny; persists) ==== */
-const SR_LS_KEY = 'sr_state_v1';
-const srSafe = {
-  get(){ try { return JSON.parse(localStorage.getItem(SR_LS_KEY)||'{}'); } catch(e){ return {}; } },
-  set(data){ try { localStorage.setItem(SR_LS_KEY, JSON.stringify(data)); } catch(e){} }
-};
-const SR = {
-  universities: [],         // full master (6000+)
-  filtered: [],             // after search/filters
-  page: 1,
-  perPage: 40,
-  q: '',
-  filters: { state:'', type:'', level:'', sort:'name_asc' },
-  selected: new Set(),      // unitid strings
-  requests: [],             // {id, unitid, uniName, who, email, ts, status}
-  studentTrack: [],         // mirrors requests for Student view
-  mockPinned: 'MOCK-0000',  // Mock University id
-  fuse: null
-};
-/* ========= Normalizer ========= */
-function normalize(arr){
-  return arr.map(u=>({
-    unitid: String(u.unitid ?? u.UnitID ?? u.id ?? u.code ?? Math.random().toString(36).slice(2,9)),
-    name:   String(u.name ?? u.InstitutionName ?? u.inst_name ?? u.title ?? 'Unnamed Institution'),
-    state:  String(u.state ?? u.State ?? u.province ?? u.region ?? ''),
-    type:   String(u.type  ?? u.Sector ?? u.Control ?? 'Public'),
-    level:  String(u.level ?? u.Level ?? u.inst_level ?? '4-year')
-  }));
-}
-
-/* ========= Loaders ========= */
-async function loadFromPublicJSON(){
-  // expects an object keyed by state OR an array of institutions
-  const url = 'public/assets/us_institutions_by_state_2023.json';
-  const res = await fetch(url, { cache: 'force-cache' });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const raw = await res.json();
-
-  let flat = [];
-  if (Array.isArray(raw)) {
-    flat = raw;
-  } else if (raw && typeof raw === 'object') {
-    for (const [state, list] of Object.entries(raw)) {
-      if (Array.isArray(list)) {
-        list.forEach(d => flat.push({ ...d, state: d.state ?? d.State ?? state }));
-      }
-    }
-  }
-  if (flat.length < 1000) throw new Error('Dataset looks too small; refusing to use.');
-  return normalize(flat);
-}
-
-function generateFallback(){
-  // generate synthetic US-like list 6,500+ (only used if JSON missing)
-  const STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
-  const TYPES = ["Public","Private nonprofit","Private for-profit"];
-  const LEVELS = ["4-year","2-year","Less-than-2-year"];
-  const list = [];
-  let idx = 1;
-  const anchors = [
-    { name:"Harvard University", state:"MA", type:"Private nonprofit", level:"4-year" },
-    { name:"Stanford University", state:"CA", type:"Private nonprofit", level:"4-year" },
-    { name:"Massachusetts Institute of Technology", state:"MA", type:"Private nonprofit", level:"4-year" },
-    { name:"University of California, Berkeley", state:"CA", type:"Public", level:"4-year" },
-    { name:"Georgia Institute of Technology", state:"GA", type:"Public", level:"4-year" },
-  ];
-  anchors.forEach(a=> list.push({ unitid:String(100000+idx++), ...a }));
-  for (; idx<=6500; idx++){
-    const st = STATES[idx % STATES.length];
-    const tp = TYPES[idx % TYPES.length];
-    const lv = LEVELS[idx % LEVELS.length];
-    const name = (idx % 7 === 0) ? `${st} State University ${idx}` :
-                 (idx % 5 === 0) ? `${st} Institute of Technology ${idx}` :
-                                   `University ${idx}`;
-    list.push({ unitid:String(100000+idx), name, state:st, type:tp, level:lv });
-  }
-  return normalize(list);
-}
-
-/* ========= Bootstrap (prefers real JSON, falls back if needed) ========= */
-async function ensureDataset(){
-  // If your /assets/js/university-search.js already set window.universities, use that first.
-  if (Array.isArray(window.universities) && window.universities.length > 0) {
-    SR.universities = normalize(window.universities);
-  } else {
-    try {
-      SR.universities = await loadFromPublicJSON();
-    } catch(err) {
-      console.warn('[SR] Could not load public/assets/us_institutions_by_state_2023.json:', err);
-      SR.universities = generateFallback();
-    }
-  }
-
-  // Ensure Mock pre-selected is present
-  if (!SR.universities.find(u=>u.unitid===SR.mockPinned)) {
-    SR.universities.unshift({ unitid:SR.mockPinned, name:"Mock University", state:"CA", type:"Private nonprofit", level:"4-year" });
-  }
-
-  // Fuse for autosuggest
-  SR.fuse = new Fuse(SR.universities, { keys:["name"], includeScore:false, threshold:0.3, minMatchCharLength:2 });
-
-  // restore persisted state
-  const saved = srSafe.get();
-  if (Array.isArray(saved.requests)) SR.requests = saved.requests;
-  if (Array.isArray(saved.studentTrack)) SR.studentTrack = saved.studentTrack;
-  const initialSelected = new Set(Array.isArray(saved.selectedIds)? saved.selectedIds : []);
-  initialSelected.add(SR.mockPinned); // keep Mock pinned
-  SR.selected = initialSelected;
-
-  SR.filtered = SR.universities.slice(0);
-}
-
-/* ========= Helpers (UI, toasts, etc.) — unchanged from earlier ========= */
-const $ = (sel, root=document)=> root.querySelector(sel);
-const $$ = (sel, root=document)=> Array.from(root.querySelectorAll(sel));
-const toast = (msg, type='info')=>{
-  const wrap = $('#toastWrap'); if(!wrap) return;
-  const div = document.createElement('div');
-  div.className = `toast ${type}`;
-  div.innerHTML = `<span class="icon material-icons">${type==='error'?'error':'check_circle'}</span><div class="msg">${msg}</div><button class="x" aria-label="Dismiss">✕</button>`;
-  wrap.appendChild(div);
-  const close = ()=>{ div.remove(); };
-  div.querySelector('.x').addEventListener('click', close);
-  setTimeout(close, 3200);
-};
-const persist = ()=>{
-  srSafe.set({
-    selectedIds: Array.from(SR.selected),
-    requests: SR.requests,
-    studentTrack: SR.studentTrack
-  });
-};
-
-/* ========= Selected list + search/filter/paging functions — unchanged ========= */
-// (keep your existing updateSelectedList, addSelected, removeSelected, updateSendButton,
-//  applyFilters, renderGrid, populateBrowseDropdown, bindStudentSelectUI,
-//  bindRecommenderSend, bindStudentSend, renderStudentTrack from the prior file)
-
-/* ========= INIT (await real dataset before rendering) ========= */
-document.addEventListener('DOMContentLoaded', async ()=>{
-  await ensureDataset();            // <-- load from public/assets JSON (or fallback)
-  populateBrowseDropdown();
-  applyFilters();
-  updateSelectedList();
-  bindStudentSelectUI();
-  bindRecommenderSend();
-  bindStudentSend();
-});
-</script>
-
-<!-- Link intake + autoset (from your original snippet, left intact but now connected) -->
+<!-- Core App Bootstrap (integrated, idempotent) -->
 <script>
 (function(){
-  // Helper: safe localStorage to avoid quota crashes
-  const safeLS = {
-    get(k, d){ try { return localStorage.getItem(k) ?? d; } catch(e){ return d; } },
-    set(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
+  if (window.__srIntegrated__) return;
+  window.__srIntegrated__ = true;
+
+  /* ===== Utilities ===== */
+  const $  = (s, r=document)=> r.querySelector(s);
+  const $$ = (s, r=document)=> Array.from(r.querySelectorAll(s));
+  const tryJSON = (s,d)=>{ try{ return JSON.parse(s); }catch(_){ return d; } };
+
+  /* ===== Toast (idempotent) ===== */
+  (function ensureToast(){
+    if (typeof window.toast === 'function') return;
+    window.toast = function(msg, type='info'){
+      const wrap = $('#toastWrap');
+      if(!wrap){ alert(msg); return; }
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerHTML = `
+        <span class="icon material-icons">${type==='success'?'check_circle':type==='error'?'error':'info'}</span>
+        <div class="msg">${msg}</div>
+        <button class="x" aria-label="Dismiss" type="button">✕</button>
+      `;
+      el.querySelector('.x').onclick = ()=> el.remove();
+      wrap.appendChild(el);
+      setTimeout(()=> el.remove(), 3200);
+    };
+  })();
+
+  /* ===== Persistent state ===== */
+  const SR_LS_KEY = 'sr_state_v1';
+  const srSafe = {
+    get(){ return tryJSON(localStorage.getItem(SR_LS_KEY)||'{}', {}); },
+    set(data){ try{ localStorage.setItem(SR_LS_KEY, JSON.stringify(data)); }catch(_){ } }
   };
-  const norm = s => (s||'').toString().trim().toLowerCase();
 
-  const els = {
-    input:  document.getElementById('linkInput'),
-    parse:  document.getElementById('linkParseBtn'),
-    status: document.getElementById('linkStatus'),
-    sum:    document.getElementById('linkSummary'),
-    help:   document.getElementById('linkHelpBtn'),
+  /* ===== Global app object ===== */
+  window.SR = {
+    universities: [],      // master list
+    filtered: [],          // filtered results
+    page: 1,
+    perPage: 40,
+    q: '',
+    filters: { state:'', type:'', level:'', sort:'name_asc' },
+    selected: new Set(),   // Set of unitids
+    requests: [],          // for recommender send history
+    studentTrack: [],      // student-side mirror
+    mockPinned: 'MOCK-0000',
+    fuse: null
   };
 
-  els.help?.addEventListener('click', () => {
-    const det = document.getElementById('linkFormatDetails');
-    if (!det) return;
-    det.open = true;
-    det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  });
-
-  function setStatus(msg, type='info'){
-    const color = type==='error' ? '#b91c1c' : type==='success' ? '#166534' : '#334155';
-    if (els.status) els.status.innerHTML = `<span style="color:${color}">${msg}</span>`;
-  }
-  function summarize(data, matchedCount){
-    const lines = [];
-    if (data.studentFirst || data.studentLast) {
-      lines.push(`<div><b>Student</b>: ${[data.studentFirst, data.studentLast].filter(Boolean).join(' ') || '<span class="muted">—</span>'}</div>`);
-    }
-    if (data.studentEmail || data.studentPhone) {
-      lines.push(`<div><b>Contact</b>: ${[data.studentEmail, data.studentPhone].filter(Boolean).join(' • ') || '<span class="muted">—</span>'}</div>`);
-    }
-    if (typeof data.waiveAccess !== 'undefined') {
-      lines.push(`<div><b>Waive access</b>: ${data.waiveAccess ? '<span class="ok">Yes</span>' : 'No'}</div>`);
-    }
-    if (data.recommenderName || data.recommenderEmail || data.recommenderPhone) {
-      lines.push(`<div><b>Recommender</b>: ${data.recommenderName || ''} ${data.recommenderEmail ? '• ' + data.recommenderEmail : ''} ${data.recommenderPhone ? '• ' + data.recommenderPhone : ''}</div>`);
-    }
-    if (Array.isArray(data.unitids) && data.unitids.length) {
-      lines.push(`<div><b>Universities (unitids)</b>: ${data.unitids.length} ${matchedCount!=null?`<span class="${matchedCount>0?'ok':'warn'}">(matched ${matchedCount})</span>`:''}</div>`);
-    } else if (Array.isArray(data.unames) && data.unames.length) {
-      lines.push(`<div><b>Universities (by name)</b>: ${data.unames.length} (will match)</div>`);
-    }
-    els.sum.innerHTML = lines.join('') || '<div class="muted">No details found.</div>';
-    els.sum.hidden = false;
+  /* ===== Normalizer ===== */
+  function normalize(arr){
+    return arr.map(u=>({
+      unitid: String(u.unitid ?? u.UnitID ?? u.id ?? u.code ?? Math.random().toString(36).slice(2,9)),
+      name:   String(u.name   ?? u.InstitutionName ?? u.inst_name ?? u.title ?? 'Unnamed Institution'),
+      state:  String(u.state  ?? u.State ?? u.province ?? u.region ?? ''),
+      type:   String(u.type   ?? u.Sector ?? u.Control ?? 'Public'),
+      level:  String(u.level  ?? u.Level ?? u.inst_level ?? '4-year')
+    }));
   }
 
-  function parseLink(raw){
-    try {
-      const url = new URL(raw);
-      const q   = url.searchParams;
-      const data = {
-        studentFirst:   q.get('sf') || q.get('sfn') || '',
-        studentLast:    q.get('sl') || q.get('sln') || '',
-        studentEmail:   q.get('se') || q.get('semail') || '',
-        studentPhone:   q.get('sp') || q.get('sphone') || '',
-        waiveAccess:    q.get('waive') === '1' || q.get('waive') === 'true',
-        recommenderName: q.get('rname') || '',
-        recommenderEmail: q.get('remail') || '',
-        recommenderPhone: q.get('rphone') || '',
-        unitids: [],
-        unames: [],
-      };
-      const unis = q.get('unis');  if (unis)   data.unitids = unis.split(',').map(s=>s.trim()).filter(Boolean);
-      const unames = q.get('unames'); if (unames) data.unames = unames.split(',').map(s=>s.trim()).filter(Boolean);
-      return data;
-    } catch(e){ return null; }
+  /* ===== Dataset loaders ===== */
+  async function loadFromPublicJSON(){
+    // expects array or { "CA": [ ... ], "NY": [ ... ] }
+    const url = 'public/assets/us_institutions_by_state_2023.json';
+    const res = await fetch(url, { cache:'force-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.json();
+
+    let flat = [];
+    if (Array.isArray(raw)) {
+      flat = raw;
+    } else if (raw && typeof raw === 'object') {
+      for (const [state, list] of Object.entries(raw)) {
+        if (Array.isArray(list)){
+          list.forEach(d => flat.push({ ...d, state: d.state ?? d.State ?? state }));
+        }
+      }
+    }
+    if (flat.length < 1000) throw new Error('Dataset looks too small.');
+    return normalize(flat);
   }
 
-  async function applyReferralData(data){
-    // Prefer unitids
-    let matched = 0;
-    if (Array.isArray(data.unitids) && data.unitids.length){
-      const master = new Set(SR.universities.map(u=>String(u.unitid)));
-      data.unitids.forEach(id=>{
-        const key = String(id);
-        if (master.has(key)){ SR.selected.add(key); matched++; }
+  function generateFallback(){
+    const STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
+    const TYPES  = ["Public","Private nonprofit","Private for-profit"];
+    const LEVELS = ["4-year","2-year","Less-than-2-year"];
+    const list = [];
+    let idx = 1;
+
+    const anchors = [
+      { name:"Harvard University", state:"MA", type:"Private nonprofit", level:"4-year" },
+      { name:"Stanford University", state:"CA", type:"Private nonprofit", level:"4-year" },
+      { name:"Massachusetts Institute of Technology", state:"MA", type:"Private nonprofit", level:"4-year" },
+      { name:"University of California, Berkeley", state:"CA", type:"Public", level:"4-year" },
+      { name:"Georgia Institute of Technology", state:"GA", type:"Public", level:"4-year" }
+    ];
+    anchors.forEach(a=> list.push({ unitid:String(100000+idx++), ...a }));
+
+    for (; idx<=6500; idx++){
+      const st = STATES[idx % STATES.length];
+      const tp = TYPES[idx % TYPES.length];
+      const lv = LEVELS[idx % LEVELS.length];
+      const name = (idx % 7 === 0) ? `${st} State University ${idx}` :
+                   (idx % 5 === 0) ? `${st} Institute of Technology ${idx}` :
+                                     `University ${idx}`;
+      list.push({ unitid:String(100000+idx), name, state:st, type:tp, level:lv });
+    }
+    return normalize(list);
+  }
+
+  /* ===== Dataset bootstrap ===== */
+  async function ensureDataset(){
+    if (Array.isArray(window.universities) && window.universities.length){
+      SR.universities = normalize(window.universities);
+    } else {
+      try {
+        SR.universities = await loadFromPublicJSON();
+      } catch (err){
+        console.warn('[SR] Falling back to generated dataset:', err);
+        SR.universities = generateFallback();
+      }
+    }
+
+    // Ensure mock pinned record exists
+    if (!SR.universities.find(u=>u.unitid===SR.mockPinned)){
+      SR.universities.unshift({ unitid:SR.mockPinned, name:"Mock University", state:"CA", type:"Private nonprofit", level:"4-year" });
+    }
+
+    // Build Fuse index
+    SR.fuse = new Fuse(SR.universities, { keys:['name'], includeScore:false, threshold:0.3, minMatchCharLength:2 });
+
+    // Restore persisted
+    const saved = srSafe.get();
+    if (Array.isArray(saved.requests)) SR.requests = saved.requests;
+    if (Array.isArray(saved.studentTrack)) SR.studentTrack = saved.studentTrack;
+    const selected = new Set(Array.isArray(saved.selectedIds) ? saved.selectedIds : []);
+    selected.add(SR.mockPinned);
+    SR.selected = selected;
+
+    SR.filtered = SR.universities.slice(0);
+  }
+
+  /* ===== Persistence helper ===== */
+  function persist(){
+    srSafe.set({
+      selectedIds: Array.from(SR.selected),
+      requests: SR.requests,
+      studentTrack: SR.studentTrack
+    });
+  }
+
+  /* ===== UI helpers (stubs will be filled later) ===== */
+  window.updateSelectedList = function(){
+    const list = $('#selectedList');
+    const listStu = $('#selectedListStu');
+    const countEl = $('#selectedCount');
+    const countStu = $('#selectedCountStu');
+    if (!list || !countEl) return;
+
+    const items = SR.universities.filter(u=> SR.selected.has(u.unitid));
+    list.innerHTML = items.map(u=>`
+      <span class="selected-tag" data-id="${u.unitid}">
+        ${u.name} <span class="remove-tag" title="Remove" aria-label="Remove" data-remove="${u.unitid}">✕</span>
+      </span>`).join('');
+    if (listStu){
+      listStu.innerHTML = list.innerHTML; // read-only copy for student
+      listStu.querySelectorAll('[data-remove]').forEach(el=> el.remove()); // ensure no removes in student
+    }
+
+    const n = items.length;
+    countEl.textContent  = `${n} universit${n===1?'y':'ies'} selected`;
+    if (countStu) countStu.textContent = countEl.textContent;
+
+    // bind removes (recommender only)
+    list.querySelectorAll('[data-remove]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        SR.selected.delete(btn.dataset.remove);
+        updateSelectedList(); updateSendButton(); persist();
       });
+    });
+  };
+
+  window.updateSendButton = function(){
+    const btn = $('#sendBtn');
+    if (!btn) return;
+    const hasSomething = SR.selected.size > 0;
+    btn.disabled = !hasSomething;
+  };
+
+  /* ===== Filters, paging, grid rendering ===== */
+  function applyFilters(){
+    // text query
+    const q = SR.q.trim();
+    let base = SR.universities;
+
+    if (q.length >= 2 && SR.fuse){
+      const hits = SR.fuse.search(q).slice(0, 1000).map(h=>h.item);
+      base = hits;
     }
-    // fallback: names
-    if ((!data.unitids || !data.unitids.length) && Array.isArray(data.unames) && data.unames.length){
-      const want = data.unames.map(s=>s.toLowerCase());
-      SR.universities.forEach(u=>{
-        if (want.some(w => u.name.toLowerCase().includes(w))){ SR.selected.add(u.unitid); matched++; }
-      });
+
+    // structured filters
+    const { state, type, level } = SR.filters;
+    let out = base.filter(u =>
+      (!state || u.state === state) &&
+      (!type  || u.type  === type)  &&
+      (!level || u.level === level)
+    );
+
+    // sort
+    const s = SR.filters.sort || 'name_asc';
+    if (s === 'name_asc') {
+      out.sort((a,b)=> a.name.localeCompare(b.name));
+    } else if (s === 'state_asc'){
+      out.sort((a,b)=> a.state.localeCompare(b.state) || a.name.localeCompare(b.name));
     }
-    // keep Mock
-    SR.selected.add(SR.mockPinned);
-    updateSelectedList(); persist();
-    return matched;
+
+    SR.filtered = out;
+    SR.page = 1;
+    renderGrid();
+    updateResultMeta();
+    updateSendButton();
   }
 
-  async function handleImport(){
-    const raw = (els.input?.value || '').trim();
-    if (!raw){ setStatus('Please paste a link first.','error'); return; }
-    const data = parseLink(raw);
-    if (!data){ setStatus('That doesn’t look like a valid link.','error'); return; }
-    setStatus('Parsing link and applying data…');
-    const matched = await applyReferralData(data);
-    summarize(data, matched);
-    // Title convenience
-    const full = [data.studentFirst, data.studentLast].filter(Boolean).join(' ');
-    if (full) { const t = $('#writerTitle'); if (t) t.value = `Recommendation for ${full}`; }
-    toast(`Imported ${matched} universit${matched===1?'y':'ies'} from the link.` , matched? 'success':'info');
-    setStatus('Link imported successfully.','success');
-    // switch to Recommender
-    const recPanel = document.getElementById('panel-recommender');
-    const stuPanel = document.getElementById('panel-student');
-    if (recPanel && stuPanel) {
-      stuPanel.hidden = true; recPanel.hidden = false;
-      recPanel.style.display = ''; stuPanel.style.display = 'none';
-      const toggles = document.querySelectorAll('.header-nav .nav-link');
-      toggles.forEach(b=>{
-        const on = b.dataset.view === 'recommender';
-        b.setAttribute('aria-selected', on?'true':'false');
-        if (on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
-      });
-      history.replaceState(null,'','#recommender');
-      safeLS.set('sr_current_view','recommender');
+  function updateResultMeta(){
+    const meta = $('#resultMeta');
+    if (!meta) return;
+    meta.textContent = `Showing ${Math.min(SR.filtered.length, SR.perPage)} of ${SR.filtered.length}`;
+  }
+
+  function renderGrid(){
+    const grid = $('#universityGrid');
+    const pageInfo = $('#pageInfo');
+    const prev = $('#prevPage');
+    const next = $('#nextPage');
+    if (!grid) return;
+
+    const total = SR.filtered.length;
+    const pages = Math.max(1, Math.ceil(total / SR.perPage));
+    SR.page = Math.min(SR.page, pages);
+
+    const start = (SR.page - 1) * SR.perPage;
+    const slice = SR.filtered.slice(start, start + SR.perPage);
+
+    grid.innerHTML = slice.map(u=>`
+      <div class="university-card ${SR.selected.has(u.unitid)?'selected':''}" data-id="${u.unitid}">
+        <div class="university-header">
+          <div class="university-logo">${(u.name[0]||'#')}</div>
+          <div>
+            <div class="university-name">${u.name}</div>
+            <div class="university-location">${u.state || '—'} • ${u.type}</div>
+            <span class="university-pill">${u.level}</span>
+          </div>
+          <button class="apply-btn" style="margin-left:auto" data-apply="${u.unitid}">Apply</button>
+        </div>
+      </div>
+    `).join('');
+
+    if (pageInfo) pageInfo.textContent = `Page ${SR.page} of ${pages}`;
+    if (prev) prev.disabled = SR.page<=1;
+    if (next) next.disabled = SR.page>=pages;
+
+    // delegation: apply buttons & card toggle
+    grid.addEventListener('click', onGridClick, { once:true });
+  }
+
+  function onGridClick(e){
+    const t = e.target;
+    // Apply button toggles selection
+    if (t && t.matches('[data-apply]')){
+      const id = t.getAttribute('data-apply');
+      toggleSelect(id);
+      return;
+    }
+    // Card click also toggles (unless clicking button)
+    const card = t.closest && t.closest('.university-card');
+    if (card && !t.matches('button')){
+      const id = card.getAttribute('data-id');
+      toggleSelect(id);
     }
   }
 
-  els.parse?.addEventListener('click', handleImport);
-  els.input?.addEventListener('keydown', (e)=>{ if (e.key==='Enter'){ e.preventDefault(); handleImport(); } });
-})();
-</script>
+  function toggleSelect(id){
+    const had = SR.selected.has(id);
+    if (had) SR.selected.delete(id);
+    else SR.selected.add(id);
+    updateSelectedList(); renderGrid(); updateSendButton(); persist();
+  }
 
-<!-- View toggler & simple header behaviors (original kept) -->
-<script>
-  (function(){
-    function safeSet(key, val){ try { localStorage.setItem(key, val); } catch (e) {} }
-    function safeGet(key, def){ try { return localStorage.getItem(key) ?? def; } catch (e) { return def; } }
-    const studentPanel = document.getElementById('panel-student');
-    const recPanel     = document.getElementById('panel-recommender');
-    const toggles      = document.querySelectorAll('.header-nav .nav-link');
-    if (studentPanel) studentPanel.hidden = false;
-    if (recPanel)     recPanel.hidden     = true;
+  /* ===== Populate dropdown ===== */
+  function populateBrowseDropdown(){
+    const sel = $('#universitySelect');
+    if (!sel) return;
+    const opts = ['<option value="" selected disabled>Browse all universities (6000+)</option>']
+      .concat(SR.universities.slice(0, 2000).map(u=> `<option value="${u.unitid}">${u.name} (${u.state})</option>`)); // cap for perf
+    sel.innerHTML = opts.join('');
+    sel.addEventListener('change', ()=>{
+      const id = sel.value;
+      if (id){
+        SR.selected.add(id);
+        updateSelectedList(); updateSendButton(); persist();
+      }
+      sel.value = '';
+    });
+  }
+
+  /* ===== Autosuggest ===== */
+  function bindSearchSuggest(){
+    const input = $('#universitySearch');
+    const pop   = $('#searchSuggest');
+    if (!input || !pop) return;
+
+    function hide(){ pop.style.display='none'; input.setAttribute('aria-expanded','false'); }
+    function show(){ pop.style.display='block'; input.setAttribute('aria-expanded','true'); }
+
+    input.addEventListener('input', ()=>{
+      const q = input.value.trim();
+      SR.q = q;
+      if (q.length < 2){ hide(); return; }
+      const hits = SR.fuse.search(q).slice(0, 8).map(h=>h.item);
+      pop.innerHTML = hits.map(u=>`
+        <div class="suggest-item" data-id="${u.unitid}">
+          <span>${u.name}</span><small>${u.state || '—'}</small>
+        </div>`).join('');
+      if (hits.length){ show(); } else { hide(); }
+    });
+
+    pop.addEventListener('click', (e)=>{
+      const el = e.target.closest('.suggest-item');
+      if (!el) return;
+      const id = el.getAttribute('data-id');
+      SR.selected.add(id);
+      input.value = '';
+      SR.q = '';
+      hide(); updateSelectedList(); updateSendButton(); persist();
+    });
+
+    document.addEventListener('click', (e)=>{
+      if (!pop.contains(e.target) && !input.contains(e.target)) hide();
+    });
+
+    $('#searchApplyBtn')?.addEventListener('click', ()=>{ applyFilters(); hide(); });
+  }
+
+  /* ===== Filters & paging bindings ===== */
+  function bindFilterControls(){
+    const state = $('#stateFilter');
+    const type  = $('#typeFilter');
+    const level = $('#levelFilter');
+    const sort  = $('#sortBy');
+    const apply = $('#filterApplyBtn');
+    const reset = $('#resetBtn');
+    const pageSize = $('#pageSize');
+    const prev = $('#prevPage');
+    const next = $('#nextPage');
+    const clearFiltersBtn = $('#clearFiltersBtn');
+
+    state?.addEventListener('change', e=> SR.filters.state = e.target.value);
+    type ?.addEventListener('change', e=> SR.filters.type  = e.target.value);
+    level?.addEventListener('change', e=> SR.filters.level = e.target.value);
+    sort ?.addEventListener('change', e=> SR.filters.sort  = e.target.value);
+    pageSize?.addEventListener('change', e=> { SR.perPage = parseInt(e.target.value||'40',10); renderGrid(); updateResultMeta(); });
+
+    apply?.addEventListener('click', applyFilters);
+    reset?.addEventListener('click', ()=>{
+      SR.q=''; SR.filters={ state:'', type:'', level:'', sort:'name_asc' };
+      $('#universitySearch').value=''; state.value=''; type.value=''; level.value=''; sort.value='name_asc';
+      applyFilters();
+    });
+    clearFiltersBtn?.addEventListener('click', ()=>{
+      SR.q=''; SR.filters={ state:'', type:'', level:'', sort:'name_asc' };
+      $('#universitySearch').value=''; state.value=''; type.value=''; level.value=''; sort.value='name_asc';
+      applyFilters();
+    });
+
+    prev?.addEventListener('click', ()=>{ if (SR.page>1){ SR.page--; renderGrid(); updateResultMeta(); } });
+    next?.addEventListener('click', ()=>{ const pages=Math.max(1,Math.ceil(SR.filtered.length/SR.perPage)); if (SR.page<pages){ SR.page++; renderGrid(); updateResultMeta(); } });
+  }
+
+  /* ===== Copy link (share) ===== */
+  function bindCopyLink(){
+    const btn = $('#copyLinkBtn');
+    btn?.addEventListener('click', async ()=>{
+      try{
+        const ids = Array.from(SR.selected).filter(x=>x!==SR.mockPinned);
+        const url = new URL(location.href);
+        url.search = '';
+        url.hash = '';
+        url.pathname = '/reco';
+        url.searchParams.set('unis', ids.join(','));
+        await navigator.clipboard.writeText(url.toString());
+        toast('Shareable link copied!', 'success');
+      }catch(_){ toast('Could not copy link.', 'error'); }
+    });
+  }
+
+  /* ===== Student: send request form ===== */
+  function bindStudentSend(){
+    const form = $('#stuSendForm');
+    if (!form) return;
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const name = $('#stuName')?.value.trim() || '';
+      const email= $('#stuEmail')?.value.trim() || '';
+      const recN = $('#recName')?.value.trim() || '';
+      const recE = $('#recEmail')?.value.trim() || '';
+      if (!name || !email || !recN || !recE){ toast('Please fill all fields.','error'); return; }
+
+      // record a "request" for student tracking
+      const now = Date.now();
+      SR.studentTrack.unshift({
+        id: 'req_'+now,
+        who: recN,
+        email: recE,
+        ts: now,
+        status: 'pending'
+      });
+      persist();
+      toast('Recommendation request sent (stub).','success');
+      form.reset();
+    });
+  }
+
+  /* ===== Student tracking table render ===== */
+  window.renderStudentTrack = function(){
+    const body = $('#stuTrackBody');
+    if (!body) return;
+    if (!SR.studentTrack.length){
+      body.innerHTML = `<tr><td colspan="4" style="color:#667">No recommendation requests yet.</td></tr>`;
+      return;
+    }
+    body.innerHTML = SR.studentTrack.map(r=>`
+      <tr>
+        <td>${r.who || '—'}</td>
+        <td>${r.email || '—'}</td>
+        <td>${new Date(r.ts).toLocaleString()}</td>
+        <td><span class="track-pill ${r.status==='pending'?'pending':r.status==='sent'?'sent':'received'}">${r.status}</span></td>
+      </tr>
+    `).join('');
+  };
+
+  /* ===== Recommender send flow (modal + progress) ===== */
+  function bindRecommenderSend(){
+    const btn = $('#sendBtn');
+    if (!btn) return;
+    const modal = $('#confirmModal');
+    const closeX = $('#modalCloseBtn');
+    const cancel = $('#modalCancelBtn');
+    const confirm= $('#modalConfirmBtn');
+
+    function openModal(){
+      // build summary/added/removed based on student vs current (stub: assume student had none)
+      const selectedItems = SR.universities.filter(u=> SR.selected.has(u.unitid));
+      $('#modalIncluded').innerHTML = selectedItems.map(u=> `<div>• ${u.name} (${u.state})</div>`).join('');
+      $('#modalIncludedCount').textContent = String(selectedItems.length);
+      $('#modalRemoved').innerHTML = `<em>None</em>`;
+      $('#modalRemovedCount').textContent = '0';
+      $('#modalAdded').innerHTML = `<em>All current are additions</em>`;
+      $('#modalAddedCount').textContent = String(selectedItems.length);
+      $('#modalSummary').innerHTML = `You’re about to send your letter to <b>${selectedItems.length}</b> universit${selectedItems.length===1?'y':'ies'}.`;
+      modal.style.display = 'flex';
+    }
+    function closeModal(){ modal.style.display = 'none'; }
+
+    btn.addEventListener('click', ()=>{
+      if (btn.disabled) return;
+      openModal();
+    });
+    closeX?.addEventListener('click', closeModal);
+    cancel?.addEventListener('click', closeModal);
+
+    confirm?.addEventListener('click', ()=>{
+      closeModal();
+      startProgressSend();
+    });
+  }
+
+  function startProgressSend(){
+    const section = $('#progressSection');
+    const fill = $('#progressFill');
+    const text = $('#progressText');
+    const list = $('#deliveryList');
+    const success = $('#successSection');
+
+    section.style.display = 'block';
+    fill.style.width = '0%';
+    list.innerHTML = '';
+    success.style.display = 'none';
+
+    const items = SR.universities.filter(u=> SR.selected.has(u.unitid));
+    let done = 0;
+
+    function step(){
+      if (done >= items.length){
+        fill.style.width = '100%';
+        text.textContent = 'Done.';
+        setTimeout(()=>{
+          section.style.display = 'none';
+          success.style.display = 'block';
+          toast('Letters sent (stub).', 'success');
+        }, 500);
+        return;
+      }
+      const u = items[done++];
+      // simulate sending
+      const row = document.createElement('div');
+      row.className = 'delivery-item';
+      row.innerHTML = `<div class="delivery-status pending">…</div><div>${u.name} (${u.state})</div>`;
+      list.appendChild(row);
+      fill.style.width = `${Math.floor((done/items.length)*100)}%`;
+      text.textContent = `Sending to ${u.name}… (${done}/${items.length})`;
+      setTimeout(()=>{
+        row.querySelector('.delivery-status').className = 'delivery-status success';
+        row.querySelector('.delivery-status').textContent = '✓';
+        step();
+      }, 180);
+    }
+    step();
+  }
+
+  /* ===== Intake link parsing & apply ===== */
+  function bindLinkIntake(){
+    const els = {
+      input:  $('#linkInput'),
+      parse:  $('#linkParseBtn'),
+      status: $('#linkStatus'),
+      sum:    $('#linkSummary'),
+      help:   $('#linkHelpBtn'),
+    };
+    function setStatus(msg, type='info'){
+      const color = type==='error' ? '#b91c1c' : type==='success' ? '#166534' : '#334155';
+      if (els.status) els.status.innerHTML = `<span style="color:${color}">${msg}</span>`;
+    }
+    function summarize(data, matchedCount){
+      const lines = [];
+      const full = [data.studentFirst, data.studentLast].filter(Boolean).join(' ');
+      if (full) lines.push(`<div><b>Student</b>: ${full}</div>`);
+      if (data.studentEmail || data.studentPhone){
+        lines.push(`<div><b>Contact</b>: ${[data.studentEmail, data.studentPhone].filter(Boolean).join(' • ')}</div>`);
+      }
+      if (typeof data.waiveAccess !== 'undefined'){
+        lines.push(`<div><b>Waive access</b>: ${data.waiveAccess?'<span class="ok">Yes</span>':'No'}</div>`);
+      }
+      if (data.recommenderName || data.recommenderEmail || data.recommenderPhone){
+        lines.push(`<div><b>Recommender</b>: ${[data.recommenderName, data.recommenderEmail, data.recommenderPhone].filter(Boolean).join(' • ')}</div>`);
+      }
+      if (Array.isArray(data.unitids) && data.unitids.length){
+        lines.push(`<div><b>Universities (unitids)</b>: ${data.unitids.length} <span class="${matchedCount>0?'ok':'warn'}">(matched ${matchedCount})</span></div>`);
+      } else if (Array.isArray(data.unames) && data.unames.length){
+        lines.push(`<div><b>Universities (by name)</b>: ${data.unames.length} (will match)</div>`);
+      }
+      els.sum.innerHTML = lines.join('') || '<div class="muted">No details found.</div>';
+      els.sum.hidden = false;
+    }
+    function parseLink(raw){
+      try{
+        const url = new URL(raw);
+        const q = url.searchParams;
+        const data = {
+          studentFirst:   q.get('sf') || q.get('sfn') || '',
+          studentLast:    q.get('sl') || q.get('sln') || '',
+          studentEmail:   q.get('se') || q.get('semail') || '',
+          studentPhone:   q.get('sp') || q.get('sphone') || '',
+          waiveAccess:    (q.get('waive') === '1' || q.get('waive') === 'true'),
+          recommenderName: q.get('rname') || '',
+          recommenderEmail: q.get('remail') || '',
+          recommenderPhone: q.get('rphone') || '',
+          unitids: [],
+          unames: [],
+        };
+        const unis = q.get('unis');   if (unis)   data.unitids = unis.split(',').map(s=>s.trim()).filter(Boolean);
+        const unames= q.get('unames'); if (unames) data.unames = unames.split(',').map(s=>s.trim()).filter(Boolean);
+        return data;
+      }catch(_){ return null; }
+    }
+    async function applyReferralData(data){
+      let matched = 0;
+      // Prefer unitids
+      if (Array.isArray(data.unitids) && data.unitids.length){
+        const master = new Set(SR.universities.map(u=> String(u.unitid)));
+        data.unitids.forEach(id=>{
+          const key = String(id);
+          if (master.has(key)){ SR.selected.add(key); matched++; }
+        });
+      }
+      // Fallback: fuzzy by names
+      if ((!data.unitids || !data.unitids.length) && Array.isArray(data.unames) && data.unames.length){
+        const want = data.unames.map(s=> s.toLowerCase());
+        SR.universities.forEach(u=>{
+          if (want.some(w => u.name.toLowerCase().includes(w))){ SR.selected.add(u.unitid); matched++; }
+        });
+      }
+      // always keep Mock pinned
+      SR.selected.add(SR.mockPinned);
+      updateSelectedList(); updateSendButton(); persist();
+      return matched;
+    }
+    async function handleImport(){
+      const raw = (els.input?.value || '').trim();
+      if (!raw){ setStatus('Please paste a link first.','error'); return; }
+      const data = parseLink(raw);
+      if (!data){ setStatus('That doesn’t look like a valid link.','error'); return; }
+      setStatus('Parsing link and applying data…');
+      const matched = await applyReferralData(data);
+      summarize(data, matched);
+      const full = [data.studentFirst, data.studentLast].filter(Boolean).join(' ');
+      if (full) { const t = $('#writerTitle'); if (t) t.value = `Recommendation for ${full}`; }
+      toast(`Imported ${matched} universit${matched===1?'y':'ies'} from the link.`, matched?'success':'info');
+      setStatus('Link imported successfully.','success');
+
+      // Switch to Recommender view
+      const recPanel = $('#panel-recommender'); const stuPanel = $('#panel-student');
+      if (recPanel && stuPanel){
+        stuPanel.hidden = true; recPanel.hidden = false;
+        recPanel.style.display = ''; stuPanel.style.display = 'none';
+        document.querySelectorAll('.header-nav .nav-link').forEach(b=>{
+          const on = b.dataset.view === 'recommender';
+          b.setAttribute('aria-selected', on?'true':'false');
+          if (on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+        });
+        try{ localStorage.setItem('sr_current_view','recommender'); }catch(_){}
+        history.replaceState(null,'','#recommender');
+      }
+    }
+    els.help?.addEventListener('click', ()=>{
+      const det = $('#linkFormatDetails');
+      if (det){ det.open = true; det.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+    });
+    els.parse?.addEventListener('click', handleImport);
+    els.input?.addEventListener('keydown', (e)=>{ if (e.key==='Enter'){ e.preventDefault(); handleImport(); } });
+  }
+
+  /* ===== Header: view toggles + theme ===== */
+  function bindHeader(){
+    const studentPanel = $('#panel-student');
+    const recPanel     = $('#panel-recommender');
+    const toggles      = $$('.header-nav .nav-link');
+    const themeBtn     = $('#headerThemeBtn');
+
     function setActive(view){
       const isStudent = (view==='student');
-      if (studentPanel) studentPanel.hidden = !isStudent;
-      if (recPanel)     recPanel.hidden     =  isStudent;
+      studentPanel.hidden = !isStudent;
+      recPanel.hidden     =  isStudent;
+      studentPanel.style.display = isStudent ? '' : 'none';
+      recPanel.style.display     = isStudent ? 'none' : '';
       toggles.forEach(btn=>{
-        const on = btn.dataset.view===view;
+        const on = btn.dataset.view === view;
         btn.setAttribute('aria-selected', on?'true':'false');
         if (on) btn.setAttribute('aria-current','page'); else btn.removeAttribute('aria-current');
       });
+      try { localStorage.setItem('sr_current_view', view); }catch(_){}
       history.replaceState(null,'','#'+view);
-      safeSet('sr_current_view', view);
     }
-    toggles.forEach(btn=>btn.addEventListener('click',()=>setActive(btn.dataset.view)));
-    const fromHash=(location.hash||'').slice(1);
-    const saved=safeGet('sr_current_view','student');
-    const initial=(fromHash==='recommender'||fromHash==='student')?fromHash:saved;
-    setActive(initial==='recommender'?'recommender':'student');
-    window.addEventListener('hashchange',()=>{
-      const v=(location.hash||'#student').slice(1);
-      setActive(v==='recommender'?'recommender':'student');
-    });
 
-    // Theme toggle
-    const themeBtn = document.getElementById('headerThemeBtn');
+    toggles.forEach(btn=> btn.addEventListener('click', ()=> setActive(btn.dataset.view)));
+    const fromHash = (location.hash||'').slice(1);
+    const saved    = localStorage.getItem('sr_current_view') || 'student';
+    const initial  = (fromHash==='recommender'||fromHash==='student') ? fromHash : saved;
+    setActive(initial);
+
+    // Theme
     if (themeBtn){
       themeBtn.addEventListener('click', ()=>{
         const root = document.documentElement;
         const isDark = root.getAttribute('data-theme')==='dark';
-        root.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        themeBtn.setAttribute('aria-pressed', isDark ? 'false':'true');
-        try { localStorage.setItem('sr_theme', isDark ? 'light' : 'dark'); } catch(e){}
+        root.setAttribute('data-theme', isDark?'light':'dark');
+        themeBtn.setAttribute('aria-pressed', isDark?'false':'true');
+        try{ localStorage.setItem('sr_theme', isDark?'light':'dark'); }catch(_){}
       });
-      try {
-        const t = localStorage.getItem('sr_theme');
-        if (t==='dark'||t==='light'){
-          document.documentElement.setAttribute('data-theme', t);
-          themeBtn.setAttribute('aria-pressed', t==='dark' ? 'true':'false');
-        }
-      } catch(e){}
-    }
-  })();
-</script>
-
-<!-- Student tabs controller (original kept) -->
-<script>
-(function(){
-  const tabs = { send:$('#stuTabSend'), select:$('#stuTabSelect'), track:$('#stuTabTrack') };
-  const panels = { send:$('#stuPanelSend'), select:$('#stuPanelSelect'), track:$('#stuPanelTrack') };
-  function activate(which){
-    Object.entries(tabs).forEach(([k,btn])=> btn?.setAttribute('aria-selected', k===which?'true':'false'));
-    Object.entries(panels).forEach(([k,sec])=> sec && (sec.hidden = (k!==which)));
-    if (which==='track') renderStudentTrack();
-  }
-  tabs.send  ?.addEventListener('click', ()=>activate('send'));
-  tabs.select?.addEventListener('click', ()=>activate('select'));
-  tabs.track ?.addEventListener('click', ()=>activate('track'));
-  activate('send');
-})();
-</script>
-<!-- Robust toggler duplicate (original kept; harmless no-op with our bindings) -->
-<script>
-(function(){
-  const studentPanel = document.getElementById('panel-student');
-  const recPanel     = document.getElementById('panel-recommender');
-  const toggles      = document.querySelectorAll('.header-nav .nav-link');
-  if (!studentPanel || !recPanel || !toggles.length) return;
-  const safeLS = { get(k,d){ try { return localStorage.getItem(k) ?? d; } catch(e){ return d; } },
-                   set(k,v){ try { localStorage.setItem(k, v); } catch(e){} } };
-  function setActive(view){
-    const isStudent = (view==='student');
-    studentPanel.hidden = !isStudent; recPanel.hidden =  isStudent;
-    studentPanel.style.display = isStudent ? '' : 'none';
-    recPanel.style.display     = isStudent ? 'none' : '';
-    toggles.forEach(btn=>{
-      const on = btn.dataset.view===view;
-      btn.setAttribute('aria-selected', on?'true':'false');
-      if (on) btn.setAttribute('aria-current','page'); else btn.removeAttribute('aria-current');
-    });
-    history.replaceState(null,'','#'+view); safeLS.set('sr_current_view',view);
-  }
-  toggles.forEach(btn=>btn.addEventListener('click',()=>setActive(btn.dataset.view)));
-  const fromHash=(location.hash||'').replace('#',''); const saved=safeLS.get('sr_current_view','');
-  const initial=(fromHash==='recommender'||fromHash==='student')?fromHash:(saved==='recommender'||saved==='student'?saved:'student');
-  setActive(initial);
-  window.addEventListener('hashchange',()=>{ const v=(location.hash||'#student').slice(1); setActive(v==='recommender'?'recommender':'student'); });
-})();
-</script>
-
-<!-- Tiny upload & contact stubs so buttons feel live -->
-<script>
-(function(){
-  const choose = $('#chooseFileBtn'), file = $('#fileInput'), box = $('#uploadedFile'), name = $('#fileName'), size = $('#fileSize'), remove = $('#removeFileBtn');
-  choose?.addEventListener('click', ()=>file?.click());
-  file?.addEventListener('change', ()=>{
-    const f = file.files?.[0]; if(!f) return;
-    name.textContent = f.name; size.textContent = `${(f.size/1024/1024).toFixed(2)} MB`;
-    box.style.display='block'; toast('PDF attached.','success');
-  });
-  remove?.addEventListener('click', ()=>{ file.value=''; box.style.display='none'; });
-
-  const chooseV=$('#chooseVideoBtn'), video=$('#videoInput'), boxV=$('#uploadedVideo'), nameV=$('#videoName'), sizeV=$('#videoSize'), removeV=$('#removeVideoBtn'), prevV=$('#videoPreview');
-  chooseV?.addEventListener('click', ()=>video?.click());
-  video?.addEventListener('change', ()=>{
-    const f=video.files?.[0]; if(!f) return;
-    nameV.textContent=f.name; sizeV.textContent=`${(f.size/1024/1024).toFixed(2)} MB`;
-    boxV.style.display='block';
-    try { prevV.src = URL.createObjectURL(f); prevV.style.display='block'; } catch(e){}
-  });
-  removeV?.addEventListener('click', ()=>{ video.value=''; boxV.style.display='none'; prevV.removeAttribute('src'); prevV.style.display='none'; });
-
-  // Contact overlay
-  const overlay = $('#contactOverlay');
-  const openBtn = $('#contactAdminItem');
-  const closeBtn1 = $('#contactCloseBtn2');
-  const closeBtn2 = $('#contactCancelBtn2');
-  openBtn?.addEventListener('click', ()=>{ overlay.style.display='flex'; requestAnimationFrame(()=>overlay.querySelector('div[style*="transform"]').style.opacity=1); });
-  closeBtn1?.addEventListener('click', ()=> overlay.style.display='none');
-  closeBtn2?.addEventListener('click', ()=> overlay.style.display='none');
-  $('#contactForm2')?.addEventListener('submit', (e)=>{ e.preventDefault(); overlay.style.display='none'; toast('Message sent to admin.','success'); });
-})();
-</script>
-<script>
-(function(){
-  // tiny helpers (no conflicts)
-  const $  = (s, r=document)=>r.querySelector(s);
-  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
-
-  // Guard to avoid double-binding
-  if (window.__sr_hotfix_bound__) return;
-  window.__sr_hotfix_bound__ = true;
-
-  // --- STUDENT TABS ---------------------------------------------------------
-  (function bindStudentTabs(){
-    const tabs = {
-      send:   $('#stuTabSend'),
-      select: $('#stuTabSelect'),
-      track:  $('#stuTabTrack'),
-    };
-    const panels = {
-      send:   $('#stuPanelSend'),
-      select: $('#stuPanelSelect'),
-      track:  $('#stuPanelTrack'),
-    };
-    if (!tabs.send || !tabs.select || !tabs.track) return;
-
-    const activate = (which)=>{
-      Object.entries(tabs).forEach(([k,btn])=>{
-        if (!btn) return;
-        btn.setAttribute('aria-selected', k===which ? 'true':'false');
-      });
-      Object.entries(panels).forEach(([k,sec])=>{
-        if (!sec) return;
-        sec.hidden = (k!==which);
-      });
-      // optional: render track rows if you have data
-      if (which==='track' && typeof window.renderStudentTrack === 'function'){
-        window.renderStudentTrack();
+      const t = localStorage.getItem('sr_theme');
+      if (t==='dark'||t==='light'){
+        document.documentElement.setAttribute('data-theme', t);
+        themeBtn.setAttribute('aria-pressed', t==='dark' ? 'true' : 'false');
       }
-    };
-
-    if (!tabs.send.__sr_bound){
-      tabs.send .addEventListener('click', ()=>activate('send'));
-      tabs.select.addEventListener('click', ()=>activate('select'));
-      tabs.track .addEventListener('click', ()=>activate('track'));
-      tabs.send.__sr_bound = tabs.select.__sr_bound = tabs.track.__sr_bound = true;
-      // default to the tab that is marked selected in DOM; fallback to "send"
-      const defaultTab = Object.entries(tabs).find(([,btn])=>btn.getAttribute('aria-selected')==='true')?.[0] || 'send';
-      activate(defaultTab);
     }
-  })();
+  }
 
-  // --- HEADER: CONTACT ADMIN -----------------------------------------------
-  (function bindContactAdmin(){
-    const btn = $('#contactAdminItem');
-    if (!btn || btn.__sr_bound) return;
-    btn.__sr_bound = true;
-
-    // If you have an overlay modal, show it; else, scroll to any contact section; else, open mail.
-    const overlay = $('#contactOverlay');
-    const openOverlay = ()=>{
-      overlay.style.display = 'flex';
-      // little fade-in
-      const panel = overlay.querySelector('div[style*="opacity"]') || overlay.firstElementChild;
-      if (panel){ panel.style.opacity = 1; }
-    };
-
-    btn.addEventListener('click', (e)=>{
-      e.preventDefault();
-      if (overlay){ openOverlay(); return; }
-
-      const section = document.getElementById('contact'); // if you have a section
-      if (section){ section.scrollIntoView({behavior:'smooth', block:'start'}); return; }
-
-      // last resort: mailto
-      window.location.href = 'mailto:support@stellarrec.com?subject=StellarRec%20support';
-    });
-  })();
-
-  // --- UPLOAD: PDF & VIDEO --------------------------------------------------
-  (function bindUploads(){
-    // PDF
-    const chooseBtn = $('#chooseFileBtn');
-    const fileInput = $('#fileInput');
-    const card      = $('#uploadedFile');
-    const nameEl    = $('#fileName');
-    const sizeEl    = $('#fileSize');
-    const rmBtn     = $('#removeFileBtn');
-
-    if (chooseBtn && fileInput && !chooseBtn.__sr_bound){
-      chooseBtn.__sr_bound = true;
-      chooseBtn.addEventListener('click', ()=> fileInput.click());
-    }
-    if (fileInput && !fileInput.__sr_bound){
-      fileInput.__sr_bound = true;
-      fileInput.addEventListener('change', ()=>{
-        const f = fileInput.files && fileInput.files[0];
-        if (!f) return;
-        if (nameEl) nameEl.textContent = f.name;
-        if (sizeEl) sizeEl.textContent = `${(f.size/1024/1024).toFixed(2)} MB`;
-        if (card) card.style.display = 'block';
-      });
-    }
-    if (rmBtn && !rmBtn.__sr_bound){
-      rmBtn.__sr_bound = true;
-      rmBtn.addEventListener('click', ()=>{
-        if (fileInput) fileInput.value = '';
-        if (card) card.style.display = 'none';
-      });
-    }
-
-    // VIDEO
-    const chooseV = $('#chooseVideoBtn');
-    const inputV  = $('#videoInput');
-    const cardV   = $('#uploadedVideo');
-    const nameV   = $('#videoName');
-    const sizeV   = $('#videoSize');
-    const rmV     = $('#removeVideoBtn');
-    const prevV   = $('#videoPreview');
-
-    if (chooseV && inputV && !chooseV.__sr_bound){
-      chooseV.__sr_bound = true;
-      chooseV.addEventListener('click', ()=> inputV.click());
-    }
-    if (inputV && !inputV.__sr_bound){
-      inputV.__sr_bound = true;
-      inputV.addEventListener('change', ()=>{
-        const f = inputV.files && inputV.files[0];
-        if (!f) return;
-        if (nameV) nameV.textContent = f.name;
-        if (sizeV) sizeV.textContent = `${(f.size/1024/1024).toFixed(2)} MB`;
-        if (cardV) cardV.style.display = 'block';
-        if (prevV){
-          try { prevV.src = URL.createObjectURL(f); prevV.style.display='block'; } catch(_){}
-        }
-      });
-    }
-    if (rmV && !rmV.__sr_bound){
-      rmV.__sr_bound = true;
-      rmV.addEventListener('click', ()=>{
-        if (inputV) inputV.value = '';
-        if (cardV) cardV.style.display = 'none';
-        if (prevV){ prevV.removeAttribute('src'); prevV.style.display = 'none'; }
-      });
-    }
-  })();
-
-  // --- WRITER TOOLBAR (bold/italic/underline + meta) -----------------------
-  (function bindWriter(){
+  /* ===== Writer: toolbar + meta + persistence ===== */
+  function bindWriter(){
     const box   = $('#writerBox');
     const title = $('#writerTitle');
-    if (!box) return;
-
-    // enable focus to exec commands
-    function exec(cmd){
-      box.focus({ preventScroll:true });
-      document.execCommand(cmd, false, null);
-      refreshMeta();
-    }
-
-    $$('[data-wcmd]').forEach(btn=>{
-      if (btn.__sr_bound) return;
-      btn.__sr_bound = true;
-      btn.addEventListener('click', ()=>{
-        const cmd = btn.getAttribute('data-wcmd');
-        if (cmd) exec(cmd);
-      });
-    });
-
-    function refreshMeta(){
-      const text = box.innerText || '';
-      const words = (text.trim().match(/\S+/g)||[]).length;
-      const chars = text.length;
-      const meta = $('#writerCount');
-      if (meta) meta.textContent = `${words} words • ${chars} chars`;
-    }
-
-    // autosave / restore / clear / copy / download / attach — light stubs
-    const LSKEY = 'sr_writer_draft';
     const savedEl = $('#writerSaved');
-
-    function setSaved(label){
-      if (savedEl){ savedEl.textContent = label; }
-    }
-
-    $('#saveDraftBtn')   ?.addEventListener('click', ()=>{
-      const payload = { title: title?.value || '', html: box.innerHTML };
-      try { localStorage.setItem(LSKEY, JSON.stringify(payload)); setSaved('Saved'); } catch(_){}
-    });
-    $('#restoreDraftBtn')?.addEventListener('click', ()=>{
-      try {
-        const raw = localStorage.getItem(LSKEY);
-        if (raw){
-          const data = JSON.parse(raw);
-          if (title && data.title) title.value = data.title;
-          box.innerHTML = data.html || '';
-          setSaved('Restored');
-          refreshMeta();
-        }
-      } catch(_){}
-    });
-    $('#clearDraftBtn')  ?.addEventListener('click', ()=>{
-      box.innerHTML = ''; refreshMeta(); setSaved('Cleared');
-    });
-    $('#copyDraftBtn')   ?.addEventListener('click', async ()=>{
-      try {
-        const tmp = document.createElement('div');
-        tmp.innerHTML = box.innerHTML;
-        await navigator.clipboard.writeText(tmp.innerText);
-        setSaved('Copied');
-      } catch(_){}
-    });
-    $('#downloadDraftBtn')?.addEventListener('click', ()=>{
-      const a = document.createElement('a');
-      const text = (title?.value ? title.value+'\n\n' : '') + (box.innerText||'');
-      const blob = new Blob([text], {type:'text/plain'});
-      a.href = URL.createObjectURL(blob);
-      a.download = 'recommendation-letter.txt';
-      a.click();
-      setSaved('Downloaded');
-    });
-    $('#attachDraftBtn')?.addEventListener('click', ()=>{
-      setSaved('Attached (stub)');
-    });
-
-    // autosave toggle
-    const autos = $('#writerAutosaveToggle');
-    if (autos && !autos.__sr_bound){
-      autos.__sr_bound = true;
-      autos.addEventListener('change', ()=>{
-        // no-op stub; kept for parity
-      });
-    }
-
-    // count updates
-    ['keyup','input','paste','cut'].forEach(ev=> box.addEventListener(ev, refreshMeta));
-    refreshMeta();
-  })();
-
-  // --- SAFETY: If a suggestion popover exists, close on outside click -------
-  (function closeSuggestOnOutside(){
-    const pop = $('#searchSuggest');
-    const input = $('#universitySearch');
-    if (!pop || !input || pop.__sr_bound) return;
-    pop.__sr_bound = true;
-    document.addEventListener('click', (e)=>{
-      if (!pop.contains(e.target) && !input.contains(e.target)){
-        pop.style.display = 'none';
-      }
-    });
-  })();
-
-})();
-</script>
-<script>
-(function () {
-  if (window.__srRecommenderPatch__) return; // idempotent
-  window.__srRecommenderPatch__ = true;
-
-  /* ---------------- Utilities ---------------- */
-  const $  = (s, r = document) => r.querySelector(s);
-  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-
-  /* ---------------- Toast helper (keeps existing if present) ---------------- */
-  (function ensureToast() {
-    if (typeof window.toast === 'function') return;
-
-    // Use existing #toastWrap if present; otherwise fall back to alert
-    const wrap = document.getElementById('toastWrap');
-
-    window.toast = function (msg, type = 'info') {
-      if (!wrap) { alert(msg); return; }
-      const el = document.createElement('div');
-      el.className = `toast ${type}`;
-      el.innerHTML = `
-        <span class="icon material-icons">
-          ${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}
-        </span>
-        <div class="msg">${msg}</div>
-        <button class="x" aria-label="Dismiss" type="button">✕</button>
-      `;
-      el.querySelector('.x').onclick = () => el.remove();
-      wrap.appendChild(el);
-      setTimeout(() => el.remove(), 3200);
-    };
-  })();
-
-  /* ---------------- Avatar → Contact admin: open, scroll, click ---------------- */
-  (function bindContactAdminFlow() {
-    const avatar   = $('#userAvatarBtn');
-    const dropdown = $('#userDropdown');
-    const item     = $('#contactAdminItem');
-    const overlay  = $('#contactOverlay');
-    const close1   = $('#contactCloseBtn2');
-    const close2   = $('#contactCancelBtn2');
-
-    function openDropdown() {
-      if (!dropdown) return;
-      dropdown.classList.add('show');
-      avatar?.setAttribute('aria-expanded', 'true');
-    }
-    function openOverlay() {
-      if (!overlay) return;
-      overlay.style.display = 'flex';
-      const panel = overlay.querySelector('div[style*="transition"]') || overlay.firstElementChild;
-      if (panel) panel.style.opacity = 1;
-    }
-    function closeOverlay() {
-      if (overlay) overlay.style.display = 'none';
-    }
-
-    // Click avatar: open dropdown and auto-scroll the "Contact admin" item into view
-    avatar?.addEventListener('click', () => {
-      openDropdown();
-      if (dropdown && item) {
-        dropdown.classList.add('sr-highlight');
-        setTimeout(() => dropdown.classList.remove('sr-highlight'), 900);
-        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    });
-
-    // Clicking Contact admin: open overlay
-    item?.addEventListener('click', (e) => { e.preventDefault(); openOverlay(); });
-
-    // Overlay close behaviors
-    close1?.addEventListener('click', closeOverlay);
-    close2?.addEventListener('click', closeOverlay);
-    overlay?.addEventListener('click', (e) => { if (e.target === overlay) closeOverlay(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && overlay?.style.display === 'flex') closeOverlay(); });
-  })();
-
-  /* ---------------- Write a Letter: full toolbar + persistence ------------------ */
-  (function bindWriter() {
-    const box     = $('#writerBox');       // contenteditable region
-    const title   = $('#writerTitle');     // optional <input> for title
-    const savedEl = $('#writerSaved');     // small status text node
-    const LSKEY   = 'sr_writer_draft_v2';
-
     if (!box) return;
+    const LSKEY = 'sr_writer_draft_v2';
 
-    // Guidance card (disappears when content present)
-    (function mountGuide() {
+    // Guidance card (mount once)
+    (function mountGuide(){
       if ($('#writerGuide')) return;
       const guide = document.createElement('div');
       guide.id = 'writerGuide';
@@ -1735,186 +1615,606 @@ document.addEventListener('DOMContentLoaded', async ()=>{
           <li><b>Performance vs. peers</b> (quantify if possible; top % or comparative outcomes).</li>
           <li><b>Potential for growth</b> and readiness for the program’s rigor.</li>
           <li><b>Qualities as a person</b> (integrity, leadership, resilience, collaboration), with stories.</li>
-        </ul>
-      `;
-      // Insert after the editor box or before action row
+        </ul>`;
       const writerSection = $('#writerSection') || box.parentElement;
       writerSection?.insertBefore(guide, writerSection.querySelector('.writer-actions') || box.nextSibling);
-
-      const toggleGuide = () => {
-        const hasText =
-          (box.innerText || '').trim().length > 0 ||
-          !!box.querySelector('img,table,ul,ol,blockquote,pre');
+      const toggle = ()=>{
+        const hasText = (box.innerText||'').trim().length > 0 || !!box.querySelector('img,table,ul,ol,blockquote,pre');
         guide.style.display = hasText ? 'none' : 'block';
       };
-      ['input', 'keyup', 'paste', 'cut', 'blur', 'DOMSubtreeModified'].forEach(ev =>
-        box.addEventListener(ev, toggleGuide)
-      );
-      toggleGuide();
+      ['input','keyup','paste','cut','blur','DOMSubtreeModified'].forEach(ev=> box.addEventListener(ev, toggle));
+      toggle();
     })();
 
-    // execCommand bindings (bold/italic/underline buttons already in DOM)
-    function refreshMeta() {
-      const text  = box.innerText || '';
-      const words = (text.trim().match(/\S+/g) || []).length;
+    function refreshMeta(){
+      const text = box.innerText || '';
+      const words = (text.trim().match(/\S+/g)||[]).length;
       const chars = text.length;
-      const meta  = $('#writerCount');
-      if (meta) meta.textContent = `${words} words • ${chars} chars`;
+      $('#writerCount').textContent = `${words} words • ${chars} chars`;
     }
-    function exec(cmd) {
-      box.focus({ preventScroll: true });
+    function exec(cmd){
+      box.focus({ preventScroll:true });
       document.execCommand(cmd, false, null);
       refreshMeta();
     }
-    $$('[data-wcmd]').forEach(btn => {
-      if (btn.__srExecBound) return;
-      btn.__srExecBound = true;
-      btn.addEventListener('click', () => exec(btn.getAttribute('data-wcmd')));
-    });
-    ['input', 'keyup', 'paste', 'cut'].forEach(ev => box.addEventListener(ev, refreshMeta));
-    refreshMeta();
-
-    // Saved status helper
-    const setSaved = (s) => { if (savedEl) savedEl.textContent = s; };
-
-    // Save / Restore / Clear / Copy / Download / Attach
-    $('#saveDraftBtn')?.addEventListener('click', () => {
-      try {
-        const payload = { title: title?.value || '', html: box.innerHTML };
-        localStorage.setItem(LSKEY, JSON.stringify(payload));
-        setSaved('Saved');
-        toast('Draft saved.', 'success');
-      } catch (e) {
-        toast('Could not save locally.', 'error');
+    $$('[data-wcmd]').forEach(btn=>{
+      if (!btn.__srExec){
+        btn.__srExec = true;
+        btn.addEventListener('click', ()=> exec(btn.getAttribute('data-wcmd')));
       }
     });
+    ['input','keyup','paste','cut'].forEach(ev=> box.addEventListener(ev, refreshMeta));
+    refreshMeta();
 
-    $('#restoreDraftBtn')?.addEventListener('click', () => {
-      try {
+    function setSaved(s){ if (savedEl) savedEl.textContent = s; }
+
+    $('#saveDraftBtn')?.addEventListener('click', ()=>{
+      try{
+        const payload = { title: title?.value || '', html: box.innerHTML };
+        localStorage.setItem(LSKEY, JSON.stringify(payload));
+        setSaved('Saved'); toast('Draft saved.','success');
+      }catch(_){ toast('Could not save locally.','error'); }
+    });
+    $('#restoreDraftBtn')?.addEventListener('click', ()=>{
+      try{
         const raw = localStorage.getItem(LSKEY);
-        if (!raw) { toast('No saved draft found.', 'info'); return; }
+        if (!raw){ toast('No saved draft found.','info'); return; }
         const data = JSON.parse(raw);
         if (title) title.value = data.title || '';
         box.innerHTML = data.html || '';
-        setSaved('Restored');
-        refreshMeta();
-      } catch (e) {
-        toast('Could not restore draft.', 'error');
-      }
+        setSaved('Restored'); refreshMeta();
+      }catch(_){ toast('Could not restore draft.','error'); }
     });
-
-    $('#clearDraftBtn')?.addEventListener('click', () => {
-      box.innerHTML = '';
-      refreshMeta();
-      setSaved('Cleared');
+    $('#clearDraftBtn')?.addEventListener('click', ()=>{ box.innerHTML=''; refreshMeta(); setSaved('Cleared'); });
+    $('#copyDraftBtn')?.addEventListener('click', async ()=>{
+      try{ const tmp = document.createElement('div'); tmp.innerHTML = box.innerHTML;
+        await navigator.clipboard.writeText(tmp.innerText); setSaved('Copied'); toast('Plain text copied.','success');
+      }catch(_){ toast('Copy failed.','error'); }
     });
-
-    $('#copyDraftBtn')?.addEventListener('click', async () => {
-      try {
-        const tmp = document.createElement('div');
-        tmp.innerHTML = box.innerHTML;
-        await navigator.clipboard.writeText(tmp.innerText);
-        setSaved('Copied');
-        toast('Plain text copied.', 'success');
-      } catch (e) {
-        toast('Copy failed.', 'error');
-      }
-    });
-
-    $('#downloadDraftBtn')?.addEventListener('click', () => {
+    $('#downloadDraftBtn')?.addEventListener('click', ()=>{
+      const text = (title?.value ? title.value+'\n\n' : '') + (box.innerText||'');
       const a = document.createElement('a');
-      const text = (title?.value ? (title.value + '\n\n') : '') + (box.innerText || '');
-      a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+      a.href = URL.createObjectURL(new Blob([text], {type:'text/plain'}));
       a.download = 'recommendation-letter.txt';
-      a.click();
-      setSaved('Downloaded');
+      a.click(); setSaved('Downloaded');
     });
-
-    $('#attachDraftBtn')?.addEventListener('click', () => {
-      try {
+    $('#attachDraftBtn')?.addEventListener('click', ()=>{
+      try{
         const payload = { title: title?.value || '', html: box.innerHTML, ts: Date.now() };
         localStorage.setItem('sr_attached_draft', JSON.stringify(payload));
-        setSaved('Attached');
-        toast('Draft attached to this send session.', 'success');
-      } catch (e) {
-        toast('Attach failed.', 'error');
+        setSaved('Attached'); toast('Draft attached to this send session.','success');
+      }catch(_){ toast('Attach failed.','error'); }
+    });
+  }
+
+  /* ===== Uploads (PDF + Video) ===== */
+  function bindUploads(){
+    // PDF
+    const choose = $('#chooseFileBtn'), file = $('#fileInput'),
+          box = $('#uploadedFile'), name = $('#fileName'), size = $('#fileSize'), remove = $('#removeFileBtn');
+    choose?.addEventListener('click', ()=> file?.click());
+    file?.addEventListener('change', ()=>{
+      const f = file.files?.[0]; if (!f) return;
+      name.textContent = f.name; size.textContent = `${(f.size/1024/1024).toFixed(2)} MB`;
+      box.style.display = 'block'; toast('PDF attached.','success');
+    });
+    remove?.addEventListener('click', ()=>{ file.value=''; box.style.display='none'; });
+
+    // Video
+    const chooseV = $('#chooseVideoBtn'), video = $('#videoInput'),
+          boxV = $('#uploadedVideo'), nameV = $('#videoName'), sizeV = $('#videoSize'),
+          removeV = $('#removeVideoBtn'), prevV = $('#videoPreview');
+    chooseV?.addEventListener('click', ()=> video?.click());
+    video?.addEventListener('change', ()=>{
+      const f = video.files?.[0]; if (!f) return;
+      nameV.textContent = f.name; sizeV.textContent = `${(f.size/1024/1024).toFixed(2)} MB`;
+      boxV.style.display = 'block';
+      try{ prevV.src = URL.createObjectURL(f); prevV.style.display='block'; }catch(_){}
+    });
+    removeV?.addEventListener('click', ()=>{
+      video.value=''; boxV.style.display='none'; prevV.removeAttribute('src'); prevV.style.display='none';
+    });
+  }
+
+  /* ===== Contact Admin overlay ===== */
+  function bindContactOverlay(){
+    const overlay = $('#contactOverlay');
+    const openBtn = $('#contactAdminItem');
+    const closeBtn1 = $('#contactCloseBtn2');
+    const closeBtn2 = $('#contactCancelBtn2');
+    openBtn?.addEventListener('click', ()=>{ overlay.style.display='flex'; requestAnimationFrame(()=>{
+      const panel = overlay.querySelector('div[style*="transform"]');
+      if (panel){ panel.style.opacity = 1; }
+    });});
+    closeBtn1?.addEventListener('click', ()=> overlay.style.display='none');
+    closeBtn2?.addEventListener('click', ()=> overlay.style.display='none');
+    overlay?.addEventListener('click', (e)=>{ if (e.target===overlay) overlay.style.display='none'; });
+    document.addEventListener('keydown', (e)=>{ if (e.key==='Escape' && overlay?.style.display==='flex') overlay.style.display='none'; });
+
+    $('#contactForm2')?.addEventListener('submit', (e)=>{
+      e.preventDefault(); overlay.style.display='none'; toast('Message sent to admin.','success');
+    });
+
+    // Avatar click: open dropdown & highlight Contact admin
+    const avatar = $('#userAvatarBtn'); const dropdown = $('#userDropdown');
+    avatar?.addEventListener('click', ()=>{
+      dropdown?.classList.add('show'); avatar.setAttribute('aria-expanded','true');
+      const item = $('#contactAdminItem');
+      if (dropdown && item){
+        dropdown.classList.add('sr-highlight');
+        setTimeout(()=> dropdown.classList.remove('sr-highlight'), 900);
+        item.scrollIntoView({ behavior:'smooth', block:'center' });
       }
     });
-  })();
-
-  /* ---------------- Ensure Mock University is pre-selected ---------------------- */
-  (function ensureMockSelected() {
-    const tryOnce = () => {
-      const hasSR = window.SR && Array.isArray(SR.universities);
-      if (!hasSR) return false;
-
-      // Find Mock uni by id or name
-      let mock = SR.universities.find(u => u.unitid === 'MOCK-0000') ||
-                 SR.universities.find(u => String(u.name).toLowerCase() === 'mock university');
-
-      if (!mock) {
-        mock = { unitid: 'MOCK-0000', name: 'Mock University', state: 'CA', type: 'Private nonprofit', level: '4-year' };
-        SR.universities.unshift(mock);
-      }
-      const before = SR.selected ? SR.selected.size : 0;
-      if (!SR.selected) SR.selected = new Set();
-      SR.selected.add(mock.unitid);
-
-      // Update the UI if helpers exist
-      if (typeof window.updateSelectedList === 'function') updateSelectedList();
-      if (typeof window.updateSendButton === 'function')  updateSendButton();
-
-      // Persist if our persist helper exists
-      try {
-        const saved = JSON.parse(localStorage.getItem('sr_state_v1') || '{}');
-        saved.selectedIds = Array.from(SR.selected);
-        localStorage.setItem('sr_state_v1', JSON.stringify(saved));
-      } catch {}
-
-      // Trigger send button pulse if we changed selection
-      if (SR.selected.size > before) pulseSendBtn(true);
-      return true;
-    };
-
-    // Try now; if SR not ready yet, retry a few times
-    if (!tryOnce()) {
-      let tries = 0;
-      const t = setInterval(() => { tries++; if (tryOnce() || tries > 20) clearInterval(t); }, 150);
-    }
-  })();
-
-  /* ---------------- Animate "Send to Selected Universities" --------------------- */
-  function pulseSendBtn(flash = false) {
-    const btn = $('#sendBtn'); if (!btn) return;
-    btn.classList.remove('sr-flash', 'sr-pulse');
-    if (!btn.disabled) {
-      if (flash) btn.classList.add('sr-flash');
-      btn.classList.add('sr-pulse');
-    }
   }
-  (function bindSendPulse() {
+
+  /* ===== Send button pulse ===== */
+  function bindSendPulse(){
+    function pulseSendBtn(flash=false){
+      const btn = $('#sendBtn'); if (!btn) return;
+      btn.classList.remove('sr-flash', 'sr-pulse');
+      if (!btn.disabled){
+        if (flash) btn.classList.add('sr-flash');
+        btn.classList.add('sr-pulse');
+      }
+    }
     const btn = $('#sendBtn');
     if (!btn) return;
-
-    // initial state
-    setTimeout(() => pulseSendBtn(false), 50);
-
-    // Re-pulse after selections via delegation on grid "Apply" buttons
+    setTimeout(()=> pulseSendBtn(false), 50);
     const grid = $('#universityGrid');
-    grid?.addEventListener('click', (e) => {
+    grid?.addEventListener('click', (e)=>{
       const t = e.target;
-      if (t && t.classList && t.classList.contains('apply-btn')) {
-        setTimeout(() => pulseSendBtn(true), 120);
+      if (t && t.classList && t.classList.contains('apply-btn')){
+        setTimeout(()=> pulseSendBtn(true), 120);
       }
     });
+    const obs = new MutationObserver(()=> pulseSendBtn(true));
+    obs.observe(btn, { attributes:true, attributeFilter:['disabled'] });
+  }
 
-    // Also observe attribute changes to disabled
-    const obs = new MutationObserver(() => pulseSendBtn(true));
-    obs.observe(btn, { attributes: true, attributeFilter: ['disabled'] });
-  })();
+  /* ===== Page init ===== */
+  document.addEventListener('DOMContentLoaded', async ()=>{
+    await ensureDataset();
 
+    populateBrowseDropdown();
+    bindSearchSuggest();
+    bindFilterControls();
+    bindCopyLink();
+    bindStudentSend();
+    bindRecommenderSend();
+    bindUploads();
+    bindContactOverlay();
+    bindHeader();
+    bindWriter();
+    bindSendPulse();
+
+    applyFilters();
+    updateSelectedList();
+    updateSendButton();
+
+    // Ensure Mock is pre-selected and persisted
+    SR.selected.add(SR.mockPinned);
+    persist();
+  });
 })();
 </script>
+<!-- Extra protective hotfix block (no-op if already bound; keeps features resilient) -->
+<script>
+(function(){
+  if (window.__srHotfix__) return;
+  window.__srHotfix__ = true;
+
+  const $  = (s, r=document)=> r.querySelector(s);
+  const $$ = (s, r=document)=> Array.from(r.querySelectorAll(s));
+
+  // Close search suggest when clicking outside (extra guard)
+  (function(){
+    const pop = $('#searchSuggest'); const input = $('#universitySearch');
+    if (!pop || !input) return;
+    if (pop.__srBound) return; pop.__srBound = true;
+    document.addEventListener('click', (e)=>{
+      if (!pop.contains(e.target) && !input.contains(e.target)){
+        pop.style.display = 'none';
+        input.setAttribute('aria-expanded','false');
+      }
+    });
+  })();
+
+  // Ensure theme button state reflects localStorage on late load
+  (function(){
+    const themeBtn = $('#headerThemeBtn');
+    const t = localStorage.getItem('sr_theme');
+    if (themeBtn && (t==='dark'||t==='light')){
+      document.documentElement.setAttribute('data-theme', t);
+      themeBtn.setAttribute('aria-pressed', t==='dark' ? 'true' : 'false');
+    }
+  })();
+
+  // Keyboard: Escape closes overlays & suggest
+  (function(){
+    document.addEventListener('keydown', (e)=>{
+      if (e.key!=='Escape') return;
+      const contactOverlay = $('#contactOverlay');
+      if (contactOverlay?.style.display==='flex'){ contactOverlay.style.display='none'; }
+      const suggest = $('#searchSuggest'); const input = $('#universitySearch');
+      if (suggest && input){ suggest.style.display='none'; input.setAttribute('aria-expanded','false'); }
+    });
+  })();
+
+  // Accessibility tweaks: set ARIA on dyn changes
+  (function(){
+    const uniGrid = $('#universityGrid');
+    if (!uniGrid) return;
+    uniGrid.setAttribute('role', 'list');
+  })();
+
+  // Prevent accidental text selection on button mash
+  (function(){
+    $$('button').forEach(b=>{
+      b.addEventListener('mousedown', (e)=> e.preventDefault());
+    });
+  })();
+})();
+</script>
+
+<!-- Minimal analytics placeholder (optional, safe to remove) -->
+<script>
+window.__srAnalytics = {
+  log: (event, data={})=>{
+    try{
+      const entry = { event, data, ts: Date.now() };
+      const raw = localStorage.getItem('sr_logs') || '[]';
+      const arr = JSON.parse(raw); arr.push(entry);
+      while (arr.length > 1000) arr.shift();
+      localStorage.setItem('sr_logs', JSON.stringify(arr));
+    }catch(_){}
+  }
+};
+// Example: when send succeeds (stubbed in startProgressSend), you could call:
+// __srAnalytics.log('send_complete', { count: selectedCount });
+</script>
+
+<!-- Defensive CSS for late-insert UI jitter (optional) -->
+<style>
+  /* Prevent layout jump when toasts appear */
+  .toast-wrap { will-change: transform; }
+  /* Smooth opening of dropdown */
+  .user-dropdown { will-change: transform, opacity; }
+  /* Stronger focus rings for a11y */
+  .page-btn:focus-visible, .apply-btn:focus-visible, .filter-select:focus-visible {
+    outline: 3px solid #1976d2; outline-offset: 2px;
+  }
+  :root[data-theme="dark"] .page-btn:focus-visible,
+  :root[data-theme="dark"] .apply-btn:focus-visible,
+  :root[data-theme="dark"] .filter-select:focus-visible {
+    outline: 3px solid #7aa2ff;
+  }
+</style>
+
+<!-- Service worker registration (optional, safe to keep) -->
+<script>
+(function(){
+  if ('serviceWorker' in navigator){
+    try{
+      navigator.serviceWorker.register('/sw.js');
+    }catch(_){}
+  }
+})();
+</script>
+
+<!-- End of page -->
+</body>
+</html>
+<!-- (Blank chunk intentionally reserved in case you later insert build-time includes) -->
+<!-- You can keep this placeholder or remove it; it does not affect functionality. -->
+<!--
+Notes:
+- All critical features are implemented in the integrated bootstrap script:
+  * dataset loading (public JSON or generated fallback)
+  * Fuse.js autosuggest
+  * search/filter/sort + pagination
+  * selected list (student readonly + recommender editable)
+  * copy share link
+  * writer editor (toolbar + guidance + persistence)
+  * upload PDF/video stubs with preview
+  * contact admin overlay (open from avatar dropdown and dedicated item)
+  * recommender send flow (confirm modal + simulated progress + success)
+  * theme toggle with localStorage persistence
+  * student portal send + tracking table
+  * send button pulse and accessibility tweaks
+- The earlier duplicate/partial scripts were merged to prevent event double-binding.
+-->
+<!-- (Optional extension points) -->
+<script>
+/* Example: hook to programmatically import a deep-link on load */
+(function(){
+  const params = new URLSearchParams(location.search);
+  if (params.get('autoimport')==='1'){
+    const demo = 'https://example.com/reco?sf=Jane&sl=Doe&se=jane@email.com&waive=1&unames=Harvard%20University,Stanford%20University';
+    const input = document.getElementById('linkInput');
+    const btn = document.getElementById('linkParseBtn');
+    if (input && btn){
+      input.value = demo;
+      setTimeout(()=> btn.click(), 300);
+    }
+  }
+})();
+</script>
+
+<!-- (Optional) keyboard shortcuts -->
+<script>
+(function(){
+  document.addEventListener('keydown', (e)=>{
+    // Bold/Italic/Underline in writer
+    const box = document.getElementById('writerBox');
+    const active = document.activeElement;
+    const inWriter = active===box || (active && box && box.contains(active));
+    if (!inWriter) return;
+
+    if ((e.ctrlKey||e.metaKey) && !e.altKey){
+      if (e.key.toLowerCase()==='b'){ e.preventDefault(); document.execCommand('bold'); }
+      if (e.key.toLowerCase()==='i'){ e.preventDefault(); document.execCommand('italic'); }
+      if (e.key.toLowerCase()==='u'){ e.preventDefault(); document.execCommand('underline'); }
+    }
+  });
+})();
+</script>
+
+<!-- (Optional) progressive enhancement for drag & drop uploads -->
+<script>
+(function(){
+  const uploadArea = document.getElementById('uploadArea');
+  const fileInput  = document.getElementById('fileInput');
+  if (!uploadArea || !fileInput) return;
+  ['dragenter','dragover'].forEach(ev=> uploadArea.addEventListener(ev, (e)=>{ e.preventDefault(); uploadArea.parentElement.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(ev=> uploadArea.addEventListener(ev, (e)=>{ e.preventDefault(); uploadArea.parentElement.classList.remove('dragover'); }));
+  uploadArea.addEventListener('drop', (e)=>{
+    const f = e.dataTransfer?.files?.[0]; if (!f) return;
+    if (!/pdf$/i.test(f.type) && !/\.pdf$/i.test(f.name)){ toast('Please drop a PDF file.','error'); return; }
+    const dt = new DataTransfer(); dt.items.add(f); fileInput.files = dt.files;
+    fileInput.dispatchEvent(new Event('change'));
+  });
+})();
+</script>
+
+<!-- (Optional) bulk import modal handler (name-based matching) -->
+<script>
+(function(){
+  const openBtn = document.getElementById('bulkImportBtn');
+  const modal   = document.getElementById('importModal');
+  const closeX  = document.getElementById('importCloseBtn');
+  const cancel  = document.getElementById('importCancelBtn');
+  const confirm = document.getElementById('importConfirmBtn');
+  const ta      = document.getElementById('importTextarea');
+  const prev    = document.getElementById('importPreview');
+
+  if (!openBtn || !modal) return;
+
+  function close(){ modal.style.display='none'; }
+  function open(){ modal.style.display='flex'; prev.textContent=''; ta.value=''; }
+
+  openBtn.addEventListener('click', open);
+  closeX ?.addEventListener('click', close);
+  cancel ?.addEventListener('click', close);
+
+  ta?.addEventListener('input', ()=>{
+    const lines = ta.value.split('\n').map(s=> s.trim()).filter(Boolean);
+    if (!lines.length){ prev.textContent=''; return; }
+    const sample = lines.slice(0, 10).join(', ');
+    prev.textContent = `Preview (${lines.length} names): ${sample}${lines.length>10?'…':''}`;
+  });
+
+  confirm?.addEventListener('click', ()=>{
+    const lines = ta.value.split('\n').map(s=> s.trim()).filter(Boolean);
+    if (!lines.length){ toast('Paste at least one university name.','error'); return; }
+    const want = lines.map(s=> s.toLowerCase());
+    let add = 0;
+    SR.universities.forEach(u=>{
+      if (SR.selected.has(u.unitid)) return;
+      if (want.some(w=> u.name.toLowerCase().includes(w))){ SR.selected.add(u.unitid); add++; }
+    });
+    if (add>0){ toast(`Added ${add} universit${add===1?'y':'ies'} by name match.`,'success'); }
+    else { toast('No matches found.','info'); }
+    updateSelectedList(); updateSendButton(); persist();
+    close();
+  });
+})();
+</script>
+<!-- (Optional) enhance accessibility for modals -->
+<script>
+(function(){
+  function trapFocus(modal){
+    const focusable = modal.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])');
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    function handler(e){
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    }
+    modal.__trapHandler = handler;
+    modal.addEventListener('keydown', handler);
+  }
+  function untrap(modal){
+    if (modal.__trapHandler){ modal.removeEventListener('keydown', modal.__trapHandler); delete modal.__trapHandler; }
+  }
+  // Hook confirm modal
+  const confirmModal = document.getElementById('confirmModal');
+  const importModal  = document.getElementById('importModal');
+  const contactOverlay = document.getElementById('contactOverlay');
+
+  const openObs = new MutationObserver(()=>{
+    [confirmModal, importModal, contactOverlay].forEach(m=>{
+      if (!m) return;
+      if (m.style.display === 'flex'){ trapFocus(m); }
+      else { untrap(m); }
+    });
+  });
+  openObs.observe(document.body, { attributes:true, childList:true, subtree:true });
+})();
+</script>
+
+<!-- (Optional) simple debounce utility for later expansions -->
+<script>
+window.srDebounce = function(fn, wait=150){
+  let t; return function(...args){ clearTimeout(t); t = setTimeout(()=> fn.apply(this, args), wait); };
+};
+</script>
+
+<!-- (Optional) improve hash routing resilience -->
+<script>
+(function(){
+  window.addEventListener('hashchange', ()=>{
+    const view = (location.hash || '#student').slice(1);
+    const toggles = document.querySelectorAll('.header-nav .nav-link');
+    const studentPanel = document.getElementById('panel-student');
+    const recPanel = document.getElementById('panel-recommender');
+    const isStudent = view!=='recommender';
+    if (studentPanel && recPanel){
+      studentPanel.hidden = !isStudent;
+      recPanel.hidden = isStudent;
+      studentPanel.style.display = isStudent ? '' : 'none';
+      recPanel.style.display = isStudent ? 'none' : '';
+    }
+    toggles.forEach(btn=>{
+      const on = btn.dataset.view === (isStudent?'student':'recommender');
+      btn.setAttribute('aria-selected', on?'true':'false');
+      if (on) btn.setAttribute('aria-current','page'); else btn.removeAttribute('aria-current');
+    });
+    try{ localStorage.setItem('sr_current_view', isStudent?'student':'recommender'); }catch(_){}
+  });
+})();
+</script>
+
+<!-- (Optional) expose a tiny API for integration tests -->
+<script>
+window.SR_API = {
+  selectByName(name){
+    const hit = SR.universities.find(u=> u.name.toLowerCase().includes(String(name).toLowerCase()));
+    if (!hit) return false;
+    SR.selected.add(hit.unitid); updateSelectedList(); updateSendButton(); return true;
+  },
+  clearSelected(){
+    SR.selected = new Set([SR.mockPinned]); updateSelectedList(); updateSendButton(); return true;
+  },
+  getSelected(){ return SR.universities.filter(u=> SR.selected.has(u.unitid)).map(u=> u.name); }
+};
+</script>
+
+<!-- (Optional) micro CSS fixes -->
+<style>
+  /* Prevent long university names from breaking layout */
+  .selected-tag { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .university-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .university-header { gap: .75rem; }
+</style>
+<!-- (Optional) material icon font fallback for offline dev -->
+<script>
+(function(){
+  // If Material Icons fail to load, fallback to text glyphs
+  const test = document.createElement('span');
+  test.className = 'material-icons';
+  test.style.position = 'absolute';
+  test.style.opacity = '0';
+  test.textContent = 'check_circle';
+  document.body.appendChild(test);
+  setTimeout(()=>{
+    const computed = window.getComputedStyle(test);
+    const fontFamily = computed.getPropertyValue('font-family') || '';
+    if (!/Material Icons/i.test(fontFamily)){
+      // fallback: just ensure icons show readable text
+      const style = document.createElement('style');
+      style.textContent = `.material-icons{ font-family: inherit !important; font-weight: 600; letter-spacing: .5px; }`;
+      document.head.appendChild(style);
+    }
+    test.remove();
+  }, 500);
+})();
+</script>
+
+<!-- (Optional) page visibility hook to pause fake sending if tab hidden -->
+<script>
+(function(){
+  document.addEventListener('visibilitychange', ()=>{
+    // In a real app, we'd pause network-hungry tasks here.
+    // For now, no-op to keep demo predictable.
+  });
+})();
+</script>
+
+<!-- (Optional) keyboard navigation in autosuggest -->
+<script>
+(function(){
+  const input = document.getElementById('universitySearch');
+  const pop   = document.getElementById('searchSuggest');
+  if (!input || !pop) return;
+  let index = -1;
+
+  input.addEventListener('keydown', (e)=>{
+    const items = Array.from(pop.querySelectorAll('.suggest-item'));
+    if (!items.length) return;
+
+    if (e.key==='ArrowDown'){ e.preventDefault(); index = (index+1) % items.length; highlight(); }
+    if (e.key==='ArrowUp'){ e.preventDefault(); index = (index-1+items.length) % items.length; highlight(); }
+    if (e.key==='Enter'){
+      if (index>=0){ e.preventDefault(); items[index].click(); index=-1; }
+    }
+    if (e.key==='Escape'){ pop.style.display='none'; input.setAttribute('aria-expanded','false'); index=-1; }
+  });
+
+  function highlight(){
+    const items = Array.from(pop.querySelectorAll('.suggest-item'));
+    items.forEach((el,i)=> el.style.background = i===index ? '#f8f9fa' : '');
+  }
+})();
+</script>
+
+<!-- (Optional) ensure dropdown hides when clicking outside -->
+<script>
+(function(){
+  const dd = document.getElementById('userDropdown');
+  const avatar = document.getElementById('userAvatarBtn');
+  document.addEventListener('click', (e)=>{
+    if (!dd) return;
+    if (avatar && (avatar===e.target || avatar.contains(e.target))) return;
+    if (!dd.contains(e.target)){ dd.classList.remove('show'); avatar?.setAttribute('aria-expanded','false'); }
+  });
+})();
+</script>
+
+<!-- (Optional) fix for very small screens -->
+<style>
+@media (max-width: 380px){
+  .header-content { padding: 0; }
+  .logo { font-size: 1.4rem; }
+  .nav-link { padding: .25rem .5rem; }
+  .writer-actions { flex-direction: column; align-items: stretch; }
+  .filter-bar { grid-template-columns: 1fr; }
+}
+</style>
+<!-- Final guard to ensure Mock University is selected & send button state right after any external script runs -->
+<script>
+(function(){
+  const ensure = ()=>{
+    if (!window.SR || !Array.isArray(SR.universities)) return false;
+    SR.selected.add(SR.mockPinned);
+    if (typeof window.updateSelectedList === 'function') updateSelectedList();
+    if (typeof window.updateSendButton === 'function')  updateSendButton();
+    try{
+      const saved = JSON.parse(localStorage.getItem('sr_state_v1')||'{}');
+      saved.selectedIds = Array.from(SR.selected);
+      localStorage.setItem('sr_state_v1', JSON.stringify(saved));
+    }catch(_){}
+    return true;
+  };
+  if (!ensure()){
+    let tries = 0;
+    const t = setInterval(()=>{ tries++; if (ensure() || tries>25) clearInterval(t); }, 120);
+  }
+})();
+</script>
+
+<!-- THE END -->
 </body>
 </html>
 
+  
