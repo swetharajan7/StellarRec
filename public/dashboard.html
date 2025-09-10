@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -419,27 +420,44 @@
           <span class="material-icons" aria-hidden="true">dark_mode</span>
           Light / Dark
         </button>
-<div class="user-info">
-  <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
-    <span class="material-icons">person</span>
-  </button>
-
-  <!-- REPLACED: dropdown content -->
-  <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
-    <div class="dropdown-header">Quick actions</div>
-
-    <!-- Only keep Contact admin -->
-    <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
-      <span class="material-icons">support_agent</span>
-      <div class="view-label">
-        <div class="view-name">Contact admin</div>
-        <div class="view-description">Send a message</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-        
+        <div class="user-info">
+          <button class="user-avatar" id="userAvatarBtn" aria-haspopup="true" aria-expanded="false" type="button">
+            <span class="material-icons">person</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown" role="menu" aria-hidden="true">
+            <div class="dropdown-header">Quick actions</div>
+            <div class="dropdown-item" role="menuitem" tabindex="0">
+              <span class="material-icons">help_outline</span>
+              <div class="view-label">
+                <a href="https://stellarrec.netlify.app/portal-signin"
+                   class="view-name" style="text-decoration:none; color:inherit;" target="_self">
+                  How it works
+                </a>
+                <div class="view-description">Sign-in portal</div>
+              </div>
+            </div>
+            <div class="dropdown-item" id="contactAdminItem" role="menuitem" tabindex="0">
+              <span class="material-icons">support_agent</span>
+              <div class="view-label">
+                <div class="view-name">Contact admin</div>
+                <div class="view-description">Send a message</div>
+              </div>
+            </div>
+            <div class="dropdown-item" style="border-top:1px solid #f0f0f0;">
+              <label for="mockToggle" style="display:flex; align-items:center; gap:.75rem; width:100%; cursor:pointer;">
+                <span class="material-icons">build</span>
+                <div class="view-label">
+                  <div class="view-name">Use mock API</div>
+                  <div class="view-description">Toggle mock vs real backend</div>
+                </div>
+                <input id="mockToggle" type="checkbox" style="margin-left:auto; width:18px; height:18px;" />
+              </label>
+            </div>
+          </div>
+        </div><!-- /.user-info -->
+      </div><!-- /.right-controls -->
+    </div><!-- /.header-content -->
+  </div><!-- /.header -->
   <!-- MAIN — RECOMMENDER VIEW (hidden by default) -->
   <div class="container" id="panel-recommender" hidden>
     <!-- Student Link Intake -->
