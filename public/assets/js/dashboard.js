@@ -1,6 +1,9 @@
 <script>
+document.addEventListener('DOMContentLoaded', function(){  // ① ensure DOM is ready
+
 // ---------- Tiny toast (keeps your #toastWrap) ----------
 (function(){
+  if (window.toast) return;                                // ② don't overwrite existing toast
   const wrap = document.getElementById('toastWrap');
   window.toast = function(msg, type='info'){
     if(!wrap) return alert(msg);
@@ -8,15 +11,26 @@
     el.className = `toast ${type}`;
     el.innerHTML = `<span class="material-icons" aria-hidden="true">${
       type==='success'?'check_circle':type==='error'?'error':'info'
-    }</span><div class="msg">${msg}</div><button class="x" aria-label="Dismiss">✕</button>`;
+    }</span><div class="msg">${msg}</div><button class="x" aria-label="Dismiss" type="button">✕</button>`;
     wrap.appendChild(el);
     el.querySelector('.x').onclick = ()=> el.remove();
     setTimeout(()=> el.remove(), 3000);
   };
 })();
 
-// ---------- Student tabs (match dashboard.html IDs) ----------
+// ---------- Utility: force safe button types inside forms ----------
 (function(){
+  ['chooseFileBtn','removeFileBtn','chooseVideoBtn','removeVideoBtn','saveDraftBtn','restoreDraftBtn',
+   'clearDraftBtn','copyDraftBtn','downloadDraftBtn','attachDraftBtn','contactCloseBtn2','contactCancelBtn2']
+  .forEach(id=>{
+    const b = document.getElementById(id);
+    if (b) b.type = 'button';                               // ③ avoid accidental submits
+  });
+})();
+
+// ---------- Student tabs ----------
+(function(){
+  if (window.__srTabsBound) return; window.__srTabsBound = true;   // ④ prevent double-binding
   const tabs = {
     send:   document.getElementById('stuTabSend'),
     select: document.getElementById('stuTabSelect'),
@@ -35,29 +49,30 @@
   tabs.send  ?.addEventListener('click', ()=>activate('send'));
   tabs.select?.addEventListener('click', ()=>activate('select'));
   tabs.track ?.addEventListener('click', ()=>activate('track'));
-  // default respects current aria-selected or falls back to "send"
   const defaultTab = Object.entries(tabs).find(([,b])=>b?.getAttribute('aria-selected')==='true')?.[0] || 'send';
   activate(defaultTab);
 })();
 
-// ---------- Header: Contact admin (overlay on your page) ----------
+// ---------- Header: Contact admin (overlay) ----------
 (function(){
+  if (window.__srContactBound) return; window.__srContactBound = true;
   const openBtn = document.getElementById('contactAdminItem');
   const overlay = document.getElementById('contactOverlay');
   const close1  = document.getElementById('contactCloseBtn2');
   const close2  = document.getElementById('contactCancelBtn2');
-  if (!openBtn) return;
   const open = ()=>{ if (overlay){ overlay.style.display='flex'; } };
   const close= ()=>{ if (overlay){ overlay.style.display='none'; } };
-  openBtn.addEventListener('click', open);
+  openBtn?.addEventListener('click', (e)=>{ e.preventDefault(); open(); });
   close1   ?.addEventListener('click', close);
   close2   ?.addEventListener('click', close);
   overlay  ?.addEventListener('click', (e)=>{ if (e.target===overlay) close(); });
   document.addEventListener('keydown', (e)=>{ if (e.key==='Escape' && overlay?.style.display==='flex') close(); });
 })();
 
-// ---------- Uploads: PDF & Video (match your IDs) ----------
+// ---------- Uploads: PDF & Video ----------
 (function(){
+  if (window.__srUploadsBound) return; window.__srUploadsBound = true;
+
   // PDF
   const choose = document.getElementById('chooseFileBtn');
   const input  = document.getElementById('fileInput');
@@ -65,15 +80,15 @@
   const nameEl = document.getElementById('fileName');
   const sizeEl = document.getElementById('fileSize');
   const remove = document.getElementById('removeFileBtn');
-  choose?.addEventListener('click', ()=> input?.click());
+  choose?.addEventListener('click', (e)=>{ e.preventDefault(); input?.click(); });
   input ?.addEventListener('change', ()=>{
     const f = input.files?.[0]; if(!f) return;
-    nameEl && (nameEl.textContent = f.name);
-    sizeEl && (sizeEl.textContent = `${(f.size/1024/1024).toFixed(2)} MB`);
-    card && (card.style.display='block');
+    if (nameEl) nameEl.textContent = f.name;
+    if (sizeEl) sizeEl.textContent = `${(f.size/1024/1024).toFixed(2)} MB`;
+    if (card) card.style.display='block';
     toast('PDF attached.','success');
   });
-  remove?.addEventListener('click', ()=>{ if(input) input.value=''; if(card) card.style.display='none'; });
+  remove?.addEventListener('click', (e)=>{ e.preventDefault(); if(input) input.value=''; if(card) card.style.display='none'; });
 
   // Video
   const chooseV = document.getElementById('chooseVideoBtn');
@@ -83,30 +98,30 @@
   const sizeV   = document.getElementById('videoSize');
   const removeV = document.getElementById('removeVideoBtn');
   const prevV   = document.getElementById('videoPreview');
-  chooseV?.addEventListener('click', ()=> inputV?.click());
+  chooseV?.addEventListener('click', (e)=>{ e.preventDefault(); inputV?.click(); });
   inputV ?.addEventListener('change', ()=>{
     const f = inputV.files?.[0]; if(!f) return;
-    nameV && (nameV.textContent = f.name);
-    sizeV && (sizeV.textContent = `${(f.size/1024/1024).toFixed(2)} MB`);
-    cardV && (cardV.style.display='block');
+    if (nameV) nameV.textContent = f.name;
+    if (sizeV) sizeV.textContent = `${(f.size/1024/1024).toFixed(2)} MB`;
+    if (cardV) cardV.style.display='block';
     if (prevV){ try { prevV.src = URL.createObjectURL(f); prevV.style.display='block'; } catch(_){} }
   });
-  removeV?.addEventListener('click', ()=>{
+  removeV?.addEventListener('click', (e)=>{
+    e.preventDefault();
     if (inputV) inputV.value='';
     if (cardV) cardV.style.display='none';
     if (prevV){ prevV.removeAttribute('src'); prevV.style.display='none'; }
   });
 })();
 
-// ---------- Writer toolbar + draft utilities (match your IDs) ----------
+// ---------- Writer toolbar + draft utilities ----------
 (function(){
+  if (window.__srWriterBound) return; window.__srWriterBound = true;
+
   const box   = document.getElementById('writerBox');
   const title = document.getElementById('writerTitle');
   if (!box) return;
-  const exec = (cmd)=>{ box.focus({preventScroll:true}); document.execCommand(cmd, false, null); refreshMeta(); };
-  document.querySelectorAll('[data-wcmd]').forEach(btn=>{
-    btn.addEventListener('click', ()=> exec(btn.getAttribute('data-wcmd')));
-  });
+
   function refreshMeta(){
     const text = box.innerText || '';
     const words = (text.trim().match(/\S+/g)||[]).length;
@@ -114,21 +129,39 @@
     const meta = document.getElementById('writerCount');
     if (meta) meta.textContent = `${words} words • ${chars} chars`;
   }
+  const exec = (cmd)=>{ box.focus({preventScroll:true}); document.execCommand(cmd, false, null); refreshMeta(); };
+
+  document.querySelectorAll('[data-wcmd]').forEach(btn=>{
+    if (btn.__bound) return; btn.__bound = true;
+    btn.addEventListener('click', ()=> exec(btn.getAttribute('data-wcmd')));
+  });
+
   const LSKEY='sr_writer_draft';
   const savedEl=document.getElementById('writerSaved');
   const setSaved=(s)=> savedEl && (savedEl.textContent = s);
-  document.getElementById('saveDraftBtn')   ?.addEventListener('click', ()=>{ try{ localStorage.setItem(LSKEY, JSON.stringify({title:title?.value||'', html: box.innerHTML})); setSaved('Saved'); }catch{} });
-  document.getElementById('restoreDraftBtn')?.addEventListener('click', ()=>{ try{ const d=JSON.parse(localStorage.getItem(LSKEY)||'{}'); if(title&&d.title) title.value=d.title; box.innerHTML=d.html||''; setSaved('Restored'); refreshMeta(); }catch{} });
+
+  document.getElementById('saveDraftBtn')   ?.addEventListener('click', ()=>{ 
+    try{ localStorage.setItem(LSKEY, JSON.stringify({title:title?.value||'', html: box.innerHTML})); setSaved('Saved'); }catch{} 
+  });
+  document.getElementById('restoreDraftBtn')?.addEventListener('click', ()=>{ 
+    try{ const d=JSON.parse(localStorage.getItem(LSKEY)||'{}'); if(title&&d.title) title.value=d.title; box.innerHTML=d.html||''; setSaved('Restored'); refreshMeta(); }catch{} 
+  });
   document.getElementById('clearDraftBtn')  ?.addEventListener('click', ()=>{ box.innerHTML=''; refreshMeta(); setSaved('Cleared'); });
   document.getElementById('copyDraftBtn')   ?.addEventListener('click', async ()=>{ try{ const tmp=document.createElement('div'); tmp.innerHTML=box.innerHTML; await navigator.clipboard.writeText(tmp.innerText); setSaved('Copied'); }catch{} });
-  document.getElementById('downloadDraftBtn')?.addEventListener('click', ()=>{ const a=document.createElement('a'); const text=(title?.value?title.value+'\n\n':'')+(box.innerText||''); a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'})); a.download='recommendation-letter.txt'; a.click(); setSaved('Downloaded'); });
+  document.getElementById('downloadDraftBtn')?.addEventListener('click', ()=>{ 
+    const a=document.createElement('a'); const text=(title?.value?title.value+'\n\n':'')+(box.innerText||''); 
+    a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'})); a.download='recommendation-letter.txt'; a.click(); setSaved('Downloaded'); 
+  });
   document.getElementById('attachDraftBtn') ?.addEventListener('click', ()=> setSaved('Attached (stub)'));
+
   ['input','keyup','paste','cut'].forEach(ev=> box.addEventListener(ev, refreshMeta));
   refreshMeta();
 })();
 
 // ---------- Student: Send Recommendation Request (MockAPI hook) ----------
 (function(){
+  if (window.__srSendBound) return; window.__srSendBound = true;
+
   const form = document.getElementById('stuSendForm');
   if (!form) return;
   const nameEl = document.getElementById('stuName');
@@ -165,7 +198,7 @@
       <td>${who}</td>
       <td>${email}</td>
       <td>${new Date(ts).toLocaleString()}</td>
-      <td><span class="track-pill ${status==='Sent'?'sent':'pending'}">${status}</span></td>
+      <td><span class="track-pill ${status==='Sent'?'sent':status==='received'?'received':'pending'}">${status}</span></td>
     `;
     tbody.prepend(tr);
   }
@@ -182,7 +215,6 @@
     try {
       await createRecommendation({ studentName, studentEmail, recommenderName:rName, recommenderEmail:rMail });
       toast('Request sent to recommender.','success');
-      // Log to Track as Pending→Sent (demo)
       const now = Date.now();
       pushToTrackRow({ who:rName, email:rMail, ts: now, status:'Pending' });
       setTimeout(()=>{ pushToTrackRow({ who:rName, email:rMail, ts: now+2000, status:'Sent' }); }, 2000);
@@ -195,10 +227,10 @@
 })();
 
 // ---------- Optional: demo redirect for "Send to Selected Universities" ----------
-// Opt-in: add data-mock-redirect="1" to #sendBtn if you want this behavior.
 (function(){
+  if (window.__srRedirectBound) return; window.__srRedirectBound = true;
   const sendBtn = document.getElementById('sendBtn');
-  if (!sendBtn || sendBtn.getAttribute('data-mock-redirect')!=='1') return; // keep your confirm modal by default
+  if (!sendBtn || sendBtn.getAttribute('data-mock-redirect')!=='1') return;
 
   function getSelectedUnitIds(){
     if (window.SR && SR.selected) return Array.from(SR.selected);
@@ -237,4 +269,6 @@
     window.location.href = `${MOCK_INBOX_URL}?${params.toString()}`;
   });
 })();
+}); // end DOMContentLoaded
 </script>
+
