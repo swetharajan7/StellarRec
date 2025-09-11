@@ -1,50 +1,33 @@
-{
+ {
   "name": "stellarrec-backend",
   "version": "1.0.0",
-  "description": "StellarRec AI-powered university application platform backend API",
-  "main": "index.js",
+  "description": "Backend API for StellarRec recommendation system",
+  "main": "server.js",
   "scripts": {
-    "dev": "docker-compose up -d && npm run dev:services",
-    "dev:services": "concurrently \"npm run dev:gateway\" \"npm run dev:user\" \"npm run dev:ai\" \"npm run dev:application\"",
-    "dev:gateway": "cd services/api-gateway && npm run dev",
-    "dev:user": "cd services/user-service && npm run dev",
-    "dev:ai": "cd services/ai-service && npm run dev",
-    "dev:application": "cd services/application-service && npm run dev",
-    "test": "npm run test:services",
-    "test:services": "concurrently \"npm run test:gateway\" \"npm run test:user\" \"npm run test:ai\" \"npm run test:application\"",
-    "test:gateway": "cd services/api-gateway && npm test",
-    "test:user": "cd services/user-service && npm test",
-    "test:ai": "cd services/ai-service && npm test",
-    "test:application": "cd services/application-service && npm test",
-    "build": "npm run build:services",
-    "build:services": "concurrently \"npm run build:gateway\" \"npm run build:user\" \"npm run build:ai\" \"npm run build:application\"",
-    "build:gateway": "cd services/api-gateway && npm run build",
-    "build:user": "cd services/user-service && npm run build",
-    "build:ai": "cd services/ai-service && npm run build",
-    "build:application": "cd services/application-service && npm run build",
-    "docker:build": "docker-compose build",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "migrate": "cd services/user-service && npm run migrate",
-    "seed": "cd services/user-service && npm run seed"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "db:init": "node database/init-database.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "stellarrec",
-    "university",
-    "application",
-    "ai",
-    "recommendation",
-    "letters",
-    "microservices"
-  ],
-  "author": "StellarRec Team",
-  "license": "MIT",
+  "keywords": ["stellarrec", "recommendations", "api"],
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "mysql2": "^3.6.0",
+    "nodemailer": "^6.9.4",
+    "crypto": "^1.0.1",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.0",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2"
+  },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "docker-compose": "^0.24.6"
+    "nodemon": "^3.0.1"
   },
-  "workspaces": [
-    "services/*",
-    "shared/*"
-  ]
+  "engines": {
+    "node": ">=16.0.0"
+  }
 }
