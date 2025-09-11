@@ -2464,6 +2464,208 @@ window.__srAnalytics = {
   })();
 })();
 </script>
+<script>
+/* ===== Re-enable Bulk Import (idempotent) ===== */
+(function(){
+  if (window.__sr_bulk_import__) return; window.__sr_bulk_import__ = true;
+
+  const openBtn = document.getElementById('bulkImportBtn');
+  const modal   = document.getElementById('importModal');
+  const ta      = document.getElementById('importTextarea');
+  const prev    = document.getElementById('importPreview');
+  const addBtn  = document.getElementById('importConfirmBtn');
+  const cancel1 = document.getElementById('importCancelBtn');
+  const closeX  = document.getElementById('importCloseBtn');
+
+  if (!openBtn || !modal || !ta || !prev || !addBtn) return;
+
+  let lastMatches = [];
+
+  function ensureFuse(){
+    if (!window.Fuse) return null;
+    if (SR.fuse) return SR.fuse;
+    SR.fuse = new Fuse(SR.universities || [], {
+      keys: [{ name:'name', weight:0.85 }, { name:'state', weight:0.15 }],
+      threshold: 0.3, minMatchCharLength: 2, ignoreLocation: true
+    });
+    return SR.fuse;
+  }
+
+  function open(){ modal.style.display='flex'; ta.focus(); if (!ta.value) ta.value = ''; renderPreview(); }
+  function close(){ modal.style.display='none'; }
+
+  function renderPreview(){
+    const fuse = ensureFuse(); if (!fuse){ prev.textContent = 'Search index not ready.'; return; }
+    const lines = ta.value.split('\n').map(s=>s.trim()).filter(Boolean);
+    const uniq  = Array.from(new Set(lines));
+    const matches = uniq.map(name=>{
+      const res = fuse.search(name, { limit: 1 });
+      return { input:name, uni: res && res[0] ? res[0].item : null };
+    });
+    lastMatches = matches;
+
+    const found = matches.filter(m=>m.uni).length;
+    const miss  = matches.length - found;
+    prev.innerHTML = `
+      <div><b>Preview:</b> ${found} matched, ${miss} not matched.</div>
+      <ul style="margin:.4rem 0 0 1rem;">
+        ${matches.slice(0,15).map(m=>`<li>${m.input} ${
+          m.uni ? `→ <span style="color:#166534">${m.uni.name}${m.uni.state?` (${m.uni.state})`:''}</span>` :
+                  `<span style="color:#b91c1c">(no match)</span>`}</li>`).join('')}
+        ${matches.length>15?`<li>…and ${matches.length-15} more</li>`:''}
+      </ul>
+    `;
+  }
+
+  ta.addEventListener('input', renderPreview);
+  openBtn.addEventListener('click', open);
+  cancel1?.addEventListener('click', close);
+  closeX ?.addEventListener('click', close);
+  modal.addEventListener('click', (e)=>{ if (e.target===modal) close(); });
+
+  addBtn.addEventListener('click', ()=>{
+    let added = 0;
+    lastMatches.forEach(m=>{
+      if (m.uni) { SR.selected.add(String(m.uni.unitid)); added++; }
+    });
+    if (typeof window.updateSelectedList === 'function') updateSelectedList(); // Recommender box
+    if (typeof window.updateStudentSelectedMini === 'function') updateStudentSelectedMini(); // Student mini list (defined in patch below)
+    else {
+      // fallback: re-run a tiny renderer if the helper isn't global
+      const evt = new CustomEvent('sr:selected:changed'); document.dispatchEvent(evt);
+    }
+    toast(`Added ${added} universit${added===1?'y':'ies'} from bulk import.`, added? 'success':'info');
+    close();
+  });
+})();
+</script>
+<script>
+/* ===== Ensure real names from JSON + Mock University present ===== */
+(function(){
+  if (window.__sr_names_fix__) return; window.__sr_names_fix__ = true;
+
+  const selectEl = document.getElementById('universitySelect');
+  const listStu  = document.getElementById('selectedListStu');
+  const countStu = document.getElementById('selectedCountStu');
+
+  window.SR = window.SR || {};
+  SR.universities = Array.isArray(SR.universities) ? SR.universities : [];
+  SR.selected     = SR.selected instanceof Set ? SR.selected : new Set();
+
+  const MOCK = { unitid:'MOCK-0000', name:'Mock University', state:'CA', type:'Private nonprofit', level:'4-year' };
+
+  const norm = (arr)=> arr.map(u=>({
+    unitid: String(u.unitid ?? u.UnitID ?? u.id ?? u.code ?? Math.random().toString(36).slice(2,9)),
+    name:   String(u.name ?? u.InstitutionName ?? u.inst_name ?? u.title ?? 'Unnamed Institution'),
+    state:  String(u.state ?? u.State ?? u.province ?? u.region ?? ''),
+    type:   String(u.type  ?? u.Sector ?? u.Control ?? 'Public'),
+    level:  String(u.level ?? u.Level ?? u.inst_level ?? '4-year'),
+  }));
+
+  async function tryFetch(url){
+    try {
+      const res = await fetch(url, { cache:'force-cache' });
+      if (!res.ok) return null;
+      const raw = await res.json();
+
+      let flat = [];
+      if (Array.isArray(raw)) flat = raw;
+      else if (raw && typeof raw === 'object'){
+        for (const [state, list] of Object.entries(raw)){
+          if (Array.isArray(list)){
+            list.forEach(d=> flat.push({ ...d, state: d.state ?? d.State ?? state }));
+          }
+        }
+      }
+      if (flat.length > 1000){
+        console.log('[SR] Universities loaded from:', url, 'count=', flat.length);
+        return norm(flat);
+      }
+    } catch(e){ /* swallow and try next */ }
+    return null;
+  }
+
+  async function ensureRealDataset(){
+    // If already loaded with many entries, keep it (but still ensure mock)
+    if (SR.universities && SR.universities.length > 1000){
+      ensureMockPresence();
+      return;
+    }
+    const paths = [
+      '/assets/us_institutions_by_state_2023.json',           // typical Netlify public assets
+      'assets/us_institutions_by_state_2023.json',
+      '/public/assets/us_institutions_by_state_2023.json',    // if site serves /public
+      'public/assets/us_institutions_by_state_2023.json'
+    ];
+    for (const p of paths){
+      const data = await tryFetch(p);
+      if (data){ SR.universities = data; break; }
+    }
+    if (!SR.universities || SR.universities.length === 0){
+      console.warn('[SR] Still on fallback list; confirm your JSON is deployed at /assets/us_institutions_by_state_2023.json');
+    }
+    ensureMockPresence();
+  }
+
+  function ensureMockPresence(){
+    const hasMock = SR.universities.some(u=> String(u.unitid) === 'MOCK-0000');
+    if (!hasMock) SR.universities.unshift(MOCK);
+    SR.selected.add('MOCK-0000'); // keep Mock preselected
+    try {
+      const saved = JSON.parse(localStorage.getItem('sr_state_v1') || '{}');
+      const ids = new Set(Array.isArray(saved.selectedIds) ? saved.selectedIds : []);
+      ids.add('MOCK-0000');
+      saved.selectedIds = Array.from(ids);
+      localStorage.setItem('sr_state_v1', JSON.stringify(saved));
+    } catch {}
+  }
+
+  function populateBrowseAll(){
+    if (!selectEl) return;
+    while (selectEl.options.length > 1) selectEl.remove(1);
+    const frag = document.createDocumentFragment();
+    const sorted = SR.universities.slice().sort((a,b)=> a.name.localeCompare(b.name));
+    sorted.forEach(u=>{
+      const opt = document.createElement('option');
+      opt.value = u.unitid;
+      opt.textContent = `${u.name}${u.state?` (${u.state})`:''}`;
+      frag.appendChild(opt);
+    });
+    selectEl.appendChild(frag);
+  }
+
+  function updateStudentSelectedMini(){
+    if (!listStu || !countStu) return;
+    const byId = new Map(SR.universities.map(u=> [String(u.unitid), u]));
+    listStu.innerHTML = '';
+    let n = 0;
+    SR.selected.forEach(id=>{
+      const u = byId.get(String(id)); if (!u) return;
+      const tag = document.createElement('div');
+      tag.className = 'selected-tag';
+      tag.innerHTML = `<span class="material-icons" aria-hidden="true">school</span>${u.name}${u.state?` • ${u.state}`:''}`;
+      listStu.appendChild(tag);
+      n++;
+    });
+    countStu.textContent = `${n} universit${n===1?'y':'ies'} selected`;
+  }
+  // expose for Bulk-import patch if it needs it
+  window.updateStudentSelectedMini = updateStudentSelectedMini;
+
+  // keep dropdown -> selection behavior
+  selectEl?.addEventListener('change', ()=>{
+    const id = selectEl.value;
+    if (!id) return;
+    SR.selected.add(String(id));
+    if (typeof window.updateSelectedList === 'function') updateSelectedList();
+    updateStudentSelectedMini();
+    selectEl.selectedIndex = 0;
+  });
+
+  (async function init(){
+    await ensureRealDataset();      // pulls the real names if available
+    populateBrowseAll();            // fills Browse-all with real names
+    updateStudentSelectedMini();    // refresh St
 
 
 <!-- End of page -->
