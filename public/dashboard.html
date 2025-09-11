@@ -2249,6 +2249,221 @@ window.__srAnalytics = {
   });
 })();
 </script>
+<script>
+/* ======== Student Select: autosuggest + browse-all population ========
+   Paste this near </body>. It is idempotent and won't break existing code.
+======================================================================== */
+(function(){
+  if (window.__sr_select_patch__) return;
+  window.__sr_select_patch__ = true;
+
+  // ---- DOM ----
+  const input    = document.getElementById('universitySearch');
+  const popover  = document.getElementById('searchSuggest');
+  const selectEl = document.getElementById('universitySelect');
+  const listStu  = document.getElementById('selectedListStu');
+  const countStu = document.getElementById('selectedCountStu');
+
+  if (!input || !popover || !selectEl) return; // only run on student-select screen
+
+  // ---- SR core (create minimal state if not present) ----
+  window.SR = window.SR || {};
+  SR.universities = Array.isArray(SR.universities) ? SR.universities : [];
+  SR.selected     = SR.selected instanceof Set ? SR.selected : new Set();
+
+  // ---- Util ----
+  const norm = (arr)=> arr.map(u=>({
+    unitid: String(u.unitid ?? u.UnitID ?? u.id ?? u.code ?? Math.random().toString(36).slice(2,9)),
+    name:   String(u.name ?? u.InstitutionName ?? u.inst_name ?? u.title ?? 'Unnamed Institution'),
+    state:  String(u.state ?? u.State ?? u.province ?? u.region ?? ''),
+    type:   String(u.type  ?? u.Sector ?? u.Control ?? 'Public'),
+    level:  String(u.level ?? u.Level ?? u.inst_level ?? '4-year'),
+  }));
+
+  async function loadUniversitiesOnce(){
+    if (SR.universities && SR.universities.length > 0) return SR.universities;
+
+    // Try the Netlify root path first (public/ is served at /)
+    const candidates = [
+      '/assets/us_institutions_by_state_2023.json',
+      'assets/us_institutions_by_state_2023.json',
+      '/public/assets/us_institutions_by_state_2023.json',
+      'public/assets/us_institutions_by_state_2023.json',
+    ];
+
+    for (const url of candidates){
+      try{
+        const res = await fetch(url, { cache: 'force-cache' });
+        if (!res.ok) continue;
+        const raw = await res.json();
+
+        let flat = [];
+        if (Array.isArray(raw)) flat = raw;
+        else if (raw && typeof raw === 'object'){
+          for (const [state, list] of Object.entries(raw)){
+            if (Array.isArray(list)){
+              list.forEach(d => flat.push({ ...d, state: d.state ?? d.State ?? state }));
+            }
+          }
+        }
+        if (flat.length > 1000){
+          SR.universities = norm(flat);
+          break;
+        }
+      }catch(_){}
+    }
+
+    // Fallback (tiny synthetic list) if file wasn’t found
+    if (!SR.universities || SR.universities.length === 0){
+      SR.universities = norm([
+        { unitid:'166027', name:'Harvard University',               state:'MA', type:'Private nonprofit', level:'4-year' },
+        { unitid:'110635', name:'Stanford University',              state:'CA', type:'Private nonprofit', level:'4-year' },
+        { unitid:'1106351',name:'Massachusetts Institute of Technology', state:'MA', type:'Private nonprofit', level:'4-year' },
+        { unitid:'1106352',name:'University of California, Berkeley',   state:'CA', type:'Public',           level:'4-year' },
+      ]);
+      console.warn('[SR] Using small fallback university list (JSON not found).');
+    }
+
+    return SR.universities;
+  }
+
+  function ensureFuse(){
+    if (!window.Fuse) return null;
+    if (SR.fuse) return SR.fuse;
+    SR.fuse = new Fuse(SR.universities, {
+      keys: [{ name:'name', weight: 0.8 }, { name:'state', weight: 0.2 }],
+      threshold: 0.3,
+      minMatchCharLength: 2,
+      ignoreLocation: true
+    });
+    return SR.fuse;
+  }
+
+  // ---- Browse-all population ----
+  function populateBrowseAll(){
+    // Keep the first (placeholder) option, remove the rest
+    while (selectEl.options.length > 1) selectEl.remove(1);
+
+    const frag = document.createDocumentFragment();
+    // Sort A→Z by name for the dropdown
+    const sorted = SR.universities.slice().sort((a,b)=> a.name.localeCompare(b.name));
+    sorted.forEach(u=>{
+      const opt = document.createElement('option');
+      opt.value = u.unitid;
+      opt.textContent = `${u.name} ${u.state ? `(${u.state})` : ''}`;
+      opt.setAttribute('data-name', u.name);
+      opt.setAttribute('data-state', u.state);
+      frag.appendChild(opt);
+    });
+    selectEl.appendChild(frag);
+  }
+
+  // When user picks a university in the dropdown, add to selected
+  selectEl.addEventListener('change', ()=>{
+    const id = selectEl.value;
+    if (!id) return;
+    SR.selected.add(String(id));
+    // reflect in UI
+    if (typeof window.updateSelectedList === 'function') {
+      updateSelectedList();             // your existing renderer (recommender list)
+    }
+    updateStudentSelectedMini();
+    // reset dropdown back to placeholder
+    selectEl.selectedIndex = 0;
+  });
+
+  // ---- Student selected list (read-only view) ----
+  function updateStudentSelectedMini(){
+    if (!listStu || !countStu) return;
+    // Silent if your page already syncs these elsewhere:
+    if (window.__sr_student_selected_external__) return;
+
+    // Build simple tags from SR.selected
+    const byId = new Map(SR.universities.map(u => [String(u.unitid), u]));
+    listStu.innerHTML = '';
+    let added = 0;
+    SR.selected.forEach(id=>{
+      const u = byId.get(String(id));
+      if (!u) return;
+      const tag = document.createElement('div');
+      tag.className = 'selected-tag';
+      tag.innerHTML = `<span class="material-icons" aria-hidden="true">school</span>${u.name}${u.state?` • ${u.state}`:''}`;
+      listStu.appendChild(tag);
+      added++;
+    });
+    countStu.textContent = `${added} universit${added===1?'y':'ies'} selected`;
+  }
+
+  // ---- Autosuggest ----
+  let activeIndex = -1; // keyboard highlight
+  function hideSuggest(){ popover.style.display='none'; popover.innerHTML=''; activeIndex = -1; input.setAttribute('aria-expanded','false'); }
+  function showSuggest(){ popover.style.display='block'; input.setAttribute('aria-expanded','true'); }
+
+  function renderSuggest(items){
+    popover.innerHTML = items.map((u, i)=>`
+      <div class="suggest-item" data-unitid="${u.unitid}" data-idx="${i}" role="option" aria-selected="${i===activeIndex?'true':'false'}">
+        <div>${u.name}</div>
+        <small style="opacity:.8">${u.state||''}</small>
+      </div>
+    `).join('');
+    showSuggest();
+  }
+
+  function pickByIndex(i){
+    const rows = Array.from(popover.querySelectorAll('.suggest-item'));
+    const el = rows[i];
+    if (!el) return;
+    const id = el.getAttribute('data-unitid');
+    if (!id) return;
+    SR.selected.add(String(id));
+    if (typeof window.updateSelectedList === 'function') updateSelectedList();
+    updateStudentSelectedMini();
+    hideSuggest();
+    input.value = '';
+  }
+
+  function selectByClick(e){
+    const row = e.target.closest('.suggest-item'); if (!row) return;
+    const idx = Number(row.getAttribute('data-idx')||'-1');
+    if (idx >= 0) pickByIndex(idx);
+  }
+
+  input.addEventListener('input', ()=>{
+    const q = input.value.trim();
+    if (q.length < 2){ hideSuggest(); return; }
+    const fuse = ensureFuse();
+    if (!fuse){ hideSuggest(); return; }
+
+    const results = fuse.search(q, { limit: 8 }).map(r=> r.item);
+    if (!results.length){ hideSuggest(); return; }
+    activeIndex = 0;
+    renderSuggest(results);
+  });
+
+  input.addEventListener('keydown', (e)=>{
+    if (popover.style.display !== 'block') return;
+    const rows = Array.from(popover.querySelectorAll('.suggest-item'));
+    if (!rows.length) return;
+
+    if (e.key === 'ArrowDown'){ e.preventDefault(); activeIndex = (activeIndex+1) % rows.length; rows.forEach((r,i)=> r.setAttribute('aria-selected', i===activeIndex?'true':'false')); }
+    else if (e.key === 'ArrowUp'){ e.preventDefault(); activeIndex = (activeIndex-1+rows.length) % rows.length; rows.forEach((r,i)=> r.setAttribute('aria-selected', i===activeIndex?'true':'false')); }
+    else if (e.key === 'Enter'){ e.preventDefault(); pickByIndex(Math.max(0, activeIndex)); }
+    else if (e.key === 'Escape'){ e.preventDefault(); hideSuggest(); }
+  });
+
+  popover.addEventListener('click', selectByClick);
+  document.addEventListener('click', (e)=>{ if (!popover.contains(e.target) && e.target !== input) hideSuggest(); });
+
+  // ---- Bootstrap once DOM is ready ----
+  (async function init(){
+    await loadUniversitiesOnce();
+    ensureFuse();
+    populateBrowseAll();
+    // first render
+    updateStudentSelectedMini();
+  })();
+})();
+</script>
 
 
 <!-- End of page -->
