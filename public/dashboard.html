@@ -647,8 +647,8 @@
       </div>
     </div>
 
-    <!-- Bulk Import Modal -->
-    <div id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle"
+
+
          style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
       <div style="background:#fff; width:min(680px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
         <div style="padding:1rem 1.2rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
@@ -659,7 +659,7 @@
           <div style="font-size:.92rem; color:#556;">
             Paste one <b>name per line</b>. We’ll fuzzy-match against the master list.
           </div>
-          <textarea id="importTextarea" rows="10" style="width:100%; padding:.8rem; border:1px solid #e5e7eb; border-radius:10px; font-family:inherit;"></textarea>
+
           <div id="importPreview" style="font-size:.9rem; color:#667;"></div>
         </div>
         <div style="padding:1rem 1.2rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
@@ -753,7 +753,7 @@
           <div class="university-section">
             <h2 class="section-title"><span class="material-icons">school</span> Select Universities</h2>
 
-            <!-- Search + Apply + Bulk import -->
+            <!-- Search + Apply -->
             <div class="university-search" style="position:relative; display:flex; gap:.5rem; align-items:center; margin-bottom:.5rem;">
               <input
                 type="text"
@@ -766,7 +766,6 @@
                 aria-owns="searchSuggest"
               />
               <button class="apply-btn" id="searchApplyBtn" title="Apply search (Enter)" type="button">Apply</button>
-              <button class="page-btn" id="bulkImportBtn" title="Bulk import by names" type="button">Bulk import</button>
               <div id="searchSuggest" class="suggest-popover" style="display:none;"></div>
             </div>
 
@@ -894,7 +893,6 @@
 <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js?v=2025-09-06" defer></script>
 
 <!-- Optional: your app shell files (kept in case you use them) -->
-<script src="/assets/js/dashboard.js?v=2025-09-06-1" defer></script>
 <script src="/assets/js/university-search.js?v=2025-09-06-1" defer></script>
 
 <!-- Core App Bootstrap (integrated, idempotent) -->
@@ -2172,64 +2170,7 @@ window.__srAnalytics = {
   });
 })();
 </script>
-<script>
-(function(){
-  if (window.__sr_bulk__) return; window.__sr_bulk__ = true;
-  const openBtn = document.getElementById('bulkImportBtn');
-  const modal   = document.getElementById('importModal');
-  const ta      = document.getElementById('importTextarea');
-  const prev    = document.getElementById('importPreview');
-  const addBtn  = document.getElementById('importConfirmBtn');
-  const cancel1 = document.getElementById('importCancelBtn');
-  const closeX  = document.getElementById('importCloseBtn');
 
-  if (!openBtn || !modal || !ta || !prev || !addBtn) return;
-
-  let lastMatches = [];
-
-  function open(){ modal.style.display='flex'; ta.focus(); ta.value = ta.value || ''; renderPreview(); }
-  function close(){ modal.style.display='none'; }
-
-  function renderPreview(){
-    const lines = ta.value.split('\n').map(s=>s.trim()).filter(Boolean);
-    const uniq = Array.from(new Set(lines));
-    const matches = [];
-    uniq.forEach(name=>{
-      // best match via Fuse: search top1
-      const res = SR.fuse ? SR.fuse.search(name, { limit: 1 }) : [];
-      if (res && res[0]) matches.push({ input:name, uni: res[0].item });
-      else matches.push({ input:name, uni:null });
-    });
-    lastMatches = matches;
-
-    const found = matches.filter(m=>m.uni).length;
-    const miss  = matches.length - found;
-    prev.innerHTML = `
-      <div><b>Preview:</b> ${found} matched, ${miss} not matched.</div>
-      <ul style="margin:.4rem 0 0 1rem;">
-        ${matches.slice(0,15).map(m=>`<li>${m.input} ${m.uni?`→ <span style="color:#166534">${m.uni.name} (${m.uni.state})</span>`:`<span style="color:#b91c1c">(no match)</span>`}</li>`).join('')}
-        ${matches.length>15?`<li>…and ${matches.length-15} more</li>`:''}
-      </ul>
-    `;
-  }
-
-  ta.addEventListener('input', renderPreview);
-  openBtn.addEventListener('click', open);
-  cancel1?.addEventListener('click', close);
-  closeX ?.addEventListener('click', close);
-  modal.addEventListener('click', (e)=>{ if (e.target===modal) close(); });
-
-  addBtn.addEventListener('click', ()=>{
-    let added = 0;
-    lastMatches.forEach(m=>{
-      if (m.uni) { SR.selected.add(m.uni.unitid); added++; }
-    });
-    updateSelectedList();
-    toast(`Added ${added} universit${added===1?'y':'ies'} from bulk import.`, added? 'success':'info');
-    close();
-  });
-})();
-</script>
 <script>
 /* ======== Student Select: autosuggest + browse-all population ========
    Paste this near </body>. It is idempotent and won't break existing code.
@@ -2445,81 +2386,7 @@ window.__srAnalytics = {
   })();
 })();
 </script>
-<script>
-/* ===== Re-enable Bulk Import (idempotent) ===== */
-(function(){
-  if (window.__sr_bulk_import__) return; window.__sr_bulk_import__ = true;
 
-  const openBtn = document.getElementById('bulkImportBtn');
-  const modal   = document.getElementById('importModal');
-  const ta      = document.getElementById('importTextarea');
-  const prev    = document.getElementById('importPreview');
-  const addBtn  = document.getElementById('importConfirmBtn');
-  const cancel1 = document.getElementById('importCancelBtn');
-  const closeX  = document.getElementById('importCloseBtn');
-
-  if (!openBtn || !modal || !ta || !prev || !addBtn) return;
-
-  let lastMatches = [];
-
-  function ensureFuse(){
-    if (!window.Fuse) return null;
-    if (SR.fuse) return SR.fuse;
-    SR.fuse = new Fuse(SR.universities || [], {
-      keys: [{ name:'name', weight:0.85 }, { name:'state', weight:0.15 }],
-      threshold: 0.3, minMatchCharLength: 2, ignoreLocation: true
-    });
-    return SR.fuse;
-  }
-
-  function open(){ modal.style.display='flex'; ta.focus(); if (!ta.value) ta.value = ''; renderPreview(); }
-  function close(){ modal.style.display='none'; }
-
-  function renderPreview(){
-    const fuse = ensureFuse(); if (!fuse){ prev.textContent = 'Search index not ready.'; return; }
-    const lines = ta.value.split('\n').map(s=>s.trim()).filter(Boolean);
-    const uniq  = Array.from(new Set(lines));
-    const matches = uniq.map(name=>{
-      const res = fuse.search(name, { limit: 1 });
-      return { input:name, uni: res && res[0] ? res[0].item : null };
-    });
-    lastMatches = matches;
-
-    const found = matches.filter(m=>m.uni).length;
-    const miss  = matches.length - found;
-    prev.innerHTML = `
-      <div><b>Preview:</b> ${found} matched, ${miss} not matched.</div>
-      <ul style="margin:.4rem 0 0 1rem;">
-        ${matches.slice(0,15).map(m=>`<li>${m.input} ${
-          m.uni ? `→ <span style="color:#166534">${m.uni.name}${m.uni.state?` (${m.uni.state})`:''}</span>` :
-                  `<span style="color:#b91c1c">(no match)</span>`}</li>`).join('')}
-        ${matches.length>15?`<li>…and ${matches.length-15} more</li>`:''}
-      </ul>
-    `;
-  }
-
-  ta.addEventListener('input', renderPreview);
-  openBtn.addEventListener('click', open);
-  cancel1?.addEventListener('click', close);
-  closeX ?.addEventListener('click', close);
-  modal.addEventListener('click', (e)=>{ if (e.target===modal) close(); });
-
-  addBtn.addEventListener('click', ()=>{
-    let added = 0;
-    lastMatches.forEach(m=>{
-      if (m.uni) { SR.selected.add(String(m.uni.unitid)); added++; }
-    });
-    if (typeof window.updateSelectedList === 'function') updateSelectedList(); // Recommender box
-    if (typeof window.updateStudentSelectedMini === 'function') updateStudentSelectedMini(); // Student mini list (defined in patch below)
-    else {
-      // fallback: re-run a tiny renderer if the helper isn't global
-      const evt = new CustomEvent('sr:selected:changed'); document.dispatchEvent(evt);
-    }
-    toast(`Added ${added} universit${added===1?'y':'ies'} from bulk import.`, added? 'success':'info');
-    close();
-  });
-})();
-</script>
 <script>
 /* ===== Ensure real names from JSON + Mock University present ===== */
 (function(){
@@ -2630,7 +2497,7 @@ window.__srAnalytics = {
     });
     countStu.textContent = `${n} universit${n===1?'y':'ies'} selected`;
   }
-  // expose for Bulk-import patch if it needs it
+  // expose for other scripts if needed
   window.updateStudentSelectedMini = updateStudentSelectedMini;
 
   // keep dropdown -> selection behavior
@@ -2725,49 +2592,8 @@ Notes:
 })();
 </script>
 
-<!-- (Optional) bulk import modal handler (name-based matching) -->
-<script>
-(function(){
-  const openBtn = document.getElementById('bulkImportBtn');
-  const modal   = document.getElementById('importModal');
-  const closeX  = document.getElementById('importCloseBtn');
-  const cancel  = document.getElementById('importCancelBtn');
-  const confirm = document.getElementById('importConfirmBtn');
-  const ta      = document.getElementById('importTextarea');
-  const prev    = document.getElementById('importPreview');
 
-  if (!openBtn || !modal) return;
 
-  function close(){ modal.style.display='none'; }
-  function open(){ modal.style.display='flex'; prev.textContent=''; ta.value=''; }
-
-  openBtn.addEventListener('click', open);
-  closeX ?.addEventListener('click', close);
-  cancel ?.addEventListener('click', close);
-
-  ta?.addEventListener('input', ()=>{
-    const lines = ta.value.split('\n').map(s=> s.trim()).filter(Boolean);
-    if (!lines.length){ prev.textContent=''; return; }
-    const sample = lines.slice(0, 10).join(', ');
-    prev.textContent = `Preview (${lines.length} names): ${sample}${lines.length>10?'…':''}`;
-  });
-
-  confirm?.addEventListener('click', ()=>{
-    const lines = ta.value.split('\n').map(s=> s.trim()).filter(Boolean);
-    if (!lines.length){ toast('Paste at least one university name.','error'); return; }
-    const want = lines.map(s=> s.toLowerCase());
-    let add = 0;
-    SR.universities.forEach(u=>{
-      if (SR.selected.has(u.unitid)) return;
-      if (want.some(w=> u.name.toLowerCase().includes(w))){ SR.selected.add(u.unitid); add++; }
-    });
-    if (add>0){ toast(`Added ${add} universit${add===1?'y':'ies'} by name match.`,'success'); }
-    else { toast('No matches found.','info'); }
-    updateSelectedList(); updateSendButton(); persist();
-    close();
-  });
-})();
-</script>
 <!-- (Optional) enhance accessibility for modals -->
 <script>
 (function(){
@@ -2787,11 +2613,10 @@ Notes:
   }
   // Hook confirm modal
   const confirmModal = document.getElementById('confirmModal');
-  const importModal  = document.getElementById('importModal');
   const contactOverlay = document.getElementById('contactOverlay');
 
   const openObs = new MutationObserver(()=>{
-    [confirmModal, importModal, contactOverlay].forEach(m=>{
+    [confirmModal, contactOverlay].forEach(m=>{
       if (!m) return;
       if (m.style.display === 'flex'){ trapFocus(m); }
       else { untrap(m); }
