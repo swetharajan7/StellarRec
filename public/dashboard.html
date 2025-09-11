@@ -983,7 +983,8 @@
   /* ===== Dataset loaders ===== */
   async function loadFromPublicJSON(){
     // expects array or { "CA": [ ... ], "NY": [ ... ] }
-    const url = 'public/assets/us_institutions_by_state_2023.json';
+ const url = '/assets/us_institutions_by_state_2023.json';
+
     const res = await fetch(url, { cache:'force-cache' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const raw = await res.json();
