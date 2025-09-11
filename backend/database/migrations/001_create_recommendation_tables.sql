@@ -120,8 +120,8 @@ INSERT INTO recommendation_requests (
     expiry_date
 ) VALUES (
     'student_001',
-    'John Doe',
-    'john.doe@student.edu',
+    'Swetha Rajan',
+    'swetha@student.edu',
     'professor.smith@university.edu',
     'Dr. Sarah Smith',
     'Master of Computer Science',
