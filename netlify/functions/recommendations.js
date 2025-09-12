@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { config } from './config.js';
 
 // Netlify serverless function for handling recommendation requests
 export const handler = async (event, context) => {
@@ -48,13 +49,14 @@ export const handler = async (event, context) => {
       };
     }
 
-    // Environment variables
+    // Get configuration
     const {
       RESEND_API_KEY,
-      EMAIL_FROM = 'StellarRec <no-reply@stellarrec.com>',
-      FRONTEND_BASE = 'https://stellarrec.netlify.app/dashboard',
-      SIGNING_SECRET = 'stellarrec_default_secret'
-    } = process.env;
+      EMAIL_FROM,
+      FRONTEND_BASE,
+      SIGNING_SECRET,
+      DEV_MODE
+    } = config;
 
     // Create unique ID and signature
     const id = 'sr_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
@@ -127,7 +129,7 @@ export const handler = async (event, context) => {
     `;
 
     // Send email using Resend API
-    if (RESEND_API_KEY) {
+    if (RESEND_API_KEY && RESEND_API_KEY !== 'your_resend_api_key_here') {
       const emailResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
