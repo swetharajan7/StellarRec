@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -408,6 +407,11 @@
     body:has(#panel-recommender:not([hidden])) #bulkImportModal {
       display: none !important;
     }
+    /* --- Recommender compact mode: hide intake and tighten spacing --- */
+#panel-recommender.is-compact #linkIntake { display: none !important; }
+#panel-recommender.is-compact .hero-section { margin-top: .5rem !important; }
+#panel-recommender.is-compact .compose-grid { margin-top: .25rem !important; }
+
   </style>
 </head>
 <body>
@@ -1933,6 +1937,34 @@
     persist();
   });
 })();
+  </script>
+  <script>
+document.addEventListener('DOMContentLoaded', function(){
+  // --- Recommender: hide intake & tighten hero spacing ---
+  (function(){
+    if (window.__srCompactBound) return; window.__srCompactBound = true;
+
+    function applyRecommenderCompact(){
+      const isRec = (location.hash.replace('#','') === 'recommender');
+      const panel = document.getElementById('panel-recommender');
+      const intake= document.getElementById('linkIntake');
+      if (!panel) return;
+
+      if (isRec) {
+        // add compact class (CSS above will hide the intake & pull hero up)
+        panel.classList.add('is-compact');
+        // remove the card from DOM so it doesn't take up space/accessibility focus
+        if (intake) { try { intake.remove(); } catch{} }
+      } else {
+        panel.classList.remove('is-compact'); // no change to student view
+      }
+    }
+
+    // Apply on load and when hash changes (if user switches tabs via URL)
+    applyRecommenderCompact();
+    window.addEventListener('hashchange', applyRecommenderCompact);
+  })();
+});
 </script>
 <!-- Extra protective hotfix block (no-op if already bound; keeps features resilient) -->
 <script>
