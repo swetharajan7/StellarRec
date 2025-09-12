@@ -2505,6 +2505,13 @@ window.__srAnalytics = {
   // ---- Bootstrap once DOM is ready ----
   (async function init(){
     await loadUniversitiesOnce();
+    
+    // CRITICAL FIX: Sync SR.universities with window.universities for university-search.js compatibility
+    if (SR.universities && SR.universities.length > 0) {
+      window.universities = SR.universities;
+      console.log('[SR] Early sync: window.universities set with', SR.universities.length, 'universities');
+    }
+    
     ensureFuse();
     // Note: populateBrowseAll() is called by the second init function to avoid conflicts
     // first render
@@ -2679,6 +2686,10 @@ window.__srAnalytics = {
     if (SR.universities && SR.universities.length > 0) {
       console.log('[SR] Universities loaded for browse dropdown:', SR.universities.length, 'total');
       console.log('[SR] First 3 universities:', SR.universities.slice(0, 3).map(u => `${u.name} (${u.state})`));
+      
+      // CRITICAL FIX: Sync SR.universities with window.universities for university-search.js compatibility
+      window.universities = SR.universities;
+      console.log('[SR] Synced window.universities with SR.universities');
     }
     
     populateBrowseAll();            // fills Browse-all with real names
