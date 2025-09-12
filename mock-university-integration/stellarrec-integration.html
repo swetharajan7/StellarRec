@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mock University - StellarRec Integration Demo</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f8fafc;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #1976d2, #7c4dff);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    
+    .integration-demo {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    
+    .recommendations-section {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .status-pending { color: #ff9800; }
+    .status-requested { color: #2196f3; }
+    .status-received { color: #4caf50; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+    }
+    
+    .demo-controls {
+      background: #e3f2fd;
+      border: 1px solid #2196f3;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .demo-button {
+      background: #1976d2;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .demo-button:hover {
+      background: #1565c0;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎓 Mock University</h1>
+    <p>Application Portal - StellarRec Integration Demo</p>
+  </div>
+
+  <div class="integration-demo">
+    <h2>🔗 StellarRec Integration Status</h2>
+    <p>This demo shows how Mock University's application system automatically updates when StellarRec sends recommendation requests.</p>
+    
+    <div class="demo-controls">
+      <h3>Demo Controls</h3>
+      <p>Use these buttons to simulate different integration states:</p>
+      <button class="demo-button" onclick="simulateStatus('no_recommendations')">Reset to No Recommendations</button>
+      <button class="demo-button" onclick="simulateStatus('recommendation_requested')">Simulate Request Sent</button>
+      <button class="demo-button" onclick="simulateStatus('recommendation_received')">Simulate Letter Completed</button>
+    </div>
+  </div>
+
+  <div class="recommendations-section">
+    <h2>Recommendations</h2>
+    <div class="demo-info" style="background: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+      <strong>Demo:</strong> This section automatically updates when StellarRec sends notifications about recommendation requests and completions.
+    </div>
+    
+    <p>Some graduate programs may prefer two academic references, while others might accept academic or professional references. Please consult with the office of admission with questions about recommendations.</p>
+    
+    <p>Undergraduate applicants, including those for Bachelor's Program for Adults and Transfer Students, are not required to submit letters of recommendation but may choose to do so if they wish.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="recommendations-table-body">
+        <tr>
+          <td colspan="2" style="text-align: center; color: #666; font-style: italic;">
+            No recommenders yet
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 20px;">
+      <button class="demo-button">Add Recommender</button>
+      <button class="demo-button" style="background: #666;">Continue</button>
+    </div>
+  </div>
+
+  <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; font-size: 14px; color: #666;">
+    <h3>Integration Details</h3>
+    <ul>
+      <li><strong>Real-time Updates:</strong> Status changes automatically when StellarRec sends notifications</li>
+      <li><strong>Webhook Integration:</strong> Mock University receives instant notifications from StellarRec</li>
+      <li><strong>Status Synchronization:</strong> Application status stays in sync with recommendation progress</li>
+      <li><strong>Professional Workflow:</strong> Seamless experience for students, recommenders, and admissions staff</li>
+    </ul>
+  </div>
+
+  <!-- Include the StellarRec integration script -->
+  <script src="js/stellarrec-integration.js"></script>
+  
+  <script>
+    // Demo functions for testing different states
+    function simulateStatus(status) {
+      const tableBody = document.getElementById('recommendations-table-body');
+      
+      if (status === 'no_recommendations') {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="2" style="text-align: center; color: #666; font-style: italic;">
+              No recommenders yet
+            </td>
+          </tr>
+        `;
+      } else if (status === 'recommendation_requested') {
+        tableBody.innerHTML = `
+          <tr>
+            <td>Prof. Manas Mohan Nand</td>
+            <td>
+              <span style="color: #ff9800; font-weight: 500;">Requested</span>
+              <br><small style="color: #666;">via StellarRec</small>
+            </td>
+          </tr>
+        `;
+        showNotification('Recommendation requested from Prof. Manas Mohan Nand');
+      } else if (status === 'recommendation_received') {
+        tableBody.innerHTML = `
+          <tr>
+            <td>Prof. Manas Mohan Nand</td>
+            <td>
+              <span style="color: #4caf50; font-weight: 500;">Received</span>
+              <br><small style="color: #666;">via StellarRec</small>
+            </td>
+          </tr>
+        `;
+        showNotification('Recommendation received from Prof. Manas Mohan Nand');
+      }
+    }
+    
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4caf50;
+        color: white;
+        padding: 16px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        font-weight: 500;
+        max-width: 300px;
+      `;
+      
+      notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 18px;">✅</span>
+          <div>
+            <div><strong>Status Updated</strong></div>
+            <div style="font-size: 14px; opacity: 0.9;">${message}</div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
