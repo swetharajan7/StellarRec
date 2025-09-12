@@ -1403,65 +1403,6 @@
     // is done by the backend integration script
     console.log('Student send form binding - handled by backend integration script');
   }
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestData)
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          // Record successful request for student tracking
-          const now = Date.now();
-          SR.studentTrack.unshift({
-            id: result.data.requestId,
-            who: recN,
-            email: recE,
-            ts: now,
-            status: 'sent',
-            token: result.data.token,
-            portalUrl: result.data.portalUrl,
-            messageId: result.data.messageId
-          });
-          persist();
-          
-          toast(`✅ Recommendation request sent successfully to ${recN}!`, 'success');
-          form.reset();
-          
-          // Show success details
-          setTimeout(() => {
-            toast(`📧 Email delivered with message ID: ${result.data.messageId}`, 'info');
-          }, 2000);
-          
-        } else {
-          throw new Error(result.message || 'Failed to send request');
-        }
-
-      } catch (error) {
-        console.error('Error sending recommendation request:', error);
-        
-        // Record failed request
-        const now = Date.now();
-        SR.studentTrack.unshift({
-          id: 'req_'+now,
-          who: recN,
-          email: recE,
-          ts: now,
-          status: 'failed',
-          error: error.message
-        });
-        persist();
-        
-        toast(`❌ Failed to send request: ${error.message}`, 'error');
-        
-      } finally {
-        // Restore button state
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-      }
-    });
-  }
 
   /* ===== Student tracking table render ===== */
   /* ===== Enhanced Student tracking table render ===== */
@@ -3479,165 +3420,216 @@ window.SR_API = {
 </script>
 
 <!-- Backend Integration for Send Recommendation Request -->
-<script>/* === BEGIN: Backend config ======================= */
+<script>
 // Backend URL - Using Netlify Functions
-// The API will be available at https://stellarrec.netlify.app/.netlify/functions/
 window.SR_BACKEND_BASE = window.SR_BACKEND_BASE || 'https://stellarrec.netlify.app/.netlify/functions';
-/* === END: Backend config =================================== */
+
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
-(function(){
-if (window.__srSendBound) return; 
-window.__srSendBound = true;
+  if (window.__srSendBound) return; 
+  window.__srSendBound = true;
 
-console.log('🔧 Initializing backend integration...');
+  console.log('🔧 Initializing backend integration...');
 
-const form = document.getElementById('stuSendForm');
-if (!form) {
-  console.error('❌ stuSendForm not found!');
-  return;
-}
-console.log('✅ Found stuSendForm:', form);const nameEl = document.getElementById('stuName');const emailEl= document.getElementById('stuEmail');const recName= document.getElementById('recName');const recMail= document.getElementById('recEmail');const validEmail = (v)=> /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').toLowerCase());/* helper: selected unit IDs (keep Mock if none) */function getSelectedUnitIds(){// your app uses one (or both) of these setsconst a = window.studentUnitIds ? Array.from(window.studentUnitIds) : [];const b = (window.SR && SR.selected) ? Array.from(SR.selected) : [];const all = new Set([ ...(a||[]), ...(b||[]) ]);if (!all.size) all.add('MOCK-0000');  // keep Mock University fallbackreturn Array.from(all);}/* helper: split "First Last" */function splitName(full){const parts = String(full||'').trim().split(/\s+/);const first = parts.shift() || '';const last  = parts.join(' ') || '';return { first, last };}/* === CALL YOUR BACKEND (instead of mockapi) ================ */async function createRecommendationOnBackend({ studentName, studentEmail, recommenderName, recommenderEmail }){const { first: sf, last: sl } = splitName(studentName);const unitids = getSelectedUnitIds();         // array of UNITIDs (keeps MOCK-1)const waive   = 1;                             // or read from your toggle if you add oneconst title   = (document.getElementById('writerTitle')?.value || '').trim();const payload = {student_name:  studentName,student_email: studentEmail.toLowerCase(),student_first: sf,student_last:  sl,recommender_name:  recommenderName,recommender_email: recommenderEmail.toLowerCase(),unitids,          // e.g., ["166027","110635","MOCK-1"]waive,            // 1 or 0title             // optional letter title};const res = await fetch(`${window.SR_BACKEND_BASE}/recommendations`, {method:'POST',headers:{ 'Content-Type':'application/json' },body: JSON.stringify(payload)});if (!res.ok) throw new Error(`Backend ${res.status}`);return await res.json(); // { id, status: 'ok' }}function pushToTrackRow({who,email,ts,status}){const tbody = document.getElementById('stuTrackBody');if (!tbody) return;const tr = document.createElement('tr');tr.innerHTML = `<td>${who}</td><td>${email}</td><td>${new Date(ts).toLocaleString()}</td><td><span class="track-pill ${status==='Sent'?'sent':status==='received'?'received':'pending'}">${status}</span></td>`;tbody.prepend(tr);}// Enhanced tracking integration with existing system
-function addToStudentTrack({id, who, email, ts, status, universities = [], studentName = '', studentEmail = ''}){
-  // Add to the main SR.studentTrack array
-  if (window.SR && Array.isArray(SR.studentTrack)) {
-    const trackEntry = {
-      id: id || 'req_' + Date.now(),
-      who: who,
-      email: email,
-      ts: ts,
-      status: status,
-      universities: universities,
-      studentName: studentName,
-      studentEmail: studentEmail,
-      lastUpdated: Date.now()
-    };
-    
-    // Check if entry already exists and update it, or add new one
-    const existingIndex = SR.studentTrack.findIndex(entry => entry.id === trackEntry.id);
-    if (existingIndex >= 0) {
-      SR.studentTrack[existingIndex] = { ...SR.studentTrack[existingIndex], ...trackEntry };
-    } else {
-      SR.studentTrack.unshift(trackEntry);
-    }
-    
-    // Persist to localStorage
-    try {
-      const saved = JSON.parse(localStorage.getItem('sr_state_v1') || '{}');
-      saved.studentTrack = SR.studentTrack;
-      localStorage.setItem('sr_state_v1', JSON.stringify(saved));
-    } catch(_) {}
-    
-    // Update the tracking table display
-    if (typeof window.renderStudentTrack === 'function') {
-      window.renderStudentTrack();
-    }
-  }
-}
-
-console.log('✅ Adding form submit listener...');
-
-form.addEventListener('submit', async (e)=>{
-  console.log('🚀 Form submitted!', e);
-  e.preventDefault();
-  
-  const studentName = (nameEl?.value||'').trim();
-  const studentEmail= (emailEl?.value||'').trim();
-  const rName       = (recName?.value||'').trim();
-  const rMail       = (recMail?.value||'').trim();
-  
-  console.log('📝 Form data:', { studentName, studentEmail, rName, rMail });
-  
-  if (!studentName || !validEmail(studentEmail) || !rName || !validEmail(rMail)){
-    console.log('❌ Validation failed');
-    if (typeof toast === 'function') {
-      toast('Please fill valid student & recommender details.','error');
-    } else {
-      alert('Please fill valid student & recommender details.');
-    }
+  const form = document.getElementById('stuSendForm');
+  if (!form) {
+    console.error('❌ stuSendForm not found!');
     return;
   }
+  console.log('✅ Found stuSendForm:', form);
+
+  const nameEl = document.getElementById('stuName');
+  const emailEl = document.getElementById('stuEmail');
+  const recName = document.getElementById('recName');
+  const recMail = document.getElementById('recEmail');
   
-  console.log('✅ Validation passed, proceeding with submission...');
+  const validEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').toLowerCase());
 
-  // Show loading state
-  const submitBtn = form.querySelector('button[type="submit"]');
-  const originalText = submitBtn.textContent;
-  submitBtn.textContent = 'Sending...';
-  submitBtn.disabled = true;
-
-  try {
-    // Get selected universities for tracking
-    const selectedUniversities = getSelectedUnitIds().map(id => {
-      if (window.SR && SR.universities) {
-        const uni = SR.universities.find(u => u.unitid === id);
-        return uni ? uni.name : id;
-      }
-      return id === 'MOCK-0000' ? 'Mock University' : id;
-    });
-
-    // Call backend
-    const result = await createRecommendationOnBackend({
-      studentName, 
-      studentEmail,
-      recommenderName: rName, 
-      recommenderEmail: rMail
-    });
-
-    // Success - add to tracking with full details
-    const now = Date.now();
-    const requestId = result.id || 'req_' + now;
-    
-    addToStudentTrack({
-      id: requestId,
-      who: rName,
-      email: rMail,
-      ts: now,
-      status: 'sent',
-      universities: selectedUniversities,
-      studentName: studentName,
-      studentEmail: studentEmail
-    });
-
-    toast('Request sent to recommender by email! 🎉','success');
-    
-    // Auto-switch to tracking tab after 2 seconds
-    setTimeout(() => {
-      const trackTab = document.getElementById('stuTabTrack');
-      if (trackTab) {
-        trackTab.click();
-        toast('Check your request status in the tracking tab!', 'info');
-      }
-    }, 2000);
-    
-    form.reset();
-
-  } catch (err) {
-    console.error('Backend error:', err);
-    
-    // Error - still add to tracking for visibility
-    const now = Date.now();
-    addToStudentTrack({
-      id: 'req_' + now,
-      who: rName,
-      email: rMail,
-      ts: now,
-      status: 'failed',
-      universities: getSelectedUnitIds().map(id => id === 'MOCK-0000' ? 'Mock University' : id),
-      studentName: studentName,
-      studentEmail: studentEmail,
-      error: err.message
-    });
-    
-    toast('Could not send the recommendation email. Check tracking tab for details.','error');
-  } finally {
-    // Reset button state
-    submitBtn.textContent = originalText;
-    submitBtn.disabled = false;
+  // Helper: selected unit IDs (keep Mock if none)
+  function getSelectedUnitIds() {
+    const a = window.studentUnitIds ? Array.from(window.studentUnitIds) : [];
+    const b = (window.SR && SR.selected) ? Array.from(SR.selected) : [];
+    const all = new Set([...(a||[]), ...(b||[])]);
+    if (!all.size) all.add('MOCK-0000');
+    return Array.from(all);
   }
-});
-})();
-}); // End DOMContentLoaded</script>
+
+  // Helper: split "First Last"
+  function splitName(full) {
+    const parts = String(full||'').trim().split(/\s+/);
+    const first = parts.shift() || '';
+    const last = parts.join(' ') || '';
+    return { first, last };
+  }
+
+  // Call backend API
+  async function createRecommendationOnBackend({ studentName, studentEmail, recommenderName, recommenderEmail }) {
+    const { first: sf, last: sl } = splitName(studentName);
+    const unitids = getSelectedUnitIds();
+    const waive = 1;
+    const title = (document.getElementById('writerTitle')?.value || '').trim();
+    
+    const payload = {
+      student_name: studentName,
+      student_email: studentEmail.toLowerCase(),
+      student_first: sf,
+      student_last: sl,
+      recommender_name: recommenderName,
+      recommender_email: recommenderEmail.toLowerCase(),
+      unitids,
+      waive,
+      title
+    };
+
+    const res = await fetch(`${window.SR_BACKEND_BASE}/recommendations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!res.ok) throw new Error(`Backend ${res.status}`);
+    return await res.json();
+  }
+
+  // Enhanced tracking integration
+  function addToStudentTrack({id, who, email, ts, status, universities = [], studentName = '', studentEmail = ''}) {
+    if (window.SR && Array.isArray(SR.studentTrack)) {
+      const trackEntry = {
+        id: id || 'req_' + Date.now(),
+        who: who,
+        email: email,
+        ts: ts,
+        status: status,
+        universities: universities,
+        studentName: studentName,
+        studentEmail: studentEmail,
+        lastUpdated: Date.now()
+      };
+      
+      const existingIndex = SR.studentTrack.findIndex(entry => entry.id === trackEntry.id);
+      if (existingIndex >= 0) {
+        SR.studentTrack[existingIndex] = { ...SR.studentTrack[existingIndex], ...trackEntry };
+      } else {
+        SR.studentTrack.unshift(trackEntry);
+      }
+      
+      try {
+        const saved = JSON.parse(localStorage.getItem('sr_state_v1') || '{}');
+        saved.studentTrack = SR.studentTrack;
+        localStorage.setItem('sr_state_v1', JSON.stringify(saved));
+      } catch(_) {}
+      
+      if (typeof window.renderStudentTrack === 'function') {
+        window.renderStudentTrack();
+      }
+    }
+  }
+
+  console.log('✅ Adding form submit listener...');
+
+  form.addEventListener('submit', async (e) => {
+    console.log('🚀 Form submitted!', e);
+    e.preventDefault();
+    
+    const studentName = (nameEl?.value||'').trim();
+    const studentEmail = (emailEl?.value||'').trim();
+    const rName = (recName?.value||'').trim();
+    const rMail = (recMail?.value||'').trim();
+    
+    console.log('📝 Form data:', { studentName, studentEmail, rName, rMail });
+    
+    if (!studentName || !validEmail(studentEmail) || !rName || !validEmail(rMail)) {
+      console.log('❌ Validation failed');
+      if (typeof toast === 'function') {
+        toast('Please fill valid student & recommender details.','error');
+      } else {
+        alert('Please fill valid student & recommender details.');
+      }
+      return;
+    }
+    
+    console.log('✅ Validation passed, proceeding with submission...');
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Sending...';
+    submitBtn.disabled = true;
+
+    try {
+      const selectedUniversities = getSelectedUnitIds().map(id => {
+        if (window.SR && SR.universities) {
+          const uni = SR.universities.find(u => u.unitid === id);
+          return uni ? uni.name : id;
+        }
+        return id === 'MOCK-0000' ? 'Mock University' : id;
+      });
+
+      const result = await createRecommendationOnBackend({
+        studentName, 
+        studentEmail,
+        recommenderName: rName, 
+        recommenderEmail: rMail
+      });
+
+      const now = Date.now();
+      const requestId = result.id || 'req_' + now;
+      
+      addToStudentTrack({
+        id: requestId,
+        who: rName,
+        email: rMail,
+        ts: now,
+        status: 'sent',
+        universities: selectedUniversities,
+        studentName: studentName,
+        studentEmail: studentEmail
+      });
+
+      if (typeof toast === 'function') {
+        toast('Request sent to recommender by email! 🎉','success');
+      } else {
+        alert('Request sent successfully!');
+      }
+      
+      setTimeout(() => {
+        const trackTab = document.getElementById('stuTabTrack');
+        if (trackTab) {
+          trackTab.click();
+          if (typeof toast === 'function') {
+            toast('Check your request status in the tracking tab!', 'info');
+          }
+        }
+      }, 2000);
+      
+      form.reset();
+
+    } catch (err) {
+      console.error('Backend error:', err);
+      
+      const now = Date.now();
+      addToStudentTrack({
+        id: 'req_' + now,
+        who: rName,
+        email: rMail,
+        ts: now,
+        status: 'failed',
+        universities: getSelectedUnitIds().map(id => id === 'MOCK-0000' ? 'Mock University' : id),
+        studentName: studentName,
+        studentEmail: studentEmail,
+        error: err.message
+      });
+      
+      if (typeof toast === 'function') {
+        toast('Could not send the recommendation email. Check tracking tab for details.','error');
+      } else {
+        alert('Error: Could not send the recommendation email.');
+      }
+    } finally {
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    }
+  });
+});</script>
 
 <!-- StellarRec API Integration -->
 <script src="../frontend/js/api-client.js"></script>
