@@ -196,6 +196,34 @@ export const handler = async (event, context) => {
       });
     }
 
+    // Notify universities about the recommendation request
+    try {
+      const universityNotification = await fetch(`${process.env.NETLIFY_FUNCTIONS_URL || 'https://stellarrec.netlify.app/.netlify/functions'}/notify-university`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          student_name,
+          student_email,
+          recommender_name,
+          recommender_email,
+          universities: unitids,
+          request_id: id,
+          action: 'request_sent'
+        })
+      });
+
+      if (universityNotification.ok) {
+        console.log('✅ Universities notified successfully');
+      } else {
+        console.log('⚠️ University notification failed:', universityNotification.status);
+      }
+    } catch (notifyError) {
+      console.error('University notification error:', notifyError);
+      // Don't fail the main request if university notification fails
+    }
+
     // Return success response
     return {
       statusCode: 200,

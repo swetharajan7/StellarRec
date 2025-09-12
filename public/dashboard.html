@@ -625,6 +625,21 @@
           <span class="material-icons">send</span>
           Send to Selected Universities
         </button>
+        
+        <div id="completionSection" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; display: none;">
+          <h3 style="margin: 0 0 0.5rem 0; color: #1976d2; font-size: 1rem;">
+            <span class="material-icons" style="vertical-align: middle; margin-right: 0.5rem;">task_alt</span>
+            Complete Recommendation
+          </h3>
+          <p style="margin: 0 0 1rem 0; font-size: 0.9rem; color: #666;">
+            When you're finished with your recommendation letter, click below to notify the universities that your letter is complete and ready for review.
+          </p>
+          <button class="btn btn-success" id="completeRecommendationBtn" style="background: #16a34a;">
+            <span class="material-icons">check_circle</span>
+            Mark Recommendation as Complete
+          </button>
+          <div id="completionStatus" style="margin-top: 0.5rem; font-size: 0.9rem;"></div>
+        </div>
       </div>
     </div>
 
@@ -3306,6 +3321,115 @@ window.srDebounce = function(fn, wait=150){
     });
     try{ localStorage.setItem('sr_current_view', isStudent?'student':'recommender'); }catch(_){}
   });
+})();
+
+// Recommendation completion system
+(function() {
+  const completionSection = document.getElementById('completionSection');
+  const completeBtn = document.getElementById('completeRecommendationBtn');
+  const completionStatus = document.getElementById('completionStatus');
+  
+  // Show completion section when universities are selected
+  function updateCompletionVisibility() {
+    const selectedCount = window.SR?.selected?.size || 0;
+    if (completionSection) {
+      completionSection.style.display = selectedCount > 0 ? 'block' : 'none';
+    }
+  }
+  
+  // Listen for university selection changes
+  if (typeof window.updateSelectedList === 'function') {
+    const originalUpdate = window.updateSelectedList;
+    window.updateSelectedList = function() {
+      originalUpdate.apply(this, arguments);
+      updateCompletionVisibility();
+    };
+  }
+  
+  // Handle completion button click
+  if (completeBtn) {
+    completeBtn.addEventListener('click', async function() {
+      try {
+        completeBtn.disabled = true;
+        completeBtn.innerHTML = '<span class="material-icons">hourglass_empty</span> Notifying Universities...';
+        
+        if (completionStatus) {
+          completionStatus.innerHTML = '<span style="color: #1976d2;">⏳ Sending notifications...</span>';
+        }
+        
+        // Get current data
+        const selectedUniversities = Array.from(window.SR?.selected || []);
+        const studentData = getStudentDataFromURL() || {};
+        const letterContent = document.getElementById('writerBox')?.textContent || '';
+        
+        // Call completion endpoint
+        const response = await fetch(`${window.SR_BACKEND_BASE || 'https://stellarrec.netlify.app/.netlify/functions'}/complete-recommendation`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            request_id: studentData.rid || 'demo_' + Date.now(),
+            student_name: studentData.sf + ' ' + (studentData.sl || ''),
+            student_email: studentData.se || '',
+            recommender_name: studentData.rname || 'Recommender',
+            recommender_email: studentData.remail || '',
+            universities: selectedUniversities,
+            letter_content: letterContent ? 'provided' : 'not_provided',
+            submission_date: new Date().toISOString()
+          })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          completeBtn.innerHTML = '<span class="material-icons">check_circle</span> Completed Successfully!';
+          completeBtn.style.background = '#16a34a';
+          
+          if (completionStatus) {
+            completionStatus.innerHTML = '<span style="color: #16a34a;">✅ Universities have been notified that your recommendation is complete!</span>';
+          }
+          
+          // Show success message
+          if (typeof toast === 'function') {
+            toast('Universities notified! Your recommendation is marked as complete.', 'success');
+          }
+          
+        } else {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+      } catch (error) {
+        console.error('Completion error:', error);
+        completeBtn.disabled = false;
+        completeBtn.innerHTML = '<span class="material-icons">error</span> Try Again';
+        completeBtn.style.background = '#dc3545';
+        
+        if (completionStatus) {
+          completionStatus.innerHTML = '<span style="color: #dc3545;">❌ Failed to notify universities. Please try again.</span>';
+        }
+        
+        if (typeof toast === 'function') {
+          toast('Failed to notify universities. Please try again.', 'error');
+        }
+      }
+    });
+  }
+  
+  // Helper function to get student data from URL parameters
+  function getStudentDataFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      sf: params.get('sf') || '',
+      sl: params.get('sl') || '',
+      se: params.get('se') || '',
+      rname: params.get('rname') || '',
+      remail: params.get('remail') || '',
+      rid: params.get('rid') || ''
+    };
+  }
+  
+  // Initialize
+  updateCompletionVisibility();
 })();
 </script>
 
