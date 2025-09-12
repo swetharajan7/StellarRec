@@ -394,6 +394,20 @@
     .send-btn.sr-flash { animation: srPulse .9s ease-in-out 1; }
     /* make dropdown scrolling obvious when auto-scrolling to Contact admin */
     .user-dropdown.sr-highlight { outline: 2px solid #1976d2; outline-offset: 2px; }
+    
+    /* Hide bulk import elements in recommender view */
+    #panel-recommender .bulk-import-btn,
+    #panel-recommender [data-action="bulk-import"],
+    #panel-recommender button[title*="Bulk"],
+    #panel-recommender button[title*="Import"],
+    #panel-recommender .import-btn { 
+      display: none !important; 
+    }
+    
+    /* Hide bulk import modal completely when in recommender view */
+    body:has(#panel-recommender:not([hidden])) #bulkImportModal {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
@@ -647,12 +661,12 @@
       </div>
     </div>
 
-
-
+    <!-- Bulk Import Modal (Hidden in Recommender View) -->
+    <div id="bulkImportModal" role="dialog" aria-modal="true"
          style="position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;">
       <div style="background:#fff; width:min(680px,92vw); border-radius:16px; box-shadow:0 12px 48px rgba(0,0,0,.22); overflow:hidden;">
         <div style="padding:1rem 1.2rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-          <div id="importTitle" style="font-weight:700;">Bulk import universities</div>
+          <h3 style="margin:0; font-size:1.1rem;">Bulk Import universities</h3>
           <button aria-label="Close" id="importCloseBtn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
         </div>
         <div style="padding:1rem 1.2rem; display:grid; gap:.75rem;">
@@ -663,8 +677,8 @@
           <div id="importPreview" style="font-size:.9rem; color:#667;"></div>
         </div>
         <div style="padding:1rem 1.2rem; border-top:1px solid #eee; display:flex; gap:.5rem; justify-content:flex-end;">
-          <button class="page-btn" id="importCancelBtn">Cancel</button>
-          <button class="apply-btn" id="importConfirmBtn">Add matches</button>
+          <button class="page-btn" id="bulkImportCancelBtn">Cancel</button>
+          <button class="apply-btn" id="bulkImportAddBtn">Add matches</button>
         </div>
       </div>
     </div>
@@ -1607,6 +1621,14 @@
           b.setAttribute('aria-selected', on?'true':'false');
           if (on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
         });
+        
+        // Hide any bulk import elements that might be spilling over
+        document.querySelectorAll('[data-action="bulk-import"], .bulk-import-btn, button[title*="Bulk"], button[title*="Import"]').forEach(el => {
+          if (el.closest('#panel-recommender')) {
+            el.style.display = 'none';
+          }
+        });
+        
         try{ localStorage.setItem('sr_current_view','recommender'); }catch(_){}
         history.replaceState(null,'','#recommender');
       }
@@ -2487,6 +2509,27 @@ window.__srAnalytics = {
     populateBrowseAll();
     // first render
     updateStudentSelectedMini();
+    
+    // Hide bulk import modal in recommender view
+    function hideBulkImportModal() {
+      const recommenderPanel = document.getElementById('panel-recommender');
+      const bulkImportModal = document.getElementById('bulkImportModal');
+      
+      if (recommenderPanel && !recommenderPanel.hidden && bulkImportModal) {
+        bulkImportModal.style.display = 'none';
+        bulkImportModal.setAttribute('hidden', 'true');
+      }
+    }
+    
+    // Run immediately and set up observer
+    hideBulkImportModal();
+    
+    // Watch for view changes
+    const observer = new MutationObserver(hideBulkImportModal);
+    const recommenderPanel = document.getElementById('panel-recommender');
+    if (recommenderPanel) {
+      observer.observe(recommenderPanel, { attributes: true, attributeFilter: ['hidden'] });
+    }
   })();
 })();
 </script>
@@ -3045,6 +3088,49 @@ window.SR_API = {
     let tries = 0;
     const t = setInterval(()=>{ tries++; if (ensure() || tries>25) clearInterval(t); }, 120);
   }
+})();
+</script>
+
+<!-- Bulk Import Modal Override for Recommender View -->
+<script>
+(function(){
+  // Override any attempts to show the bulk import modal in recommender view
+  function preventBulkImportModal() {
+    const bulkImportModal = document.getElementById('bulkImportModal');
+    const recommenderPanel = document.getElementById('panel-recommender');
+    
+    if (bulkImportModal && recommenderPanel && !recommenderPanel.hidden) {
+      // Force hide the modal
+      bulkImportModal.style.display = 'none';
+      bulkImportModal.setAttribute('hidden', 'true');
+      return true;
+    }
+    return false;
+  }
+  
+  // Watch for any attempts to show the modal
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+        const target = mutation.target;
+        if (target.id === 'bulkImportModal') {
+          preventBulkImportModal();
+        }
+      }
+    });
+  });
+  
+  // Start observing when DOM is ready
+  document.addEventListener('DOMContentLoaded', function() {
+    const bulkImportModal = document.getElementById('bulkImportModal');
+    if (bulkImportModal) {
+      observer.observe(bulkImportModal, { attributes: true, attributeFilter: ['style'] });
+      preventBulkImportModal(); // Run immediately
+    }
+  });
+  
+  // Also run prevention check periodically
+  setInterval(preventBulkImportModal, 500);
 })();
 </script>
 
