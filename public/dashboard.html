@@ -1007,6 +1007,70 @@
   loadOnce();
 })();
 </script>
+  <script>
+document.addEventListener('DOMContentLoaded', function(){
+
+  // --- Load universities JSON once (with Mock on top) ---
+  (async function loadUniversitiesOnce(){
+    if (window.__srUnisLoaded) return; window.__srUnisLoaded = true;
+
+    const MOCK = {
+      unitid: 'MOCK',
+      name: 'Mock University',
+      state: 'CA',
+      type: 'Public',
+      level: '4-year'
+    };
+
+    try {
+      // IMPORTANT: no "/public" in the URL
+      const res = await fetch('/assets/us_institutions_by_state_2023.json', {
+        cache: 'force-cache'
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+
+      const raw = await res.json();
+
+      // Accept both array or {data:[...]} shapes and map common field names
+      const rows = Array.isArray(raw) ? raw : (raw.data || []);
+      const mapped = rows.map(r => ({
+        unitid: String(r.unitid ?? r.UnitID ?? r.id ?? r.UNITID ?? ''),
+        name:   r.name   ?? r.Institution ?? r.INSTNM ?? r.inst ?? '',
+        state:  r.state  ?? r.State       ?? r.STABBR ?? '',
+        type:   r.type   ?? r.Sector      ?? r.sector ?? '',
+        level:  r.level  ?? r.Level       ?? r.level_group ?? ''
+      })).filter(u => u.unitid && u.name);
+
+      // Ensure Mock is at the very top (no duplicates)
+      const withoutMock = mapped.filter(u => u.unitid !== 'MOCK' && u.name !== 'Mock University');
+      window.universities = [MOCK, ...withoutMock];
+
+    } catch (err) {
+      console.warn('[SR] Using fallback tiny list (JSON not found).', err);
+      window.universities = [MOCK];
+    }
+
+    // Populate the "Browse all universities" <select> if empty
+    const select = document.getElementById('universitySelect');
+    if (select && select.options.length <= 1) {
+      const frag = document.createDocumentFragment();
+      window.universities.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = String(u.unitid);
+        // Show correct, full names with state
+        opt.textContent = u.state ? `${u.name} (${u.state})` : u.name;
+        frag.appendChild(opt);
+      });
+      select.appendChild(frag);
+    }
+
+    // If your search module exposes a refresh, nudge it
+    window.applyUniversityFiltersAndSort?.();
+  })();
+
+});
+</script>
+
 
   <script src="/assets/js/university-search.js?v=2025-09-06-1" defer></script>
 
