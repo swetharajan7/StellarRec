@@ -2562,29 +2562,47 @@ window.__srAnalytics = {
   async function tryFetch(url){
     try {
       console.log('[SR] Attempting to fetch universities from:', url);
-      const res = await fetch(url, { cache:'force-cache' });
+      
+      // Try without cache first, then with cache if that fails
+      let res;
+      try {
+        res = await fetch(url, { cache: 'no-cache' });
+      } catch (e) {
+        console.log('[SR] No-cache fetch failed, trying with cache:', e.message);
+        res = await fetch(url, { cache: 'force-cache' });
+      }
+      
       if (!res.ok) {
-        console.log('[SR] Fetch failed for:', url, 'Status:', res.status);
+        console.log('[SR] Fetch failed for:', url, 'Status:', res.status, 'StatusText:', res.statusText);
         return null;
       }
+      
+      console.log('[SR] Fetch successful for:', url, 'Status:', res.status);
       const raw = await res.json();
       console.log('[SR] Raw data type:', typeof raw, 'Keys:', Object.keys(raw).slice(0, 5));
 
       let flat = [];
-      if (Array.isArray(raw)) flat = raw;
-      else if (raw && typeof raw === 'object'){
+      if (Array.isArray(raw)) {
+        flat = raw;
+        console.log('[SR] Data is array, length:', flat.length);
+      } else if (raw && typeof raw === 'object'){
+        console.log('[SR] Data is object, processing states...');
         for (const [state, list] of Object.entries(raw)){
           if (Array.isArray(list)){
+            console.log('[SR] Processing state:', state, 'with', list.length, 'universities');
             list.forEach(d=> flat.push({ ...d, state: d.state ?? d.State ?? state }));
           }
         }
       }
       console.log('[SR] Flattened universities count:', flat.length);
+      
       if (flat.length > 1000){
         const normalized = norm(flat);
         console.log('[SR] Universities loaded from:', url, 'count=', flat.length);
         console.log('[SR] First 3 normalized universities:', normalized.slice(0, 3).map(u => `${u.name} (${u.state})`));
         return normalized;
+      } else {
+        console.warn('[SR] Not enough universities found:', flat.length, 'expected > 1000');
       }
     } catch(e){ 
       console.error('[SR] Error fetching from:', url, e);
@@ -2617,6 +2635,49 @@ window.__srAnalytics = {
         dataLoaded = true;
         console.log('[SR] Successfully loaded', data.length, 'universities from', p);
         break; 
+      } else if (data) {
+        console.warn('[SR] Data loaded but insufficient count:', data.length, 'from', p);
+      }
+    }
+    
+    // If still no data, try one more time with a direct approach
+    if (!dataLoaded) {
+      console.log('[SR] All paths failed, trying direct fetch with different options...');
+      try {
+        const directUrl = '/assets/us_institutions_by_state_2023.json';
+        const response = await fetch(directUrl, { 
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache'
+          }
+        });
+        
+        if (response.ok) {
+          const jsonData = await response.json();
+          console.log('[SR] Direct fetch successful, processing...');
+          
+          let universities = [];
+          for (const [state, list] of Object.entries(jsonData)) {
+            if (Array.isArray(list)) {
+              list.forEach(u => universities.push({
+                unitid: String(u.unitid),
+                name: String(u.name),
+                state: String(u.state || state),
+                control: String(u.control || 'Public'),
+                level: String(u.level || '4-year')
+              }));
+            }
+          }
+          
+          if (universities.length > 1000) {
+            SR.universities = universities;
+            dataLoaded = true;
+            console.log('[SR] Direct fetch successful! Loaded', universities.length, 'universities');
+          }
+        }
+      } catch (e) {
+        console.error('[SR] Direct fetch also failed:', e);
       }
     }
     
