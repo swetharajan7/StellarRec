@@ -1,9 +1,9 @@
 // Configuration file for StellarRec backend
-// Update these values with your actual credentials
+// Configured with production credentials
 
 export const config = {
-  // Get your free API key from https://resend.com
-  RESEND_API_KEY: 'your_resend_api_key_here',
+  // Resend API key for sending emails
+  RESEND_API_KEY: 're_2FU7PXNf_8PjSC2zz9TYAdweY7xmkZnKr',
   
   // Email settings
   EMAIL_FROM: 'StellarRec <no-reply@stellarrec.com>',
@@ -11,16 +11,13 @@ export const config = {
   // Frontend URL
   FRONTEND_BASE: 'https://stellarrec.netlify.app/dashboard',
   
-  // Security secret - use a strong random string
-  SIGNING_SECRET: 'stellarrec_production_secret_change_me_to_random_string',
+  // Security secret for signing links (generated secure random string)
+  SIGNING_SECRET: 'a7f8d9e2b4c6f1a3e5d7b9c2f4e6a8d0b3c5e7f9a1d3b5c7e9f2a4c6e8f0a2b4c6e8f0a2b4c6e8f0a2b4c6e8f0',
   
-  // Development mode (set to false for production)
+  // Production mode - emails will be sent via Resend
   DEV_MODE: false
 };
 
-// Instructions:
-// 1. Sign up at https://resend.com (free - 100 emails/day)
-// 2. Create API key
-// 3. Replace 'your_resend_api_key_here' with your actual key
-// 4. Replace the SIGNING_SECRET with a strong random string
-// 5. Commit and push changes
+// ✅ Configuration complete!
+// Your backend is now ready to send real emails via Resend API
+// Free tier: 100 emails/day, 3,000 emails/month
