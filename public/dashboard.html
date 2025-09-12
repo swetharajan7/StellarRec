@@ -2702,6 +2702,13 @@ window.__srAnalytics = {
       return;
     }
     
+    // If we have the fallback list (5 universities), we need to override it
+    if (SR.universities && SR.universities.length <= 10) {
+      console.log('[SR] Found fallback list with', SR.universities.length, 'universities. Attempting to load full dataset...');
+      // Clear the fallback data so we can load the real data
+      SR.universities = [];
+    }
+    
     console.log('[SR] Loading university data from JSON...');
     
     // SURGICAL FIX: Direct, simplified approach to load JSON data
