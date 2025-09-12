@@ -1,0 +1,9 @@
+{
+  "name": "stellarrec-netlify-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for StellarRec backend",
+  "type": "module",
+  "dependencies": {
+    "crypto": "^1.0.1"
+  }
+}

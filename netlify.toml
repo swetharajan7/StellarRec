@@ -2,6 +2,9 @@
   publish = "public"
   command = ""
 
+[functions]
+  directory = "netlify/functions"
+
 [[redirects]]
   from = "/"
   to   = "/dashboard"
@@ -10,4 +13,10 @@
 [[redirects]]
   from = "/dashboard"
   to   = "/dashboard.html"
+  status = 200
+
+# API routes for backend functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
   status = 200
