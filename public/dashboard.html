@@ -2503,19 +2503,14 @@ window.__srAnalytics = {
   document.addEventListener('click', (e)=>{ if (!popover.contains(e.target) && e.target !== input) hideSuggest(); });
 
   // ---- Bootstrap once DOM is ready ----
+  // DISABLED: This init function conflicts with the second one
+  // The second init function (ensureRealDataset) handles all data loading
   (async function init(){
-    await loadUniversitiesOnce();
-    
-    // CRITICAL FIX: Sync SR.universities with window.universities for university-search.js compatibility
-    if (SR.universities && SR.universities.length > 0) {
-      window.universities = SR.universities;
-      console.log('[SR] Early sync: window.universities set with', SR.universities.length, 'universities');
-    }
-    
+    // Only handle non-data-loading initialization
     ensureFuse();
-    // Note: populateBrowseAll() is called by the second init function to avoid conflicts
-    // first render
-    updateStudentSelectedMini();
+    // Note: populateBrowseAll() is called by the second init function
+    // first render will be handled after data loading
+    // updateStudentSelectedMini();
     
     // Hide bulk import modal in recommender view
     function hideBulkImportModal() {
@@ -2600,22 +2595,45 @@ window.__srAnalytics = {
   async function ensureRealDataset(){
     // If already loaded with many entries, keep it (but still ensure mock)
     if (SR.universities && SR.universities.length > 1000){
+      console.log('[SR] Universities already loaded:', SR.universities.length, 'entries');
       ensureMockPresence();
       return;
     }
+    
+    console.log('[SR] Loading university data from JSON...');
     const paths = [
       '/assets/us_institutions_by_state_2023.json',           // typical Netlify public assets
       'assets/us_institutions_by_state_2023.json',
       '/public/assets/us_institutions_by_state_2023.json',    // if site serves /public
       'public/assets/us_institutions_by_state_2023.json'
     ];
+    
+    let dataLoaded = false;
     for (const p of paths){
+      console.log('[SR] Trying path:', p);
       const data = await tryFetch(p);
-      if (data){ SR.universities = data; break; }
+      if (data && data.length > 1000){ 
+        SR.universities = data; 
+        dataLoaded = true;
+        console.log('[SR] Successfully loaded', data.length, 'universities from', p);
+        break; 
+      }
     }
-    if (!SR.universities || SR.universities.length === 0){
-      console.warn('[SR] Still on fallback list; confirm your JSON is deployed at /assets/us_institutions_by_state_2023.json');
+    
+    if (!dataLoaded || !SR.universities || SR.universities.length === 0){
+      console.error('[SR] Failed to load university data from JSON. Using fallback list.');
+      console.warn('[SR] Confirm your JSON is deployed at /assets/us_institutions_by_state_2023.json');
+      
+      // Use fallback list
+      SR.universities = [
+        { unitid:'MOCK-0000', name:'Mock University', state:'CA', control:'Private nonprofit', level:'4-year' },
+        { unitid:'166027', name:'Harvard University', state:'MA', control:'Private nonprofit', level:'4-year' },
+        { unitid:'110635', name:'Stanford University', state:'CA', control:'Private nonprofit', level:'4-year' },
+        { unitid:'1106351', name:'Massachusetts Institute of Technology', state:'MA', control:'Private nonprofit', level:'4-year' },
+        { unitid:'1106352', name:'University of California, Berkeley', state:'CA', control:'Public', level:'4-year' },
+      ];
     }
+    
     ensureMockPresence();
   }
 
@@ -2690,7 +2708,12 @@ window.__srAnalytics = {
       // CRITICAL FIX: Sync SR.universities with window.universities for university-search.js compatibility
       window.universities = SR.universities;
       console.log('[SR] Synced window.universities with SR.universities');
+    } else {
+      console.error('[SR] No universities loaded! This should not happen.');
     }
+    
+    // Ensure Fuse search is initialized
+    ensureFuse();
     
     populateBrowseAll();            // fills Browse-all with real names
     updateStudentSelectedMini();    // refresh St
