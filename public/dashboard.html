@@ -923,7 +923,7 @@
     'assets/us_institutions_by_state_2023.json'
   ];
 
-  const MOCK = { unitid:'MOCK-1', name:'Mock University', state:'CA', type:'Private nonprofit', level:'4-year' };
+  const MOCK = { unitid:'MOCK-0000', name:'Mock University', state:'CA', type:'Private nonprofit', level:'4-year' };
 
   function fallbackList(){
     // If your old fallback exists, reuse it; otherwise keep at least Mock
@@ -1707,6 +1707,14 @@
     const saved    = localStorage.getItem('sr_current_view') || 'student';
     const initial  = (fromHash==='recommender'||fromHash==='student') ? fromHash : saved;
     setActive(initial);
+    
+    // Handle URL with query params like ?#send
+    if (location.search && location.hash) {
+      const cleanHash = location.hash.slice(1);
+      if (cleanHash === 'send' || cleanHash === 'select' || cleanHash === 'track') {
+        setActive('student'); // Ensure we're in student view for student tabs
+      }
+    }
 
     // Theme
     if (themeBtn){
@@ -1956,9 +1964,65 @@
   (function(){
     const themeBtn = $('#headerThemeBtn');
     const t = localStorage.getItem('sr_theme');
-    if (themeBtn && (t==='dark'||t==='light')){
-      document.documentElement.setAttribute('data-theme', t);
-      themeBtn.setAttribute('aria-pressed', t==='dark' ? 'true' : 'false');
+    if (themeBtn) {
+      if (t==='dark'||t==='light'){
+        document.documentElement.setAttribute('data-theme', t);
+        themeBtn.setAttribute('aria-pressed', t==='dark' ? 'true' : 'false');
+      }
+      // Ensure theme button is visible and functional
+      themeBtn.style.display = 'inline-flex';
+      
+      // Add click handler if not already bound
+      if (!themeBtn.hasAttribute('data-theme-bound')) {
+        themeBtn.setAttribute('data-theme-bound', 'true');
+        themeBtn.addEventListener('click', ()=>{
+          const root = document.documentElement;
+          const isDark = root.getAttribute('data-theme')==='dark';
+          const newTheme = isDark ? 'light' : 'dark';
+          root.setAttribute('data-theme', newTheme);
+          themeBtn.setAttribute('aria-pressed', newTheme === 'dark' ? 'true' : 'false');
+          try{ localStorage.setItem('sr_theme', newTheme); }catch(_){}
+        });
+      }
+    }
+  })();
+
+  // Ensure Student/Recommender toggle works properly
+  (function(){
+    const studentPanel = document.getElementById('panel-student');
+    const recPanel = document.getElementById('panel-recommender');
+    const toggles = document.querySelectorAll('.header-nav .nav-link');
+    
+    if (studentPanel && recPanel && toggles.length > 0) {
+      toggles.forEach(btn => {
+        if (!btn.hasAttribute('data-toggle-bound')) {
+          btn.setAttribute('data-toggle-bound', 'true');
+          btn.addEventListener('click', () => {
+            const view = btn.dataset.view;
+            const isStudent = (view === 'student');
+            
+            // Update panels
+            studentPanel.hidden = !isStudent;
+            recPanel.hidden = isStudent;
+            studentPanel.style.display = isStudent ? '' : 'none';
+            recPanel.style.display = isStudent ? 'none' : '';
+            
+            // Update toggle states
+            toggles.forEach(toggle => {
+              const on = toggle.dataset.view === view;
+              toggle.setAttribute('aria-selected', on ? 'true' : 'false');
+              if (on) toggle.setAttribute('aria-current', 'page'); 
+              else toggle.removeAttribute('aria-current');
+            });
+            
+            // Save state
+            try { 
+              localStorage.setItem('sr_current_view', view); 
+              history.replaceState(null, '', '#' + view);
+            } catch(_) {}
+          });
+        }
+      });
     }
   })();
 
@@ -3272,19 +3336,49 @@ window.SR_API = {
 (function(){
   const ensure = ()=>{
     if (!window.SR || !Array.isArray(SR.universities)) return false;
-    SR.selected.add(SR.mockPinned);
+    
+    // Ensure Mock University is in the universities list
+    if (!SR.universities.find(u => u.unitid === 'MOCK-0000')) {
+      SR.universities.unshift({ 
+        unitid: 'MOCK-0000', 
+        name: 'Mock University', 
+        state: 'CA', 
+        type: 'Private nonprofit', 
+        level: '4-year' 
+      });
+    }
+    
+    // Ensure Mock University is selected
+    SR.selected = SR.selected || new Set();
+    SR.selected.add('MOCK-0000');
+    
+    // Update UI
     if (typeof window.updateSelectedList === 'function') updateSelectedList();
-    if (typeof window.updateSendButton === 'function')  updateSendButton();
+    if (typeof window.updateSendButton === 'function') updateSendButton();
+    
+    // Persist state
     try{
       const saved = JSON.parse(localStorage.getItem('sr_state_v1')||'{}');
       saved.selectedIds = Array.from(SR.selected);
       localStorage.setItem('sr_state_v1', JSON.stringify(saved));
     }catch(_){}
+    
     return true;
   };
+  
+  // Try immediately
   if (!ensure()){
     let tries = 0;
-    const t = setInterval(()=>{ tries++; if (ensure() || tries>25) clearInterval(t); }, 120);
+    const t = setInterval(()=>{ 
+      tries++; 
+      if (ensure() || tries>25) {
+        clearInterval(t);
+        // Force one more update after everything is loaded
+        setTimeout(() => {
+          if (typeof window.updateSelectedList === 'function') updateSelectedList();
+        }, 500);
+      }
+    }, 120);
   }
 })();
 </script>
@@ -3338,7 +3432,7 @@ window.SR_API = {
 // For local development: 'http://localhost:3000'
 // For production: 'https://your-backend-url.com'
 window.SR_BACKEND_BASE = window.SR_BACKEND_BASE || 'https://stellarrec-backend.example.com';
-/* === END: Backend config =================================== */(function(){if (window.__srSendBound) return; window.__srSendBound = true;const form   = document.getElementById('stuSendForm');if (!form) return;const nameEl = document.getElementById('stuName');const emailEl= document.getElementById('stuEmail');const recName= document.getElementById('recName');const recMail= document.getElementById('recEmail');const validEmail = (v)=> /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').toLowerCase());/* helper: selected unit IDs (keep Mock if none) */function getSelectedUnitIds(){// your app uses one (or both) of these setsconst a = window.studentUnitIds ? Array.from(window.studentUnitIds) : [];const b = (window.SR && SR.selected) ? Array.from(SR.selected) : [];const all = new Set([ ...(a||[]), ...(b||[]) ]);if (!all.size) all.add('MOCK-1');  // keep Mock University fallbackreturn Array.from(all);}/* helper: split "First Last" */function splitName(full){const parts = String(full||'').trim().split(/\s+/);const first = parts.shift() || '';const last  = parts.join(' ') || '';return { first, last };}/* === CALL YOUR BACKEND (instead of mockapi) ================ */async function createRecommendationOnBackend({ studentName, studentEmail, recommenderName, recommenderEmail }){const { first: sf, last: sl } = splitName(studentName);const unitids = getSelectedUnitIds();         // array of UNITIDs (keeps MOCK-1)const waive   = 1;                             // or read from your toggle if you add oneconst title   = (document.getElementById('writerTitle')?.value || '').trim();const payload = {student_name:  studentName,student_email: studentEmail.toLowerCase(),student_first: sf,student_last:  sl,recommender_name:  recommenderName,recommender_email: recommenderEmail.toLowerCase(),unitids,          // e.g., ["166027","110635","MOCK-1"]waive,            // 1 or 0title             // optional letter title};const res = await fetch(`${window.SR_BACKEND_BASE}/api/recommendations`, {method:'POST',headers:{ 'Content-Type':'application/json' },body: JSON.stringify(payload)});if (!res.ok) throw new Error(`Backend ${res.status}`);return await res.json(); // { id, status: 'ok' }}function pushToTrackRow({who,email,ts,status}){const tbody = document.getElementById('stuTrackBody');if (!tbody) return;const tr = document.createElement('tr');tr.innerHTML = `<td>${who}</td><td>${email}</td><td>${new Date(ts).toLocaleString()}</td><td><span class="track-pill ${status==='Sent'?'sent':status==='received'?'received':'pending'}">${status}</span></td>`;tbody.prepend(tr);}form.addEventListener('submit', async (e)=>{e.preventDefault();const studentName = (nameEl?.value||'').trim();const studentEmail= (emailEl?.value||'').trim();const rName       = (recName?.value||'').trim();const rMail       = (recMail?.value||'').trim();if (!studentName || !validEmail(studentEmail) || !rName || !validEmail(rMail)){toast('Please fill valid student & recommender details.','error'); return;}try {await createRecommendationOnBackend({studentName, studentEmail,recommenderName: rName, recommenderEmail: rMail});toast('Request sent to recommender by email.','success');const now = Date.now();pushToTrackRow({ who:rName, email:rMail, ts: now, status:'Pending' });setTimeout(()=>{ pushToTrackRow({ who:rName, email:rMail, ts: now+1500, status:'Sent' }); }, 1500);form.reset();} catch (err){console.error(err);toast('Could not send the recommendation email.','error');}});})();</script>
+/* === END: Backend config =================================== */(function(){if (window.__srSendBound) return; window.__srSendBound = true;const form   = document.getElementById('stuSendForm');if (!form) return;const nameEl = document.getElementById('stuName');const emailEl= document.getElementById('stuEmail');const recName= document.getElementById('recName');const recMail= document.getElementById('recEmail');const validEmail = (v)=> /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').toLowerCase());/* helper: selected unit IDs (keep Mock if none) */function getSelectedUnitIds(){// your app uses one (or both) of these setsconst a = window.studentUnitIds ? Array.from(window.studentUnitIds) : [];const b = (window.SR && SR.selected) ? Array.from(SR.selected) : [];const all = new Set([ ...(a||[]), ...(b||[]) ]);if (!all.size) all.add('MOCK-0000');  // keep Mock University fallbackreturn Array.from(all);}/* helper: split "First Last" */function splitName(full){const parts = String(full||'').trim().split(/\s+/);const first = parts.shift() || '';const last  = parts.join(' ') || '';return { first, last };}/* === CALL YOUR BACKEND (instead of mockapi) ================ */async function createRecommendationOnBackend({ studentName, studentEmail, recommenderName, recommenderEmail }){const { first: sf, last: sl } = splitName(studentName);const unitids = getSelectedUnitIds();         // array of UNITIDs (keeps MOCK-1)const waive   = 1;                             // or read from your toggle if you add oneconst title   = (document.getElementById('writerTitle')?.value || '').trim();const payload = {student_name:  studentName,student_email: studentEmail.toLowerCase(),student_first: sf,student_last:  sl,recommender_name:  recommenderName,recommender_email: recommenderEmail.toLowerCase(),unitids,          // e.g., ["166027","110635","MOCK-1"]waive,            // 1 or 0title             // optional letter title};const res = await fetch(`${window.SR_BACKEND_BASE}/api/recommendations`, {method:'POST',headers:{ 'Content-Type':'application/json' },body: JSON.stringify(payload)});if (!res.ok) throw new Error(`Backend ${res.status}`);return await res.json(); // { id, status: 'ok' }}function pushToTrackRow({who,email,ts,status}){const tbody = document.getElementById('stuTrackBody');if (!tbody) return;const tr = document.createElement('tr');tr.innerHTML = `<td>${who}</td><td>${email}</td><td>${new Date(ts).toLocaleString()}</td><td><span class="track-pill ${status==='Sent'?'sent':status==='received'?'received':'pending'}">${status}</span></td>`;tbody.prepend(tr);}form.addEventListener('submit', async (e)=>{e.preventDefault();const studentName = (nameEl?.value||'').trim();const studentEmail= (emailEl?.value||'').trim();const rName       = (recName?.value||'').trim();const rMail       = (recMail?.value||'').trim();if (!studentName || !validEmail(studentEmail) || !rName || !validEmail(rMail)){toast('Please fill valid student & recommender details.','error'); return;}try {await createRecommendationOnBackend({studentName, studentEmail,recommenderName: rName, recommenderEmail: rMail});toast('Request sent to recommender by email.','success');const now = Date.now();pushToTrackRow({ who:rName, email:rMail, ts: now, status:'Pending' });setTimeout(()=>{ pushToTrackRow({ who:rName, email:rMail, ts: now+1500, status:'Sent' }); }, 1500);form.reset();} catch (err){console.error(err);toast('Could not send the recommendation email.','error');}});})();</script>
 
 <!-- StellarRec API Integration -->
 <script src="../frontend/js/api-client.js"></script>
