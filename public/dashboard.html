@@ -2703,66 +2703,67 @@ window.__srAnalytics = {
     }
     
     console.log('[SR] Loading university data from JSON...');
-    const paths = [
-      '/assets/us_institutions_by_state_2023.json',           // typical Netlify public assets
-      'assets/us_institutions_by_state_2023.json',
-      '/public/assets/us_institutions_by_state_2023.json',    // if site serves /public
-      'public/assets/us_institutions_by_state_2023.json'
-    ];
     
-    let dataLoaded = false;
-    for (const p of paths){
-      console.log('[SR] Trying path:', p);
-      const data = await tryFetch(p);
-      if (data && data.length > 1000){ 
-        SR.universities = data; 
-        dataLoaded = true;
-        console.log('[SR] Successfully loaded', data.length, 'universities from', p);
-        break; 
-      } else if (data) {
-        console.warn('[SR] Data loaded but insufficient count:', data.length, 'from', p);
-      }
-    }
-    
-    // If still no data, try one more time with a direct approach
-    if (!dataLoaded) {
-      console.log('[SR] All paths failed, trying direct fetch with different options...');
-      try {
-        const directUrl = '/assets/us_institutions_by_state_2023.json';
-        const response = await fetch(directUrl, { 
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Cache-Control': 'no-cache'
-          }
-        });
-        
-        if (response.ok) {
-          const jsonData = await response.json();
-          console.log('[SR] Direct fetch successful, processing...');
-          
-          let universities = [];
-          for (const [state, list] of Object.entries(jsonData)) {
-            if (Array.isArray(list)) {
-              list.forEach(u => universities.push({
-                unitid: String(u.unitid),
-                name: String(u.name),
-                state: String(u.state || state),
-                control: String(u.control || 'Public'),
-                level: String(u.level || '4-year')
-              }));
-            }
-          }
-          
-          if (universities.length > 1000) {
-            SR.universities = universities;
-            dataLoaded = true;
-            console.log('[SR] Direct fetch successful! Loaded', universities.length, 'universities');
-          }
+    // SURGICAL FIX: Direct, simplified approach to load JSON data
+    try {
+      console.log('[SR] Attempting direct fetch of JSON file...');
+      const response = await fetch('/assets/us_institutions_by_state_2023.json', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
         }
-      } catch (e) {
-        console.error('[SR] Direct fetch also failed:', e);
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
+      
+      const jsonData = await response.json();
+      console.log('[SR] JSON loaded successfully, processing states...');
+      
+      // Process the JSON data directly
+      const universities = [];
+      let totalProcessed = 0;
+      
+      for (const [stateCode, stateUniversities] of Object.entries(jsonData)) {
+        if (Array.isArray(stateUniversities)) {
+          console.log(`[SR] Processing ${stateCode}: ${stateUniversities.length} universities`);
+          
+          stateUniversities.forEach(uni => {
+            universities.push({
+              unitid: String(uni.unitid || `${stateCode}-${totalProcessed}`),
+              name: String(uni.name || 'Unknown University'),
+              state: String(uni.state || stateCode),
+              control: String(uni.control || 'Public'),
+              level: String(uni.level || '4-year')
+            });
+            totalProcessed++;
+          });
+        }
+      }
+      
+      console.log(`[SR] Processed ${universities.length} universities from ${Object.keys(jsonData).length} states`);
+      
+      if (universities.length > 1000) {
+        SR.universities = universities;
+        console.log('[SR] ✅ SUCCESS: Loaded', universities.length, 'universities from JSON file');
+        console.log('[SR] Sample universities:', universities.slice(0, 3).map(u => `${u.name} (${u.state})`));
+      } else {
+        throw new Error(`Insufficient universities loaded: ${universities.length}`);
+      }
+      
+    } catch (error) {
+      console.error('[SR] ❌ FAILED to load JSON data:', error);
+      console.log('[SR] Using fallback university list...');
+      
+      // Use fallback list
+      SR.universities = [
+        { unitid:'MOCK-0000', name:'Mock University', state:'CA', control:'Private nonprofit', level:'4-year' },
+        { unitid:'166027', name:'Harvard University', state:'MA', control:'Private nonprofit', level:'4-year' },
+        { unitid:'110635', name:'Stanford University', state:'CA', control:'Private nonprofit', level:'4-year' },
+        { unitid:'1106351', name:'Massachusetts Institute of Technology', state:'MA', control:'Private nonprofit', level:'4-year' },
+        { unitid:'1106352', name:'University of California, Berkeley', state:'CA', control:'Public', level:'4-year' },
+      ];
     }
     
     if (!dataLoaded || !SR.universities || SR.universities.length === 0){
@@ -2853,6 +2854,15 @@ window.__srAnalytics = {
       // CRITICAL FIX: Sync SR.universities with window.universities for university-search.js compatibility
       window.universities = SR.universities;
       console.log('[SR] Synced window.universities with SR.universities');
+      
+      // Force refresh the dropdown to ensure it shows the new data
+      setTimeout(() => {
+        console.log('[SR] Force refreshing dropdown with loaded data...');
+        if (typeof populateBrowseAll === 'function') {
+          populateBrowseAll();
+          console.log('[SR] Dropdown refreshed with', SR.universities.length, 'universities');
+        }
+      }, 100);
     } else {
       console.error('[SR] No universities loaded! This should not happen.');
     }
