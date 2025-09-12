@@ -1,4 +1,4 @@
- {
+{
   "name": "stellarrec-backend",
   "version": "1.0.0",
   "description": "Backend API for StellarRec recommendation system",
@@ -9,7 +9,11 @@
     "db:init": "node database/init-database.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["stellarrec", "recommendations", "api"],
+  "keywords": [
+    "stellarrec",
+    "recommendations",
+    "api"
+  ],
   "author": "Your Name",
   "license": "ISC",
   "dependencies": {

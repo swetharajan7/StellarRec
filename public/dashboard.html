@@ -1298,26 +1298,115 @@
   function bindStudentSend(){
     const form = $('#stuSendForm');
     if (!form) return;
-    form.addEventListener('submit', (e)=>{
+    form.addEventListener('submit', async (e)=>{
       e.preventDefault();
+      
       const name = $('#stuName')?.value.trim() || '';
       const email= $('#stuEmail')?.value.trim() || '';
       const recN = $('#recName')?.value.trim() || '';
       const recE = $('#recEmail')?.value.trim() || '';
-      if (!name || !email || !recN || !recE){ toast('Please fill all fields.','error'); return; }
+      
+      if (!name || !email || !recN || !recE){ 
+        toast('Please fill all fields.','error'); 
+        return; 
+      }
 
-      // record a "request" for student tracking
-      const now = Date.now();
-      SR.studentTrack.unshift({
-        id: 'req_'+now,
-        who: recN,
-        email: recE,
-        ts: now,
-        status: 'pending'
-      });
-      persist();
-      toast('Recommendation request sent (stub).','success');
-      form.reset();
+      // Validate email formats
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        toast('Please enter a valid student email address.', 'error');
+        return;
+      }
+      if (!emailRegex.test(recE)) {
+        toast('Please enter a valid recommender email address.', 'error');
+        return;
+      }
+
+      // Show loading state
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Sending...';
+      submitBtn.disabled = true;
+
+      try {
+        // Get selected universities from the current state
+        const selectedUniversities = SR.selectedUniversities || [];
+        
+        // Prepare request data
+        const requestData = {
+          studentName: name,
+          studentEmail: email,
+          recommenderName: recN,
+          recommenderEmail: recE,
+          universities: selectedUniversities,
+          message: `Hello ${recN}, I would appreciate your recommendation for my university applications. Thank you for your time and support.`,
+          deadline: null // Could add deadline field to form later
+        };
+
+        // Send request to backend API
+        const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+          ? 'http://localhost:3003' 
+          : 'https://stellarrec-backend.onrender.com';
+        
+        const response = await fetch(`${apiUrl}/api/recommendations/request`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Record successful request for student tracking
+          const now = Date.now();
+          SR.studentTrack.unshift({
+            id: result.data.requestId,
+            who: recN,
+            email: recE,
+            ts: now,
+            status: 'sent',
+            token: result.data.token,
+            portalUrl: result.data.portalUrl,
+            messageId: result.data.messageId
+          });
+          persist();
+          
+          toast(`✅ Recommendation request sent successfully to ${recN}!`, 'success');
+          form.reset();
+          
+          // Show success details
+          setTimeout(() => {
+            toast(`📧 Email delivered with message ID: ${result.data.messageId}`, 'info');
+          }, 2000);
+          
+        } else {
+          throw new Error(result.message || 'Failed to send request');
+        }
+
+      } catch (error) {
+        console.error('Error sending recommendation request:', error);
+        
+        // Record failed request
+        const now = Date.now();
+        SR.studentTrack.unshift({
+          id: 'req_'+now,
+          who: recN,
+          email: recE,
+          ts: now,
+          status: 'failed',
+          error: error.message
+        });
+        persist();
+        
+        toast(`❌ Failed to send request: ${error.message}`, 'error');
+        
+      } finally {
+        // Restore button state
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
     });
   }
 
@@ -2229,7 +2318,10 @@ window.__srAnalytics = {
           }
         }
         if (flat.length > 1000){
+          // Add Mock University to the real data
+          flat.unshift({ unitid:'MOCK-0000', name:'Mock University', state:'CA', control:'Private nonprofit', level:'4-year', city:'Mock City' });
           SR.universities = norm(flat);
+          console.log(`✅ Loaded ${flat.length} universities from ${url}`);
           break;
         }
       }catch(_){}
@@ -2238,13 +2330,21 @@ window.__srAnalytics = {
     // Fallback (tiny synthetic list) if file wasn’t found
     if (!SR.universities || SR.universities.length === 0){
       SR.universities = norm([
+        { unitid:'MOCK-0000', name:'Mock University',               state:'CA', type:'Private nonprofit', level:'4-year' },
         { unitid:'166027', name:'Harvard University',               state:'MA', type:'Private nonprofit', level:'4-year' },
         { unitid:'110635', name:'Stanford University',              state:'CA', type:'Private nonprofit', level:'4-year' },
         { unitid:'1106351',name:'Massachusetts Institute of Technology', state:'MA', type:'Private nonprofit', level:'4-year' },
         { unitid:'1106352',name:'University of California, Berkeley',   state:'CA', type:'Public',           level:'4-year' },
       ]);
-      console.warn('[SR] Using small fallback university list (JSON not found).');
+      console.warn('[SR] Using small fallback university list (JSON not found). Tried URLs:', candidates);
     }
+
+    // Ensure Mock University is always present and preselected
+    if (!SR.universities.find(u => u.unitid === 'MOCK-0000')) {
+      SR.universities.unshift({ unitid:'MOCK-0000', name:'Mock University', state:'CA', type:'Private nonprofit', level:'4-year' });
+    }
+    SR.selected = SR.selected || new Set();
+    SR.selected.add('MOCK-0000');
 
     return SR.universities;
   }
@@ -2267,8 +2367,12 @@ window.__srAnalytics = {
     while (selectEl.options.length > 1) selectEl.remove(1);
 
     const frag = document.createDocumentFragment();
-    // Sort A→Z by name for the dropdown
-    const sorted = SR.universities.slice().sort((a,b)=> a.name.localeCompare(b.name));
+    // Sort A→Z by name for the dropdown, but keep Mock University first
+    const sorted = SR.universities.slice().sort((a,b)=> {
+      if (a.unitid === 'MOCK-0000') return -1;
+      if (b.unitid === 'MOCK-0000') return 1;
+      return a.name.localeCompare(b.name);
+    });
     sorted.forEach(u=>{
       const opt = document.createElement('option');
       opt.value = u.unitid;
@@ -2472,7 +2576,11 @@ window.__srAnalytics = {
     if (!selectEl) return;
     while (selectEl.options.length > 1) selectEl.remove(1);
     const frag = document.createDocumentFragment();
-    const sorted = SR.universities.slice().sort((a,b)=> a.name.localeCompare(b.name));
+    const sorted = SR.universities.slice().sort((a,b)=> {
+      if (a.unitid === 'MOCK-0000') return -1;
+      if (b.unitid === 'MOCK-0000') return 1;
+      return a.name.localeCompare(b.name);
+    });
     sorted.forEach(u=>{
       const opt = document.createElement('option');
       opt.value = u.unitid;

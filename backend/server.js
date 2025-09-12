@@ -10,16 +10,12 @@ const path = require('path');
 // Load environment variables
 dotenv.config();
 
-// Import routes (we'll create these)
+// Import routes
 const recommendationRoutes = require('./routes/recommendations');
-const DatabaseManager = require('./database/config/database-config');
 
 // Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 3001;
-
-// Database instance
-const dbManager = new DatabaseManager();
+const PORT = process.env.PORT || 3003;
 
 // Middleware
 app.use(cors({
@@ -92,17 +88,7 @@ app.use('*', (req, res) => {
 // Start server
 async function startServer() {
     try {
-        // Test database connection
-        console.log('🔌 Testing database connection...');
-        const dbConnected = await dbManager.testConnection();
-        
-        if (!dbConnected) {
-            console.error('❌ Database connection failed!');
-            console.log('Please check your database configuration in .env file');
-            process.exit(1);
-        }
-        
-        console.log('✅ Database connection successful');
+        console.log('🚀 Starting StellarRec API Server...');
         
         // Start listening
         app.listen(PORT, () => {
@@ -122,6 +108,7 @@ async function startServer() {
             console.log('   GET  /api/recommendations/validate/:token - Validate token');
             console.log('   POST /api/recommendations/submit - Submit recommendation');
             console.log('\n🔗 Frontend URL: https://stellarrec.netlify.app');
+            console.log('📧 Email mode: Console logging (no SMTP configured)');
         });
         
     } catch (error) {
@@ -134,20 +121,12 @@ async function startServer() {
 process.on('SIGTERM', async () => {
     console.log('\n🛑 Received SIGTERM signal');
     console.log('🔄 Shutting down gracefully...');
-    
-    await dbManager.close();
-    console.log('✅ Database connections closed');
-    
     process.exit(0);
 });
 
 process.on('SIGINT', async () => {
     console.log('\n🛑 Received SIGINT signal (Ctrl+C)');
     console.log('🔄 Shutting down gracefully...');
-    
-    await dbManager.close();
-    console.log('✅ Database connections closed');
-    
     process.exit(0);
 });
 
