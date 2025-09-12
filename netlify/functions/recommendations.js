@@ -66,22 +66,24 @@ export const handler = async (event, context) => {
     h.update(JSON.stringify({ id, student_email, recommender_email, unitids }));
     const sig = h.digest('hex');
 
-    // Build recommender URL with parameters
-    const params = new URLSearchParams({
-      sf: student_first || '',
-      sl: student_last || '',
-      se: student_email || '',
-      waive: String(waive || 0),
-      unis: unitids.join(','),
-      rname: recommender_name,
-      remail: recommender_email,
-      rid: id,
-      sig,
-    });
-
-    if (title) params.set('title', title);
-
-    const recommenderURL = `${FRONTEND_BASE}#recommender?${params.toString()}`;
+    // Build clean recommender URL - just the base URL with hash
+    const recommenderURL = `${FRONTEND_BASE}#recommender`;
+    
+    // Store the data securely for the recommender to access
+    const recommenderData = {
+      id,
+      student_name,
+      student_email,
+      student_first: student_first || '',
+      student_last: student_last || '',
+      recommender_name,
+      recommender_email,
+      universities: unitids,
+      waive: waive || 0,
+      title: title || '',
+      signature: sig,
+      timestamp: Date.now()
+    };
 
     // Email HTML template
     const html = `
@@ -114,6 +116,14 @@ export const handler = async (event, context) => {
                       display: inline-block;">
               Open Recommender Portal
             </a>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h4 style="margin: 0 0 10px 0; color: #495057;">Student Details:</h4>
+            <p style="margin: 5px 0; color: #495057;"><strong>Name:</strong> ${student_name}</p>
+            <p style="margin: 5px 0; color: #495057;"><strong>Email:</strong> ${student_email}</p>
+            <p style="margin: 5px 0; color: #495057;"><strong>Universities:</strong> ${unitids.join(', ')}</p>
+            <p style="margin: 5px 0; color: #495057;"><strong>Request ID:</strong> ${id}</p>
           </div>
           
           <p style="font-size: 14px; color: #666; margin-top: 30px;">
@@ -152,8 +162,13 @@ export const handler = async (event, context) => {
           to: isTestingMode ? verifiedTestEmail : recommender_email,
           subject: `Recommendation request for ${student_name}`,
           html: isTestingMode ? 
-            `<div style="background: #fff3cd; padding: 15px; margin-bottom: 20px; border: 1px solid #ffeaa7; border-radius: 5px;">
-              <strong>🧪 TESTING MODE:</strong> This email was intended for <strong>${recommender_email}</strong> but sent to your verified email for testing.
+            `<div style="background: #fff3cd; padding: 20px; margin-bottom: 20px; border: 1px solid #ffeaa7; border-radius: 8px; font-family: Arial, sans-serif;">
+              <h3 style="margin: 0 0 10px 0; color: #856404;">🧪 TESTING MODE ACTIVE</h3>
+              <p style="margin: 0; color: #856404;">
+                <strong>Original Recipient:</strong> ${recommender_email}<br>
+                <strong>Actual Recipient:</strong> ${verifiedTestEmail}<br>
+                <strong>Reason:</strong> Resend free tier can only send to verified email addresses
+              </p>
             </div>` + html : html
         })
       });
