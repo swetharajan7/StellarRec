@@ -129,6 +129,17 @@ export const handler = async (event, context) => {
     `;
 
     // Send email using Resend API
+    console.log('Attempting to send email:', {
+      apiKey: RESEND_API_KEY ? 'Present' : 'Missing',
+      from: EMAIL_FROM,
+      to: recommender_email,
+      hasHtml: !!html
+    });
+    
+    // Check if we're in testing mode (Resend free tier limitation)
+    const isTestingMode = RESEND_API_KEY === 're_2FU7PXNf_8PjSC2zz9TYAdweY7xmkZnKr';
+    const verifiedTestEmail = 'swetha.rajan103@gmail.com';
+    
     if (RESEND_API_KEY && RESEND_API_KEY !== 'your_resend_api_key_here') {
       const emailResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -138,16 +149,25 @@ export const handler = async (event, context) => {
         },
         body: JSON.stringify({
           from: EMAIL_FROM,
-          to: recommender_email,
+          to: isTestingMode ? verifiedTestEmail : recommender_email,
           subject: `Recommendation request for ${student_name}`,
-          html: html
+          html: isTestingMode ? 
+            `<div style="background: #fff3cd; padding: 15px; margin-bottom: 20px; border: 1px solid #ffeaa7; border-radius: 5px;">
+              <strong>🧪 TESTING MODE:</strong> This email was intended for <strong>${recommender_email}</strong> but sent to your verified email for testing.
+            </div>` + html : html
         })
       });
 
       if (!emailResponse.ok) {
         const errorData = await emailResponse.text();
-        console.error('Resend API error:', errorData);
-        throw new Error(`Email service error: ${emailResponse.status}`);
+        console.error('Resend API error:', {
+          status: emailResponse.status,
+          statusText: emailResponse.statusText,
+          error: errorData,
+          apiKey: RESEND_API_KEY ? 'Present' : 'Missing',
+          emailFrom: EMAIL_FROM
+        });
+        throw new Error(`Email service error: ${emailResponse.status} - ${errorData}`);
       }
 
       const emailResult = await emailResponse.json();

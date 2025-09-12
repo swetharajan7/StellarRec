@@ -5,8 +5,8 @@ export const config = {
   // Resend API key for sending emails
   RESEND_API_KEY: 're_2FU7PXNf_8PjSC2zz9TYAdweY7xmkZnKr',
   
-  // Email settings
-  EMAIL_FROM: 'StellarRec <no-reply@stellarrec.com>',
+  // Email settings - using onboarding@resend.dev for testing
+  EMAIL_FROM: 'StellarRec <onboarding@resend.dev>',
   
   // Frontend URL
   FRONTEND_BASE: 'https://stellarrec.netlify.app/dashboard',

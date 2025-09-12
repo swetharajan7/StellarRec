@@ -3481,14 +3481,27 @@ document.addEventListener('DOMContentLoaded', function() {
       title
     };
 
+    console.log('📤 Sending payload to backend:', payload);
+    console.log('🔗 API URL:', `${window.SR_BACKEND_BASE}/recommendations`);
+
     const res = await fetch(`${window.SR_BACKEND_BASE}/recommendations`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     
-    if (!res.ok) throw new Error(`Backend ${res.status}`);
-    return await res.json();
+    console.log('📡 Response status:', res.status);
+    console.log('📡 Response headers:', Object.fromEntries(res.headers.entries()));
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('❌ Backend error response:', errorText);
+      throw new Error(`Backend ${res.status}: ${errorText}`);
+    }
+    
+    const result = await res.json();
+    console.log('📨 Backend result:', result);
+    return result;
   }
 
   // Enhanced tracking integration
@@ -3524,6 +3537,13 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   }
+
+  // Test backend connectivity
+  console.log('🧪 Testing backend connectivity...');
+  fetch(`${window.SR_BACKEND_BASE}/health`)
+    .then(r => r.json())
+    .then(data => console.log('✅ Backend health check:', data))
+    .catch(err => console.error('❌ Backend health check failed:', err));
 
   console.log('✅ Adding form submit listener...');
 
@@ -3564,12 +3584,17 @@ document.addEventListener('DOMContentLoaded', function() {
         return id === 'MOCK-0000' ? 'Mock University' : id;
       });
 
+      console.log('🎯 Selected universities:', selectedUniversities);
+      console.log('🌐 Backend URL:', window.SR_BACKEND_BASE);
+
       const result = await createRecommendationOnBackend({
         studentName, 
         studentEmail,
         recommenderName: rName, 
         recommenderEmail: rMail
       });
+
+      console.log('✅ Backend response:', result);
 
       const now = Date.now();
       const requestId = result.id || 'req_' + now;
