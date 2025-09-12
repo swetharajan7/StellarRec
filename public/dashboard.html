@@ -1423,11 +1423,13 @@
     body.innerHTML = SR.studentTrack.map(r=>{
       const statusClass = r.status === 'sent' ? 'sent' : 
                          r.status === 'received' ? 'received' : 
-                         r.status === 'failed' ? 'error' : 'pending';
+                         r.status === 'failed' ? 'error' : 
+                         r.status === 'testing' ? 'testing' : 'pending';
       
       const statusText = r.status === 'sent' ? '✅ Sent' :
                         r.status === 'received' ? '📨 Received' :
-                        r.status === 'failed' ? '❌ Failed' : '⏳ Pending';
+                        r.status === 'failed' ? '❌ Failed' : 
+                        r.status === 'testing' ? '🧪 Testing Mode' : '⏳ Pending';
       
       const universitiesText = r.universities && r.universities.length > 0 ? 
         r.universities.slice(0, 2).join(', ') + (r.universities.length > 2 ? ` +${r.universities.length - 2} more` : '') :
@@ -1436,10 +1438,11 @@
       const timeAgo = r.ts ? getTimeAgo(r.ts) : '—';
       
       return `
-        <tr style="border-left: 3px solid ${statusClass === 'sent' ? '#4caf50' : statusClass === 'failed' ? '#f44336' : '#ff9800'};">
+        <tr style="border-left: 3px solid ${statusClass === 'sent' ? '#4caf50' : statusClass === 'failed' ? '#f44336' : statusClass === 'testing' ? '#2196f3' : '#ff9800'};">
           <td>
             <div style="font-weight:600;">${r.who || '—'}</div>
             <div style="font-size:0.85rem; color:#666; margin-top:0.2rem;">${r.email || '—'}</div>
+            ${r.note ? `<div style="font-size:0.8rem;color:#2196f3;margin-top:4px;">ℹ️ ${r.note}</div>` : ''}
           </td>
           <td>
             <div style="font-size:0.9rem;">${universitiesText}</div>
@@ -3599,21 +3602,29 @@ document.addEventListener('DOMContentLoaded', function() {
       const now = Date.now();
       const requestId = result.id || 'req_' + now;
       
+      // Check if we're in testing mode (Resend free tier)
+      const isTestingMode = result.message && result.message.includes('testing');
+      
       addToStudentTrack({
         id: requestId,
         who: rName,
         email: rMail,
         ts: now,
-        status: 'sent',
+        status: isTestingMode ? 'testing' : 'sent',
         universities: selectedUniversities,
         studentName: studentName,
-        studentEmail: studentEmail
+        studentEmail: studentEmail,
+        note: isTestingMode ? 'Email sent to verified test address (swetha.rajan103@gmail.com) due to Resend testing limitations' : undefined
       });
 
       if (typeof toast === 'function') {
-        toast('Request sent to recommender by email! 🎉','success');
+        if (isTestingMode) {
+          toast('🧪 Email sent in testing mode! Check tracking tab for details.','info');
+        } else {
+          toast('Request sent to recommender by email! 🎉','success');
+        }
       } else {
-        alert('Request sent successfully!');
+        alert(isTestingMode ? 'Email sent in testing mode!' : 'Request sent successfully!');
       }
       
       setTimeout(() => {
