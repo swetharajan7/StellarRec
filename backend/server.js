@@ -1,136 +1,90 @@
-// StellarRec Backend Server
-// File: backend/server.js
-// Purpose: Main server file for handling recommendation requests
+import express from 'express';
+import cors from 'cors';
+import crypto from 'crypto';
+import { Resend } from 'resend';
 
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const path = require('path');
-
-// Load environment variables
-dotenv.config();
-
-// Import routes
-const recommendationRoutes = require('./routes/recommendations');
-
-// Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 3003;
-
-// Middleware
-app.use(cors({
-    origin: [
-        'https://stellarrec.netlify.app',
-        'http://localhost:3000',
-        'http://127.0.0.1:3000'
-    ],
-    credentials: true
-}));
-
+app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Static files for uploaded documents
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+const {
+  RESEND_API_KEY,        // Your Resend key
+  EMAIL_FROM = 'StellarRec <no-reply@yourdomain.com>',
+  FRONTEND_BASE = 'https://stellarrec.netlify.app/dashboard',
+  SIGNING_SECRET = 'change_me' // set a strong secret in env
+} = process.env;
 
-// API Routes
-app.use('/api/recommendations', recommendationRoutes);
+const resend = new Resend(RESEND_API_KEY);
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.json({
-        status: 'OK',
-        message: 'StellarRec API is running',
-        timestamp: new Date().toISOString(),
-        version: '1.0.0'
-    });
-});
-
-// Root endpoint
-app.get('/', (req, res) => {
-    res.json({
-        message: 'Welcome to StellarRec API',
-        version: '1.0.0',
-        endpoints: {
-            health: '/health',
-            recommendations: '/api/recommendations'
-        },
-        documentation: 'https://github.com/swetharajan7/StellarRec'
-    });
-});
-
-// Error handling middleware
-app.use((error, req, res, next) => {
-    console.error('Server Error:', error);
-    
-    res.status(error.status || 500).json({
-        success: false,
-        message: error.message || 'Internal Server Error',
-        ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
-    });
-});
-
-// 404 handler
-app.use('*', (req, res) => {
-    res.status(404).json({
-        success: false,
-        message: 'Endpoint not found',
-        availableEndpoints: [
-            'GET /',
-            'GET /health',
-            'POST /api/recommendations/request',
-            'GET /api/recommendations/validate/:token',
-            'POST /api/recommendations/submit'
-        ]
-    });
-});
-
-// Start server
-async function startServer() {
-    try {
-        console.log('🚀 Starting StellarRec API Server...');
-        
-        // Start listening
-        app.listen(PORT, () => {
-            console.log('\n🚀 StellarRec API Server Started');
-            console.log('=' .repeat(50));
-            console.log(`🌐 Server running on port: ${PORT}`);
-            console.log(`📱 Local URL: http://localhost:${PORT}`);
-            console.log(`🔍 Health check: http://localhost:${PORT}/health`);
-            console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-            console.log('=' .repeat(50));
-            
-            // Show available endpoints
-            console.log('\n📋 Available Endpoints:');
-            console.log('   GET  /', '                    - API information');
-            console.log('   GET  /health', '             - Health check');
-            console.log('   POST /api/recommendations/request - Send recommendation request');
-            console.log('   GET  /api/recommendations/validate/:token - Validate token');
-            console.log('   POST /api/recommendations/submit - Submit recommendation');
-            console.log('\n🔗 Frontend URL: https://stellarrec.netlify.app');
-            console.log('📧 Email mode: Console logging (no SMTP configured)');
-        });
-        
-    } catch (error) {
-        console.error('💥 Failed to start server:', error.message);
-        process.exit(1);
-    }
+/* helper: sign payload */
+function sign(data) {
+  const h = crypto.createHmac('sha256', SIGNING_SECRET);
+  h.update(JSON.stringify(data));
+  return h.digest('hex');
 }
 
-// Handle graceful shutdown
-process.on('SIGTERM', async () => {
-    console.log('\n🛑 Received SIGTERM signal');
-    console.log('🔄 Shutting down gracefully...');
-    process.exit(0);
+app.post('/api/recommendations', async (req, res) => {
+  try {
+    const {
+      student_name, student_email, student_first, student_last,
+      recommender_name, recommender_email,
+      unitids = [], waive = 1, title = ''
+    } = req.body || {};
+
+    if (!student_name || !student_email || !recommender_name || !recommender_email) {
+      return res.status(400).json({ error: 'Missing fields' });
+    }
+
+    // create a server id and signature
+    const id = 'sr_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    const sig = sign({ id, student_email, recommender_email, unitids });
+
+    // build the recommender link (your importer already understands these params)
+    const params = new URLSearchParams({
+      sf: student_first || '',
+      sl: student_last || '',
+      se: student_email || '',
+      waive: String(waive || 0),
+      unis: unitids.join(','),
+      rname: recommender_name,
+      remail: recommender_email,
+      rid: id,
+      sig,
+    });
+
+    if (title) params.set('title', title);
+
+    const recommenderURL = `${FRONTEND_BASE}#recommender?${params.toString()}`;
+
+    // send email
+    const html = `<p>Hi ${recommender_name},</p>
+<p>${student_name} has requested a recommendation via <b>StellarRec</b>.</p>
+<p>Click the link below to open the Recommender portal with the student's details and selected universities preloaded:</p>
+<p><a href="${recommenderURL}">${recommenderURL}</a></p>
+<p>If the link doesn't open automatically, copy and paste it into your browser.</p>
+<hr/>
+<p>Thanks,<br/>StellarRec</p>`;
+
+    if (!RESEND_API_KEY) {
+      // Dev fallback: log instead of email
+      console.log('[DEV EMAIL]', { to: recommender_email, html });
+    } else {
+      await resend.emails.send({
+        from: EMAIL_FROM,
+        to: recommender_email,
+        subject: `Recommendation request for ${student_name}`,
+        html
+      });
+    }
+
+    // (Optional) Store record in your DB here
+
+    res.json({ id, status: 'ok' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Email failed' });
+  }
 });
 
-process.on('SIGINT', async () => {
-    console.log('\n🛑 Received SIGINT signal (Ctrl+C)');
-    console.log('🔄 Shutting down gracefully...');
-    process.exit(0);
-});
-
-// Start the server
-startServer();
-
-module.exports = app;
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log('Backend listening on', PORT));

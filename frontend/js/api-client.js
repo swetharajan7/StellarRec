@@ -1,1 +1,425 @@
-/**\n * StellarRec API Client - Frontend Integration\n * Connects to all 32 backend services and tasks\n */\n\nclass StellarRecAPI {\n    constructor() {\n        this.baseURL = 'https://api.stellarrec.com';\n        this.token = localStorage.getItem('stellarrec_token');\n        this.userId = localStorage.getItem('stellarrec_user_id');\n        this.userType = localStorage.getItem('stellarrec_user_type') || 'student';\n        \n        // Service endpoints mapping to backend tasks\n        this.endpoints = {\n            // Task 3: API Gateway\n            auth: '/auth',\n            \n            // Task 4: User Management Service\n            users: '/users',\n            profiles: '/profiles',\n            \n            // Task 6-8: AI/ML Services\n            ai: '/ai',\n            matching: '/ai/matching',\n            essayAnalysis: '/ai/essay-analysis',\n            predictions: '/ai/predictions',\n            \n            // Task 9-11: Application Management\n            applications: '/applications',\n            timelines: '/timelines',\n            deadlines: '/deadlines',\n            \n            // Task 12-14: Letter Management & Collaboration\n            letters: '/letters',\n            collaboration: '/collaboration',\n            aiWriting: '/ai-writing',\n            \n            // Task 15-16: File Management\n            files: '/files',\n            documents: '/documents',\n            \n            // Task 17-18: Search & Discovery\n            search: '/search',\n            discovery: '/discovery',\n            \n            // Task 19-20: Analytics & Insights\n            analytics: '/analytics',\n            predictive: '/predictive-analytics',\n            \n            // Task 21-22: Notifications\n            notifications: '/notifications',\n            reminders: '/reminders',\n            \n            // Task 30: Developer Tools\n            webhooks: '/webhooks',\n            \n            // Task 32: Monitoring\n            health: '/health',\n            metrics: '/metrics'\n        };\n    }\n\n    // Authentication methods (Task 3)\n    async login(email, password) {\n        try {\n            const response = await this.request('POST', this.endpoints.auth + '/login', {\n                email,\n                password\n            });\n            \n            if (response.token) {\n                this.token = response.token;\n                this.userId = response.user.id;\n                this.userType = response.user.type;\n                \n                localStorage.setItem('stellarrec_token', this.token);\n                localStorage.setItem('stellarrec_user_id', this.userId);\n                localStorage.setItem('stellarrec_user_type', this.userType);\n            }\n            \n            return response;\n        } catch (error) {\n            console.error('Login failed:', error);\n            throw error;\n        }\n    }\n\n    async logout() {\n        try {\n            await this.request('POST', this.endpoints.auth + '/logout');\n        } catch (error) {\n            console.error('Logout error:', error);\n        } finally {\n            this.token = null;\n            this.userId = null;\n            this.userType = null;\n            localStorage.removeItem('stellarrec_token');\n            localStorage.removeItem('stellarrec_user_id');\n            localStorage.removeItem('stellarrec_user_type');\n        }\n    }\n\n    // User Management (Task 4)\n    async getUserProfile() {\n        return this.request('GET', `${this.endpoints.users}/${this.userId}`);\n    }\n\n    async updateProfile(profileData) {\n        return this.request('PUT', `${this.endpoints.profiles}/${this.userId}`, profileData);\n    }\n\n    // AI Services (Tasks 6-8)\n    async getUniversityMatches(preferences) {\n        return this.request('POST', this.endpoints.matching, preferences);\n    }\n\n    async analyzeEssay(essayText) {\n        return this.request('POST', this.endpoints.essayAnalysis, { text: essayText });\n    }\n\n    async getAdmissionPredictions(applicationData) {\n        return this.request('POST', this.endpoints.predictions, applicationData);\n    }\n\n    // Application Management (Tasks 9-11)\n    async getApplications() {\n        return this.request('GET', this.endpoints.applications);\n    }\n\n    async createApplication(applicationData) {\n        return this.request('POST', this.endpoints.applications, applicationData);\n    }\n\n    async updateApplication(applicationId, updates) {\n        return this.request('PUT', `${this.endpoints.applications}/${applicationId}`, updates);\n    }\n\n    async getTimeline(applicationId) {\n        return this.request('GET', `${this.endpoints.timelines}/${applicationId}`);\n    }\n\n    async getDeadlines() {\n        return this.request('GET', this.endpoints.deadlines);\n    }\n\n    // Letter Management (Tasks 12-14)\n    async getLetters() {\n        return this.request('GET', this.endpoints.letters);\n    }\n\n    async createLetter(letterData) {\n        return this.request('POST', this.endpoints.letters, letterData);\n    }\n\n    async updateLetter(letterId, updates) {\n        return this.request('PUT', `${this.endpoints.letters}/${letterId}`, updates);\n    }\n\n    async getCollaborationSession(letterId) {\n        return this.request('GET', `${this.endpoints.collaboration}/${letterId}`);\n    }\n\n    async getWritingSuggestions(text) {\n        return this.request('POST', this.endpoints.aiWriting + '/suggestions', { text });\n    }\n\n    // File Management (Tasks 15-16)\n    async uploadFile(file, metadata = {}) {\n        const formData = new FormData();\n        formData.append('file', file);\n        formData.append('metadata', JSON.stringify(metadata));\n        \n        return this.request('POST', this.endpoints.files + '/upload', formData, {\n            'Content-Type': 'multipart/form-data'\n        });\n    }\n\n    async getFiles() {\n        return this.request('GET', this.endpoints.files);\n    }\n\n    async processDocument(fileId) {\n        return this.request('POST', `${this.endpoints.documents}/${fileId}/process`);\n    }\n\n    // Search & Discovery (Tasks 17-18)\n    async search(query, filters = {}) {\n        const params = new URLSearchParams({ q: query, ...filters });\n        return this.request('GET', `${this.endpoints.search}?${params}`);\n    }\n\n    async getRecommendations(type = 'universities') {\n        return this.request('GET', `${this.endpoints.discovery}/recommendations/${type}`);\n    }\n\n    async getTrendingContent() {\n        return this.request('GET', this.endpoints.discovery + '/trending');\n    }\n\n    // Analytics & Insights (Tasks 19-20)\n    async getAnalytics(timeframe = '30d') {\n        return this.request('GET', `${this.endpoints.analytics}?timeframe=${timeframe}`);\n    }\n\n    async getPredictiveInsights() {\n        return this.request('GET', this.endpoints.predictive + '/insights');\n    }\n\n    async getSuccessFactors() {\n        return this.request('GET', this.endpoints.predictive + '/success-factors');\n    }\n\n    // Notifications (Tasks 21-22)\n    async getNotifications() {\n        return this.request('GET', this.endpoints.notifications);\n    }\n\n    async markNotificationRead(notificationId) {\n        return this.request('PUT', `${this.endpoints.notifications}/${notificationId}/read`);\n    }\n\n    async getReminders() {\n        return this.request('GET', this.endpoints.reminders);\n    }\n\n    async createReminder(reminderData) {\n        return this.request('POST', this.endpoints.reminders, reminderData);\n    }\n\n    // System Health (Task 32)\n    async getSystemHealth() {\n        return this.request('GET', this.endpoints.health);\n    }\n\n    async getMetrics() {\n        return this.request('GET', this.endpoints.metrics);\n    }\n\n    // WebSocket connections for real-time features\n    connectWebSocket(endpoint, onMessage) {\n        const wsUrl = this.baseURL.replace('https://', 'wss://').replace('http://', 'ws://');\n        const ws = new WebSocket(`${wsUrl}${endpoint}?token=${this.token}`);\n        \n        ws.onmessage = (event) => {\n            const data = JSON.parse(event.data);\n            onMessage(data);\n        };\n        \n        ws.onerror = (error) => {\n            console.error('WebSocket error:', error);\n        };\n        \n        return ws;\n    }\n\n    // Generic request method\n    async request(method, endpoint, data = null, customHeaders = {}) {\n        const url = `${this.baseURL}${endpoint}`;\n        \n        const headers = {\n            'Content-Type': 'application/json',\n            ...customHeaders\n        };\n        \n        if (this.token) {\n            headers['Authorization'] = `Bearer ${this.token}`;\n        }\n        \n        const config = {\n            method,\n            headers\n        };\n        \n        if (data && method !== 'GET') {\n            if (data instanceof FormData) {\n                delete headers['Content-Type']; // Let browser set it for FormData\n                config.body = data;\n            } else {\n                config.body = JSON.stringify(data);\n            }\n        }\n        \n        try {\n            const response = await fetch(url, config);\n            \n            if (!response.ok) {\n                const errorData = await response.json().catch(() => ({}));\n                throw new Error(errorData.message || `HTTP ${response.status}`);\n            }\n            \n            const contentType = response.headers.get('content-type');\n            if (contentType && contentType.includes('application/json')) {\n                return await response.json();\n            }\n            \n            return await response.text();\n        } catch (error) {\n            console.error(`API request failed: ${method} ${endpoint}`, error);\n            throw error;\n        }\n    }\n\n    // Utility methods\n    isAuthenticated() {\n        return !!this.token;\n    }\n\n    getUserType() {\n        return this.userType;\n    }\n\n    getUserId() {\n        return this.userId;\n    }\n}\n\n// Export for use in other modules\nwindow.StellarRecAPI = StellarRecAPI;\n\n// Create global instance\nwindow.stellarAPI = new StellarRecAPI();"
+/**
+ * StellarRec API Client - Frontend Integration
+ * Connects to backend services including recommendation system
+ */
+
+class StellarRecAPI {
+    constructor() {
+        // Use local backend for development, production API for deployment
+        this.baseURL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:3003' 
+            : 'https://api.stellarrec.com';
+        this.token = localStorage.getItem('stellarrec_token');
+        this.userId = localStorage.getItem('stellarrec_user_id');
+        this.userType = localStorage.getItem('stellarrec_user_type') || 'student';
+        
+        // Service endpoints mapping to backend tasks
+        this.endpoints = {
+            // Core API endpoints
+            auth: '/auth',
+            users: '/users',
+            profiles: '/profiles',
+            
+            // Recommendation system endpoints
+            recommendations: '/api/recommendations',
+            
+            // AI/ML Services
+            ai: '/ai',
+            matching: '/ai/matching',
+            essayAnalysis: '/ai/essay-analysis',
+            predictions: '/ai/predictions',
+            
+            // Application Management
+            applications: '/applications',
+            timelines: '/timelines',
+            deadlines: '/deadlines',
+            
+            // Letter Management & Collaboration
+            letters: '/letters',
+            collaboration: '/collaboration',
+            aiWriting: '/ai-writing',
+            
+            // File Management
+            files: '/files',
+            documents: '/documents',
+            
+            // Search & Discovery
+            search: '/search',
+            discovery: '/discovery',
+            
+            // Analytics & Insights
+            analytics: '/analytics',
+            predictive: '/predictive-analytics',
+            
+            // Notifications
+            notifications: '/notifications',
+            reminders: '/reminders',
+            
+            // System Health
+            health: '/health',
+            metrics: '/metrics'
+        };
+    }
+
+    // ===== RECOMMENDATION SYSTEM METHODS =====
+    
+    /**
+     * Send a recommendation request email to a recommender
+     */
+    async sendRecommendationRequest(requestData) {
+        try {
+            console.log('📨 Sending recommendation request:', requestData);
+            
+            const response = await this.request('POST', this.endpoints.recommendations + '/request', {
+                studentName: requestData.studentName,
+                studentEmail: requestData.studentEmail,
+                recommenderEmail: requestData.recommenderEmail,
+                recommenderName: requestData.recommenderName,
+                programName: requestData.programName,
+                universityName: requestData.universityName
+            });
+            
+            console.log('✅ Recommendation request sent successfully:', response);
+            return response;
+            
+        } catch (error) {
+            console.error('❌ Failed to send recommendation request:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Validate a recommendation token (for recommenders)
+     */
+    async validateRecommendationToken(token) {
+        try {
+            console.log('🔍 Validating recommendation token...');
+            
+            const response = await this.request('GET', `${this.endpoints.recommendations}/validate/${token}`);
+            
+            console.log('✅ Token validation successful:', response);
+            return response;
+            
+        } catch (error) {
+            console.error('❌ Token validation failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Submit a recommendation letter (for recommenders)
+     */
+    async submitRecommendation(submissionData) {
+        try {
+            console.log('📝 Submitting recommendation:', submissionData);
+            
+            const response = await this.request('POST', this.endpoints.recommendations + '/submit', {
+                token: submissionData.token,
+                recommenderName: submissionData.recommenderName,
+                recommenderTitle: submissionData.recommenderTitle,
+                recommenderOrganization: submissionData.recommenderOrganization,
+                letterType: submissionData.letterType,
+                letterContent: submissionData.letterContent
+            });
+            
+            console.log('✅ Recommendation submitted successfully:', response);
+            return response;
+            
+        } catch (error) {
+            console.error('❌ Failed to submit recommendation:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get student's recommendation requests and submissions
+     */
+    async getStudentRecommendations(studentEmail) {
+        try {
+            console.log('👨‍🎓 Getting student recommendations for:', studentEmail);
+            
+            const response = await this.request('GET', `${this.endpoints.recommendations}/student/${encodeURIComponent(studentEmail)}`);
+            
+            console.log('✅ Student recommendations loaded:', response);
+            return response;
+            
+        } catch (error) {
+            console.error('❌ Failed to load student recommendations:', error);
+            throw error;
+        }
+    }
+
+    // ===== AUTHENTICATION METHODS =====
+    
+    async login(email, password) {
+        try {
+            const response = await this.request('POST', this.endpoints.auth + '/login', {
+                email,
+                password
+            });
+            
+            if (response.token) {
+                this.token = response.token;
+                this.userId = response.user.id;
+                this.userType = response.user.type;
+                
+                localStorage.setItem('stellarrec_token', this.token);
+                localStorage.setItem('stellarrec_user_id', this.userId);
+                localStorage.setItem('stellarrec_user_type', this.userType);
+            }
+            
+            return response;
+        } catch (error) {
+            console.error('Login failed:', error);
+            throw error;
+        }
+    }
+
+    async logout() {
+        try {
+            await this.request('POST', this.endpoints.auth + '/logout');
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            this.token = null;
+            this.userId = null;
+            this.userType = null;
+            localStorage.removeItem('stellarrec_token');
+            localStorage.removeItem('stellarrec_user_id');
+            localStorage.removeItem('stellarrec_user_type');
+        }
+    }
+
+    // ===== USER MANAGEMENT =====
+    
+    async getUserProfile() {
+        return this.request('GET', `${this.endpoints.users}/${this.userId}`);
+    }
+
+    async updateProfile(profileData) {
+        return this.request('PUT', `${this.endpoints.profiles}/${this.userId}`, profileData);
+    }
+
+    // ===== AI SERVICES =====
+    
+    async getUniversityMatches(preferences) {
+        return this.request('POST', this.endpoints.matching, preferences);
+    }
+
+    async analyzeEssay(essayText) {
+        return this.request('POST', this.endpoints.essayAnalysis, { text: essayText });
+    }
+
+    async getAdmissionPredictions(applicationData) {
+        return this.request('POST', this.endpoints.predictions, applicationData);
+    }
+
+    // ===== APPLICATION MANAGEMENT =====
+    
+    async getApplications() {
+        return this.request('GET', this.endpoints.applications);
+    }
+
+    async createApplication(applicationData) {
+        return this.request('POST', this.endpoints.applications, applicationData);
+    }
+
+    async updateApplication(applicationId, updates) {
+        return this.request('PUT', `${this.endpoints.applications}/${applicationId}`, updates);
+    }
+
+    async getTimeline(applicationId) {
+        return this.request('GET', `${this.endpoints.timelines}/${applicationId}`);
+    }
+
+    async getDeadlines() {
+        return this.request('GET', this.endpoints.deadlines);
+    }
+
+    // ===== LETTER MANAGEMENT =====
+    
+    async getLetters() {
+        return this.request('GET', this.endpoints.letters);
+    }
+
+    async createLetter(letterData) {
+        return this.request('POST', this.endpoints.letters, letterData);
+    }
+
+    async updateLetter(letterId, updates) {
+        return this.request('PUT', `${this.endpoints.letters}/${letterId}`, updates);
+    }
+
+    async getCollaborationSession(letterId) {
+        return this.request('GET', `${this.endpoints.collaboration}/${letterId}`);
+    }
+
+    async getWritingSuggestions(text) {
+        return this.request('POST', this.endpoints.aiWriting + '/suggestions', { text });
+    }
+
+    // ===== FILE MANAGEMENT =====
+    
+    async uploadFile(file, metadata = {}) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('metadata', JSON.stringify(metadata));
+        
+        return this.request('POST', this.endpoints.files + '/upload', formData, {
+            'Content-Type': 'multipart/form-data'
+        });
+    }
+
+    async getFiles() {
+        return this.request('GET', this.endpoints.files);
+    }
+
+    async processDocument(fileId) {
+        return this.request('POST', `${this.endpoints.documents}/${fileId}/process`);
+    }
+
+    // ===== SEARCH & DISCOVERY =====
+    
+    async search(query, filters = {}) {
+        const params = new URLSearchParams({ q: query, ...filters });
+        return this.request('GET', `${this.endpoints.search}?${params}`);
+    }
+
+    async getRecommendations(type = 'universities') {
+        return this.request('GET', `${this.endpoints.discovery}/recommendations/${type}`);
+    }
+
+    async getTrendingContent() {
+        return this.request('GET', this.endpoints.discovery + '/trending');
+    }
+
+    // ===== ANALYTICS & INSIGHTS =====
+    
+    async getAnalytics(timeframe = '30d') {
+        return this.request('GET', `${this.endpoints.analytics}?timeframe=${timeframe}`);
+    }
+
+    async getPredictiveInsights() {
+        return this.request('GET', this.endpoints.predictive + '/insights');
+    }
+
+    async getSuccessFactors() {
+        return this.request('GET', this.endpoints.predictive + '/success-factors');
+    }
+
+    // ===== NOTIFICATIONS =====
+    
+    async getNotifications() {
+        return this.request('GET', this.endpoints.notifications);
+    }
+
+    async markNotificationRead(notificationId) {
+        return this.request('PUT', `${this.endpoints.notifications}/${notificationId}/read`);
+    }
+
+    async getReminders() {
+        return this.request('GET', this.endpoints.reminders);
+    }
+
+    async createReminder(reminderData) {
+        return this.request('POST', this.endpoints.reminders, reminderData);
+    }
+
+    // ===== SYSTEM HEALTH =====
+    
+    async getSystemHealth() {
+        return this.request('GET', this.endpoints.health);
+    }
+
+    async getMetrics() {
+        return this.request('GET', this.endpoints.metrics);
+    }
+
+    // ===== WEBSOCKET CONNECTIONS =====
+    
+    connectWebSocket(endpoint, onMessage) {
+        const wsUrl = this.baseURL.replace('https://', 'wss://').replace('http://', 'ws://');
+        const ws = new WebSocket(`${wsUrl}${endpoint}?token=${this.token}`);
+        
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            onMessage(data);
+        };
+        
+        ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+        
+        return ws;
+    }
+
+    // ===== GENERIC REQUEST METHOD =====
+    
+    async request(method, endpoint, data = null, customHeaders = {}) {
+        const url = `${this.baseURL}${endpoint}`;
+        
+        const headers = {
+            'Content-Type': 'application/json',
+            ...customHeaders
+        };
+        
+        if (this.token) {
+            headers['Authorization'] = `Bearer ${this.token}`;
+        }
+        
+        const config = {
+            method,
+            headers
+        };
+        
+        if (data && method !== 'GET') {
+            if (data instanceof FormData) {
+                delete headers['Content-Type']; // Let browser set it for FormData
+                config.body = data;
+            } else {
+                config.body = JSON.stringify(data);
+            }
+        }
+        
+        try {
+            console.log(`🌐 API Request: ${method} ${url}`);
+            
+            const response = await fetch(url, config);
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `HTTP ${response.status}`);
+            }
+            
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return await response.json();
+            }
+            
+            return await response.text();
+        } catch (error) {
+            console.error(`❌ API request failed: ${method} ${endpoint}`, error);
+            throw error;
+        }
+    }
+
+    // ===== UTILITY METHODS =====
+    
+    isAuthenticated() {
+        return !!this.token;
+    }
+
+    getUserType() {
+        return this.userType;
+    }
+
+    getUserId() {
+        return this.userId;
+    }
+}
+
+// Export for use in other modules
+window.StellarRecAPI = StellarRecAPI;
+
+// Create global instance
+window.stellarAPI = new StellarRecAPI();

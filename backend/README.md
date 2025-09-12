@@ -20,12 +20,45 @@ The StellarRec backend is built using a microservices architecture with the foll
 ### Prerequisites
 
 - Node.js 18+
-- Docker and Docker Compose
-- PostgreSQL 15+
-- Redis 7+
-- Elasticsearch 8+
+- Docker and Docker Compose (for full microservices)
+- PostgreSQL 15+ (for full microservices)
+- Redis 7+ (for full microservices)
+- Elasticsearch 8+ (for full microservices)
 
-### Development Setup
+### Simple Server Setup (Recommendation Emails)
+
+For the basic recommendation email functionality:
+
+1. **Setup the simple server:**
+```bash
+cd backend
+cp .env.example .env
+npm install
+```
+
+2. **Configure environment variables in `.env`:**
+```bash
+# Required for email functionality
+RESEND_API_KEY=your_resend_api_key_here
+EMAIL_FROM=StellarRec <no-reply@yourdomain.com>
+FRONTEND_BASE=https://stellarrec.netlify.app/dashboard
+SIGNING_SECRET=your_strong_secret_here
+```
+
+3. **Start the server:**
+```bash
+# Start the recommendation server
+npm start
+
+# Or for development with auto-reload
+npm run dev
+```
+
+4. **Server will be available at:**
+- http://localhost:3000 (or PORT from .env)
+- Endpoint: `POST /api/recommendations`
+
+### Full Microservices Setup
 
 1. **Clone and setup the project:**
 ```bash
@@ -171,7 +204,10 @@ API documentation is available at:
 ### Key Endpoints
 
 ```bash
-# Authentication
+# Recommendation Requests (Simple Server)
+POST /api/recommendations          # Send recommendation request email
+
+# Authentication (Full Microservices)
 POST /api/v1/auth/login
 POST /api/v1/auth/register
 POST /api/v1/auth/refresh
@@ -195,6 +231,42 @@ PUT  /api/v1/applications/{id}
 GET  /api/v1/letters
 POST /api/v1/letters
 PUT  /api/v1/letters/{id}
+```
+
+#### Recommendation Request API
+
+**POST /api/recommendations**
+
+Sends a recommendation request email to a recommender with a pre-filled link to the dashboard.
+
+**Request Body:**
+```json
+{
+  "student_name": "John Doe",
+  "student_email": "john@example.com",
+  "student_first": "John",
+  "student_last": "Doe",
+  "recommender_name": "Prof. Jane Smith",
+  "recommender_email": "jane@university.edu",
+  "unitids": ["166027", "110635", "MOCK-1"],
+  "waive": 1,
+  "title": "Recommendation for John Doe"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "sr_1703123456789_abc123",
+  "status": "ok"
+}
+```
+
+**Error Response:**
+```json
+{
+  "error": "Missing fields"
+}
 ```
 
 ## 🔒 Security

@@ -747,6 +747,10 @@
                 <input id="stuEmail" class="filter-select" type="email" placeholder="you@example.com" required />
               </div>
               <div>
+                <label style="font-weight:600; display:block; margin-bottom:.25rem;">Program/Degree</label>
+                <input id="stuProgram" class="filter-select" type="text" placeholder="Master of Computer Science" required />
+              </div>
+              <div>
                 <label style="font-weight:600; display:block; margin-bottom:.25rem;">Recommender Name</label>
                 <input id="recName" class="filter-select" type="text" placeholder="Prof. Jane Smith" required />
               </div>
@@ -1394,60 +1398,11 @@
 
   /* ===== Student: send request form ===== */
   function bindStudentSend(){
-    const form = $('#stuSendForm');
-    if (!form) return;
-    form.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      
-      const name = $('#stuName')?.value.trim() || '';
-      const email= $('#stuEmail')?.value.trim() || '';
-      const recN = $('#recName')?.value.trim() || '';
-      const recE = $('#recEmail')?.value.trim() || '';
-      
-      if (!name || !email || !recN || !recE){ 
-        toast('Please fill all fields.','error'); 
-        return; 
-      }
-
-      // Validate email formats
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        toast('Please enter a valid student email address.', 'error');
-        return;
-      }
-      if (!emailRegex.test(recE)) {
-        toast('Please enter a valid recommender email address.', 'error');
-        return;
-      }
-
-      // Show loading state
-      const submitBtn = form.querySelector('button[type="submit"]');
-      const originalText = submitBtn.textContent;
-      submitBtn.textContent = 'Sending...';
-      submitBtn.disabled = true;
-
-      try {
-        // Get selected universities from the current state
-        const selectedUniversities = SR.selectedUniversities || [];
-        
-        // Prepare request data
-        const requestData = {
-          studentName: name,
-          studentEmail: email,
-          recommenderName: recN,
-          recommenderEmail: recE,
-          universities: selectedUniversities,
-          message: `Hello ${recN}, I would appreciate your recommendation for my university applications. Thank you for your time and support.`,
-          deadline: null // Could add deadline field to form later
-        };
-
-        // Send request to backend API
-        const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-          ? 'http://localhost:3003' 
-          : 'https://stellarrec-backend.onrender.com';
-        
-        const response = await fetch(`${apiUrl}/api/recommendations/request`, {
-          method: 'POST',
+    // Backend integration is now handled by the dedicated script block
+    // This function is kept for compatibility but the actual form handling
+    // is done by the backend integration script
+    console.log('Student send form binding - handled by backend integration script');
+  }
           headers: {
             'Content-Type': 'application/json',
           },
@@ -3376,6 +3331,18 @@ window.SR_API = {
   setInterval(preventBulkImportModal, 500);
 })();
 </script>
+
+<!-- Backend Integration for Send Recommendation Request -->
+<script>/* === BEGIN: Backend config ======================= */
+// TODO: Update this URL to your deployed backend
+// For local development: 'http://localhost:3000'
+// For production: 'https://your-backend-url.com'
+window.SR_BACKEND_BASE = window.SR_BACKEND_BASE || 'https://stellarrec-backend.example.com';
+/* === END: Backend config =================================== */(function(){if (window.__srSendBound) return; window.__srSendBound = true;const form   = document.getElementById('stuSendForm');if (!form) return;const nameEl = document.getElementById('stuName');const emailEl= document.getElementById('stuEmail');const recName= document.getElementById('recName');const recMail= document.getElementById('recEmail');const validEmail = (v)=> /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').toLowerCase());/* helper: selected unit IDs (keep Mock if none) */function getSelectedUnitIds(){// your app uses one (or both) of these setsconst a = window.studentUnitIds ? Array.from(window.studentUnitIds) : [];const b = (window.SR && SR.selected) ? Array.from(SR.selected) : [];const all = new Set([ ...(a||[]), ...(b||[]) ]);if (!all.size) all.add('MOCK-1');  // keep Mock University fallbackreturn Array.from(all);}/* helper: split "First Last" */function splitName(full){const parts = String(full||'').trim().split(/\s+/);const first = parts.shift() || '';const last  = parts.join(' ') || '';return { first, last };}/* === CALL YOUR BACKEND (instead of mockapi) ================ */async function createRecommendationOnBackend({ studentName, studentEmail, recommenderName, recommenderEmail }){const { first: sf, last: sl } = splitName(studentName);const unitids = getSelectedUnitIds();         // array of UNITIDs (keeps MOCK-1)const waive   = 1;                             // or read from your toggle if you add oneconst title   = (document.getElementById('writerTitle')?.value || '').trim();const payload = {student_name:  studentName,student_email: studentEmail.toLowerCase(),student_first: sf,student_last:  sl,recommender_name:  recommenderName,recommender_email: recommenderEmail.toLowerCase(),unitids,          // e.g., ["166027","110635","MOCK-1"]waive,            // 1 or 0title             // optional letter title};const res = await fetch(`${window.SR_BACKEND_BASE}/api/recommendations`, {method:'POST',headers:{ 'Content-Type':'application/json' },body: JSON.stringify(payload)});if (!res.ok) throw new Error(`Backend ${res.status}`);return await res.json(); // { id, status: 'ok' }}function pushToTrackRow({who,email,ts,status}){const tbody = document.getElementById('stuTrackBody');if (!tbody) return;const tr = document.createElement('tr');tr.innerHTML = `<td>${who}</td><td>${email}</td><td>${new Date(ts).toLocaleString()}</td><td><span class="track-pill ${status==='Sent'?'sent':status==='received'?'received':'pending'}">${status}</span></td>`;tbody.prepend(tr);}form.addEventListener('submit', async (e)=>{e.preventDefault();const studentName = (nameEl?.value||'').trim();const studentEmail= (emailEl?.value||'').trim();const rName       = (recName?.value||'').trim();const rMail       = (recMail?.value||'').trim();if (!studentName || !validEmail(studentEmail) || !rName || !validEmail(rMail)){toast('Please fill valid student & recommender details.','error'); return;}try {await createRecommendationOnBackend({studentName, studentEmail,recommenderName: rName, recommenderEmail: rMail});toast('Request sent to recommender by email.','success');const now = Date.now();pushToTrackRow({ who:rName, email:rMail, ts: now, status:'Pending' });setTimeout(()=>{ pushToTrackRow({ who:rName, email:rMail, ts: now+1500, status:'Sent' }); }, 1500);form.reset();} catch (err){console.error(err);toast('Could not send the recommendation email.','error');}});})();</script>
+
+<!-- StellarRec API Integration -->
+<script src="../frontend/js/api-client.js"></script>
+<script src="../frontend/js/recommendation-handler.js"></script>
 
 <!-- THE END -->
 </body>

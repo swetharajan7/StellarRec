@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Integration Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #1565c0; }
+        .toast { margin-top: 20px; padding: 10px; border-radius: 4px; }
+        .toast.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .toast.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>Backend Integration Test</h1>
+    <p>This page tests the backend integration code that was added to dashboard.html</p>
+    
+    <form id="stuSendForm">
+        <div class="form-group">
+            <label for="stuName">Student Name:</label>
+            <input type="text" id="stuName" placeholder="John Doe" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="stuEmail">Student Email:</label>
+            <input type="email" id="stuEmail" placeholder="john@example.com" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="recName">Recommender Name:</label>
+            <input type="text" id="recName" placeholder="Prof. Jane Smith" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="recEmail">Recommender Email:</label>
+            <input type="email" id="recEmail" placeholder="jane@university.edu" required>
+        </div>
+        
+        <button type="submit">Send Request</button>
+    </form>
+    
+    <div id="toastContainer"></div>
+    
+    <table style="margin-top: 30px; width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background: #f5f5f5;">
+                <th style="padding: 10px; border: 1px solid #ddd;">Recommender</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Email</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Time</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Status</th>
+            </tr>
+        </thead>
+        <tbody id="stuTrackBody">
+            <!-- Populated by code -->
+        </tbody>
+    </table>
+
+    <script>
+        // Mock toast function for testing
+        window.toast = function(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = msg;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 5000);
+        };
+
+        // Backend integration code (same as added to dashboard.html)
+        window.SR_BACKEND_BASE = window.SR_BACKEND_BASE || 'https://stellarrec-backend.example.com';
+        
+        (function(){
+            if (window.__srSendBound) return; 
+            window.__srSendBound = true;
+            
+            const form = document.getElementById('stuSendForm');
+            if (!form) return;
+            
+            const nameEl = document.getElementById('stuName');
+            const emailEl = document.getElementById('stuEmail');
+            const recName = document.getElementById('recName');
+            const recMail = document.getElementById('recEmail');
+            
+            const validEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').toLowerCase());
+
+            function getSelectedUnitIds() {
+                // For testing, return mock university IDs
+                return ['MOCK-1', '166027'];
+            }
+
+            function splitName(full) {
+                const parts = String(full||'').trim().split(/\s+/);
+                const first = parts.shift() || '';
+                const last = parts.join(' ') || '';
+                return { first, last };
+            }
+
+            async function createRecommendationOnBackend({ studentName, studentEmail, recommenderName, recommenderEmail }) {
+                const { first: sf, last: sl } = splitName(studentName);
+                const unitids = getSelectedUnitIds();
+                const waive = 1;
+                const title = 'Test Recommendation Letter';
+                
+                const payload = {
+                    student_name: studentName,
+                    student_email: studentEmail.toLowerCase(),
+                    student_first: sf,
+                    student_last: sl,
+                    recommender_name: recommenderName,
+                    recommender_email: recommenderEmail.toLowerCase(),
+                    unitids,
+                    waive,
+                    title
+                };
+
+                console.log('Sending payload to backend:', payload);
+                
+                // For testing, simulate a successful response
+                // In real implementation, this would make the actual API call
+                const mockResponse = {
+                    id: 'req_' + Date.now(),
+                    status: 'ok',
+                    message: 'Request sent successfully'
+                };
+                
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                return mockResponse;
+            }
+
+            function pushToTrackRow({who, email, ts, status}) {
+                const tbody = document.getElementById('stuTrackBody');
+                if (!tbody) return;
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding: 10px; border: 1px solid #ddd;">${who}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">${email}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">${new Date(ts).toLocaleString()}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">
+                        <span class="track-pill ${status==='Sent'?'sent':status==='received'?'received':'pending'}" 
+                              style="padding: 4px 8px; border-radius: 12px; font-size: 12px; 
+                                     background: ${status==='Sent'?'#e8f5e8':status==='received'?'#e3f2fd':'#fff3e0'};
+                                     color: ${status==='Sent'?'#2e7d32':status==='received'?'#1976d2':'#f57c00'};">
+                            ${status}
+                        </span>
+                    </td>
+                `;
+                tbody.prepend(tr);
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const studentName = (nameEl?.value||'').trim();
+                const studentEmail = (emailEl?.value||'').trim();
+                const rName = (recName?.value||'').trim();
+                const rMail = (recMail?.value||'').trim();
+                
+                if (!studentName || !validEmail(studentEmail) || !rName || !validEmail(rMail)) {
+                    toast('Please fill valid student & recommender details.', 'error'); 
+                    return;
+                }
+
+                try {
+                    toast('Sending request...', 'info');
+                    
+                    await createRecommendationOnBackend({
+                        studentName, 
+                        studentEmail,
+                        recommenderName: rName, 
+                        recommenderEmail: rMail
+                    });
+                    
+                    toast('Request sent to recommender by email.', 'success');
+                    
+                    const now = Date.now();
+                    pushToTrackRow({ who: rName, email: rMail, ts: now, status: 'Pending' });
+                    
+                    setTimeout(() => { 
+                        pushToTrackRow({ who: rName, email: rMail, ts: now + 1500, status: 'Sent' }); 
+                    }, 1500);
+                    
+                    form.reset();
+                } catch (err) {
+                    console.error(err);
+                    toast('Could not send the recommendation email.', 'error');
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

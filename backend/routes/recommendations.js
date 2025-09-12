@@ -8,8 +8,11 @@ const { v4: uuidv4 } = require('uuid');
 
 // Import DatabaseManager - adjust path if needed
 let DatabaseManager;
+let dbManager;
+
 try {
     DatabaseManager = require('../database/config/database-config');
+    dbManager = new DatabaseManager();
 } catch (error) {
     console.error('⚠️  DatabaseManager not found, using fallback');
     // Fallback DatabaseManager for basic functionality
@@ -27,12 +30,10 @@ try {
             console.log('Database connection closed');
         }
     };
+    dbManager = new DatabaseManager();
 }
 
 const router = express.Router();
-
-// Create database manager instance
-const dbManager = new DatabaseManager();
 
 // Email transporter configuration
 const createEmailTransporter = () => {
