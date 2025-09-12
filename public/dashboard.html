@@ -907,7 +907,91 @@
 <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js?v=2025-09-06" defer></script>
 
 <!-- Optional: your app shell files (kept in case you use them) -->
-<script src="/assets/js/university-search.js?v=2025-09-06-1" defer></script>
+<script>
+/* Minimal Universities Loader (keeps all existing features) */
+(function(){
+  if (window.__srUniversitiesLoaded) return;
+  window.__srUniversitiesLoaded = true;
+
+  const CANDIDATE_URLS = [
+    '/assets/us_institutions_by_state_2023.json',           // correct on Netlify when publish dir = public
+    './assets/us_institutions_by_state_2023.json',
+    'assets/us_institutions_by_state_2023.json'
+  ];
+
+  const MOCK = { unitid:'MOCK-1', name:'Mock University', state:'CA', type:'Private nonprofit', level:'4-year' };
+
+  function fallbackList(){
+    // If your old fallback exists, reuse it; otherwise keep at least Mock
+    return [MOCK];
+  }
+
+  function flattenAndMap(data){
+    // Accept either an array of rows or an object keyed by state -> [rows]
+    const rows = Array.isArray(data)
+      ? data
+      : Object.keys(data||{}).flatMap(st => (data[st]||[]).map(r => ({...r, state: r.state || st})));
+
+    const mapped = rows.map((r, i) => ({
+      unitid: String(r.unitid ?? r.UNITID ?? r.id ?? `u${i}`),
+      name:   r.name   ?? r.INSTNM ?? r.instnm ?? 'Unnamed University',
+      state:  r.state  ?? r.STABBR ?? r.state_abbr ?? '',
+      type:   r.type   ?? r.SECTOR_DESC ?? r.sector ?? '',
+      level:  r.level  ?? r.ICLEVEL_DESC ?? r.level_desc ?? '',
+    })).filter(u => u.unitid && u.name);
+
+    // Ensure unique ids
+    const seen = new Set();
+    const uniq = [];
+    for (const u of mapped) { if (!seen.has(u.unitid)) { seen.add(u.unitid); uniq.push(u); } }
+
+    // Ensure Mock University is the very first entry (without duplicates)
+    if (!uniq.find(x => x.unitid === MOCK.unitid)) uniq.unshift(MOCK);
+    return uniq;
+  }
+
+  async function loadOnce(){
+    if (Array.isArray(window.universities) && window.universities.length) return;
+
+    let json = null, lastErr = null;
+    for (const url of CANDIDATE_URLS) {
+      try {
+        const res = await fetch(url, { cache: 'force-cache' });
+        if (!res.ok) { lastErr = new Error('HTTP ' + res.status); continue; }
+        json = await res.json();
+        break;
+      } catch (e) { lastErr = e; }
+    }
+
+    if (!json) {
+      console.warn('[SR] Could not fetch universities JSON. Using fallback.', lastErr);
+      window.universities = fallbackList();
+    } else {
+      window.universities = flattenAndMap(json);
+    }
+
+    // Make sure Mock University is preselected in both Student and Recommender
+    try {
+      window.studentUnitIds = new Set([MOCK.unitid, ...(window.studentUnitIds || [])]);
+      window.SR = window.SR || {};
+      window.SR.selected = new Set([MOCK.unitid, ...(window.SR.selected || [])]);
+    } catch {}
+
+    // Optional: build Fuse index if your autosuggest uses it
+    if (window.Fuse) {
+      window.SR = window.SR || {};
+      window.SR.fuse = new Fuse(window.universities, { keys:['name','state'], threshold:0.33, includeScore:true });
+    }
+
+    // Nudge any listeners that wait for the data
+    window.dispatchEvent(new Event('sr:universities-ready'));
+  }
+
+  loadOnce();
+})();
+</script>
+
+  <script src="/assets/js/university-search.js?v=2025-09-06-1" defer></script>
 
 <!-- Core App Bootstrap (integrated, idempotent) -->
 <script>
