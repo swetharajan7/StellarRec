@@ -1985,9 +1985,89 @@ document.addEventListener('DOMContentLoaded', function(){
     obs.observe(btn, { attributes:true, attributeFilter:['disabled'] });
   }
 
+  /* ===== Load Universities Function ===== */
+  async function loadUniversitiesOnce() {
+    if (window.__srUnisLoaded) return; 
+    window.__srUnisLoaded = true;
+    
+    // Always include Mock University first
+    const MOCK = { unitid:'MOCK', name:'Mock University', state:'CA', type:'Public', level:'4-year' };
+    
+    try {
+      // Load universities from JSON file
+      const res = await fetch('/assets/us_institutions_by_state_2023.json', { cache:'force-cache' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      
+      const raw = await res.json();
+      
+      // Accept both array and {data:[...]} shapes; map common federal fields (IPEDS):
+      const src = Array.isArray(raw) ? raw : (raw.data || []);
+      const mapped = src.map(r => {
+        const unitid = String(r.unitid ?? r.UNITID ?? r.id ?? '');
+        const name   = (r.name ?? r.INSTNM ?? r.Institution ?? r.inst ?? '').toString();
+        const state  = (r.state ?? r.STABBR ?? r.State ?? '').toString();
+        const type   = (r.type  ?? r.Sector ?? r.sector ?? '').toString();
+        const level  = (r.level ?? r.Level  ?? r.level_group ?? '').toString();
+        return { unitid, name, state, type, level };
+      }).filter(u => u.unitid && u.name);
+      
+      // Put Mock at top; remove any accidental duplicates of Mock
+      const withoutMock = mapped.filter(u => u.unitid !== 'MOCK' && u.name !== 'Mock University');
+      window.universities = [MOCK, ...withoutMock];
+      
+      console.log(`✅ Loaded ${window.universities.length} universities from JSON`);
+      
+    } catch (err) {
+      console.warn('[SR] JSON not found, fallback tiny list used.', err);
+      window.universities = [MOCK];
+    }
+    
+    // Ensure Mock is preselected in both views (idempotent)
+    const id = 'MOCK';
+    window.studentUnitIds = window.studentUnitIds || new Set();
+    if (!window.studentUnitIds.has(id)) window.studentUnitIds.add(id);
+    
+    window.SR = window.SR || {};
+    window.SR.selected = window.SR.selected || new Set();
+    if (!window.SR.selected.has(id)) window.SR.selected.add(id);
+    
+    // If your page exposes these, refresh the chips/buttons
+    if (typeof window.updateSelectedList === 'function') window.updateSelectedList();
+    if (typeof window.updateSendButton === 'function') window.updateSendButton();
+    
+    // Fill the "Browse all universities (6000+)" select with CORRECT names
+    const sel = document.getElementById('universitySelect');
+    if (sel) {
+      // keep the first placeholder option, wipe the rest
+      while (sel.options.length > 1) sel.remove(1);
+      
+      const frag = document.createDocumentFragment();
+      window.universities.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = String(u.unitid);
+        opt.textContent = u.state ? `${u.name} (${u.state})` : u.name;
+        frag.appendChild(opt);
+      });
+      sel.appendChild(frag);
+    }
+    
+    // If your search module has a public "refresh" hook, nudge it
+    if (typeof window.applyUniversityFiltersAndSort === 'function') {
+      window.applyUniversityFiltersAndSort();
+    }
+    
+    // Also trigger autosuggest binding (if not using your own module)
+    if (typeof window.__srBindAutosuggest === 'function') {
+      window.__srBindAutosuggest();
+    }
+  }
+
   /* ===== Page init ===== */
   document.addEventListener('DOMContentLoaded', async ()=>{
     await ensureDataset();
+    
+    // Load universities from JSON file
+    await loadUniversitiesOnce();
 
     populateBrowseDropdown();
     bindSearchSuggest();

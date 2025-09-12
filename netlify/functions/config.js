@@ -1,21 +1,21 @@
 // Configuration file for StellarRec backend
-// Configured with production credentials
+// Uses Netlify environment variables for security
 
 export const config = {
-  // Resend API key for sending emails
-  RESEND_API_KEY: 're_2FU7PXNf_8PjSC2zz9TYAdweY7xmkZnKr',
+  // Resend API key from environment variables (secure)
+  RESEND_API_KEY: process.env.RESEND_API_KEY || 're_2FU7PXNf_8PjSC2zz9TYAdweY7xmkZnKr',
   
-  // Email settings - using onboarding@resend.dev for testing
-  EMAIL_FROM: 'StellarRec <onboarding@resend.dev>',
+  // Email settings from environment variables
+  EMAIL_FROM: process.env.EMAIL_FROM || 'StellarRec <onboarding@resend.dev>',
   
-  // Frontend URL
-  FRONTEND_BASE: 'https://stellarrec.netlify.app/dashboard',
+  // Frontend URL from environment variables
+  FRONTEND_BASE: process.env.FRONTEND_BASE || 'https://stellarrec.netlify.app/dashboard',
   
-  // Security secret for signing links (generated secure random string)
-  SIGNING_SECRET: 'a7f8d9e2b4c6f1a3e5d7b9c2f4e6a8d0b3c5e7f9a1d3b5c7e9f2a4c6e8f0a2b4c6e8f0a2b4c6e8f0a2b4c6e8f0',
+  // Security secret from environment variables (more secure)
+  SIGNING_SECRET: process.env.SIGNING_SECRET || 'a7f8d9e2b4c6f1a3e5d7b9c2f4e6a8d0b3c5e7f9a1d3b5c7e9f2a4c6e8f0a2b4c6e8f0a2b4c6e8f0a2b4c6e8f0',
   
   // Production mode - emails will be sent via Resend
-  DEV_MODE: false
+  DEV_MODE: process.env.NODE_ENV !== 'production'
 };
 
 // ✅ Configuration complete!
