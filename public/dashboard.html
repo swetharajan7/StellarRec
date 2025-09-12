@@ -2506,7 +2506,7 @@ window.__srAnalytics = {
   (async function init(){
     await loadUniversitiesOnce();
     ensureFuse();
-    populateBrowseAll();
+    // Note: populateBrowseAll() is called by the second init function to avoid conflicts
     // first render
     updateStudentSelectedMini();
     
@@ -2559,9 +2559,14 @@ window.__srAnalytics = {
 
   async function tryFetch(url){
     try {
+      console.log('[SR] Attempting to fetch universities from:', url);
       const res = await fetch(url, { cache:'force-cache' });
-      if (!res.ok) return null;
+      if (!res.ok) {
+        console.log('[SR] Fetch failed for:', url, 'Status:', res.status);
+        return null;
+      }
       const raw = await res.json();
+      console.log('[SR] Raw data type:', typeof raw, 'Keys:', Object.keys(raw).slice(0, 5));
 
       let flat = [];
       if (Array.isArray(raw)) flat = raw;
@@ -2572,11 +2577,16 @@ window.__srAnalytics = {
           }
         }
       }
+      console.log('[SR] Flattened universities count:', flat.length);
       if (flat.length > 1000){
+        const normalized = norm(flat);
         console.log('[SR] Universities loaded from:', url, 'count=', flat.length);
-        return norm(flat);
+        console.log('[SR] First 3 normalized universities:', normalized.slice(0, 3).map(u => `${u.name} (${u.state})`));
+        return normalized;
       }
-    } catch(e){ /* swallow and try next */ }
+    } catch(e){ 
+      console.error('[SR] Error fetching from:', url, e);
+    }
     return null;
   }
 
@@ -2662,7 +2672,15 @@ window.__srAnalytics = {
   });
 
   (async function init(){
+    // Ensure we have the real dataset loaded first
     await ensureRealDataset();      // pulls the real names if available
+    
+    // Debug: Log the first few universities to verify real names are loaded
+    if (SR.universities && SR.universities.length > 0) {
+      console.log('[SR] Universities loaded for browse dropdown:', SR.universities.length, 'total');
+      console.log('[SR] First 3 universities:', SR.universities.slice(0, 3).map(u => `${u.name} (${u.state})`));
+    }
+    
     populateBrowseAll();            // fills Browse-all with real names
     updateStudentSelectedMini();    // refresh St
 
