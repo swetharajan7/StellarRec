@@ -2836,35 +2836,75 @@ window.__srAnalytics = {
   });
 
   (async function init(){
-    // Ensure we have the real dataset loaded first
-    await ensureRealDataset();      // pulls the real names if available
+    console.log('[SR] Starting university data loading...');
     
-    // Debug: Log the first few universities to verify real names are loaded
-    if (SR.universities && SR.universities.length > 0) {
-      console.log('[SR] Universities loaded for browse dropdown:', SR.universities.length, 'total');
-      console.log('[SR] First 3 universities:', SR.universities.slice(0, 3).map(u => `${u.name} (${u.state})`));
+    // DIRECT APPROACH: Load JSON data immediately without complex logic
+    try {
+      console.log('[SR] Fetching university JSON directly...');
+      const response = await fetch('/assets/us_institutions_by_state_2023.json');
       
-      // CRITICAL FIX: Sync SR.universities with window.universities for university-search.js compatibility
-      window.universities = SR.universities;
-      console.log('[SR] Synced window.universities with SR.universities');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
+      }
       
-      // Force refresh the dropdown to ensure it shows the new data
-      setTimeout(() => {
-        console.log('[SR] Force refreshing dropdown with loaded data...');
-        if (typeof populateBrowseAll === 'function') {
-          populateBrowseAll();
-          console.log('[SR] Dropdown refreshed with', SR.universities.length, 'universities');
+      const jsonData = await response.json();
+      console.log('[SR] JSON fetched successfully, processing...');
+      
+      // Process the data directly
+      const universities = [];
+      let count = 0;
+      
+      // Add Mock University first
+      universities.push({
+        unitid: 'MOCK-0000',
+        name: 'Mock University',
+        state: 'CA',
+        control: 'Private nonprofit',
+        level: '4-year'
+      });
+      
+      // Process all states
+      for (const [state, stateUniversities] of Object.entries(jsonData)) {
+        if (Array.isArray(stateUniversities)) {
+          stateUniversities.forEach(uni => {
+            universities.push({
+              unitid: String(uni.unitid || `${state}-${count++}`),
+              name: String(uni.name || 'Unknown University'),
+              state: String(uni.state || state),
+              control: String(uni.control || 'Public'),
+              level: String(uni.level || '4-year')
+            });
+          });
         }
-      }, 100);
-    } else {
-      console.error('[SR] No universities loaded! This should not happen.');
+      }
+      
+      // Set the data
+      SR.universities = universities;
+      window.universities = universities;
+      
+      console.log('[SR] ✅ SUCCESS! Loaded', universities.length, 'universities');
+      console.log('[SR] Sample:', universities.slice(0, 3).map(u => `${u.name} (${u.state})`));
+      
+      // Ensure Mock is selected
+      SR.selected = SR.selected || new Set();
+      SR.selected.add('MOCK-0000');
+      
+    } catch (error) {
+      console.error('[SR] ❌ FAILED to load JSON:', error);
+      
+      // Fallback
+      SR.universities = [
+        { unitid: 'MOCK-0000', name: 'Mock University', state: 'CA', control: 'Private nonprofit', level: '4-year' }
+      ];
+      window.universities = SR.universities;
     }
     
-    // Ensure Fuse search is initialized
+    // Initialize everything else
     ensureFuse();
+    populateBrowseAll();
+    updateStudentSelectedMini();
     
-    populateBrowseAll();            // fills Browse-all with real names
-    updateStudentSelectedMini();    // refresh St
+    console.log('[SR] Initialization complete with', SR.universities.length, 'universities');
   })();
 })();
 </script>
