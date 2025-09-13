@@ -112,7 +112,16 @@
     try {
       updateIntegrationMessage('Checking for updates...', 'info');
       
-      const response = await fetch(`${CONFIG.API_BASE}/get-recommendation-status?student_email=${encodeURIComponent(CONFIG.STUDENT_EMAIL)}&student_name=${encodeURIComponent(CONFIG.STUDENT_NAME)}`);
+      // Get external_id from URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const externalId = urlParams.get('external_id');
+      
+      if (!externalId) {
+        updateIntegrationMessage('No recommendation ID found', 'info');
+        return;
+      }
+      
+      const response = await fetch(`${CONFIG.API_BASE}/get-recommendation-data?external_id=${encodeURIComponent(externalId)}`);
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -120,17 +129,116 @@
       
       const data = await response.json();
       
-      if (data.success) {
+      if (data.success && data.recommendation) {
         updateRecommendationDisplay(data.recommendation);
         updateIntegrationMessage('Connected to StellarRec', 'success');
+        
+        // Display the letter content in the text box
+        displayLetterContent(data.recommendation);
       } else {
-        throw new Error(data.message || 'Unknown error');
+        updateIntegrationMessage('No recommendation data found', 'info');
       }
       
     } catch (error) {
       console.error('❌ Failed to check recommendation status:', error);
       updateIntegrationMessage('Connection error - retrying...', 'error');
     }
+  }
+  
+  // Display letter content in the recommendation text box
+  function displayLetterContent(recommendation) {
+    // Find the recommendation letter text area/box
+    const letterBox = findLetterContentBox();
+    
+    if (letterBox && recommendation.letter_content) {
+      console.log('📄 Displaying letter content in Mock University');
+      
+      // Update the text content
+      if (letterBox.tagName === 'TEXTAREA' || letterBox.tagName === 'INPUT') {
+        letterBox.value = recommendation.letter_content;
+      } else {
+        letterBox.textContent = recommendation.letter_content;
+      }
+      
+      // Add some styling to indicate it's from StellarRec
+      letterBox.style.border = '2px solid #4caf50';
+      letterBox.style.backgroundColor = '#f8fff8';
+      
+      // Add a label if it doesn't exist
+      addLetterLabel(letterBox, recommendation);
+      
+      // Make it read-only since it's from StellarRec
+      if (letterBox.tagName === 'TEXTAREA' || letterBox.tagName === 'INPUT') {
+        letterBox.readOnly = true;
+      }
+      
+      console.log('✅ Letter content displayed successfully');
+    } else {
+      console.warn('⚠️ Could not find letter content box or no letter content available');
+    }
+  }
+  
+  // Find the letter content box in the DOM
+  function findLetterContentBox() {
+    // Look for various possible selectors for the letter content area
+    const selectors = [
+      'textarea[placeholder*="recommendation"]',
+      'textarea[placeholder*="letter"]',
+      '.recommendation-letter textarea',
+      '.letter-content textarea',
+      'textarea',
+      '.recommendation-content',
+      '.letter-text',
+      '[contenteditable="true"]'
+    ];
+    
+    for (const selector of selectors) {
+      const element = document.querySelector(selector);
+      if (element) {
+        console.log(`📍 Found letter content box with selector: ${selector}`);
+        return element;
+      }
+    }
+    
+    // If no specific element found, look for any text area in the recommendations section
+    const recommendationsSection = findRecommendationsSection();
+    if (recommendationsSection) {
+      const textArea = recommendationsSection.querySelector('textarea');
+      if (textArea) {
+        console.log('📍 Found textarea in recommendations section');
+        return textArea;
+      }
+    }
+    
+    return null;
+  }
+  
+  // Add a label to indicate the letter is from StellarRec
+  function addLetterLabel(letterBox, recommendation) {
+    // Check if label already exists
+    if (letterBox.previousElementSibling && letterBox.previousElementSibling.classList.contains('stellarrec-letter-label')) {
+      return;
+    }
+    
+    const label = document.createElement('div');
+    label.className = 'stellarrec-letter-label';
+    label.style.cssText = `
+      background: #e8f5e8;
+      border: 1px solid #4caf50;
+      border-radius: 4px 4px 0 0;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #2e7d32;
+      margin-bottom: -1px;
+    `;
+    label.innerHTML = `
+      <span style="margin-right: 6px;">✅</span>
+      Recommendation Letter from ${recommendation.recommender_name} via StellarRec
+      <span style="float: right; font-weight: normal;">${new Date(recommendation.submission_date).toLocaleDateString()}</span>
+    `;
+    
+    letterBox.parentNode.insertBefore(label, letterBox);
   }
   
   // Update the recommendation display
