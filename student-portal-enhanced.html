@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StellarRec™ - AI-Powered Student Portal</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background: #f8f9fa; color: #333; }
+        
+        .sidebar {
+            position: fixed; left: 0; top: 0; width: 280px; height: 100vh;
+            background: linear-gradient(135deg, #1976d2 0%, #7c4dff 100%);
+            color: white; z-index: 1000; overflow-y: auto;
+        }
+        
+        .sidebar-header { padding: 2rem 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .logo { display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+        .user-info { display: flex; align-items: center; gap: 1rem; }
+        .user-avatar { width: 50px; height: 50px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .user-details h3 { font-size: 1rem; margin-bottom: 0.25rem; }
+        .user-details p { font-size: 0.8rem; opacity: 0.8; }
+        
+        .nav-menu { padding: 1rem 0; }
+        .nav-item { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; color: rgba(255, 255, 255, 0.8); text-decoration: none; transition: all 0.3s ease; border-left: 3px solid transparent; cursor: pointer; }
+        .nav-item:hover, .nav-item.active { background: rgba(255, 255, 255, 0.1); color: white; border-left-color: #ffeb3b; }
+        .nav-section { padding: 0.5rem 1.5rem; font-size: 0.8rem; font-weight: 600; color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: 1px; margin-top: 1rem; }
+        
+        .main-content { margin-left: 280px; min-height: 100vh; }
+        .top-bar { background: white; padding: 1rem 2rem; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); display: flex; justify-content: space-between; align-items: center; }
+        .page-title { font-size: 1.5rem; font-weight: 600; color: #333; }
+        
+        .top-bar-actions { display: flex; align-items: center; gap: 1rem; }
+        .notification-bell { position: relative; cursor: pointer; padding: 0.5rem; }
+        .notification-badge { position: absolute; top: 0; right: 0; background: #f44336; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; }
+        
+        .content-area { padding: 2rem; }
+        .dashboard-section { display: none; }
+        .dashboard-section.active { display: block; }
+        
+        /* Enhanced AI Features Styles */
+        .ai-insights-panel {
+            background: linear-gradient(135deg, #e8f5e8, #f0f8ff);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 2px solid #4caf50;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ai-insights-panel::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
+            animation: pulse-glow 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        
+        .ai-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .ai-avatar-enhanced {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #4caf50, #2196f3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .dashboard-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; }
+        .dashboard-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12); }
+        
+        .card-header { display: flex; align-items: center; margin-bottom: 1rem; }
+        .card-icon { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; margin-right: 1rem; }
+        .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .card-subtitle { color: #666; font-size: 0.9rem; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-number { font-size: 2rem; font-weight: 700; color: #1976d2; margin-bottom: 0.5rem; }
+        .stat-label { color: #666; font-size: 0.9rem; }
+        
+        .progress-bar { width: 100%; height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; margin: 1rem 0; }
+        .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+        
+        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: #1976d2; color: white; }
+        .btn-primary:hover { background: #1565c0; transform: translateY(-2px); }
+        .btn-outline { background: transparent; border: 2px solid #1976d2; color: #1976d2; }
+        .btn-outline:hover { background: #1976d2; color: white; }
+        .btn-success { background: #4caf50; color: white; }
+        .btn-success:hover { background: #45a049; }
+        
+        /* Timeline Styles */
+        .timeline-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #1976d2, #4caf50);
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-left: 2rem;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            left: -2rem;
+            top: 0.5rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #1976d2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: #1976d2;
+            font-weight: 600;
+        }
+        
+        .timeline-marker.completed {
+            background: #4caf50;
+            border-color: #4caf50;
+            color: white;
+        }
+        
+        .timeline-marker.urgent {
+            background: #ff5722;
+            border-color: #ff5722;
+            color: white;
+            animation: pulse-urgent 2s infinite;
+        }
+        
+        @keyframes pulse-urgent {
+            0% { box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 87, 34, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 87, 34, 0); }
+        }
+        
+        .timeline-content {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #1976d2;
+        }
+        
+        .timeline-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .timeline-date {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .timeline-description {
+            color: #555;
+            font-size: 0.9rem;
+        }
+        
+        /* Predictive Insights Styles */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .insight-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #2196f3;
+            transition: all 0.3s ease;
+        }
+        
+        .insight-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+        
+        .insight-card.success { border-left-color: #4caf50; }
+        .insight-card.warning { border-left-color: #ff9800; }
+        .insight-card.danger { border-left-color: #f44336; }
+        
+        .insight-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .insight-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .insight-title {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .insight-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .insight-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        /* University Matching Enhanced */
+        .matching-engine {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-select, .search-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-select:focus, .search-input:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+        
+        .match-results {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .match-grid {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .match-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .match-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .high-match {
+            border-color: #4caf50;
+            background: linear-gradient(135deg, #e8f5e8, #f1f8e9);
+        }
+        
+        .medium-match {
+            border-color: #ff9800;
+            background: linear-gradient(135deg, #fff3e0, #fef7e0);
+        }
+        
+        .low-match {
+            border-color: #f44336;
+            background: linear-gradient(135deg, #ffebee, #fce4ec);
+        }
+        
+        .match-score {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1976d2;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .university-info h4 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .university-location {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .match-reasons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .reason-tag {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-badge.active { background: #e8f5e8; color: #4caf50; }
+        .status-badge.pending { background: #fff3e0; color: #ff9800; }
+        .status-badge.delivered { background: #e3f2fd; color: #1976d2; }
+        .status-badge.urgent { background: #ffebee; color: #f44336; }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .notification-success { background: #4caf50; }
+        .notification-error { background: #f44336; }
+        .notification-info { background: #2196f3; }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1976d2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .dashboard-grid, .stats-grid, .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="material-icons">star</i>
+                stellarrec
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">S</div>
+                <div class="user-details">
+                    <h3 class="user-name">Student Portal</h3>
+                    <p class="user-email">AI-Powered Experience</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-section">Dashboard</div>
+            <a class="nav-item active" data-section="overview">
+                <i class="material-icons">dashboard</i>
+                Overview
+            </a>
+            <a class="nav-item" data-section="ai-insights">
+                <i class="material-icons">psychology</i>
+                AI Insights
+            </a>
+            
+            <div class="nav-section">Applications</div>
+            <a class="nav-item" data-section="applications">
+                <i class="material-icons">school</i>
+                My Applications
+            </a>
+            <a class="nav-item" data-section="matching">
+                <i class="material-icons">search</i>
+                University Matching
+            </a>
+            <a class="nav-item" data-section="timeline">
+                <i class="material-icons">schedule</i>
+                Timeline & Deadlines
+            </a>
+            
+            <div class="nav-section">Support</div>
+            <a class="nav-item" data-section="letters">
+                <i class="material-icons">mail</i>
+                Recommendation Letters
+            </a>
+            <a class="nav-item" data-section="writing">
+                <i class="material-icons">edit</i>
+                AI Writing Assistant
+            </a>
+            
+            <div class="nav-section">Analytics</div>
+            <a class="nav-item" data-section="analytics">
+                <i class="material-icons">analytics</i>
+                Predictive Analytics
+            </a>
+            <a class="nav-item" data-section="insights">
+                <i class="material-icons">lightbulb</i>
+                Success Insights
+            </a>
+            
+            <div class="nav-section">Tools</div>
+            <a class="nav-item" data-section="files">
+                <i class="material-icons">folder</i>
+                File Management
+            </a>
+            <a class="nav-item" data-section="settings">
+                <i class="material-icons">settings</i>
+                Settings
+            </a>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <h1 class="page-title">Student Dashboard</h1>
+            <div class="top-bar-actions">
+                <div class="notification-bell">
+                    <i class="material-icons">notifications</i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <button class="btn btn-outline">
+                    <i class="material-icons">logout</i>
+                    Logout
+                </button>
+            </div>
+        </div>
+        
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Overview Section -->
+            <div id="overview-section" class="dashboard-section active">
+                <!-- AI Insights Panel -->
+                <div class="ai-insights-panel">
+                    <div class="ai-header">
+                        <div class="ai-avatar-enhanced">
+                            <i class="material-icons">psychology</i>
+                        </div>
+                        <div class="ai-info">
+                            <h3 style="color: #2e7d32; font-size: 1.3rem; margin-bottom: 0.5rem;">Stella AI Assistant</h3>
+                            <p style="color: #555; font-size: 1rem;">Your personalized college application AI companion</p>
+                        </div>
+                    </div>
+                    <div class="ai-suggestions" style="position: relative; z-index: 2;">
+                        <div class="suggestion-card" style="background: white; border-radius: 8px; padding: 1rem; display: flex; align-items: center; gap: 1rem; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); margin-bottom: 1rem;">
+                            <div class="suggestion-icon" style="font-size: 2rem;">🎯</div>
+                            <div class="suggestion-content">
+                                <h4 style="margin-bottom: 0.5rem; color: #333;">Perfect Match Found!</h4>
+                                <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.75rem;">Based on your profile, MIT has a 92% compatibility score with your goals.</p>
+                                <button class="btn btn-success btn-sm">View Details</button>
+                            </div>
+                        </div>
+                        <div class="suggestion-card" style="background: white; border-radius: 8px; padding: 1rem; display: flex; align-items: center; gap: 1rem; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                            <div class="suggestion-icon" style="font-size: 2rem;">⏰</div>
+                            <div class="suggestion-content">
+                                <h4 style="margin-bottom: 0.5rem; color: #333;">Deadline Alert</h4>
+                                <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.75rem;">Stanford application deadline is in 5 days. Complete your essay now!</p>
+                                <button class="btn btn-primary btn-sm">Take Action</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">Active Applications</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Letters Requested</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">85%</div>
+                        <div class="stat-label">Completion Rate</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Upcoming Deadlines</div>
+                    </div>
+                </div>
+                
+                <!-- Dashboard Cards -->
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: #1976d2;">
+                                <i class="material-icons">trending_up</i>
+                            </div>
+                            <div>
+                                <h3 class="card-title">Recent Activity</h3>
+                                <p class="card-subtitle">Your latest actions and updates</p>
+                            </div>
+                        </div>
+                        <div class="recent-activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="material-icons">school</i>
+                                </div>
+                                <div class="activity-content">
+                                    <p>Submitted MIT application</p>
+                                    <span class="activity-time">2 hours ago</span>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="material-icons">mail</i>
+                                </div>
+                                <div class="activity-content">
+                                    <p>Received letter from Dr. Smith</p>
+                                    <span class="activity-time">1 day ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: #4caf50;">
+                                <i class="material-icons">schedule</i>
+                            </div>
+                            <div>
+                                <h3 class="card-title">Upcoming Deadlines</h3>
+                                <p class="card-subtitle">Don't miss important dates</p>
+                            </div>
+                        </div>
+                        <div class="deadlines-list">
+                            <div class="deadline-item" style="padding: 0.75rem 0; border-bottom: 1px solid #f0f0f0;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 500;">Stanford University</span>
+                                    <span class="status-badge urgent">5 days</span>
+                                </div>
+                                <p style="color: #666; font-size: 0.9rem; margin-top: 0.25rem;">Application deadline</p>
+                            </div>
+                            <div class="deadline-item" style="padding: 0.75rem 0; border-bottom: 1px solid #f0f0f0;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 500;">Harvard University</span>
+                                    <span class="status-badge pending">12 days</span>
+                                </div>
+                                <p style="color: #666; font-size: 0.9rem; margin-top: 0.25rem;">Essay submission</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: #ff9800;">
+                                <i class="material-icons">lightbulb</i>
+                            </div>
+                            <div>
+                                <h3 class="card-title">AI Recommendations</h3>
+                                <p class="card-subtitle">Personalized suggestions for you</p>
+                            </div>
+                        </div>
+                        <div class="recommendations-list">
+                            <div style="padding: 0.75rem 0; border-bottom: 1px solid #f0f0f0;">
+                                <p style="font-weight: 500; margin-bottom: 0.25rem;">Improve Essay Structure</p>
+                                <p style="color: #666; font-size: 0.9rem;">Your personal statement could benefit from a stronger conclusion</p>
+                            </div>
+                            <div style="padding: 0.75rem 0;">
+                                <p style="font-weight: 500; margin-bottom: 0.25rem;">Add Safety Schools</p>
+                                <p style="color: #666; font-size: 0.9rem;">Consider adding 2-3 safety schools to your list</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AI Insights Section -->
+            <div id="ai-insights-section" class="dashboard-section">
+                <div style="margin-bottom: 2rem;">
+                    <h2>AI-Powered Insights</h2>
+                    <p style="color: #666; margin-top: 0.5rem;">Get personalized recommendations based on your academic profile and goals</p>
+                </div>
+                
+                <div class="insights-grid">
+                    <div class="insight-card success">
+                        <div class="insight-header">
+                            <div class="insight-icon" style="background: #4caf50;">
+                                <i class="material-icons">trending_up</i>
+                            </div>
+                            <div>
+                                <div class="insight-title">Application Strength</div>
+                                <div class="insight-score" style="color: #4caf50;">92/100</div>
+                            </div>
+                        </div>
+                        <div class="insight-description">
+                            Your application profile is exceptionally strong. Your GPA, test scores, and extracurriculars align perfectly with top-tier universities.
+                        </div>
+                    </div>
+                    
+                    <div class="insight-card warning">
+                        <div class="insight-header">
+                            <div class="insight-icon" style="background: #ff9800;">
+                                <i class="material-icons">warning</i>
+                            </div>
+                            <div>
+                                <div class="insight-title">Essay Optimization</div>
+                                <div class="insight-score" style="color: #ff9800;">68/100</div>
+                            </div>
+                        </div>
+                        <div class="insight-description">
+                            Your essays show potential but could be strengthened. Focus on specific examples and clearer narrative structure.
+                        </div>
+                    </div>
+                    
+                    <div class="insight-card">
+                        <div class="insight-header">
+                            <div class="insight-icon" style="background: #2196f3;">
+                                <i class="material-icons">school</i>
+                            </div>
+                            <div>
+                                <div class="insight-title">University Match</div>
+                                <div class="insight-score" style="color: #2196f3;">15</div>
+                            </div>
+                        </div>
+                        <div class="insight-description">
+                            We've identified 15 universities that match your profile perfectly. 8 reach schools, 4 target schools, and 3 safety schools.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Timeline & Deadlines Section -->
+            <div id="timeline-section" class="dashboard-section">
+                <div style="margin-bottom: 2rem;">
+                    <h2>Personalized Timeline</h2>
+                    <p style="color: #666; margin-top: 0.5rem;">AI-optimized schedule to maximize your application success</p>
+                </div>
+                
+                <div class="timeline-container">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker urgent">!</div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Complete Stanford Essay</div>
+                                <div class="timeline-date">Due: December 15, 2024 (5 days left)</div>
+                                <div class="timeline-description">
+                                    Finish your personal statement for Stanford. AI suggests focusing on your leadership experience in robotics club.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker">2</div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Request Letter from Dr. Johnson</div>
+                                <div class="timeline-date">Recommended: December 18, 2024</div>
+                                <div class="timeline-description">
+                                    Follow up with Dr. Johnson for your recommendation letter. Send a gentle reminder with your updated resume.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker completed">✓</div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Submit MIT Application</div>
+                                <div class="timeline-date">Completed: December 8, 2024</div>
+                                <div class="timeline-description">
+                                    Successfully submitted your MIT application with all required documents.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker">4</div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Harvard Interview Preparation</div>
+                                <div class="timeline-date">Scheduled: January 5, 2025</div>
+                                <div class="timeline-description">
+                                    Prepare for your Harvard alumni interview. Review common questions and practice your responses.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- University Matching Section -->
+            <div id="matching-section" class="dashboard-section">
+                <div style="margin-bottom: 2rem;">
+                    <h2>AI University Matching</h2>
+                    <p style="color: #666; margin-top: 0.5rem;">Find your perfect university matches using advanced AI algorithms</p>
+                </div>
+                
+                <div class="matching-engine">
+                    <div class="match-input-panel">
+                        <h3>Refine Your Preferences</h3>
+                        <div class="input-grid">
+                            <div class="input-group">
+                                <label>Preferred Major</label>
+                                <select class="form-select" id="major-select">
+                                    <option value="">Select Major</option>
+                                    <option value="computer-science" selected>Computer Science</option>
+                                    <option value="engineering">Engineering</option>
+                                    <option value="business">Business</option>
+                                    <option value="medicine">Medicine</option>
+                                    <option value="arts">Arts</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Location Preference</label>
+                                <select class="form-select" id="location-select">
+                                    <option value="">Any Location</option>
+                                    <option value="northeast" selected>Northeast</option>
+                                    <option value="southeast">Southeast</option>
+                                    <option value="midwest">Midwest</option>
+                                    <option value="west">West Coast</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>School Size</label>
+                                <select class="form-select" id="size-select">
+                                    <option value="">Any Size</option>
+                                    <option value="small">Small (< 5,000)</option>
+                                    <option value="medium" selected>Medium (5,000-15,000)</option>
+                                    <option value="large">Large (> 15,000)</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>GPA Range</label>
+                                <select class="form-select" id="gpa-select">
+                                    <option value="">Select GPA</option>
+                                    <option value="4.0" selected>3.8-4.0</option>
+                                    <option value="3.5-3.9">3.5-3.7</option>
+                                    <option value="3.0-3.4">3.0-3.4</option>
+                                    <option value="2.5-2.9">2.5-2.9</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="runMatching()">
+                            <i class="material-icons">psychology</i>
+                            Update Matches
+                        </button>
+                    </div>
+                    
+                    <div class="match-results">
+                        <h3>Your AI-Generated Matches</h3>
+                        <div class="match-grid">
+                            <div class="match-card high-match">
+                                <div class="match-score">94%</div>
+                                <div class="university-info">
+                                    <h4>Massachusetts Institute of Technology</h4>
+                                    <p class="university-location">Cambridge, MA</p>
+                                    <div class="match-reasons">
+                                        <span class="reason-tag">Strong CS Program</span>
+                                        <span class="reason-tag">Research Opportunities</span>
+                                        <span class="reason-tag">GPA Match</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="match-card high-match">
+                                <div class="match-score">91%</div>
+                                <div class="university-info">
+                                    <h4>Stanford University</h4>
+                                    <p class="university-location">Stanford, CA</p>
+                                    <div class="match-reasons">
+                                        <span class="reason-tag">Innovation Focus</span>
+                                        <span class="reason-tag">Tech Industry Connections</span>
+                                        <span class="reason-tag">Entrepreneurship</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="match-card medium-match">
+                                <div class="match-score">78%</div>
+                                <div class="university-info">
+                                    <h4>Carnegie Mellon University</h4>
+                                    <p class="university-location">Pittsburgh, PA</p>
+                                    <div class="match-reasons">
+                                        <span class="reason-tag">CS Excellence</span>
+                                        <span class="reason-tag">Medium Size</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Predictive Analytics Section -->
+            <div id="analytics-section" class="dashboard-section">
+                <div style="margin-bottom: 2rem;">
+                    <h2>Predictive Analytics</h2>
+                    <p style="color: #666; margin-top: 0.5rem;">AI-powered predictions to optimize your application strategy</p>
+                </div>
+                
+                <div class="insights-grid">
+                    <div class="insight-card success">
+                        <div class="insight-header">
+                            <div class="insight-icon" style="background: #4caf50;">
+                                <i class="material-icons">trending_up</i>
+                            </div>
+                            <div>
+                                <div class="insight-title">Admission Probability</div>
+                                <div class="insight-score" style="color: #4caf50;">87%</div>
+                            </div>
+                        </div>
+                        <div class="insight-description">
+                            Based on historical data and your profile, you have an 87% chance of admission to your target schools.
+                        </div>
+                    </div>
+                    
+                    <div class="insight-card">
+                        <div class="insight-header">
+                            <div class="insight-icon" style="background: #2196f3;">
+                                <i class="material-icons">schedule</i>
+                            </div>
+                            <div>
+                                <div class="insight-title">Optimal Timeline</div>
+                                <div class="insight-score" style="color: #2196f3;">92%</div>
+                            </div>
+                        </div>
+                        <div class="insight-description">
+                            You're 92% on track with your application timeline. Stay focused on upcoming deadlines.
+                        </div>
+                    </div>
+                    
+                    <div class="insight-card warning">
+                        <div class="insight-header">
+                            <div class="insight-icon" style="background: #ff9800;">
+                                <i class="material-icons">psychology</i>
+                            </div>
+                            <div>
+                                <div class="insight-title">Profile Strength</div>
+                                <div class="insight-score" style="color: #ff9800;">76%</div>
+                            </div>
+                        </div>
+                        <div class="insight-description">
+                            Consider adding one more leadership activity or research project to strengthen your profile.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Applications Section (Existing) -->
+            <div id="applications-section" class="dashboard-section">
+                <div style="margin-bottom: 2rem;">
+                    <h2>My Applications</h2>
+                    <p style="color: #666; margin-top: 0.5rem;">Track and manage your college applications</p>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: #1976d2;">
+                                <i class="material-icons">school</i>
+                            </div>
+                            <div>
+                                <h3 class="card-title">MIT</h3>
+                                <p class="card-subtitle">Computer Science</p>
+                            </div>
+                            <span class="status-badge delivered">Submitted</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100%; background: #4caf50;"></div>
+                        </div>
+                        <p>Progress: 100%</p>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background: #ff9800;">
+                                <i class="material-icons">school</i>
+                            </div>
+                            <div>
+                                <h3 class="card-title">Stanford</h3>
+                                <p class="card-subtitle">Computer Science</p>
+                            </div>
+                            <span class="status-badge pending">In Progress</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 75%; background: #ff9800;"></div>
+                        </div>
+                        <p>Progress: 75%</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Other sections remain the same as original dashboard -->
+            <div id="letters-section" class="dashboard-section">
+                <div style="margin-bottom: 2rem;">
+                    <h2>Recommendation Letters</h2>
+                    <p style="color: #666; margin-top: 0.5rem;">Manage and track your recommendation letters</p>
+                </div>
+                <p>Letter management interface here...</p>
+            </div>
+            
+            <div id="writing-section" class="dashboard-section">
+                <div style="margin-bottom: 2rem;">
+                    <h2>AI Writing Assistant</h2>
+                    <p style="color: #666; margin-top: 0.5rem;">Get AI-powered help with your essays</p>
+                </div>
+                <p>Writing assistant interface here...</p>
+            </div>
+            
+            <div id="insights-section" class="dashboard-section">
+                <div style="margin-bottom: 2rem;">
+                    <h2>Success Insights</h2>
+                    <p style="color: #666; margin-top: 0.5rem;">Learn from successful applicants</p>
+                </div>
+                <p>Success insights interface here...</p>
+            </div>
+            
+            <div id="files-section" class="dashboard-section">
+                <div style="margin-bottom: 2rem;">
+                    <h2>File Management</h2>
+                    <p style="color: #666; margin-top: 0.5rem;">Upload and organize your documents</p>
+                </div>
+                <p>File management interface here...</p>
+            </div>
+            
+            <div id="settings-section" class="dashboard-section">
+                <div style="margin-bottom: 2rem;">
+                    <h2>Settings</h2>
+                    <p style="color: #666; margin-top: 0.5rem;">Customize your experience</p>
+                </div>
+                <p>Settings interface here...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced Student Portal JavaScript
+        class StudentPortal {
+            constructor() {
+                this.currentSection = 'overview';
+                this.init();
+            }
+
+            init() {
+                this.setupNavigation();
+                this.loadInitialData();
+                this.setupEventListeners();
+            }
+
+            setupNavigation() {
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const section = item.dataset.section;
+                        if (section) {
+                            this.switchSection(section);
+                        }
+                    });
+                });
+            }
+
+            switchSection(section) {
+                // Update navigation
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.toggle('active', item.dataset.section === section);
+                });
+                
+                // Update content sections
+                document.querySelectorAll('.dashboard-section').forEach(sec => {
+                    sec.classList.toggle('active', sec.id === `${section}-section`);
+                });
+                
+                // Update page title
+                const pageTitle = document.querySelector('.page-title');
+                if (pageTitle) {
+                    pageTitle.textContent = this.getSectionTitle(section);
+                }
+                
+                this.currentSection = section;
+                this.loadSectionData(section);
+            }
+
+            getSectionTitle(section) {
+                const titles = {
+                    overview: 'Student Dashboard',
+                    'ai-insights': 'AI Insights',
+                    applications: 'My Applications',
+                    matching: 'University Matching',
+                    timeline: 'Timeline & Deadlines',
+                    letters: 'Recommendation Letters',
+                    writing: 'AI Writing Assistant',
+                    analytics: 'Predictive Analytics',
+                    insights: 'Success Insights',
+                    files: 'File Management',
+                    settings: 'Settings'
+                };
+                return titles[section] || 'Student Dashboard';
+            }
+
+            loadInitialData() {
+                // Simulate loading initial data
+                this.showNotification('Welcome to your enhanced student portal!', 'success');
+            }
+
+            loadSectionData(section) {
+                // Simulate loading section-specific data
+                console.log(`Loading data for section: ${section}`);
+            }
+
+            setupEventListeners() {
+                // Add event listeners for interactive elements
+                document.addEventListener('click', (e) => {
+                    if (e.target.matches('.btn')) {
+                        this.handleButtonClick(e.target);
+                    }
+                });
+            }
+
+            handleButtonClick(button) {
+                const action = button.textContent.trim();
+                
+                switch (action) {
+                    case 'View Details':
+                        this.showNotification('Opening detailed match analysis...', 'info');
+                        break;
+                    case 'Take Action':
+                        this.showNotification('Redirecting to application portal...', 'info');
+                        break;
+                    case 'Update Matches':
+                        this.runMatching();
+                        break;
+                    default:
+                        console.log('Button clicked:', action);
+                }
+            }
+
+            runMatching() {
+                this.showNotification('Running AI matching algorithm...', 'info');
+                
+                // Simulate AI matching process
+                setTimeout(() => {
+                    this.showNotification('New matches found! Check your results.', 'success');
+                }, 2000);
+            }
+
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 5000);
+            }
+        }
+
+        // Global function for matching (called from HTML)
+        function runMatching() {
+            if (window.studentPortal) {
+                window.studentPortal.runMatching();
+            }
+        }
+
+        // Initialize the student portal when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.studentPortal = new StudentPortal();
+        });
+    </script>
+</body>
+</html>
