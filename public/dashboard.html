@@ -254,15 +254,16 @@
       box-shadow:0 8px 32px rgba(0,0,0,.08);
     }
     .student-tabs {
-      display:flex; gap:.2rem; background:#f1f5f9; border-radius:999px; padding:.2rem;
+      display:flex; gap:.15rem; background:#f1f5f9; border-radius:999px; padding:.15rem;
       border:1px solid #e5e7eb; margin-bottom:.9rem;
-      justify-content: center; flex-wrap: wrap;
-      width: 100%;
+      justify-content: center; flex-wrap: nowrap; overflow-x: auto;
+      width: 100%; scrollbar-width: none; -ms-overflow-style: none;
     }
+    .student-tabs::-webkit-scrollbar { display: none; }
     .student-tab {
       appearance:none; background:transparent; border:0; cursor:pointer;
-      padding:.4rem .75rem; border-radius:999px; font-weight:600; color:#334155;
-      font-size:.85rem; white-space: nowrap; flex: 1; min-width: 0;
+      padding:.35rem .6rem; border-radius:999px; font-weight:600; color:#334155;
+      font-size:.8rem; white-space: nowrap; flex: 0 0 auto; min-width: 100px;
       text-align: center; transition: all 0.2s ease; position: relative;
     }
     .student-tab:hover {
@@ -841,6 +842,19 @@
       font-size: 0.8rem;
     }
 
+    /* Wide screen adjustments */
+    @media (min-width: 1200px) {
+      .student-tabs {
+        max-width: 800px;
+        margin: 0 auto .9rem auto;
+      }
+      
+      .student-tab {
+        min-width: 120px;
+        padding: .4rem .8rem;
+      }
+    }
+    
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .insights-grid {
@@ -863,13 +877,17 @@
       
       .student-tabs {
         gap: .1rem;
-        padding: .15rem;
+        padding: .1rem;
+        flex-wrap: wrap;
+        justify-content: center;
       }
       
       .student-tab {
-        padding: .35rem .5rem;
-        font-size: .8rem;
+        padding: .3rem .45rem;
+        font-size: .75rem;
         font-weight: 500;
+        min-width: 80px;
+        flex: 0 0 auto;
       }
     }
     
@@ -877,13 +895,16 @@
       .student-tabs {
         flex-wrap: wrap;
         justify-content: center;
-        gap: .25rem;
+        gap: .2rem;
+        padding: .2rem;
       }
       
       .student-tab {
-        flex: 0 1 auto;
-        min-width: 120px;
-        margin-bottom: .1rem;
+        flex: 0 0 auto;
+        min-width: 90px;
+        padding: .25rem .4rem;
+        font-size: .7rem;
+        margin: .05rem;
       }
     }
 
