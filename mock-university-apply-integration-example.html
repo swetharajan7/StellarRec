@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Apply • Mock University</title>
+  <meta name="description" content="Mock University application — recommendations demo page." />
+  <style>
+    :root{
+      --brand-1:#1976d2;
+      --brand-2:#7c4dff;
+      --ink:#111827;
+      --muted:#6b7280;
+      --panel:#ffffff;
+      --line:#e5e7eb;
+      --bg:#f8fafc;
+      --focus:#2563eb;
+      --danger:#e11d48;
+      --ok:#16a34a;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ margin:0; padding:0; height:100%; }
+    body{
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
+      color:var(--ink); 
+      background:var(--bg);
+    }
+
+    /* Header */
+    .site-header{
+      background:linear-gradient(135deg,var(--brand-1),var(--brand-2));
+      color:#fff; 
+      padding:.9rem 1.25rem;
+      box-shadow:0 6px 24px rgba(23,63,162,.25);
+      position:sticky; 
+      top:0; 
+      z-index:50;
+    }
+    .hdr-wrap{
+      max-width:1200px; 
+      margin:0 auto;
+      display:flex; 
+      align-items:center; 
+      justify-content:space-between;
+    }
+    .brand{
+      display:inline-flex; 
+      align-items:center; 
+      gap:.5rem;
+      font-weight:800; 
+      letter-spacing:.3px; 
+      text-decoration:none; 
+      color:#fff;
+      padding:.35rem .55rem; 
+      border-radius:8px;
+    }
+    .brand:hover{ background:rgba(255,255,255,.12); }
+    .brand .logo{
+      display:inline-grid; 
+      place-items:center; 
+      width:28px; 
+      height:28px;
+      background:rgba(255,255,255,.18); 
+      border-radius:6px; 
+      font-weight:900;
+      box-shadow:inset 0 0 0 2px rgba(255,255,255,.25);
+    }
+    
+    /* Layout */
+    .app{
+      max-width:1200px; 
+      margin:1.25rem auto; 
+      padding:0 1rem;
+      display:grid; 
+      grid-template-columns:280px 1fr; 
+      gap:1.25rem;
+    }
+    @media (max-width: 960px){
+      .app{ grid-template-columns:1fr; }
+    }
+
+    /* Sidebar */
+    .sidebar{
+      background:var(--panel); 
+      border:1px solid var(--line); 
+      border-radius:14px;
+      padding:1rem; 
+      position:sticky; 
+      top:88px; 
+      align-self:start;
+    }
+    .sidebar h2{
+      margin:.25rem 0 1rem; 
+      font-size:1.15rem; 
+      letter-spacing:.2px;
+    }
+    .side-nav{ 
+      list-style:none; 
+      margin:0; 
+      padding:0; 
+    }
+    .side-nav a{
+      display:block; 
+      padding:.55rem .65rem; 
+      border-radius:8px; 
+      text-decoration:none;
+      color:#1f2937; 
+      font-weight:600; 
+      border:1px solid transparent;
+    }
+    .side-nav a:hover{ background:#f3f4f6; }
+    .side-nav a[aria-current="page"]{
+      background:#eef2ff; 
+      color:#1e40af; 
+      border-color:#c7d2fe;
+    }
+    .side-spacer{ height:.35rem; }
+    
+    /* Main panel */
+    .panel{
+      background:var(--panel); 
+      border:1px solid var(--line); 
+      border-radius:14px; 
+      overflow:hidden;
+    }
+    .panel-hd{
+      padding:1rem 1.25rem; 
+      border-bottom:1px solid var(--line);
+      display:flex; 
+      align-items:center; 
+      justify-content:space-between;
+    }
+    .panel-hd h1{ 
+      margin:0; 
+      font-size:1.35rem; 
+      letter-spacing:.2px; 
+    }
+    .panel-bd{ padding:1.25rem; }
+    .info{ 
+      color:#374151; 
+      line-height:1.55; 
+    }
+    .info p{ margin:.75rem 0; }
+    
+    /* Rec table */
+    .table{
+      width:100%; 
+      border-collapse:collapse; 
+      margin-top:1rem; 
+      border-radius:10px; 
+      overflow:hidden;
+      border:1px solid var(--line);
+    }
+    .table th,.table td{ 
+      padding:.7rem .8rem; 
+      border-bottom:1px solid var(--line); 
+      text-align:left; 
+    }
+    .table th{ 
+      background:#f8fafc; 
+      font-weight:600; 
+      font-size:.9rem; 
+      color:#374151; 
+    }
+    .table tbody tr:hover{ background:#f9fafb; }
+    
+    /* Buttons */
+    .btn{
+      display:inline-flex; 
+      align-items:center; 
+      gap:.4rem;
+      padding:.5rem 1rem; 
+      border:1px solid var(--line); 
+      border-radius:8px; 
+      background:#fff; 
+      color:#374151; 
+      text-decoration:none; 
+      font-weight:500; 
+      cursor:pointer;
+      transition:all .15s;
+    }
+    .btn:hover{ 
+      background:#f3f4f6; 
+      border-color:#d1d5db; 
+    }
+    .btn-primary{ 
+      background:var(--brand-1); 
+      color:#fff; 
+      border-color:var(--brand-1); 
+    }
+    .btn-primary:hover{ 
+      background:#1565c0; 
+      border-color:#1565c0; 
+    }
+    
+    /* Integration indicator */
+    .integration-status {
+      background: #e3f2fd;
+      border: 1px solid #2196f3;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #1565c0;
+    }
+    
+    .integration-status.connected {
+      background: #e8f5e8;
+      border-color: #4caf50;
+      color: #2e7d32;
+    }
+    
+    .integration-status.error {
+      background: #ffebee;
+      border-color: #f44336;
+      color: #c62828;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="hdr-wrap">
+      <a href="/" class="brand">
+        <div class="logo">MU</div>
+        Mock University
+      </a>
+    </div>
+  </header>
+
+  <div class="app">
+    <aside class="sidebar">
+      <h2>Application Menu</h2>
+      <nav class="side-nav">
+        <a href="#home">Home</a>
+        <a href="#background">Personal Background</a>
+        <a href="#program">Program Selection</a>
+        <a href="#term">Term Selection</a>
+        <a href="#emergency">Emergency Contact(s)</a>
+        <a href="#additional">Additional Information</a>
+        <a href="#conduct">Student Conduct</a>
+        <a href="#questions">Program Questions</a>
+        <a href="#visa">Visa Information</a>
+        <a href="#history">Academic History</a>
+        <a href="#statement">Statement of Purpose</a>
+        <a href="#resume">Résumé</a>
+        <a href="#writing">Writing Sample</a>
+        <a href="#scores">Test Scores</a>
+        <a href="#experience">Professional/Work/Military Experience</a>
+        <a href="#achievements">Achievements/Civic Involvement</a>
+      </nav>
+    </aside>
+
+    <main class="panel">
+      <div class="panel-hd">
+        <h1>Recommendations</h1>
+        <a href="#" class="btn">Demo</a>
+      </div>
+      <div class="panel-bd">
+        <!-- StellarRec Integration Status -->
+        <div id="stellarrec-integration-status" class="integration-status">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 16px;">🔗</span>
+            <span><strong>StellarRec Integration:</strong> <span id="integration-message">Initializing...</span></span>
+          </div>
+        </div>
+        
+        <div class="info">
+          <p>Some graduate programs may prefer two academic references, while others might accept academic or professional references. Please consult with the office of admission with questions about recommendations.</p>
+          <p>Undergraduate applicants, including those for Bachelor's Program for Adults and Transfer Students, are not required to submit letters of recommendation but may choose to do so if they wish.</p>
+        </div>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="2" style="text-align: center; color: #6b7280; font-style: italic; padding: 2rem;">
+                No recommenders yet
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top: 1.5rem; display: flex; gap: .75rem;">
+          <button class="btn btn-primary">Add Recommender</button>
+          <button class="btn">Continue</button>
+        </div>
+        
+        <!-- Demo Controls -->
+        <div style="margin-top: 2rem; padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e5e7eb;">
+          <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: #374151;">Demo Controls</h3>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn" onclick="simulateRequest()">Simulate Request Sent</button>
+            <button class="btn" onclick="simulateCompletion()">Simulate Letter Completed</button>
+            <button class="btn" onclick="clearRecommendations()">Clear All</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Include StellarRec Integration Script -->
+  <script src="mock-university-stellarrec-integration.js"></script>
+  
+  <script>
+    // Demo functions for testing
+    function simulateRequest() {
+      window.mockUniversityReceiveWebhook({
+        type: 'request_sent',
+        timestamp: new Date().toISOString(),
+        student: {
+          name: 'Swetha Rajan',
+          email: 'swetha.rajan103@gmail.com'
+        },
+        recommender: {
+          name: 'Prof. Manas Mohan Nand',
+          email: 'manasmohannand@gmail.com'
+        }
+      });
+    }
+    
+    function simulateCompletion() {
+      window.mockUniversityReceiveWebhook({
+        type: 'letter_completed',
+        timestamp: new Date().toISOString(),
+        student: {
+          name: 'Swetha Rajan',
+          email: 'swetha.rajan103@gmail.com'
+        },
+        recommender: {
+          name: 'Prof. Manas Mohan Nand',
+          email: 'manasmohannand@gmail.com'
+        }
+      });
+    }
+    
+    function clearRecommendations() {
+      if (window.MockUniversityStellarRecIntegration) {
+        window.MockUniversityStellarRecIntegration.clearRecommendations();
+      }
+    }
+    
+    // Update integration status
+    function updateIntegrationStatus() {
+      const statusEl = document.getElementById('stellarrec-integration-status');
+      const messageEl = document.getElementById('integration-message');
+      
+      if (window.MockUniversityStellarRecIntegration) {
+        statusEl.className = 'integration-status connected';
+        messageEl.textContent = 'Connected and ready to receive updates';
+      } else {
+        statusEl.className = 'integration-status error';
+        messageEl.textContent = 'Integration script not loaded';
+      }
+    }
+    
+    // Check integration status after a short delay
+    setTimeout(updateIntegrationStatus, 1000);
+  </script>
+</body>
+</html>
