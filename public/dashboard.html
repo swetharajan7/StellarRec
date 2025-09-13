@@ -254,17 +254,26 @@
       box-shadow:0 8px 32px rgba(0,0,0,.08);
     }
     .student-tabs {
-      display:flex; gap:.15rem; background:#f1f5f9; border-radius:999px; padding:.15rem;
+      display:flex; gap:.3rem; background:#f1f5f9; border-radius:16px; padding:.3rem;
       border:1px solid #e5e7eb; margin-bottom:.9rem;
-      justify-content: center; flex-wrap: nowrap; overflow-x: auto;
-      width: 100%; scrollbar-width: none; -ms-overflow-style: none;
+      justify-content: center; flex-wrap: wrap;
+      width: 100%;
     }
-    .student-tabs::-webkit-scrollbar { display: none; }
     .student-tab {
       appearance:none; background:transparent; border:0; cursor:pointer;
-      padding:.35rem .6rem; border-radius:999px; font-weight:600; color:#334155;
-      font-size:.8rem; white-space: nowrap; flex: 0 0 auto; min-width: 100px;
+      padding:.5rem .75rem; border-radius:12px; font-weight:600; color:#334155;
+      font-size:.85rem; flex: 1; min-width: 80px; max-width: 120px;
       text-align: center; transition: all 0.2s ease; position: relative;
+      display: flex; flex-direction: column; align-items: center; gap: .2rem;
+    }
+    .tab-icon {
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+    .tab-text {
+      font-size: .75rem;
+      font-weight: 600;
+      line-height: 1;
     }
     .student-tab:hover {
       background: rgba(255, 255, 255, 0.5);
@@ -845,13 +854,22 @@
     /* Wide screen adjustments */
     @media (min-width: 1200px) {
       .student-tabs {
-        max-width: 800px;
+        max-width: 700px;
         margin: 0 auto .9rem auto;
       }
       
       .student-tab {
-        min-width: 120px;
-        padding: .4rem .8rem;
+        min-width: 100px;
+        max-width: 140px;
+        padding: .6rem .9rem;
+      }
+      
+      .tab-icon {
+        font-size: 1.2rem;
+      }
+      
+      .tab-text {
+        font-size: .8rem;
       }
     }
     
@@ -876,18 +894,25 @@
       }
       
       .student-tabs {
-        gap: .1rem;
-        padding: .1rem;
+        gap: .2rem;
+        padding: .2rem;
         flex-wrap: wrap;
         justify-content: center;
       }
       
       .student-tab {
-        padding: .3rem .45rem;
-        font-size: .75rem;
-        font-weight: 500;
-        min-width: 80px;
-        flex: 0 0 auto;
+        padding: .4rem .6rem;
+        min-width: 70px;
+        max-width: 100px;
+        flex: 1;
+      }
+      
+      .tab-icon {
+        font-size: 1rem;
+      }
+      
+      .tab-text {
+        font-size: .7rem;
       }
     }
     
@@ -895,16 +920,24 @@
       .student-tabs {
         flex-wrap: wrap;
         justify-content: center;
-        gap: .2rem;
-        padding: .2rem;
+        gap: .25rem;
+        padding: .25rem;
       }
       
       .student-tab {
-        flex: 0 0 auto;
-        min-width: 90px;
-        padding: .25rem .4rem;
-        font-size: .7rem;
-        margin: .05rem;
+        flex: 0 0 calc(50% - .125rem);
+        min-width: 0;
+        max-width: none;
+        padding: .4rem .3rem;
+        margin: 0;
+      }
+      
+      .tab-icon {
+        font-size: .9rem;
+      }
+      
+      .tab-text {
+        font-size: .65rem;
       }
     }
 
@@ -1250,19 +1283,24 @@
       <div class="student-tabs" role="tablist" aria-label="Student actions">
         <!-- REORDERED: Select (left), Send (center), Track (right) -->
         <button id="stuTabSelect" class="student-tab" role="tab" aria-selected="false" type="button">
-          Select Universities
+          <span class="tab-icon material-icons">school</span>
+          <span class="tab-text">Select</span>
         </button>
         <button id="stuTabSend" class="student-tab" role="tab" aria-selected="true" type="button">
-          Send Recommendation Request
+          <span class="tab-icon material-icons">send</span>
+          <span class="tab-text">Send</span>
         </button>
         <button id="stuTabAI" class="student-tab" role="tab" aria-selected="false" type="button">
-          🤖 AI Insights
+          <span class="tab-icon material-icons">psychology</span>
+          <span class="tab-text">AI</span>
         </button>
         <button id="stuTabTimeline" class="student-tab" role="tab" aria-selected="false" type="button">
-          📅 Timeline
+          <span class="tab-icon material-icons">schedule</span>
+          <span class="tab-text">Timeline</span>
         </button>
         <button id="stuTabTrack" class="student-tab" role="tab" aria-selected="false" type="button">
-          Track Recommendation &amp; Status
+          <span class="tab-icon material-icons">track_changes</span>
+          <span class="tab-text">Track</span>
         </button>
       </div>
       <div class="student-panels">
