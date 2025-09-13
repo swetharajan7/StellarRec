@@ -3890,13 +3890,16 @@ window.SR_MOCK = {
         file_url: payload.artifact_url || 'https://stellarrec.netlify.app/assets/mock/reco-demo.pdf'
       };
       
-      console.log('[SR] Sending to Mock University API:', {
+      console.log('[SR] 🚀 Sending to Mock University API:', {
         url: this.SAVE_URL,
         external_id: mockPayload.external_id,
         status: mockPayload.status,
         recommender: mockPayload.recommender_name,
-        letter_length: mockPayload.letter_html.length
+        letter_length: mockPayload.letter_html.length,
+        has_file_url: !!mockPayload.file_url
       });
+      
+      console.log('[SR] 📋 Full payload:', mockPayload);
       
       const response = await fetch(this.SAVE_URL, {
         method: 'POST',
@@ -3929,6 +3932,45 @@ window.SR_MOCK = {
     });
     
     return { title: letterTitle, content: letterContent };
+  },
+  
+  // Test Mock University API connection
+  async testMockUniversityAPI() {
+    const testPayload = {
+      external_id: 'sr_test_' + Date.now(),
+      student_name: 'Test Student',
+      student_email: 'test@example.com',
+      recommender_name: 'Prof. Test Recommender',
+      recommender_email: 'test.recommender@example.com',
+      status: 'Completed',
+      letter_html: 'This is a test recommendation letter from StellarRec.',
+      file_url: 'https://stellarrec.netlify.app/assets/mock/reco-demo.pdf'
+    };
+    
+    console.log('[SR] Testing Mock University API connection...');
+    console.log('[SR] Test payload:', testPayload);
+    
+    try {
+      const response = await fetch(this.SAVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(testPayload)
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('[SR] ✅ Mock University API test SUCCESS:', result);
+        console.log('[SR] 🔗 Test the result at:', `https://mockuniversity.netlify.app/apply.html?external_id=${testPayload.external_id}`);
+        return { success: true, result, testUrl: `https://mockuniversity.netlify.app/apply.html?external_id=${testPayload.external_id}` };
+      } else {
+        const errorText = await response.text();
+        console.error('[SR] ❌ Mock University API test FAILED:', response.status, response.statusText, errorText);
+        return { success: false, error: `${response.status}: ${errorText}` };
+      }
+    } catch(e) {
+      console.error('[SR] ❌ Mock University API test ERROR:', e);
+      return { success: false, error: e.message };
+    }
   }
 };
 
@@ -4268,6 +4310,40 @@ document.addEventListener('DOMContentLoaded', function() {
       window.open(mockUrl, '_blank');
     }
   });
+  
+  // Expose test functions to global scope for easy console testing
+  window.testMockUniversityIntegration = async function() {
+    console.log('🧪 Testing Mock University Integration...');
+    
+    // Test API connection
+    const apiTest = await window.SR_MOCK.testMockUniversityAPI();
+    
+    if (apiTest.success) {
+      console.log('✅ API Test Passed!');
+      console.log('🔗 View result at:', apiTest.testUrl);
+      
+      // Test letter capture
+      const letterTest = window.SR_MOCK.testLetterCapture();
+      console.log('📝 Letter capture test:', letterTest);
+      
+      return {
+        success: true,
+        message: 'Integration test completed successfully!',
+        testUrl: apiTest.testUrl,
+        letterCaptured: letterTest.content.length > 0
+      };
+    } else {
+      console.error('❌ API Test Failed:', apiTest.error);
+      return {
+        success: false,
+        message: 'Integration test failed',
+        error: apiTest.error
+      };
+    }
+  };
+  
+  console.log('🔧 StellarRec Mock University Integration Ready!');
+  console.log('💡 Run testMockUniversityIntegration() in console to test the integration');
 });</script>
 
 <!-- StellarRec API Integration -->
