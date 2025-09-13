@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Universities - StellarRec</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .debug-output { background: #f5f5f5; padding: 10px; border-radius: 3px; white-space: pre-wrap; }
+        button { padding: 10px 20px; margin: 5px; background: #1976d2; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #1565c0; }
+    </style>
+</head>
+<body>
+    <h1>🔍 University Data Debug Tool</h1>
+    
+    <div class="debug-section">
+        <h2>1. Test University JSON Loading</h2>
+        <button onclick="testUniversityLoading()">Load Universities</button>
+        <div id="loading-output" class="debug-output"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>2. Check University Names</h2>
+        <button onclick="checkUniversityNames()">Check Names</button>
+        <div id="names-output" class="debug-output"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>3. Test Dropdown Population</h2>
+        <select id="test-dropdown" style="width: 300px; padding: 5px;">
+            <option>Loading...</option>
+        </select>
+        <button onclick="populateDropdown()">Populate Dropdown</button>
+    </div>
+
+    <script>
+        // University loading URLs to test
+        const CANDIDATE_URLS = [
+            '/assets/us_institutions_by_state_2023.json',
+            './assets/us_institutions_by_state_2023.json',
+            'https://stellarrec.netlify.app/assets/us_institutions_by_state_2023.json'
+        ];
+
+        const MOCK = {
+            unitid: 'MOCK-0000',
+            name: 'Mock University',
+            state: 'CA',
+            type: 'Private nonprofit',
+            level: '4-year'
+        };
+
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent += message + '\n';
+        }
+
+        function clearLog(elementId) {
+            document.getElementById(elementId).textContent = '';
+        }
+
+        async function testUniversityLoading() {
+            clearLog('loading-output');
+            log('loading-output', '🔍 Testing university JSON loading...\n');
+
+            for (const url of CANDIDATE_URLS) {
+                try {
+                    log('loading-output', `Trying: ${url}`);
+                    const res = await fetch(url, { cache: 'no-cache' });
+                    
+                    if (!res.ok) {
+                        log('loading-output', `❌ HTTP ${res.status}`);
+                        continue;
+                    }
+                    
+                    const json = await res.json();
+                    log('loading-output', `✅ Success! Data type: ${Array.isArray(json) ? 'Array' : 'Object'}`);
+                    log('loading-output', `Data keys: ${Object.keys(json).slice(0, 5).join(', ')}...`);
+                    
+                    if (Array.isArray(json)) {
+                        log('loading-output', `Array length: ${json.length}`);
+                        if (json.length > 0) {
+                            log('loading-output', `First item: ${JSON.stringify(json[0], null, 2)}`);
+                        }
+                    } else {
+                        const firstState = Object.keys(json)[0];
+                        if (firstState && json[firstState]) {
+                            log('loading-output', `First state (${firstState}) has ${json[firstState].length} universities`);
+                            if (json[firstState].length > 0) {
+                                log('loading-output', `Sample university: ${JSON.stringify(json[firstState][0], null, 2)}`);
+                            }
+                        }
+                    }
+                    
+                    // Store for other tests
+                    window.testUniversityData = json;
+                    return;
+                    
+                } catch (error) {
+                    log('loading-output', `❌ Error: ${error.message}`);
+                }
+            }
+            
+            log('loading-output', '\n❌ All URLs failed. Using fallback.');
+            window.testUniversityData = [MOCK];
+        }
+
+        function flattenAndMap(data) {
+            // Same logic as in dashboard
+            const rows = Array.isArray(data)
+                ? data
+                : Object.keys(data || {}).flatMap(st => (data[st] || []).map(r => ({...r, state: r.state || st})));
+
+            const mapped = rows.map((r, i) => ({
+                unitid: String(r.unitid ?? r.UNITID ?? r.id ?? `u${i}`),
+                name: r.name ?? r.INSTNM ?? r.instnm ?? 'Unnamed University',
+                state: r.state ?? r.STABBR ?? r.state_abbr ?? '',
+                type: r.type ?? r.SECTOR_DESC ?? r.sector ?? '',
+                level: r.level ?? r.ICLEVEL_DESC ?? r.level_desc ?? '',
+            })).filter(u => u.unitid && u.name);
+
+            // Ensure unique ids
+            const seen = new Set();
+            const uniq = [];
+            for (const u of mapped) {
+                if (!seen.has(u.unitid)) {
+                    seen.add(u.unitid);
+                    uniq.push(u);
+                }
+            }
+
+            // Ensure Mock University is first
+            if (!uniq.find(x => x.unitid === MOCK.unitid)) {
+                uniq.unshift(MOCK);
+            }
+            
+            return uniq;
+        }
+
+        function checkUniversityNames() {
+            clearLog('names-output');
+            
+            if (!window.testUniversityData) {
+                log('names-output', '❌ No university data loaded. Run "Load Universities" first.');
+                return;
+            }
+
+            log('names-output', '🔍 Processing university names...\n');
+            
+            const processed = flattenAndMap(window.testUniversityData);
+            
+            log('names-output', `Total universities after processing: ${processed.length}`);
+            
+            // Check for real vs generic names
+            const realNames = processed.filter(u => !u.name.match(/^University [A-Z]$/));
+            const genericNames = processed.filter(u => u.name.match(/^University [A-Z]$/));
+            
+            log('names-output', `Real university names: ${realNames.length}`);
+            log('names-output', `Generic names (University A, B, etc): ${genericNames.length}`);
+            
+            if (realNames.length > 0) {
+                log('names-output', '\n✅ Sample real names:');
+                realNames.slice(0, 10).forEach(u => {
+                    log('names-output', `  • ${u.name} (${u.state})`);
+                });
+            }
+            
+            if (genericNames.length > 0) {
+                log('names-output', '\n⚠️ Sample generic names:');
+                genericNames.slice(0, 10).forEach(u => {
+                    log('names-output', `  • ${u.name} (${u.state})`);
+                });
+            }
+            
+            // Store processed data
+            window.processedUniversities = processed;
+        }
+
+        function populateDropdown() {
+            const dropdown = document.getElementById('test-dropdown');
+            
+            if (!window.processedUniversities) {
+                dropdown.innerHTML = '<option>❌ No processed data. Run previous steps first.</option>';
+                return;
+            }
+            
+            dropdown.innerHTML = '<option value="">Select a university...</option>';
+            
+            window.processedUniversities.slice(0, 50).forEach(u => {
+                const option = document.createElement('option');
+                option.value = u.unitid;
+                option.textContent = `${u.name} (${u.state})`;
+                dropdown.appendChild(option);
+            });
+            
+            console.log('🎯 Dropdown populated with first 50 universities');
+        }
+
+        // Auto-run on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Debug tool ready. Click buttons to test university loading.');
+        });
+    </script>
+</body>
+</html>
