@@ -942,6 +942,36 @@
     }
 
   </style>
+
+<style id="sr-sticky-fix">
+  /* Keep the pill nav from overlapping & let it wrap on smaller widths */
+  .student-tabs{
+    position: sticky;
+    top: var(--sticky-top, 88px); /* sits just below header */
+    z-index: 15;
+    background: var(--panel, #fff);
+    border-radius: 999px;
+    gap: .5rem;              /* spacing between buttons */
+    flex-wrap: wrap;         /* prevent self-overlap on small screens */
+    padding: .25rem .35rem;  /* gives breathing room when wrapped */
+    backdrop-filter: saturate(1.2) blur(4px);
+  }
+  .student-tab{
+    flex: 0 1 auto;          /* don't stretch; allow wrapping */
+    min-width: max-content;  /* keep label text from squashing */
+  }
+  
+  /* Dark theme harmony */
+  :root[data-theme="dark"] .student-tabs{
+    background: rgba(17,26,42,.72);
+    border: 1px solid #24324a;
+  }
+  
+  /* On narrow screens, disable sticky to keep things simple */
+  @media (max-width: 768px){
+    .student-tabs{ position: static; }
+  }
+</style>
 </head>
 <body>
   <!-- HEADER -->
@@ -5458,5 +5488,18 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     initAIFeatures();
   }
+})();
+</script>
+
+<script>
+(function fixStickyTop(){
+  const root = document.documentElement;
+  function setStickyTop(){
+    const header = document.querySelector('.header');
+    const h = header ? header.offsetHeight : 72;   // fallback
+    root.style.setProperty('--sticky-top', (h + 12) + 'px');
+  }
+  setStickyTop();
+  window.addEventListener('resize', setStickyTop, { passive:true });
 })();
 </script>
