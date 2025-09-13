@@ -1633,9 +1633,23 @@ document.addEventListener('DOMContentLoaded', function(){
       // Reuse same external_id from earlier step
       const externalId = localStorage.getItem('sr_last_external_id') || ('sr_' + Date.now());
       
-      // Pick your actual artifact URL; if you have a file upload, use that URL.
-      // You already use a demo PDF in your mock redirect—reuse it here:
-      const artifactUrl = 'https://stellarrec.netlify.app/assets/mock/reco-demo.pdf';
+      // Capture the actual letter content from the editor
+      const writerBox = document.getElementById('writerBox');
+      let letterContent = writerBox ? (writerBox.textContent || writerBox.innerText || '').trim() : '';
+      const letterTitle = document.getElementById('writerTitle')?.value?.trim() || 'Recommendation Letter';
+      
+      // If no content, provide a meaningful fallback
+      if (!letterContent) {
+        letterContent = `I am pleased to provide this recommendation for ${studentName}. This letter was submitted through StellarRec on ${new Date().toLocaleDateString()}.`;
+      }
+      
+      // Create a data URL with the letter content for download
+      // In a real implementation, this would be a proper file upload URL
+      const letterBlob = new Blob([`${letterTitle}\n\n${letterContent}\n\nSubmitted via StellarRec on ${new Date().toLocaleString()}`], { type: 'text/plain' });
+      const artifactUrl = URL.createObjectURL(letterBlob);
+      
+      // Also keep the demo PDF as fallback
+      const fallbackArtifactUrl = 'https://stellarrec.netlify.app/assets/mock/reco-demo.pdf';
       
       // Get student data using helper function
       const studentData = getStudentDataFromURL();
@@ -1649,6 +1663,26 @@ document.addEventListener('DOMContentLoaded', function(){
         return u ? { unitid: u.unitid, name: u.name } : { unitid: uid };
       });
       
+      // Store letter content for persistence
+      try {
+        const letterData = {
+          title: letterTitle,
+          content: letterContent,
+          timestamp: Date.now(),
+          external_id: externalId
+        };
+        localStorage.setItem('sr_last_letter', JSON.stringify(letterData));
+      } catch(e) {
+        console.warn('[SR] Could not store letter data:', e);
+      }
+      
+      console.log('[SR] Sending completion webhook with letter content:', {
+        letterTitle,
+        letterLength: letterContent.length,
+        letterPreview: letterContent.substring(0, 100) + (letterContent.length > 100 ? '...' : ''),
+        externalId
+      });
+      
       await SR_MOCK.notify({
         external_id: externalId,
         student_name: studentName,
@@ -1657,7 +1691,12 @@ document.addEventListener('DOMContentLoaded', function(){
         recommender_email: recommenderEmail,
         universities,
         status: 'completed',
-        artifact_url: artifactUrl,
+        artifact_url: fallbackArtifactUrl, // Use demo PDF for Mock University compatibility
+        letter_title: letterTitle,
+        letter_content: letterContent,
+        letter_length: letterContent.length,
+        letter_blob_url: artifactUrl, // Actual letter content as downloadable blob
+        submission_date: new Date().toISOString(),
         ts: Date.now()
       });
     })();
@@ -3839,15 +3878,44 @@ window.SR_MOCK = {
   HOOK_URL: 'https://mockuniversity.netlify.app/.netlify/functions/reco-hook',
   async notify(payload) {
     try {
-      await fetch(this.HOOK_URL, {
+      console.log('[SR] Sending webhook to Mock University:', {
+        url: this.HOOK_URL,
+        payload: {
+          ...payload,
+          letter_content: payload.letter_content ? `${payload.letter_content.substring(0, 50)}...` : 'No content'
+        }
+      });
+      
+      const response = await fetch(this.HOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      console.log('[SR] Mock University webhook sent:', payload);
+      
+      if (response.ok) {
+        console.log('[SR] ✅ Mock University webhook sent successfully');
+      } else {
+        console.error('[SR] ❌ Mock University webhook failed:', response.status, response.statusText);
+      }
     } catch(e) { 
-      console.warn('[SR] mock webhook failed', e); 
+      console.warn('[SR] ❌ Mock webhook failed:', e); 
     }
+  },
+  
+  // Helper function to test letter content capture
+  testLetterCapture() {
+    const writerBox = document.getElementById('writerBox');
+    const letterContent = writerBox ? (writerBox.textContent || writerBox.innerText || '').trim() : '';
+    const letterTitle = document.getElementById('writerTitle')?.value?.trim() || 'Recommendation Letter';
+    
+    console.log('[SR] Letter Content Test:', {
+      title: letterTitle,
+      content: letterContent,
+      length: letterContent.length,
+      preview: letterContent.substring(0, 100) + (letterContent.length > 100 ? '...' : '')
+    });
+    
+    return { title: letterTitle, content: letterContent };
   }
 };
 
@@ -4181,7 +4249,25 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('click', function(e) {
     if (e.target.id === 'mockUniversityBtn' || e.target.closest('#mockUniversityBtn')) {
       const externalId = localStorage.getItem('sr_last_external_id') || ('sr_' + Date.now());
-      const mockUrl = `https://mockuniversity.netlify.app/apply.html?external_id=${externalId}`;
+      
+      // Include letter data in URL for Mock University
+      const params = new URLSearchParams();
+      params.set('external_id', externalId);
+      
+      // Add letter content if available
+      try {
+        const letterData = JSON.parse(localStorage.getItem('sr_last_letter') || '{}');
+        if (letterData.content) {
+          params.set('letter_available', 'true');
+          params.set('letter_title', letterData.title || 'Recommendation Letter');
+          // Don't put full content in URL (too long), Mock University will fetch via webhook
+        }
+      } catch(e) {
+        console.warn('[SR] Could not retrieve letter data for URL:', e);
+      }
+      
+      const mockUrl = `https://mockuniversity.netlify.app/apply.html?${params.toString()}`;
+      console.log('[SR] Opening Mock University with URL:', mockUrl);
       window.open(mockUrl, '_blank');
     }
   });
