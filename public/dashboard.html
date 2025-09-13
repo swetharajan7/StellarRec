@@ -1610,8 +1610,19 @@ document.addEventListener('DOMContentLoaded', function(){
     closeX?.addEventListener('click', closeModal);
     cancel?.addEventListener('click', closeModal);
 
-    confirm?.addEventListener('click', ()=>{
+    confirm?.addEventListener('click', async ()=>{
       closeModal();
+      
+      // Hook B: Send Completed status to MockU
+      try {
+        const completedPayload = buildCompletedPayload();
+        if (!completedPayload.external_id) throw new Error('missing external_id');
+        const resp = await postToMockU(completedPayload);
+        console.log('[SR] ✅ MockU completed saved', resp);
+      } catch (e) {
+        console.warn('[SR] MockU completed failed', e);  // non-fatal, UI still continues
+      }
+      
       startProgressSend();
     });
   }
@@ -3974,6 +3985,80 @@ window.SR_MOCK = {
   }
 };
 
+// ---------- MockU API bridge (POST to /api/save-reco) ----------
+(function(){
+  // Reuse the external_id your Student form already creates
+  function getExternalId(){
+    try { return localStorage.getItem('sr_last_external_id') || ''; } catch { return ''; }
+  }
+  
+  // OPTIONAL: demo fallbacks until you wire real uploads
+  function demoPdfUrl(){ return 'https://stellarrec.netlify.app/assets/mock/reco-demo.pdf'; }
+  function demoMovUrl(){ return 'https://stellarrec.netlify.app/assets/mock/reco-demo.mov'; }
+  
+  // Public function you can call anywhere
+  window.postToMockU = async function(payload){
+    const url = 'https://mockuniversity.netlify.app/api/save-reco';
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type':'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('MockU API failed: '+res.status);
+    return res.json();
+  };
+  
+  // Build a "Completed" payload from the Recommender UI
+  window.buildCompletedPayload = function(){
+    const external_id = getExternalId();                     // must match the one created by the student
+    // Pull whatever you have on screen:
+    const titleEl  = document.getElementById('writerTitle');
+    const boxEl    = document.getElementById('writerBox');
+    
+    // If you don't have real hosted uploads yet, use demo URLs:
+    const pdfUrl = demoPdfUrl();
+    const movUrl = demoMovUrl();
+    
+    // You likely already store these in localStorage during "Import link"
+    let student_name='', student_email='', recommender_name='', recommender_email='';
+    try {
+      const ref = JSON.parse(localStorage.getItem('sr_referral')||'{}');
+      const s = ref.student||{}, r = ref.recommender||{};
+      student_name = [s.first||'', s.last||''].filter(Boolean).join(' ').trim();
+      student_email = s.email||'';
+      recommender_name  = r.name || '';
+      recommender_email = r.email||'';
+    } catch {}
+    
+    return {
+      external_id,
+      student_name,
+      student_email,
+      recommender_name,
+      recommender_email,
+      status: 'Completed',
+      title: (titleEl?.value||'').trim(),
+      letter_content: (boxEl?.innerText||'').trim(),
+      pdf_url: pdfUrl,        // change to your real hosted PDF later
+      mov_url: movUrl         // change to your real hosted video later
+    };
+  };
+  
+  // Build a "Pending" payload from the Student form
+  window.buildPendingPayload = function(studentName, studentEmail, recName, recEmail){
+    let external_id = '';
+    try { external_id = localStorage.getItem('sr_last_external_id') || ''; } catch {}
+    return {
+      external_id,
+      student_name: studentName,
+      student_email: studentEmail,
+      recommender_name: recName,
+      recommender_email: recEmail,
+      status: 'Pending'
+    };
+  };
+})();
+
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
   if (window.__srSendBound) return; 
@@ -4207,6 +4292,15 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
       console.log('✅ Backend response:', result);
+      
+      // Hook A: Send Pending status to MockU
+      const pendingPayload = buildPendingPayload(studentName, studentEmail, rName, rMail);
+      try {
+        const resp = await postToMockU(pendingPayload);
+        console.log('[SR] ✅ MockU pending saved', resp);
+      } catch(e){
+        console.warn('[SR] MockU pending failed', e);  // non-fatal
+      }
 
       const now = Date.now();
       const requestId = result.id || 'req_' + now;
