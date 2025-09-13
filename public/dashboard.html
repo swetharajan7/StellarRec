@@ -4445,13 +4445,37 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('SR.universities length:', SR.universities?.length || 0);
     console.log('First 10 universities:', SR.universities?.slice(0, 10));
     
+    // Check for real names vs generic names
+    const realNames = SR.universities?.filter(u => u.name && !u.name.match(/^University [A-Z]$/)) || [];
+    const genericNames = SR.universities?.filter(u => u.name && u.name.match(/^University [A-Z]$/)) || [];
+    console.log('Real university names:', realNames.length);
+    console.log('Generic names (University A, B, etc):', genericNames.length);
+    
+    if (realNames.length > 0) {
+      console.log('Sample real names:', realNames.slice(0, 5).map(u => u.name));
+    }
+    if (genericNames.length > 0) {
+      console.log('Sample generic names:', genericNames.slice(0, 5).map(u => u.name));
+    }
+    
     const selectEl = document.getElementById('universitySelect');
     console.log('Select element found:', !!selectEl);
     console.log('Select options count:', selectEl?.options?.length || 0);
     
     if (selectEl && selectEl.options.length > 1) {
-      console.log('First 5 options:', Array.from(selectEl.options).slice(0, 5).map(opt => opt.textContent));
+      console.log('First 10 dropdown options:', Array.from(selectEl.options).slice(0, 10).map(opt => opt.textContent));
     }
+    
+    // Check if JSON file is accessible
+    console.log('🔄 Testing JSON file access...');
+    fetch('/assets/us_institutions_by_state_2023.json')
+      .then(r => r.json())
+      .then(data => {
+        const firstState = Object.keys(data)[0];
+        const firstUni = data[firstState][0];
+        console.log('✅ JSON accessible. First university:', firstUni.name, 'in', firstState);
+      })
+      .catch(e => console.error('❌ JSON not accessible:', e));
     
     // Try to reload universities
     console.log('🔄 Attempting to reload universities...');
