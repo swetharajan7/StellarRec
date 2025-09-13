@@ -254,17 +254,27 @@
       box-shadow:0 8px 32px rgba(0,0,0,.08);
     }
     .student-tabs {
-      display:flex; gap:.4rem; background:#f1f5f9; border-radius:999px; padding:.2rem;
+      display:flex; gap:.2rem; background:#f1f5f9; border-radius:999px; padding:.2rem;
       border:1px solid #e5e7eb; margin-bottom:.9rem;
-      justify-content: space-between;
+      justify-content: center; flex-wrap: wrap;
       width: 100%;
     }
     .student-tab {
       appearance:none; background:transparent; border:0; cursor:pointer;
-      padding:.5rem 1rem; border-radius:999px; font-weight:700; color:#334155;
+      padding:.4rem .75rem; border-radius:999px; font-weight:600; color:#334155;
+      font-size:.85rem; white-space: nowrap; flex: 1; min-width: 0;
+      text-align: center; transition: all 0.2s ease; position: relative;
+    }
+    .student-tab:hover {
+      background: rgba(255, 255, 255, 0.5);
+      transform: translateY(-1px);
     }
     .student-tab[aria-selected="true"] {
       background:#fff; color:#0f172a; box-shadow:0 6px 18px rgba(0,0,0,.06);
+      transform: none;
+    }
+    .student-tab[aria-selected="true"]:hover {
+      transform: none;
     }
     .student-panels > section { display:block; }
   
@@ -849,6 +859,31 @@
       .recommendation-item {
         flex-direction: column;
         text-align: center;
+      }
+      
+      .student-tabs {
+        gap: .1rem;
+        padding: .15rem;
+      }
+      
+      .student-tab {
+        padding: .35rem .5rem;
+        font-size: .8rem;
+        font-weight: 500;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .student-tabs {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: .25rem;
+      }
+      
+      .student-tab {
+        flex: 0 1 auto;
+        min-width: 120px;
+        margin-bottom: .1rem;
       }
     }
 
