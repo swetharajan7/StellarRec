@@ -3873,32 +3873,45 @@ window.SR_API = {
 // Backend URL - Using Netlify Functions
 window.SR_BACKEND_BASE = window.SR_BACKEND_BASE || 'https://stellarrec.netlify.app/.netlify/functions';
 
-// ---- Mock University webhook helper (safe no-op on failure)
+// ---- Mock University webhook helper (updated for new API)
 window.SR_MOCK = {
-  HOOK_URL: 'https://mockuniversity.netlify.app/.netlify/functions/reco-hook',
+  SAVE_URL: 'https://mockuniversity.netlify.app/api/save-reco',
   async notify(payload) {
     try {
-      console.log('[SR] Sending webhook to Mock University:', {
-        url: this.HOOK_URL,
-        payload: {
-          ...payload,
-          letter_content: payload.letter_content ? `${payload.letter_content.substring(0, 50)}...` : 'No content'
-        }
+      // Transform payload to match Mock University's expected format
+      const mockPayload = {
+        external_id: payload.external_id,
+        student_name: payload.student_name,
+        student_email: payload.student_email,
+        recommender_name: payload.recommender_name,
+        recommender_email: payload.recommender_email,
+        status: payload.status === 'sent' ? 'Pending' : 'Completed',
+        letter_html: payload.letter_content || '',
+        file_url: payload.artifact_url || 'https://stellarrec.netlify.app/assets/mock/reco-demo.pdf'
+      };
+      
+      console.log('[SR] Sending to Mock University API:', {
+        url: this.SAVE_URL,
+        external_id: mockPayload.external_id,
+        status: mockPayload.status,
+        recommender: mockPayload.recommender_name,
+        letter_length: mockPayload.letter_html.length
       });
       
-      const response = await fetch(this.HOOK_URL, {
+      const response = await fetch(this.SAVE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(mockPayload)
       });
       
       if (response.ok) {
-        console.log('[SR] ✅ Mock University webhook sent successfully');
+        const result = await response.json();
+        console.log('[SR] ✅ Mock University API success:', result);
       } else {
-        console.error('[SR] ❌ Mock University webhook failed:', response.status, response.statusText);
+        console.error('[SR] ❌ Mock University API failed:', response.status, response.statusText);
       }
     } catch(e) { 
-      console.warn('[SR] ❌ Mock webhook failed:', e); 
+      console.warn('[SR] ❌ Mock University API error:', e); 
     }
   },
   
@@ -4250,23 +4263,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.target.id === 'mockUniversityBtn' || e.target.closest('#mockUniversityBtn')) {
       const externalId = localStorage.getItem('sr_last_external_id') || ('sr_' + Date.now());
       
-      // Include letter data in URL for Mock University
-      const params = new URLSearchParams();
-      params.set('external_id', externalId);
-      
-      // Add letter content if available
-      try {
-        const letterData = JSON.parse(localStorage.getItem('sr_last_letter') || '{}');
-        if (letterData.content) {
-          params.set('letter_available', 'true');
-          params.set('letter_title', letterData.title || 'Recommendation Letter');
-          // Don't put full content in URL (too long), Mock University will fetch via webhook
-        }
-      } catch(e) {
-        console.warn('[SR] Could not retrieve letter data for URL:', e);
-      }
-      
-      const mockUrl = `https://mockuniversity.netlify.app/apply.html?${params.toString()}`;
+      const mockUrl = `https://mockuniversity.netlify.app/apply.html?external_id=${externalId}`;
       console.log('[SR] Opening Mock University with URL:', mockUrl);
       window.open(mockUrl, '_blank');
     }
