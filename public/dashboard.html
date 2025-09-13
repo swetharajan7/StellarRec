@@ -4438,6 +4438,30 @@ document.addEventListener('DOMContentLoaded', function() {
   
   console.log('🔧 StellarRec Mock University Integration Ready!');
   console.log('💡 Run testMockUniversityIntegration() in console to test the integration');
+  
+  // Debug function for university loading
+  window.debugUniversities = function() {
+    console.log('🔍 University Debug Info:');
+    console.log('SR.universities length:', SR.universities?.length || 0);
+    console.log('First 10 universities:', SR.universities?.slice(0, 10));
+    
+    const selectEl = document.getElementById('universitySelect');
+    console.log('Select element found:', !!selectEl);
+    console.log('Select options count:', selectEl?.options?.length || 0);
+    
+    if (selectEl && selectEl.options.length > 1) {
+      console.log('First 5 options:', Array.from(selectEl.options).slice(0, 5).map(opt => opt.textContent));
+    }
+    
+    // Try to reload universities
+    console.log('🔄 Attempting to reload universities...');
+    if (typeof populateBrowseAll === 'function') {
+      populateBrowseAll();
+      console.log('✅ populateBrowseAll called');
+    }
+  };
+  
+  console.log('💡 Run debugUniversities() to check university loading status');
 });</script>
 
 <!-- StellarRec API Integration -->
