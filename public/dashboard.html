@@ -656,10 +656,16 @@
       <div class="success-icon"><span class="material-icons">check_circle</span></div>
       <h2 class="success-title">Letters Sent Successfully!</h2>
       <p class="success-subtitle">Your recommendation letter has been delivered to all selected universities.</p>
-      <button class="new-upload-btn" id="newUploadBtn">
-        <span class="material-icons">add</span>
-        Send Another Letter
-      </button>
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <button class="new-upload-btn" id="mockUniversityBtn" style="background: linear-gradient(135deg, #4caf50, #66bb6a);">
+          <span class="material-icons">school</span>
+          View Mock University Status
+        </button>
+        <button class="new-upload-btn" id="newUploadBtn">
+          <span class="material-icons">add</span>
+          Send Another Letter
+        </button>
+      </div>
     </div>
 
     <!-- Confirm Send Modal -->
@@ -1621,6 +1627,40 @@ document.addEventListener('DOMContentLoaded', function(){
     fill.style.width = '0%';
     list.innerHTML = '';
     success.style.display = 'none';
+    
+    // Send completion webhook to Mock University before starting progress
+    (async function(){
+      // Reuse same external_id from earlier step
+      const externalId = localStorage.getItem('sr_last_external_id') || ('sr_' + Date.now());
+      
+      // Pick your actual artifact URL; if you have a file upload, use that URL.
+      // You already use a demo PDF in your mock redirect—reuse it here:
+      const artifactUrl = 'https://stellarrec.netlify.app/assets/mock/reco-demo.pdf';
+      
+      // Get student data using helper function
+      const studentData = getStudentDataFromURL();
+      const studentName = [studentData.sf, studentData.sl].filter(Boolean).join(' ').trim();
+      const studentEmail = studentData.se;
+      const recommenderName = studentData.rname;
+      const recommenderEmail = studentData.remail;
+      
+      const universities = Array.from(window.SR?.selected || window.studentUnitIds || []).map(uid=>{
+        const u = (window.universities||[]).find(x=> String(x.unitid)===String(uid));
+        return u ? { unitid: u.unitid, name: u.name } : { unitid: uid };
+      });
+      
+      await SR_MOCK.notify({
+        external_id: externalId,
+        student_name: studentName,
+        student_email: studentEmail,
+        recommender_name: recommenderName,
+        recommender_email: recommenderEmail,
+        universities,
+        status: 'completed',
+        artifact_url: artifactUrl,
+        ts: Date.now()
+      });
+    })();
 
     const items = SR.universities.filter(u=> SR.selected.has(u.unitid));
     let done = 0;
@@ -1644,9 +1684,10 @@ document.addEventListener('DOMContentLoaded', function(){
       list.appendChild(row);
       fill.style.width = `${Math.floor((done/items.length)*100)}%`;
       text.textContent = `Sending to ${u.name}… (${done}/${items.length})`;
-      setTimeout(()=>{
+      setTimeout(async ()=>{
         row.querySelector('.delivery-status').className = 'delivery-status success';
         row.querySelector('.delivery-status').textContent = '✓';
+        
         step();
       }, 180);
     }
@@ -3793,6 +3834,23 @@ window.SR_API = {
 // Backend URL - Using Netlify Functions
 window.SR_BACKEND_BASE = window.SR_BACKEND_BASE || 'https://stellarrec.netlify.app/.netlify/functions';
 
+// ---- Mock University webhook helper (safe no-op on failure)
+window.SR_MOCK = {
+  HOOK_URL: 'https://mockuniversity.netlify.app/.netlify/functions/reco-hook',
+  async notify(payload) {
+    try {
+      await fetch(this.HOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      console.log('[SR] Mock University webhook sent:', payload);
+    } catch(e) { 
+      console.warn('[SR] mock webhook failed', e); 
+    }
+  }
+};
+
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
   if (window.__srSendBound) return; 
@@ -3829,6 +3887,68 @@ document.addEventListener('DOMContentLoaded', function() {
     const first = parts.shift() || '';
     const last = parts.join(' ') || '';
     return { first, last };
+  }
+  
+  // Helper: get student data from URL parameters or stored data
+  function getStudentDataFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    
+    // Try URL parameters first
+    if (params.get('sf') || params.get('se')) {
+      return {
+        sf: params.get('sf') || '',
+        sl: params.get('sl') || '',
+        se: params.get('se') || '',
+        rname: params.get('rname') || '',
+        remail: params.get('remail') || '',
+        rid: params.get('rid') || ''
+      };
+    }
+    
+    // Try stored referral data
+    try {
+      const saved = JSON.parse(localStorage.getItem('sr_referral') || '{}');
+      if (saved.student || saved.recommender) {
+        const s = saved.student || {};
+        const r = saved.recommender || {};
+        return {
+          sf: s.first || '',
+          sl: s.last || '',
+          se: s.email || '',
+          rname: r.name || '',
+          remail: r.email || '',
+          rid: saved.id || ''
+        };
+      }
+    } catch {}
+    
+    // Try form data as fallback
+    const nameEl = document.getElementById('stuName');
+    const emailEl = document.getElementById('stuEmail');
+    const recName = document.getElementById('recName');
+    const recMail = document.getElementById('recEmail');
+    
+    if (nameEl && emailEl) {
+      const { first, last } = splitName(nameEl.value || '');
+      return {
+        sf: first,
+        sl: last,
+        se: emailEl.value || '',
+        rname: recName?.value || '',
+        remail: recMail?.value || '',
+        rid: 'form_' + Date.now()
+      };
+    }
+    
+    // Default fallback
+    return {
+      sf: 'Student',
+      sl: 'Applicant',
+      se: 'student@example.com',
+      rname: 'Recommender',
+      remail: 'recommender@example.com',
+      rid: 'default_' + Date.now()
+    };
   }
 
   // Call backend API
@@ -3968,6 +4088,31 @@ document.addEventListener('DOMContentLoaded', function() {
       const now = Date.now();
       const requestId = result.id || 'req_' + now;
       
+      // Generate and store external_id for Mock University integration
+      let externalId = localStorage.getItem('sr_last_external_id');
+      if (!externalId) {
+        externalId = 'sr_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+        try { localStorage.setItem('sr_last_external_id', externalId); } catch {}
+      }
+      
+      // Gather university data for webhook
+      const universities = getSelectedUnitIds().map(uid => {
+        const u = (window.SR?.universities || []).find(x => String(x.unitid) === String(uid));
+        return u ? { unitid: u.unitid, name: u.name } : { unitid: uid };
+      });
+      
+      // Send 'sent' status to Mock University
+      SR_MOCK.notify({
+        external_id: externalId,
+        student_name: studentName,
+        student_email: studentEmail,
+        recommender_name: rName,
+        recommender_email: rMail,
+        universities,
+        status: 'sent',  // shows "PENDING" on Mock side UI
+        ts: Date.now()
+      });
+      
       // Check if we're in testing mode (Resend free tier)
       const isTestingMode = result.message && result.message.includes('testing');
       
@@ -4029,6 +4174,15 @@ document.addEventListener('DOMContentLoaded', function() {
     } finally {
       submitBtn.textContent = originalText;
       submitBtn.disabled = false;
+    }
+  });
+  
+  // Mock University redirect button handler
+  document.addEventListener('click', function(e) {
+    if (e.target.id === 'mockUniversityBtn' || e.target.closest('#mockUniversityBtn')) {
+      const externalId = localStorage.getItem('sr_last_external_id') || ('sr_' + Date.now());
+      const mockUrl = `https://mockuniversity.netlify.app/apply.html?external_id=${externalId}`;
+      window.open(mockUrl, '_blank');
     }
   });
 });</script>
