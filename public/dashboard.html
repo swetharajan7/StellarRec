@@ -421,6 +421,437 @@
 #panel-recommender.is-compact .hero-section { margin-top: .5rem !important; }
 #panel-recommender.is-compact .compose-grid { margin-top: .25rem !important; }
 
+    /* ===== AI INSIGHTS & TIMELINE STYLES ===== */
+    .ai-insights-container {
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #f8f9ff 0%, #f0f8ff 100%);
+      border-radius: 16px;
+      border: 2px solid #e3f2fd;
+    }
+
+    .ai-header-panel {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: linear-gradient(135deg, #e8f5e8, #f0f8ff);
+      border-radius: 12px;
+      border: 2px solid #4caf50;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ai-header-panel::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
+      animation: pulse-glow 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.1); }
+    }
+
+    .ai-avatar-enhanced {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #4caf50, #2196f3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.8rem;
+      box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+      animation: float 3s ease-in-out infinite;
+      position: relative;
+      z-index: 2;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .ai-info {
+      position: relative;
+      z-index: 2;
+    }
+
+    .ai-info h3 {
+      color: #2e7d32;
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .ai-info p {
+      color: #555;
+      font-size: 1rem;
+    }
+
+    .insights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .insight-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      border-left: 4px solid #2196f3;
+      transition: all 0.3s ease;
+    }
+
+    .insight-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .insight-card.success-card { border-left-color: #4caf50; }
+    .insight-card.warning-card { border-left-color: #ff9800; }
+    .insight-card.info-card { border-left-color: #2196f3; }
+    .insight-card.prediction-card { border-left-color: #9c27b0; }
+
+    .insight-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .insight-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .success-icon { background: #4caf50; }
+    .warning-icon { background: #ff9800; }
+    .info-icon { background: #2196f3; }
+    .prediction-icon { background: #9c27b0; }
+
+    .insight-title {
+      font-weight: 600;
+      color: #333;
+      font-size: 0.9rem;
+    }
+
+    .insight-score {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .success-score { color: #4caf50; }
+    .warning-score { color: #ff9800; }
+    .info-score { color: #2196f3; }
+    .prediction-score { color: #9c27b0; }
+
+    .insight-description {
+      color: #666;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .ai-recommendations h3 {
+      color: #333;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+
+    .recommendation-list {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .recommendation-item {
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .recommendation-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .rec-icon {
+      font-size: 2rem;
+      min-width: 40px;
+    }
+
+    .rec-content {
+      flex: 1;
+    }
+
+    .rec-content h4 {
+      margin-bottom: 0.5rem;
+      color: #333;
+      font-size: 0.95rem;
+    }
+
+    .rec-content p {
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+    }
+
+    .rec-action-btn {
+      background: #1976d2;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .rec-action-btn:hover {
+      background: #1565c0;
+      transform: translateY(-1px);
+    }
+
+    .rec-action-btn.urgent {
+      background: #f44336;
+      animation: pulse-urgent 2s infinite;
+    }
+
+    @keyframes pulse-urgent {
+      0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+    }
+
+    /* Timeline Styles */
+    .timeline-container {
+      padding: 1.5rem;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .timeline-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-subtitle {
+      color: #666;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, #1976d2, #4caf50);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 2rem;
+      padding-left: 2rem;
+    }
+
+    .timeline-marker {
+      position: absolute;
+      left: -2rem;
+      top: 0.5rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: white;
+      border: 3px solid #1976d2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: #1976d2;
+      font-weight: 600;
+    }
+
+    .completed-marker {
+      background: #4caf50;
+      border-color: #4caf50;
+      color: white;
+    }
+
+    .urgent-marker {
+      background: #ff5722;
+      border-color: #ff5722;
+      color: white;
+      animation: pulse-urgent 2s infinite;
+    }
+
+    .timeline-content {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      border-left: 4px solid #1976d2;
+    }
+
+    .urgent-item .timeline-content {
+      border-left-color: #ff5722;
+      background: #fff3e0;
+    }
+
+    .completed-item .timeline-content {
+      border-left-color: #4caf50;
+      background: #e8f5e8;
+    }
+
+    .timeline-item-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #333;
+      font-size: 0.95rem;
+    }
+
+    .timeline-date {
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .urgent-date {
+      color: #d32f2f;
+      font-weight: 600;
+    }
+
+    .completed-date {
+      color: #388e3c;
+    }
+
+    .timeline-description {
+      color: #555;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      margin-bottom: 1rem;
+    }
+
+    .timeline-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .timeline-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .timeline-btn.primary {
+      background: #1976d2;
+      color: white;
+    }
+
+    .timeline-btn.primary:hover {
+      background: #1565c0;
+      transform: translateY(-1px);
+    }
+
+    .timeline-btn.outline {
+      background: transparent;
+      border: 2px solid #1976d2;
+      color: #1976d2;
+    }
+
+    .timeline-btn.outline:hover {
+      background: #1976d2;
+      color: white;
+    }
+
+    .timeline-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .stat-number {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1976d2;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 0.8rem;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .insights-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .timeline-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .ai-header-panel {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .recommendation-item {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -768,6 +1199,12 @@
         <button id="stuTabSend" class="student-tab" role="tab" aria-selected="true" type="button">
           Send Recommendation Request
         </button>
+        <button id="stuTabAI" class="student-tab" role="tab" aria-selected="false" type="button">
+          🤖 AI Insights
+        </button>
+        <button id="stuTabTimeline" class="student-tab" role="tab" aria-selected="false" type="button">
+          📅 Timeline
+        </button>
         <button id="stuTabTrack" class="student-tab" role="tab" aria-selected="false" type="button">
           Track Recommendation &amp; Status
         </button>
@@ -913,6 +1350,204 @@
             </h2>
             <div class="selected-count" id="selectedCountStu">0 universities selected</div>
             <div class="selected-list" id="selectedListStu" role="list" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <!-- AI Insights Panel -->
+        <section id="stuPanelAI" hidden>
+          <div class="ai-insights-container">
+            <!-- AI Assistant Header -->
+            <div class="ai-header-panel">
+              <div class="ai-avatar-enhanced">
+                <span class="material-icons">psychology</span>
+              </div>
+              <div class="ai-info">
+                <h3>Stella AI Assistant</h3>
+                <p>Your personalized college application AI companion</p>
+              </div>
+            </div>
+
+            <!-- AI Insights Grid -->
+            <div class="insights-grid">
+              <div class="insight-card success-card">
+                <div class="insight-header">
+                  <div class="insight-icon success-icon">
+                    <span class="material-icons">trending_up</span>
+                  </div>
+                  <div>
+                    <div class="insight-title">Application Strength</div>
+                    <div class="insight-score success-score">92/100</div>
+                  </div>
+                </div>
+                <div class="insight-description">
+                  Your application profile is exceptionally strong. Your GPA, test scores, and extracurriculars align perfectly with top-tier universities.
+                </div>
+              </div>
+
+              <div class="insight-card warning-card">
+                <div class="insight-header">
+                  <div class="insight-icon warning-icon">
+                    <span class="material-icons">warning</span>
+                  </div>
+                  <div>
+                    <div class="insight-title">Essay Optimization</div>
+                    <div class="insight-score warning-score">68/100</div>
+                  </div>
+                </div>
+                <div class="insight-description">
+                  Your essays show potential but could be strengthened. Focus on specific examples and clearer narrative structure.
+                </div>
+              </div>
+
+              <div class="insight-card info-card">
+                <div class="insight-header">
+                  <div class="insight-icon info-icon">
+                    <span class="material-icons">school</span>
+                  </div>
+                  <div>
+                    <div class="insight-title">University Matches</div>
+                    <div class="insight-score info-score">15</div>
+                  </div>
+                </div>
+                <div class="insight-description">
+                  We've identified 15 universities that match your profile perfectly. 8 reach schools, 4 target schools, and 3 safety schools.
+                </div>
+              </div>
+
+              <div class="insight-card prediction-card">
+                <div class="insight-header">
+                  <div class="insight-icon prediction-icon">
+                    <span class="material-icons">analytics</span>
+                  </div>
+                  <div>
+                    <div class="insight-title">Admission Probability</div>
+                    <div class="insight-score prediction-score">87%</div>
+                  </div>
+                </div>
+                <div class="insight-description">
+                  Based on historical data and your profile, you have an 87% chance of admission to your target schools.
+                </div>
+              </div>
+            </div>
+
+            <!-- AI Recommendations -->
+            <div class="ai-recommendations">
+              <h3>🎯 Personalized Recommendations</h3>
+              <div class="recommendation-list">
+                <div class="recommendation-item">
+                  <div class="rec-icon">🎓</div>
+                  <div class="rec-content">
+                    <h4>Perfect Match Found!</h4>
+                    <p>Based on your profile, MIT has a 94% compatibility score with your goals.</p>
+                    <button class="rec-action-btn">View Details</button>
+                  </div>
+                </div>
+                <div class="recommendation-item">
+                  <div class="rec-icon">⏰</div>
+                  <div class="rec-content">
+                    <h4>Deadline Alert</h4>
+                    <p>Stanford application deadline is in 5 days. Complete your essay now!</p>
+                    <button class="rec-action-btn urgent">Take Action</button>
+                  </div>
+                </div>
+                <div class="recommendation-item">
+                  <div class="rec-icon">📝</div>
+                  <div class="rec-content">
+                    <h4>Essay Improvement</h4>
+                    <p>Your personal statement could benefit from a stronger conclusion and more specific examples.</p>
+                    <button class="rec-action-btn">Get Suggestions</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Timeline Panel -->
+        <section id="stuPanelTimeline" hidden>
+          <div class="timeline-container">
+            <h2 class="timeline-title">
+              <span class="material-icons">schedule</span>
+              Personalized Timeline & Deadlines
+            </h2>
+            <p class="timeline-subtitle">AI-optimized schedule to maximize your application success</p>
+
+            <div class="timeline">
+              <div class="timeline-item urgent-item">
+                <div class="timeline-marker urgent-marker">!</div>
+                <div class="timeline-content">
+                  <div class="timeline-item-title">Complete Stanford Essay</div>
+                  <div class="timeline-date urgent-date">Due: December 15, 2024 (5 days left)</div>
+                  <div class="timeline-description">
+                    Finish your personal statement for Stanford. AI suggests focusing on your leadership experience in robotics club.
+                  </div>
+                  <div class="timeline-actions">
+                    <button class="timeline-btn primary">Start Writing</button>
+                    <button class="timeline-btn outline">Get AI Help</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <div class="timeline-marker">2</div>
+                <div class="timeline-content">
+                  <div class="timeline-item-title">Request Letter from Dr. Johnson</div>
+                  <div class="timeline-date">Recommended: December 18, 2024</div>
+                  <div class="timeline-description">
+                    Follow up with Dr. Johnson for your recommendation letter. Send a gentle reminder with your updated resume.
+                  </div>
+                  <div class="timeline-actions">
+                    <button class="timeline-btn primary">Send Request</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="timeline-item completed-item">
+                <div class="timeline-marker completed-marker">✓</div>
+                <div class="timeline-content">
+                  <div class="timeline-item-title">Submit MIT Application</div>
+                  <div class="timeline-date completed-date">Completed: December 8, 2024</div>
+                  <div class="timeline-description">
+                    Successfully submitted your MIT application with all required documents.
+                  </div>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <div class="timeline-marker">4</div>
+                <div class="timeline-content">
+                  <div class="timeline-item-title">Harvard Interview Preparation</div>
+                  <div class="timeline-date">Scheduled: January 5, 2025</div>
+                  <div class="timeline-description">
+                    Prepare for your Harvard alumni interview. Review common questions and practice your responses.
+                  </div>
+                  <div class="timeline-actions">
+                    <button class="timeline-btn primary">Prep Guide</button>
+                    <button class="timeline-btn outline">Mock Interview</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="timeline-stats">
+              <div class="stat-item">
+                <div class="stat-number">8</div>
+                <div class="stat-label">Active Applications</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Urgent Deadlines</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">85%</div>
+                <div class="stat-label">On Track</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Letters Requested</div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -4497,3 +5132,237 @@ document.addEventListener('DOMContentLoaded', function() {
 </html>
 
   
+
+<script>
+// Enhanced AI Student Portal Functionality
+(function() {
+  // Wait for DOM to be ready
+  function initAIFeatures() {
+    // Add AI tab functionality
+    const aiTab = document.getElementById('stuTabAI');
+    const timelineTab = document.getElementById('stuTabTimeline');
+    const aiPanel = document.getElementById('stuPanelAI');
+    const timelinePanel = document.getElementById('stuPanelTimeline');
+    
+    if (aiTab && timelineTab) {
+      // Override the existing tab binding to include AI tabs
+      const originalBindStudentTabs = window.bindStudentTabs;
+      
+      // Enhanced tab activation function
+      function activateTab(which) {
+        const tabs = {
+          send: document.getElementById('stuTabSend'),
+          select: document.getElementById('stuTabSelect'),
+          ai: document.getElementById('stuTabAI'),
+          timeline: document.getElementById('stuTabTimeline'),
+          track: document.getElementById('stuTabTrack')
+        };
+        
+        const panels = {
+          send: document.getElementById('stuPanelSend'),
+          select: document.getElementById('stuPanelSelect'),
+          ai: document.getElementById('stuPanelAI'),
+          timeline: document.getElementById('stuPanelTimeline'),
+          track: document.getElementById('stuPanelTrack')
+        };
+        
+        // Update tab states
+        Object.entries(tabs).forEach(([key, tab]) => {
+          if (tab) {
+            tab.setAttribute('aria-selected', key === which ? 'true' : 'false');
+          }
+        });
+        
+        // Update panel visibility
+        Object.entries(panels).forEach(([key, panel]) => {
+          if (panel) {
+            panel.hidden = key !== which;
+          }
+        });
+        
+        // Update URL hash
+        try {
+          history.replaceState(null, '', '#' + which);
+        } catch(e) {}
+        
+        // Initialize specific features
+        if (which === 'ai') {
+          initAIInsights();
+        } else if (which === 'timeline') {
+          initTimeline();
+        } else if (which === 'track' && typeof window.renderStudentTrack === 'function') {
+          window.renderStudentTrack();
+        }
+      }
+      
+      // Bind AI tab events
+      if (aiTab) {
+        aiTab.addEventListener('click', () => activateTab('ai'));
+      }
+      if (timelineTab) {
+        timelineTab.addEventListener('click', () => activateTab('timeline'));
+      }
+      
+      // Handle hash changes for AI tabs
+      window.addEventListener('hashchange', () => {
+        const hash = (location.hash || '').replace('#', '').toLowerCase();
+        if (hash === 'ai' || hash === 'timeline') {
+          activateTab(hash);
+        }
+      });
+      
+      // Check initial hash for AI tabs
+      const initialHash = (location.hash || '').replace('#', '').toLowerCase();
+      if (initialHash === 'ai' || initialHash === 'timeline') {
+        setTimeout(() => activateTab(initialHash), 100);
+      }
+    }
+  }
+  
+  // AI Insights initialization
+  window.initAIInsights = function() {
+    console.log('🤖 AI Insights initialized');
+    
+    // Add interactive functionality to recommendation buttons
+    const recButtons = document.querySelectorAll('.rec-action-btn');
+    recButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const action = this.textContent.trim();
+        
+        switch(action) {
+          case 'View Details':
+            showNotification('Opening detailed university analysis...', 'info');
+            break;
+          case 'Take Action':
+            showNotification('Redirecting to application portal...', 'info');
+            break;
+          case 'Get Suggestions':
+            showNotification('Loading AI writing suggestions...', 'info');
+            break;
+          default:
+            showNotification('AI feature activated!', 'success');
+        }
+      });
+    });
+    
+    // Animate insight cards
+    const insightCards = document.querySelectorAll('.insight-card');
+    insightCards.forEach((card, index) => {
+      setTimeout(() => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.5s ease';
+        
+        setTimeout(() => {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, 50);
+      }, index * 100);
+    });
+  };
+  
+  // Timeline initialization
+  window.initTimeline = function() {
+    console.log('📅 Timeline initialized');
+    
+    // Add interactive functionality to timeline buttons
+    const timelineButtons = document.querySelectorAll('.timeline-btn');
+    timelineButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const action = this.textContent.trim();
+        
+        switch(action) {
+          case 'Start Writing':
+            showNotification('Opening essay editor...', 'info');
+            break;
+          case 'Get AI Help':
+            showNotification('Loading AI writing assistant...', 'info');
+            break;
+          case 'Send Request':
+            showNotification('Preparing recommendation request...', 'info');
+            break;
+          case 'Prep Guide':
+            showNotification('Loading interview preparation guide...', 'info');
+            break;
+          case 'Mock Interview':
+            showNotification('Starting mock interview session...', 'info');
+            break;
+          default:
+            showNotification('Timeline action activated!', 'success');
+        }
+      });
+    });
+    
+    // Animate timeline items
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    timelineItems.forEach((item, index) => {
+      setTimeout(() => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-20px)';
+        item.style.transition = 'all 0.6s ease';
+        
+        setTimeout(() => {
+          item.style.opacity = '1';
+          item.style.transform = 'translateX(0)';
+        }, 50);
+      }, index * 150);
+    });
+  };
+  
+  // Notification system
+  function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      color: white;
+      z-index: 10000;
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease;
+      max-width: 300px;
+    `;
+    
+    const colors = {
+      success: '#4caf50',
+      error: '#f44336',
+      info: '#2196f3',
+      warning: '#ff9800'
+    };
+    
+    notification.style.background = colors[type] || colors.info;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+  
+  // Add CSS animations
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+  
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAIFeatures);
+  } else {
+    initAIFeatures();
+  }
+})();
+</script>
