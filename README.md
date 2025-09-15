@@ -155,14 +155,4 @@ The **Mock University** repository serves as a demonstration environment showcas
    
 ---
 
-## 📬 Contact Information  
-
-For questions about **StellarRec**:  
-
-- **Project Maintainer**: Swetha Rajan  
-- **Email**: [swetharajan7@gmail.com](mailto:swetharajan7@gmail.com)  
-- **GitHub**: [swetharajan7](https://github.com/swetharajan7)  
-
----
-
 ✨ **StellarRec** – Modernizing the recommendation process for the digital age.  
