@@ -151,4 +151,18 @@ The **Mock University** repository serves as a demonstration environment showcas
 2. Receive recommendations in standardized format  
 3. Verify authenticity using digital signatures  
 4. Access recommendation portal to view and manage submissions  
-5. Sync with application systems through webhooks or APIs  
+5. Sync with application systems through webhooks or APIs
+   
+---
+
+## 📬 Contact Information  
+
+For questions about **StellarRec**:  
+
+- **Project Maintainer**: Swetha Rajan  
+- **Email**: [swetharajan7@gmail.com](mailto:swetharajan7@gmail.com)  
+- **GitHub**: [swetharajan7](https://github.com/swetharajan7)  
+
+---
+
+✨ **StellarRec** – Modernizing the recommendation process for the digital age.  
