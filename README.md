@@ -80,80 +80,75 @@ Status updates: All parties receive notifications throughout the process
 
 ## Key Technologies
 
-Frontend: React, TypeScript, Tailwind CSS
-Backend: Node.js, Express, MongoDB
-AI/ML: Natural Language Processing for letter optimization
-APIs: RESTful services with OpenAPI documentation
-Security: OAuth 2.0, JWT authentication, encryption
-Deployment: Netlify (frontend), cloud hosting (backend)
+- **Frontend**: React, TypeScript, Tailwind CSS  
+- **Backend**: Node.js, Express, MongoDB  
+- **AI/ML**: Natural Language Processing for letter optimization  
+- **APIs**: RESTful services with OpenAPI documentation  
+- **Security**: OAuth 2.0, JWT authentication, encryption  
+- **Deployment**: Netlify (frontend), cloud hosting (backend)  
+
+---
+
+## 🔗 Integration with Mock University
+
+**[Demo Link](https://mockuniversity.netlify.app/apply.html?external_id=sr_1757781570892)**  
+
+### Purpose  
+The **Mock University** repository serves as a demonstration environment showcasing how real universities can integrate with StellarRec through modern APIs.  
+
+### API Endpoints  
+
+**StellarRec → Mock University**  
+
+- `POST /api/recommendations` – Submit a new recommendation request  
+- `PUT /api/recommendations/:id` – Update recommendation status  
+- `GET /api/recommendations/:studentId` – Retrieve student recommendations  
+
+### Authentication Flow  
+
+- StellarRec authenticates with Mock University API using **OAuth 2.0**  
+- Secure API keys exchanged for authenticated requests  
+- **JWT tokens** used for session management  
+- Role-based access control: *student, recommender, admin*  
+
+---
+
+## Usage Guide
+
+### For Students
+
+1. Create an account on StellarRec  
+2. Add recommenders to your network  
+3. Request recommendations by filling out the request form:  
+   - Select program details  
+   - Add university information  
+   - Set submission deadlines  
+   - Add personal statement or resume  
+4. Track status of each recommendation request  
+5. Resend reminders to recommenders if needed  
+
+---
+
+### For Recommenders
+
+1. Receive email invitation from a student  
+2. Create an account or log in to an existing account  
+3. View pending requests in your dashboard  
+4. Write recommendation using the structured form:  
+   - Rate student on various competencies  
+   - Add free-form evaluation  
+   - Upload supporting documents if needed  
+5. Submit to specified universities with one click  
+6. Manage previous recommendations for future use  
 
 
-🔗 Integration with Mock University
-[Demo](https://mockuniversity.netlify.app/apply.html?external_id=sr_1757781570892)
-Purpose
-The Mock University repository serves as a demonstration environment showcasing how real universities can integrate with StellarRec through modern APIs.
-API Endpoints
-StellarRec → Mock University
+### For Universities
 
-POST /api/recommendations - Submit new recommendation request
-PUT /api/recommendations/:id - Update recommendation status
-GET /api/recommendations/:studentId - Retrieve student recommendations
-
-Authentication Flow
-
-StellarRec authenticates with Mock University API using OAuth 2.0
-Secure API keys exchanged for authenticated requests
-JWT tokens used for session management
-Role-based access control (student, recommender, admin)
-Usage Guide
-For Students
-Create an account on StellarRec
-
-Add recommenders to your network
-
-Request recommendations by filling out the request form:
-
-Select program details
-
-Add university information
-
-Set submission deadlines
-
-Add personal statement or resume
-
-Track status of each recommendation request
-
-Resend reminders to recommenders if needed
-
-For Recommenders
-Receive email invitation from a student
-
-Create an account or login to existing account
-
-View pending requests in your dashboard
-
-Write recommendation using the structured form:
-
-Rate student on various competencies
-
-Add free-form evaluation
-
-Upload supporting documents if needed
-
-Submit to specified universities with one click
-
-Manage previous recommendations for future use
-
-For Universities
-Integrate with StellarRec by providing API endpoints
-
-Receive recommendations in standardized format
-
-Verify authenticity using digital signatures
-
-Access recommendation portal to view and manage submissions
-
-Sync with application systems through webhooks or APIs
+1. Integrate with StellarRec by providing API endpoints  
+2. Receive recommendations in standardized format  
+3. Verify authenticity using digital signatures  
+4. Access recommendation portal to view and manage submissions  
+5. Sync with application systems through webhooks or APIs  
 
 
 
